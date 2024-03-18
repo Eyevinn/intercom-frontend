@@ -7,14 +7,18 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "lint": "eslint ./src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "prepare": "husky install",
     "preview": "vite preview",
-    "pretty": "prettier --write --ignore-unknown ."
+    "pretty": "prettier --write --ignore-unknown .",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
+    "@commitlint/cli": "^19.2.0",
+    "@commitlint/config-conventional": "^19.1.0",
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.0",
     "@types/react": "^18.2.64",
@@ -30,6 +34,8 @@
     "eslint-plugin-react": "^7.28.0",
     "eslint-plugin-react-hooks": "^4.3.0",
     "eslint-plugin-react-refresh": "^0.4.5",
+    "husky": "^9.0.11",
+    "lint-staged": "^15.2.2",
     "prettier": "^3.2.5",
     "typescript": "^5.2.2",
     "vite": "^5.1.6"
