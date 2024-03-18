@@ -10,7 +10,6 @@ const Heh = styled.button`
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <Heh />
     <App />
   </React.StrictMode>,
 )
