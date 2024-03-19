@@ -30,6 +30,14 @@ module.exports = {
     "react/react-in-jsx-scope": "off",
     "react/jsx-uses-react": "off",
     "import/extensions": "off",
+    "import/prefer-default-export": "off",
+    "react/function-component-definition": [
+      "error",
+      {
+        namedComponents: "arrow-function",
+        unnamedComponents: "arrow-function",
+      },
+    ],
     "react-refresh/only-export-components": [
       "warn",
       { allowConstantExport: true },
