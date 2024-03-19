@@ -143,9 +143,11 @@ table {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* apply a natural box layout model to all elements, but allowing components to change */
 html {
+  /* apply a natural box layout model to all elements, but allowing components to change */
   box-sizing: border-box;
+  /* easy REM sizing (e.g. 1.2rem = 12px) */
+  font-size: 62.5%;
 }
 *,
 *:before,
@@ -154,6 +156,10 @@ html {
   -moz-osx-font-smoothing: grayscale;
   -webkit-font-smoothing: antialiased;
   font-smoothing: antialiased;
+}
+
+body {
+  font-size: 1.6rem;
 }
 
 /* image size contstrained to container size */
