@@ -31,6 +31,7 @@ module.exports = {
     "react/jsx-uses-react": "off",
     "import/extensions": "off",
     "import/prefer-default-export": "off",
+    "react-hooks/exhaustive-deps": "error",
     "react/function-component-definition": [
       "error",
       {
