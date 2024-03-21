@@ -91,6 +91,7 @@ video {
   font: inherit;
   vertical-align: baseline;
 }
+
 /* HTML5 display-role reset for older browsers */
 article,
 aside,
@@ -105,17 +106,21 @@ nav,
 section {
   display: block;
 }
+
 body {
   line-height: 1;
 }
+
 ol,
 ul {
   list-style: none;
 }
+
 blockquote,
 q {
   quotes: none;
 }
+
 blockquote:before,
 blockquote:after,
 q:before,
@@ -123,6 +128,7 @@ q:after {
   content: "";
   content: none;
 }
+
 table {
   border-collapse: collapse;
   border-spacing: 0;
@@ -148,7 +154,9 @@ html {
   box-sizing: border-box;
   /* easy REM sizing (e.g. 1.2rem = 12px) */
   font-size: 62.5%;
+  height: 100%;
 }
+
 *,
 *:before,
 *:after {
@@ -160,6 +168,7 @@ html {
 
 body {
   font-size: 1.6rem;
+  height: 100%;
 }
 
 /* image size contstrained to container size */
@@ -167,6 +176,10 @@ img {
   /* max-width: 100%; */
   width: 100%;
   height: auto;
+}
+
+#root {
+  height: 100%;
 }
 
 /*

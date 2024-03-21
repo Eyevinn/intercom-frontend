@@ -8,5 +8,9 @@ const UserList = styled.div`
 `;
 
 export const Production: FC = () => {
+  // const { participants } = useLoaderData();
+  // Mute/Unmute mic
+  // Mute/Unmute speaker
+  // Show active sink and mic
   return <UserList>A User</UserList>;
 };
