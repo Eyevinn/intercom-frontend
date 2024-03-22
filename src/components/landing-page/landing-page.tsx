@@ -1,5 +1,4 @@
 import styled from "@emotion/styled";
-import { Header } from "./header.tsx";
 import { JoinProduction } from "./join-production.tsx";
 import { CreateProduction } from "./create-production.tsx";
 import { ProductionsList } from "./productions-list.tsx";
@@ -29,7 +28,6 @@ export const LandingPage = () => {
 
   return (
     <>
-      <Header />
       <FlexContainer>
         <DisplayContainer>
           <JoinProduction />
