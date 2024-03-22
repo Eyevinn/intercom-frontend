@@ -37,14 +37,18 @@ export const Production: FC = () => {
       return noop;
     }
 
-    fetchProduction(productionIdAsNumber).then((payload) => {
-      if (aborted) return;
+    fetchProduction(productionIdAsNumber)
+      .then((payload) => {
+        if (aborted) return;
 
-      dispatch({
-        type: "UPDATE_PRODUCTION",
-        payload,
+        dispatch({
+          type: "UPDATE_PRODUCTION",
+          payload,
+        });
+      })
+      .catch(() => {
+        // TODO dispatch error/show local error
       });
-    });
 
     return () => {
       aborted = true;
