@@ -3,6 +3,7 @@ import { Header } from "./header.tsx";
 import { JoinProduction } from "./join-production.tsx";
 import { CreateProduction } from "./create-production.tsx";
 import { ProductionsList } from "./productions-list.tsx";
+import { useNavigateToProduction } from "./use-navigate-to-production.ts";
 
 const FlexContainer = styled.div`
   display: flex;
@@ -22,17 +23,22 @@ const DisplayContainer = styled.div`
   }
 `;
 
-export const LandingPage = () => (
-  <>
-    <Header />
-    <FlexContainer>
-      <DisplayContainer>
-        <JoinProduction />
-      </DisplayContainer>
-      <DisplayContainer>
-        <CreateProduction />
-      </DisplayContainer>
-    </FlexContainer>
-    <ProductionsList />
-  </>
-);
+export const LandingPage = () => {
+  // TODO does this trigger, or is listening to a state update needed here
+  useNavigateToProduction();
+
+  return (
+    <>
+      <Header />
+      <FlexContainer>
+        <DisplayContainer>
+          <JoinProduction />
+        </DisplayContainer>
+        <DisplayContainer>
+          <CreateProduction />
+        </DisplayContainer>
+      </FlexContainer>
+      <ProductionsList />
+    </>
+  );
+};
