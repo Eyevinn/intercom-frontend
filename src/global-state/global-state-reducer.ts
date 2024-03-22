@@ -10,6 +10,8 @@ const globalReducer: Reducer<TGlobalState, TGlobalStateAction> = (
   state,
   action
 ) => {
+  // Simple Debug
+  // console.log(action.type, action.payload);
   switch (action.type) {
     case "UPDATE_PRODUCTION":
       return {
