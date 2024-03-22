@@ -31,7 +31,7 @@ const App = () => {
             errorElement={<ErrorPage />}
           />
           <Route
-            path="/production/:productionId"
+            path="/production/:productionId/line/:lineId"
             element={<Production />}
             errorElement={<ErrorPage />}
           />
