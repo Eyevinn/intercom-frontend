@@ -14,7 +14,7 @@ const globalReducer: Reducer<TGlobalState, TGlobalStateAction> = (
     case "UPDATE_PRODUCTION":
       return {
         ...state,
-        production: action.payload.production,
+        production: action.payload,
       };
     default:
       return state;

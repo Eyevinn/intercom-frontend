@@ -1,3 +1,5 @@
+import { TProduction } from "../components/production/types.ts";
+
 export type TGlobalState = {
-  production: string | null;
+  production: TProduction | null;
 };
