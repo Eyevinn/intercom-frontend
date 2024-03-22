@@ -1,9 +1,11 @@
 import { TProduction } from "./types";
 
-export const fetchProduction = async (): Promise<TProduction> => {
+export const fetchProduction = async (
+  productionId: number
+): Promise<TProduction> => {
   return Promise.resolve({
-    name: "production 1",
-    id: 4,
+    name: `sample production`,
+    id: productionId,
     lines: [
       {
         name: "editorial",
