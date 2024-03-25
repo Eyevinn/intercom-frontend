@@ -3,11 +3,11 @@ const rootUrl = "https://intercom-manager.dev.eyevinn.technology/";
 
 type TCreateProductionOptions = {
   name: string;
-  lines: string[];
+  lines: { name: string }[];
 };
 
 type TCreateProductionResponse = {
-  productionId: string;
+  productionid: string;
 };
 
 // TODO create generic response/error converter and response data validator
@@ -23,9 +23,7 @@ export const API = {
       },
       body: JSON.stringify({
         name,
-        lines: lines.map((line) => ({
-          name: line,
-        })),
+        lines,
       }),
     }).then((response) => response.json()),
   // TODO add response types, headers
