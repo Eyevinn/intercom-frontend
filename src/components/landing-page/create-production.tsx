@@ -1,5 +1,6 @@
 import { SubmitHandler, useFieldArray, useForm } from "react-hook-form";
 import { useState } from "react";
+import styled from "@emotion/styled";
 import { DisplayContainerHeader } from "./display-container-header.tsx";
 import {
   DecorativeLabel,
@@ -15,6 +16,14 @@ type FormValues = {
   defaultLine: string;
   lines: { name: string }[];
 };
+
+const ProductionConfirmation = styled.div`
+  background: #91fa8c;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid #b2ffa1;
+  color: #1a1a1a;
+`;
 export const CreateProduction = () => {
   const [createdProductionId, setCreatedProductionId] = useState<string | null>(
     null
@@ -61,7 +70,7 @@ export const CreateProduction = () => {
         <DecorativeLabel>Line</DecorativeLabel>
         <FormInput
           // eslint-disable-next-line
-          {...register(`defaultLine`)}
+          {...register(`defaultLine`, { minLength: 1 })}
           type="text"
           value="Editorial"
           placeholder="Line Name"
@@ -77,17 +86,17 @@ export const CreateProduction = () => {
           />
         </FormLabel>
       ))}
-      <button type="button" onClick={() => append({ name: "" })}>
-        Add
-      </button>
+      <SubmitButton type="button" onClick={() => append({ name: "" })}>
+        Add Line
+      </SubmitButton>
 
       <SubmitButton type="submit" onClick={handleSubmit(onSubmit)}>
         Create Production
       </SubmitButton>
       {createdProductionId !== null && (
-        <DecorativeLabel>
+        <ProductionConfirmation>
           The production ID is: {createdProductionId.toString()}
-        </DecorativeLabel>
+        </ProductionConfirmation>
       )}
     </FormContainer>
   );

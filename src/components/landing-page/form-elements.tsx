@@ -28,4 +28,7 @@ export const DecorativeLabel = styled.span`
 
 export const SubmitButton = styled.button`
   font-size: 1.6rem;
+  padding: 1rem;
+  display: block;
+  margin: 0 0 2rem 0;
 `;
