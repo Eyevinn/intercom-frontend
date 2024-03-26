@@ -7,7 +7,6 @@ export type TLine = {
   name: string;
   id: number;
   connected: boolean;
-  connectionId: string;
   participants: TParticipant[];
 };
 
