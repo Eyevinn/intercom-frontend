@@ -1,4 +1,7 @@
 import styled from "@emotion/styled";
+import { useEffect, useState } from "react";
+import { API } from "../../api/api.ts";
+import { TProduction } from "../production/types.ts";
 
 const ProductionListContainer = styled.div`
   display: flex;
@@ -28,42 +31,57 @@ const ProductionId = styled.div`
 `;
 
 export const ProductionsList = () => {
+  const [productions, setProductions] = useState<TProduction[]>([]);
+
+  // TODO extract to separate hook file
+  // TODO trigger new fetch whenever a production is created
+  useEffect(() => {
+    let aborted = false;
+
+    API.listProductions()
+      .then((result) => {
+        if (aborted) return;
+
+        setProductions(
+          result
+            // pick laste 10 items
+            .slice(-10)
+            // display in reverse order
+            .toReversed()
+            // convert to local format
+            .map((prod) => {
+              return {
+                name: prod.name,
+                id: parseInt(prod.productionid, 10),
+                lines: prod.lines.map((l) => ({
+                  name: l.name,
+                  id: parseInt(l.id, 10),
+                  connected: false,
+                  connectionId: "1",
+                  participants: [],
+                })),
+              };
+            })
+        );
+      })
+      .catch(() => {
+        // TODO handle error/retry
+      });
+
+    return () => {
+      aborted = true;
+    };
+  }, []);
+
   return (
     <ProductionListContainer>
-      <ProductionItem>
-        <ProductionName>Mello</ProductionName>
-        <ProductionId>123</ProductionId>
-      </ProductionItem>
-      <ProductionItem>
-        <ProductionName>Bolibompa</ProductionName>
-        <ProductionId>4</ProductionId>
-      </ProductionItem>
-      <ProductionItem>
-        <ProductionName>Nyheterna</ProductionName>
-        <ProductionId>928</ProductionId>
-      </ProductionItem>
-      <ProductionItem>
-        <ProductionName>Sikta mot Stjärnorna</ProductionName>
-        <ProductionId>38974</ProductionId>
-      </ProductionItem>
-      <ProductionItem>
-        <ProductionName>Idol</ProductionName>
-        <ProductionId>5</ProductionId>
-      </ProductionItem>
-      <ProductionItem>
-        <ProductionName>
-          IdolIdol Idol Idol Idol Idol Idol Idol Idol Idol Idol Idol Idol Idol
-          Idol Idol Idol Idol Idol Idol Idol Idol Idol Idol
-        </ProductionName>
-        <ProductionId>5</ProductionId>
-      </ProductionItem>
-      <ProductionItem>
-        <ProductionName>
-          IdolIdolIdolIdolIdolIdolIdolIdolIdolIdolIdolIdolIdolIdol
-          IdolIdolIdolIdolIdolIdolIdolIdolIdolIdol
-        </ProductionName>
-        <ProductionId>5</ProductionId>
-      </ProductionItem>
+      {/* TODO add loading indicator */}
+      {productions.map((p) => (
+        <ProductionItem key={p.id}>
+          <ProductionName>{p.name}</ProductionName>
+          <ProductionId>{p.id}</ProductionId>
+        </ProductionItem>
+      ))}
     </ProductionListContainer>
   );
 };
