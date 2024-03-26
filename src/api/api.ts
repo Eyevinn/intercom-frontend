@@ -10,6 +10,21 @@ type TCreateProductionResponse = {
   productionid: string;
 };
 
+type TLine = {
+  name: string;
+  id: string;
+  smbid: string;
+  connections: unknown;
+};
+
+type TFetchProductionResponse = {
+  name: string;
+  productionid: string;
+  lines: TLine[];
+};
+
+type TListProductionsResponse = TFetchProductionResponse[];
+
 // TODO create generic response/error converter and response data validator
 export const API = {
   createProduction: ({
@@ -27,11 +42,11 @@ export const API = {
       }),
     }).then((response) => response.json()),
   // TODO add response types, headers
-  listProductions: () =>
+  listProductions: (): Promise<TListProductionsResponse> =>
     fetch(`${rootUrl}productions/`, { method: "GET" }).then((response) =>
       response.json()
     ),
-  fetchProduction: (id: number) =>
+  fetchProduction: (id: number): Promise<TFetchProductionResponse> =>
     fetch(`${rootUrl}productions/${id}`, { method: "GET" }).then((response) =>
       response.json()
     ),
@@ -43,7 +58,7 @@ export const API = {
     fetch(`${rootUrl}productions/${id}/lines`, { method: "GET" }).then(
       (response) => response.json()
     ),
-  fetchProductionLine: (productionId: number, lineId: number) =>
+  fetchProductionLine: (productionId: number, lineId: number): Promise<TLine> =>
     fetch(`${rootUrl}productions/${productionId}/lines/${lineId}`, {
       method: "GET",
     }).then((response) => response.json()),
