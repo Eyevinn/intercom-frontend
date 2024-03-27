@@ -10,10 +10,13 @@ const ErrorDisplay = styled.div`
   font-size: 2rem;
   font-weight: bold;
   margin: 0 0 1rem 0;
+  color: #1a1a1a;
 `;
 
 export const Error: FC = () => {
   const [{ error }] = useGlobalState();
 
-  return error && <ErrorDisplay>Something went wrong</ErrorDisplay>;
+  return (
+    error && <ErrorDisplay>{`${error.name}: ${error.message}`}</ErrorDisplay>
+  );
 };
