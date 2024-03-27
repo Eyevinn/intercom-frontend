@@ -5,6 +5,7 @@ import { TGlobalState } from "./types";
 const initialGlobalState: TGlobalState = {
   production: null,
   error: null,
+  devices: null,
 };
 
 const globalReducer: Reducer<TGlobalState, TGlobalStateAction> = (
@@ -24,6 +25,11 @@ const globalReducer: Reducer<TGlobalState, TGlobalStateAction> = (
       return {
         ...state,
         error: action.payload,
+      };
+    case "DEVICES_UPDATED":
+      return {
+        ...state,
+        devices: action.payload,
       };
 
     default:
