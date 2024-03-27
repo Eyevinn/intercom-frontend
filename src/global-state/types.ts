@@ -1,13 +1,8 @@
 import { TProduction } from "../components/production/types.ts";
 
-export type TGlobalState = TGlobalProductionState & TError;
-
-export type TGlobalProductionState = {
+export type TGlobalState = {
   production: TProduction | null;
+  error: Error | null;
   //  selectedInput: string | null;
   //  selectedOutput: string | null;
-};
-
-export type TError = {
-  error: Error | null;
 };

@@ -21,13 +21,10 @@ const globalReducer: Reducer<TGlobalState, TGlobalStateAction> = (
         error: null,
       };
     case "ERROR":
-      if ("error" in action.payload) {
-        return {
-          ...state,
-          error: action.payload.error,
-        };
-      }
-      return state;
+      return {
+        ...state,
+        error: action.payload,
+      };
 
     default:
       return state;
