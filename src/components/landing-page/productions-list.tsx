@@ -2,6 +2,7 @@ import styled from "@emotion/styled";
 import { useEffect, useState } from "react";
 import { API } from "../../api/api.ts";
 import { TProduction } from "../production-line/types.ts";
+import { useGlobalState } from "../../global-state/context-provider.tsx";
 
 const ProductionListContainer = styled.div`
   display: flex;
@@ -32,9 +33,9 @@ const ProductionId = styled.div`
 
 export const ProductionsList = () => {
   const [productions, setProductions] = useState<TProduction[]>([]);
+  const [{ reloadProductionList }, dispatch] = useGlobalState();
 
   // TODO extract to separate hook file
-  // TODO trigger new fetch whenever a production is created
   useEffect(() => {
     let aborted = false;
 
@@ -72,6 +73,43 @@ export const ProductionsList = () => {
       aborted = true;
     };
   }, []);
+
+  useEffect(() => {
+    if (reloadProductionList) {
+      dispatch({
+        type: "NEW_PRODUCTION_FETCHED",
+        payload: false,
+      });
+
+      API.listProductions()
+        .then((result) => {
+          setProductions(
+            result
+              // pick laste 10 items
+              .slice(-10)
+              // display in reverse order
+              .toReversed()
+              // convert to local format
+              .map((prod) => {
+                return {
+                  name: prod.name,
+                  id: parseInt(prod.productionid, 10),
+                  lines: prod.lines.map((l) => ({
+                    name: l.name,
+                    id: parseInt(l.id, 10),
+                    connected: false,
+                    connectionId: "1",
+                    participants: [],
+                  })),
+                };
+              })
+          );
+        })
+        .catch(() => {
+          // TODO handle error/retry
+        });
+    }
+  }, [dispatch, reloadProductionList]);
 
   return (
     <ProductionListContainer>
