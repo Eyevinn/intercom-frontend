@@ -8,4 +8,5 @@ export type TGlobalState = {
   error: Error | null;
   devices: MediaDeviceInfo[] | null;
   joinProductionOptions: TJoinProductionOptions | null;
+  reloadProductionList: boolean;
 };
