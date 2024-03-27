@@ -70,8 +70,12 @@ export const CreateProduction = () => {
         defaultLine: "",
         lines: [],
       });
+      dispatch({
+        type: "NEW_PRODUCTION_FETCHED",
+        payload: true,
+      });
     }
-  }, [createdProductionId, reset]);
+  }, [createdProductionId, dispatch, reset]);
 
   return (
     <FormContainer>
