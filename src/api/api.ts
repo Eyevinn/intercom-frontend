@@ -25,22 +25,47 @@ type TFetchProductionResponse = {
 
 type TListProductionsResponse = TFetchProductionResponse[];
 
+const isSuccessful = (r: Response) => r.status >= 200 && r.status <= 399;
+
+const handleFetchRequest = async <T>(
+  fetchRequest: Promise<Response>
+): Promise<T> => {
+  const response = await fetchRequest;
+
+  const json = await response.json();
+
+  const isSuccess = isSuccessful(response);
+
+  if (!isSuccess) {
+    if ("message" in json) {
+      throw new Error(json.message);
+    }
+
+    throw new Error(
+      `Response Code: ${response.status} - ${response.statusText}.`
+    );
+  }
+
+  console.log(json);
+
+  return json;
+};
+
 // TODO create generic response/error converter and response data validator
 export const API = {
-  createProduction: ({
-    name,
-    lines,
-  }: TCreateProductionOptions): Promise<TCreateProductionResponse> =>
-    fetch(`${rootUrl}production/`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        name,
-        lines,
-      }),
-    }).then((response) => response.json()),
+  createProduction: async ({ name, lines }: TCreateProductionOptions) =>
+    handleFetchRequest<TCreateProductionResponse>(
+      fetch(`${rootUrl}production/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name,
+          lines,
+        }),
+      })
+    ),
   // TODO add response types, headers
   listProductions: (): Promise<TListProductionsResponse> =>
     fetch(`${rootUrl}productions/`, { method: "GET" }).then((response) =>
