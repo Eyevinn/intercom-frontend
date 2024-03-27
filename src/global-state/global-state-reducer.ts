@@ -6,6 +6,7 @@ import { uniqBy } from "../helpers";
 const initialGlobalState: TGlobalState = {
   production: null,
   error: null,
+  reloadProductionList: true,
   devices: null,
   joinProductionOptions: null,
 };
@@ -21,6 +22,16 @@ const globalReducer: Reducer<TGlobalState, TGlobalStateAction> = (
       return {
         ...state,
         error: action.payload,
+      };
+    case "PRODUCTION_CREATED":
+      return {
+        ...state,
+        reloadProductionList: true,
+      };
+    case "PRODUCTION_LIST_FETCHED":
+      return {
+        ...state,
+        reloadProductionList: false,
       };
     case "DEVICES_UPDATED":
       return {
