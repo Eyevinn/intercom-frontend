@@ -133,7 +133,7 @@ export const JoinProduction = () => {
               {production &&
                 production.lines.map((line) => (
                   <option key={line.id} value={line.id}>
-                    {line.name}
+                    {line.name || line.id}
                   </option>
                 ))}
             </FormSelect>
