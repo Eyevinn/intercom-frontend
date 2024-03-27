@@ -26,12 +26,7 @@ const globalReducer: Reducer<TGlobalState, TGlobalStateAction> = (
     case "PRODUCTION_CREATED":
       return {
         ...state,
-        reloadProductionList: true,
-      };
-    case "PRODUCTION_LIST_FETCHED":
-      return {
-        ...state,
-        reloadProductionList: false,
+        reloadProductionList: action.payload,
       };
     case "DEVICES_UPDATED":
       return {
