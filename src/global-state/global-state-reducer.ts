@@ -4,6 +4,7 @@ import { TGlobalState } from "./types";
 
 const initialGlobalState: TGlobalState = {
   production: null,
+  error: null,
 };
 
 const globalReducer: Reducer<TGlobalState, TGlobalStateAction> = (
@@ -17,7 +18,17 @@ const globalReducer: Reducer<TGlobalState, TGlobalStateAction> = (
       return {
         ...state,
         production: action.payload,
+        error: null,
       };
+    case "ERROR":
+      if ("error" in action.payload) {
+        return {
+          ...state,
+          error: action.payload.error,
+        };
+      }
+      return state;
+
     default:
       return state;
   }
