@@ -1,6 +1,7 @@
 import { SubmitHandler, useFieldArray, useForm } from "react-hook-form";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import styled from "@emotion/styled";
+import { ErrorMessage } from "@hookform/error-message";
 import { DisplayContainerHeader } from "./display-container-header.tsx";
 import {
   DecorativeLabel,
@@ -10,6 +11,7 @@ import {
   SubmitButton,
 } from "./form-elements.tsx";
 import { API } from "../../api/api.ts";
+import { useGlobalState } from "../../global-state/context-provider.tsx";
 
 type FormValues = {
   productionName: string;
@@ -25,6 +27,7 @@ const ProductionConfirmation = styled.div`
   color: #1a1a1a;
 `;
 export const CreateProduction = () => {
+  const [, dispatch] = useGlobalState();
   const [createdProductionId, setCreatedProductionId] = useState<string | null>(
     null
   );
@@ -33,6 +36,7 @@ export const CreateProduction = () => {
     control,
     register,
     handleSubmit,
+    reset,
   } = useForm<FormValues>();
   const { fields, append } = useFieldArray({
     control,
@@ -48,11 +52,23 @@ export const CreateProduction = () => {
       lines: [{ name: value.defaultLine }, ...value.lines],
     })
       .then((v) => setCreatedProductionId(v.productionid))
-      .catch((e) => {
-        console.error(e);
-        // TODO error handling, display error in form or in global header?
+      .catch((error) => {
+        dispatch({
+          type: "ERROR",
+          payload: error,
+        });
       });
   };
+
+  useEffect(() => {
+    if (createdProductionId) {
+      reset({
+        productionName: "",
+        defaultLine: "",
+        lines: [],
+      });
+    }
+  }, [createdProductionId, reset]);
 
   return (
     <FormContainer>
@@ -61,30 +77,43 @@ export const CreateProduction = () => {
         <DecorativeLabel>Production Name</DecorativeLabel>
         <FormInput
           // eslint-disable-next-line
-          {...register(`productionName`, { minLength: 1 })}
+          {...register(`productionName`, {
+            required: "Production name is required",
+            minLength: 1,
+          })}
           placeholder="Production Name"
         />
       </FormLabel>
-      {errors.productionName && <div>BAD INPUT</div>}
+      <ErrorMessage errors={errors} name="productionName" />
       <FormLabel>
         <DecorativeLabel>Line</DecorativeLabel>
         <FormInput
           // eslint-disable-next-line
-          {...register(`defaultLine`, { minLength: 1 })}
+          {...register(`defaultLine`, {
+            required: "Line name is required",
+            minLength: 1,
+          })}
           type="text"
-          value="Editorial"
           placeholder="Line Name"
         />
       </FormLabel>
+      <ErrorMessage errors={errors} name="defaultLine" />
       {fields.map((field, index) => (
-        <FormLabel key={field.id}>
-          <DecorativeLabel>Line</DecorativeLabel>
-          <FormInput
-            // eslint-disable-next-line
-            {...register(`lines.${index}.name`)}
-            type="text"
-          />
-        </FormLabel>
+        <div key={field.id}>
+          <FormLabel>
+            <DecorativeLabel>Line</DecorativeLabel>
+            <FormInput
+              // eslint-disable-next-line
+              {...register(`lines.${index}.name`, {
+                required: "Line name is required",
+                minLength: 1,
+              })}
+              type="text"
+              placeholder="Line Name"
+            />
+          </FormLabel>
+          <ErrorMessage errors={errors} name={`lines.${index}.name`} />
+        </div>
       ))}
       <SubmitButton type="button" onClick={() => append({ name: "" })}>
         Add Line
