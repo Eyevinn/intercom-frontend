@@ -47,7 +47,13 @@ export const Production: FC = () => {
         });
       })
       .catch(() => {
-        // TODO dispatch error/show local error
+        // TODO api needs to convert responses to appropriate Error objects
+        //        dispatch({
+        //          type: "ERROR",
+        //          payload: {
+        //            error,
+        //          },
+        //        });
       });
 
     return () => {
