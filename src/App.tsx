@@ -7,6 +7,7 @@ import { LandingPage } from "./components/landing-page/landing-page.tsx";
 import { useInitializeGlobalStateReducer } from "./global-state/global-state-reducer.ts";
 import { GlobalStateContext } from "./global-state/context-provider.tsx";
 import { Header } from "./components/landing-page/header.tsx";
+import { Error } from "./components/landing-page/error.tsx";
 
 const App = () => {
   const { denied, permission } = useDevicePermissions();
@@ -15,8 +16,7 @@ const App = () => {
   return (
     <GlobalStateContext.Provider value={initializedGlobalState}>
       <Header />
-
-      {/* TODO add error element here, e.g. a red banner with text */}
+      <Error />
 
       {denied && (
         <div>
