@@ -31,12 +31,28 @@ const handleFetchRequest = async <T>(
   fetchRequest: Promise<Response>
 ): Promise<T> => {
   const response = await fetchRequest;
+  let json = null;
+  let text = null;
 
-  const json = await response.json();
+  const contentType = response.headers.get("content-type");
+
+  if (!contentType) {
+    throw new Error("No content-type on response. Report to your developer.");
+  }
+
+  if (contentType.indexOf("text/plain") > -1) {
+    text = await response.text();
+  } else if (contentType.indexOf("application/json") > -1) {
+    json = await response.json();
+  }
 
   const isSuccess = isSuccessful(response);
 
   if (!isSuccess) {
+    if (text) {
+      throw new Error(text);
+    }
+
     if ("message" in json) {
       throw new Error(json.message);
     }
@@ -46,7 +62,11 @@ const handleFetchRequest = async <T>(
     );
   }
 
-  console.log(json);
+  console.log("Request response:", json);
+
+  if (!json) {
+    throw new Error(`No response data. Response text: ${text}`);
+  }
 
   return json;
 };
@@ -66,15 +86,15 @@ export const API = {
         }),
       })
     ),
-  // TODO add response types, headers
   listProductions: (): Promise<TListProductionsResponse> =>
-    fetch(`${rootUrl}productions/`, { method: "GET" }).then((response) =>
-      response.json()
+    handleFetchRequest<TListProductionsResponse>(
+      fetch(`${rootUrl}productions/`, { method: "GET" })
     ),
   fetchProduction: (id: number): Promise<TFetchProductionResponse> =>
-    fetch(`${rootUrl}productions/${id}`, { method: "GET" }).then((response) =>
-      response.json()
+    handleFetchRequest<TFetchProductionResponse>(
+      fetch(`${rootUrl}productions/${id}`, { method: "GET" })
     ),
+  // TODO add response types, headers, handleFetchRequest
   deleteProduction: (id: number) =>
     fetch(`${rootUrl}productions/${id}`, { method: "DELETE" }).then(
       (response) => response.json()
