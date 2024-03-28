@@ -4,8 +4,12 @@ export type TGlobalStateAction =
   | TPublishError
   | TProductionCreated
   | TProductionListFetched
-  | TUpdateDevicesAction
-  | TUpdateJoinProductionOptions;
+  | TUpdateDevicesAction;
+
+export type TUpdateProductionAction = {
+  type: "UPDATE_PRODUCTION";
+  payload: TProduction;
+};
 
 export type TPublishError = {
   type: "ERROR";
