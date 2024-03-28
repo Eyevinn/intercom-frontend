@@ -70,7 +70,6 @@ const handleFetchRequest = async <T>(
   return json;
 };
 
-// TODO create generic response/error converter and response data validator
 export const API = {
   createProduction: async ({ name, lines }: TCreateProductionOptions) =>
     handleFetchRequest<TCreateProductionResponse>(
