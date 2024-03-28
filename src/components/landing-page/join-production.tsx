@@ -1,6 +1,6 @@
 import { useForm } from "react-hook-form";
 import { ErrorMessage } from "@hookform/error-message";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import styled from "@emotion/styled";
 import { DisplayContainerHeader } from "./display-container-header.tsx";
 import {
@@ -31,6 +31,7 @@ export const JoinProduction = () => {
     formState: { errors },
     register,
     //    handleSubmit,
+    reset,
   } = useForm<FormValues>({
     defaultValues: {
       productionId: "",
@@ -45,6 +46,17 @@ export const JoinProduction = () => {
 
   const { error: productionFetchError, production } =
     useFetchProduction(joinProductionId);
+
+  // Update selected line id when a new production is fetched
+  useEffect(() => {
+    if (!production) return;
+
+    const lineId = production.lines[0]?.id?.toString() || "";
+
+    reset({
+      lineId,
+    });
+  }, [production, reset]);
 
   const { onChange, onBlur, name, ref } = register("productionId", {
     required: "Production ID is required",
