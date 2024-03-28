@@ -7,6 +7,7 @@ const initialGlobalState: TGlobalState = {
   production: null,
   error: null,
   devices: null,
+  joinProductionOptions: null,
 };
 
 const globalReducer: Reducer<TGlobalState, TGlobalStateAction> = (
@@ -32,7 +33,11 @@ const globalReducer: Reducer<TGlobalState, TGlobalStateAction> = (
         ...state,
         devices: uniqBy(action.payload, (item) => item.deviceId),
       };
-
+    case "UPDATE_JOIN_PRODUCTION_OPTIONS":
+      return {
+        ...state,
+        joinProductionOptions: action.payload,
+      };
     default:
       return state;
   }
