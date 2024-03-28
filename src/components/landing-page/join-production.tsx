@@ -1,4 +1,4 @@
-import { useForm } from "react-hook-form";
+import { SubmitHandler, useForm } from "react-hook-form";
 import { ErrorMessage } from "@hookform/error-message";
 import { useEffect, useState } from "react";
 import styled from "@emotion/styled";
@@ -30,7 +30,7 @@ export const JoinProduction = () => {
   const {
     formState: { errors },
     register,
-    //    handleSubmit,
+    handleSubmit,
     reset,
   } = useForm<FormValues>({
     defaultValues: {
@@ -42,7 +42,7 @@ export const JoinProduction = () => {
     },
   });
 
-  const [{ devices }] = useGlobalState();
+  const [{ devices }, dispatch] = useGlobalState();
 
   const { error: productionFetchError, production } =
     useFetchProduction(joinProductionId);
@@ -62,6 +62,15 @@ export const JoinProduction = () => {
     required: "Production ID is required",
     min: 1,
   });
+
+  const onSubmit: SubmitHandler<FormValues> = (payload) => {
+    dispatch({
+      type: "UPDATE_JOIN_PRODUCTION_OPTIONS",
+      payload,
+    });
+    // TODO remove
+    console.log(payload);
+  };
 
   return (
     <FormContainer>
@@ -150,7 +159,9 @@ export const JoinProduction = () => {
             </FormSelect>
           </FormLabel>
 
-          <SubmitButton type="submit">Join</SubmitButton>
+          <SubmitButton type="submit" onClick={handleSubmit(onSubmit)}>
+            Join
+          </SubmitButton>
         </>
       )}
     </FormContainer>

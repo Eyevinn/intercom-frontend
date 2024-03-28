@@ -3,7 +3,8 @@ import { TProduction } from "../components/production/types.ts";
 export type TGlobalStateAction =
   | TUpdateProductionAction
   | TPublishError
-  | TUpdateDevicesAction;
+  | TUpdateDevicesAction
+  | TUpdateJoinProductionOptions;
 
 export type TUpdateProductionAction = {
   type: "UPDATE_PRODUCTION";
@@ -18,4 +19,9 @@ export type TPublishError = {
 export type TUpdateDevicesAction = {
   type: "DEVICES_UPDATED";
   payload: MediaDeviceInfo[];
+};
+
+export type TUpdateJoinProductionOptions = {
+  type: "UPDATE_JOIN_PRODUCTION_OPTIONS";
+  payload: TJoinProductionOptions;
 };
