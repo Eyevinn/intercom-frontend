@@ -14,13 +14,9 @@ import {
 import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { useFetchProduction } from "../../hooks/fetch-production.ts";
 import { darkText, errorColour } from "../../css-helpers/defaults.ts";
+import { TJoinProductionOptions } from "../production/types.ts";
 
-type FormValues = {
-  productionId: string;
-  username: string;
-  audioinput: string;
-  audiooutput: string;
-};
+type FormValues = TJoinProductionOptions;
 
 const FetchErrorMessage = styled.div`
   background: ${errorColour};
@@ -129,7 +125,10 @@ export const JoinProduction = () => {
 
           <FormLabel>
             <DecorativeLabel>Line</DecorativeLabel>
-            <FormSelect>
+            <FormSelect
+              // eslint-disable-next-line
+              {...register(`lineId`)}
+            >
               {production &&
                 production.lines.map((line) => (
                   <option key={line.id} value={line.id}>
