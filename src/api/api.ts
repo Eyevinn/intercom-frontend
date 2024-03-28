@@ -1,5 +1,4 @@
-// TODO env variable
-const rootUrl = "https://intercom-manager.dev.eyevinn.technology/";
+const API_URL = process.env.APP_URL ?? "";
 
 type TCreateProductionOptions = {
   name: string;
@@ -75,7 +74,7 @@ const handleFetchRequest = async <T>(
 export const API = {
   createProduction: async ({ name, lines }: TCreateProductionOptions) =>
     handleFetchRequest<TCreateProductionResponse>(
-      fetch(`${rootUrl}production/`, {
+      fetch(`${API_URL}production/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -88,23 +87,23 @@ export const API = {
     ),
   listProductions: (): Promise<TListProductionsResponse> =>
     handleFetchRequest<TListProductionsResponse>(
-      fetch(`${rootUrl}productions/`, { method: "GET" })
+      fetch(`${API_URL}productions/`, { method: "GET" })
     ),
   fetchProduction: (id: number): Promise<TFetchProductionResponse> =>
     handleFetchRequest<TFetchProductionResponse>(
-      fetch(`${rootUrl}productions/${id}`, { method: "GET" })
+      fetch(`${API_URL}productions/${id}`, { method: "GET" })
     ),
   // TODO add response types, headers, handleFetchRequest
   deleteProduction: (id: number) =>
-    fetch(`${rootUrl}productions/${id}`, { method: "DELETE" }).then(
+    fetch(`${API_URL}productions/${id}`, { method: "DELETE" }).then(
       (response) => response.json()
     ),
   listProductionLines: (id: number) =>
-    fetch(`${rootUrl}productions/${id}/lines`, { method: "GET" }).then(
+    fetch(`${API_URL}productions/${id}/lines`, { method: "GET" }).then(
       (response) => response.json()
     ),
   fetchProductionLine: (productionId: number, lineId: number): Promise<TLine> =>
-    fetch(`${rootUrl}productions/${productionId}/lines/${lineId}`, {
+    fetch(`${API_URL}productions/${productionId}/lines/${lineId}`, {
       method: "GET",
     }).then((response) => response.json()),
   offerAudioSession: () => Promise.resolve(),
