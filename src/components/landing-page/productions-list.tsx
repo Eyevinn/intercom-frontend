@@ -38,51 +38,14 @@ export const ProductionsList = () => {
   // TODO extract to separate hook file
   useEffect(() => {
     let aborted = false;
+    let listUpdating = false;
 
-    API.listProductions()
-      .then((result) => {
-        if (aborted) return;
-
-        setProductions(
-          result
-            // pick laste 10 items
-            .slice(-10)
-            // display in reverse order
-            .toReversed()
-            // convert to local format
-            .map((prod) => {
-              return {
-                name: prod.name,
-                id: parseInt(prod.productionid, 10),
-                lines: prod.lines.map((l) => ({
-                  name: l.name,
-                  id: parseInt(l.id, 10),
-                  connected: false,
-                  connectionId: "1",
-                  participants: [],
-                })),
-              };
-            })
-        );
-      })
-      .catch(() => {
-        // TODO handle error/retry
-      });
-
-    return () => {
-      aborted = true;
-    };
-  }, []);
-
-  useEffect(() => {
-    if (reloadProductionList) {
-      dispatch({
-        type: "NEW_PRODUCTION_FETCHED",
-        payload: false,
-      });
-
+    if (reloadProductionList && !listUpdating) {
+      listUpdating = true;
       API.listProductions()
         .then((result) => {
+          if (aborted) return;
+
           setProductions(
             result
               // pick laste 10 items
@@ -104,11 +67,18 @@ export const ProductionsList = () => {
                 };
               })
           );
+          dispatch({
+            type: "PRODUCTION_LIST_FETCHED",
+          });
+          listUpdating = false;
         })
         .catch(() => {
           // TODO handle error/retry
         });
     }
+    return () => {
+      aborted = true;
+    };
   }, [dispatch, reloadProductionList]);
 
   return (

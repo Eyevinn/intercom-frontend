@@ -71,8 +71,7 @@ export const CreateProduction = () => {
         lines: [],
       });
       dispatch({
-        type: "NEW_PRODUCTION_FETCHED",
-        payload: true,
+        type: "PRODUCTION_CREATED",
       });
     }
   }, [createdProductionId, dispatch, reset]);
