@@ -38,10 +38,8 @@ export const ProductionsList = () => {
   // TODO extract to separate hook file
   useEffect(() => {
     let aborted = false;
-    let listUpdating = false;
 
-    if (reloadProductionList && !listUpdating) {
-      listUpdating = true;
+    if (reloadProductionList) {
       API.listProductions()
         .then((result) => {
           if (aborted) return;
@@ -70,7 +68,6 @@ export const ProductionsList = () => {
           dispatch({
             type: "PRODUCTION_LIST_FETCHED",
           });
-          listUpdating = false;
         })
         .catch(() => {
           // TODO handle error/retry
