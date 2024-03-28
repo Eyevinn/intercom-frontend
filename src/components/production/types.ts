@@ -1,3 +1,11 @@
+export type TJoinProductionOptions = {
+  productionId: string;
+  lineId: string;
+  username: string;
+  audioinput: string;
+  audiooutput: string;
+};
+
 export type TParticipant = {
   name: string;
   active: boolean;
