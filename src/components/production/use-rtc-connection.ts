@@ -1,7 +1,9 @@
-import { useEffect, useState } from "react";
+import { Dispatch, useEffect, useState } from "react";
 import { noop } from "../../helpers";
 import { API } from "../../api/api.ts";
 import { TJoinProductionOptions } from "./types.ts";
+import { useGlobalState } from "../../global-state/context-provider.tsx";
+import { TGlobalStateAction } from "../../global-state/global-state-actions.ts";
 
 type TRtcConnectionOptions = {
   inputAudioStream: MediaStream | null;
@@ -17,6 +19,7 @@ type TEstablishConnection = {
   joinProductionOptions: TJoinProductionOptions;
   sessionId: string;
   audioElement: HTMLAudioElement;
+  dispatch: Dispatch<TGlobalStateAction>;
 };
 
 type TAttachAudioStream = {
@@ -38,6 +41,7 @@ const establishConnection = ({
   joinProductionOptions,
   sessionId,
   audioElement,
+  dispatch,
 }: TEstablishConnection): { teardown: () => void } => {
   const onRtcTrack = ({ streams }: RTCTrackEvent) => {
     // We can count on there being only a single stream for now.
@@ -100,6 +104,8 @@ const establishConnection = ({
 
     await iceGatheringComplete();
 
+    console.log("sdp PATCH sent");
+
     await API.patchAudioSession({
       productionId: parseInt(joinProductionOptions.productionId, 10),
       lineId: parseInt(joinProductionOptions.lineId, 10),
@@ -113,7 +119,11 @@ const establishConnection = ({
     // TODO it's possible view is closed while user is connecting,
     // handle checking if component was unmounted and ignore error.
     console.error(e);
-    // TODO publish error
+
+    dispatch({
+      type: "ERROR",
+      payload: e,
+    });
   });
 
   return {
@@ -133,6 +143,7 @@ export const useRtcConnection = ({
   const [rtcPeerConnection] = useState<RTCPeerConnection>(
     new RTCPeerConnection()
   );
+  const [, dispatch] = useGlobalState();
   const [connectionState, setConnectionState] =
     useState<RTCPeerConnectionState | null>(null);
 
@@ -166,6 +177,7 @@ export const useRtcConnection = ({
       joinProductionOptions,
       sessionId,
       audioElement,
+      dispatch,
     });
 
     return () => {
@@ -185,7 +197,71 @@ export const useRtcConnection = ({
     joinProductionOptions,
     rtcPeerConnection,
     audioElement,
+    dispatch,
   ]);
+
+  // Debug hook for logging RTC events TODO remove
+  useEffect(() => {
+    const onIceGathering = () =>
+      console.log("ice gathering:", rtcPeerConnection.iceGatheringState);
+    const onIceConnection = () =>
+      console.log("ice connection:", rtcPeerConnection.iceConnectionState);
+    const onConnection = () =>
+      console.log("rtc connection", rtcPeerConnection.connectionState);
+    const onSignaling = () =>
+      console.log("rtc signaling", rtcPeerConnection.signalingState);
+    const onIceCandidate = () => console.log("ice candidate requested");
+    const onIceCandidateError = () => console.log("ice candidate error");
+    const onNegotiationNeeded = () => console.log("negotiation needed");
+
+    rtcPeerConnection.addEventListener(
+      "icegatheringstatechange",
+      onIceGathering
+    );
+    rtcPeerConnection.addEventListener(
+      "iceconnectionstatechange",
+      onIceConnection
+    );
+    rtcPeerConnection.addEventListener("connectionstatechange", onConnection);
+    rtcPeerConnection.addEventListener("signalingstatechange", onSignaling);
+    rtcPeerConnection.addEventListener("icecandidate", onIceCandidate);
+    rtcPeerConnection.addEventListener(
+      "icecandidateerror",
+      onIceCandidateError
+    );
+    rtcPeerConnection.addEventListener(
+      "negotiationneeded",
+      onNegotiationNeeded
+    );
+
+    return () => {
+      rtcPeerConnection.removeEventListener(
+        "icegatheringstatechange",
+        onIceGathering
+      );
+      rtcPeerConnection.removeEventListener(
+        "iceconnectionstatechange",
+        onIceConnection
+      );
+      rtcPeerConnection.removeEventListener(
+        "connectionstatechange",
+        onConnection
+      );
+      rtcPeerConnection.removeEventListener(
+        "signalingstatechange",
+        onSignaling
+      );
+      rtcPeerConnection.removeEventListener("icecandidate", onIceCandidate);
+      rtcPeerConnection.removeEventListener(
+        "icecandidateerror",
+        onIceCandidateError
+      );
+      rtcPeerConnection.removeEventListener(
+        "negotiationneeded",
+        onNegotiationNeeded
+      );
+    };
+  }, [rtcPeerConnection]);
 
   return { connectionState };
 };
