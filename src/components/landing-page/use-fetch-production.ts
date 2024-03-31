@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { API } from "../../api/api";
-import { TProduction } from "../production/types";
+import { TProduction } from "../production-line/types";
 
 type TUseFetchProduction = (id: number | null) => {
   production: TProduction | null;

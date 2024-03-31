@@ -1,4 +1,4 @@
-import { TJoinProductionOptions } from "../components/production/types.ts";
+import { TJoinProductionOptions } from "../components/production-line/types.ts";
 
 export type TGlobalStateAction =
   | TPublishError
