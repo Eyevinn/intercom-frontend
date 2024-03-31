@@ -12,7 +12,7 @@ import {
   SubmitButton,
 } from "./form-elements.tsx";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
-import { useFetchProduction } from "../../hooks/fetch-production.ts";
+import { useFetchProduction } from "./use-fetch-production.ts";
 import { darkText, errorColour } from "../../css-helpers/defaults.ts";
 import { TJoinProductionOptions } from "../production/types.ts";
 
