@@ -6,7 +6,7 @@ import { useDevicePermissions } from "./use-device-permission.ts";
 import { LandingPage } from "./components/landing-page/landing-page.tsx";
 import { useInitializeGlobalStateReducer } from "./global-state/global-state-reducer.ts";
 import { GlobalStateContext } from "./global-state/context-provider.tsx";
-import { Header } from "./components/landing-page/header.tsx";
+import { Header } from "./components/header.tsx";
 import { Error } from "./components/error";
 import { useFetchDevices } from "./use-fetch-devices.ts";
 import { FlexContainer } from "./components/generic-components.ts";
