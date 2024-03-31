@@ -4,6 +4,7 @@ import { CreateProduction } from "./create-production.tsx";
 import { ProductionsList } from "./productions-list.tsx";
 import { useNavigateToProduction } from "./use-navigate-to-production.ts";
 import { FlexContainer } from "../generic-components.ts";
+import { useGlobalState } from "../../global-state/context-provider.tsx";
 
 const DisplayContainer = styled.div`
   flex-basis: 100%;
@@ -20,8 +21,9 @@ const DisplayContainer = styled.div`
 `;
 
 export const LandingPage = () => {
-  // TODO does this trigger, or is listening to a state update needed here
-  useNavigateToProduction();
+  const [{ joinProductionOptions }] = useGlobalState();
+
+  useNavigateToProduction(joinProductionOptions);
 
   return (
     <>
