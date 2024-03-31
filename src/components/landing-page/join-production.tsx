@@ -9,7 +9,8 @@ import {
   FormContainer,
   FormInput,
   FormSelect,
-  SubmitButton,
+  ActionButton,
+  StyledWarningMessage,
 } from "./form-elements.tsx";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { useFetchProduction } from "./use-fetch-production.ts";
@@ -108,7 +109,11 @@ export const JoinProduction = () => {
               {productionFetchError.name} {productionFetchError.message}.
             </FetchErrorMessage>
           )}
-          <ErrorMessage errors={errors} name="productionId" />
+          <ErrorMessage
+            errors={errors}
+            name="productionId"
+            as={StyledWarningMessage}
+          />
 
           <FormLabel>
             <DecorativeLabel>Username</DecorativeLabel>
@@ -121,7 +126,11 @@ export const JoinProduction = () => {
               placeholder="Username"
             />
           </FormLabel>
-          <ErrorMessage errors={errors} name="username" />
+          <ErrorMessage
+            errors={errors}
+            name="username"
+            as={StyledWarningMessage}
+          />
 
           <FormLabel>
             <DecorativeLabel>Input</DecorativeLabel>
@@ -176,13 +185,15 @@ export const JoinProduction = () => {
                   ))}
               </FormSelect>
             ) : (
-              <div>Please enter a production id.</div>
+              <StyledWarningMessage>
+                Please enter a production id.
+              </StyledWarningMessage>
             )}
           </FormLabel>
 
-          <SubmitButton type="submit" onClick={handleSubmit(onSubmit)}>
+          <ActionButton type="submit" onClick={handleSubmit(onSubmit)}>
             Join
-          </SubmitButton>
+          </ActionButton>
         </>
       )}
     </FormContainer>

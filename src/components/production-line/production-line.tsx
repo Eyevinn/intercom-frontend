@@ -5,7 +5,7 @@ import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { useAudioInput } from "./use-audio-input.ts";
 import { useRtcConnection } from "./use-rtc-connection.ts";
 import { useEstablishSession } from "./use-establish-session.ts";
-import { SubmitButton } from "../landing-page/form-elements.tsx";
+import { ActionButton } from "../landing-page/form-elements.tsx";
 import { useAudioElement } from "./use-audio-element.ts";
 
 const TempDiv = styled.div`
@@ -63,7 +63,7 @@ export const ProductionLine: FC = () => {
   return (
     <div>
       <TempDiv>
-        <SubmitButton onClick={exit}>Exit</SubmitButton>
+        <ActionButton onClick={exit}>Exit</ActionButton>
       </TempDiv>
       <TempDiv>Production View</TempDiv>
       <TempDiv ref={audioContainerRef} />
