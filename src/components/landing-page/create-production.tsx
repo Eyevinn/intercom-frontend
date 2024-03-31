@@ -8,7 +8,8 @@ import {
   FormContainer,
   FormInput,
   FormLabel,
-  SubmitButton,
+  StyledWarningMessage,
+  ActionButton,
 } from "./form-elements.tsx";
 import { API } from "../../api/api.ts";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
@@ -86,7 +87,11 @@ export const CreateProduction = () => {
           placeholder="Production Name"
         />
       </FormLabel>
-      <ErrorMessage errors={errors} name="productionName" />
+      <ErrorMessage
+        errors={errors}
+        name="productionName"
+        as={StyledWarningMessage}
+      />
       <FormLabel>
         <DecorativeLabel>Line</DecorativeLabel>
         <FormInput
@@ -99,7 +104,11 @@ export const CreateProduction = () => {
           placeholder="Line Name"
         />
       </FormLabel>
-      <ErrorMessage errors={errors} name="defaultLine" />
+      <ErrorMessage
+        errors={errors}
+        name="defaultLine"
+        as={StyledWarningMessage}
+      />
       {fields.map((field, index) => (
         <div key={field.id}>
           <FormLabel>
@@ -114,16 +123,20 @@ export const CreateProduction = () => {
               placeholder="Line Name"
             />
           </FormLabel>
-          <ErrorMessage errors={errors} name={`lines.${index}.name`} />
+          <ErrorMessage
+            errors={errors}
+            name={`lines.${index}.name`}
+            as={StyledWarningMessage}
+          />
         </div>
       ))}
-      <SubmitButton type="button" onClick={() => append({ name: "" })}>
+      <ActionButton type="button" onClick={() => append({ name: "" })}>
         Add Line
-      </SubmitButton>
+      </ActionButton>
 
-      <SubmitButton type="submit" onClick={handleSubmit(onSubmit)}>
+      <ActionButton type="submit" onClick={handleSubmit(onSubmit)}>
         Create Production
-      </SubmitButton>
+      </ActionButton>
       {createdProductionId !== null && (
         <ProductionConfirmation>
           The production ID is: {createdProductionId.toString()}
