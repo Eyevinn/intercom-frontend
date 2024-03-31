@@ -1,10 +1,11 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useGlobalState } from "../../global-state/context-provider";
+import { TJoinProductionOptions } from "../production/types.ts";
 
 // Navigates to a production line as soon as a new production is pushed to the global state
-export const useNavigateToProduction = () => {
-  const [{ joinProductionOptions }] = useGlobalState();
+export const useNavigateToProduction = (
+  joinProductionOptions: TJoinProductionOptions | null
+) => {
   const navigate = useNavigate();
 
   useEffect(() => {
