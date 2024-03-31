@@ -8,20 +8,24 @@ type TUseGetRtcOfferOptions = {
 };
 
 // A hook for fetching the web rtc sdp offer from the backend
-export const useGetRtcOffer = ({
+export const useEstablishSession = ({
   joinProductionOptions,
 }: TUseGetRtcOfferOptions) => {
   const [sdpOffer, setSdpOffer] = useState<string | null>(null);
   const [sessionId, setSessionId] = useState<string | null>(null);
 
+  // Establish audio session
   useEffect(() => {
     if (!joinProductionOptions) return noop;
 
     let aborted = false;
 
+    const productionId = parseInt(joinProductionOptions.productionId, 10);
+    const lineId = parseInt(joinProductionOptions.lineId, 10);
+
     API.offerAudioSession({
-      productionId: parseInt(joinProductionOptions.productionId, 10),
-      lineId: parseInt(joinProductionOptions.lineId, 10),
+      productionId,
+      lineId,
       username: joinProductionOptions.username,
     }).then((response) => {
       if (aborted) return;
@@ -33,7 +37,26 @@ export const useGetRtcOffer = ({
     return () => {
       aborted = true;
     };
-  }, [joinProductionOptions, setSdpOffer, setSessionId]);
+  }, [joinProductionOptions]);
+
+  // Clean up audio session
+  useEffect(
+    () => () => {
+      if (!joinProductionOptions) return;
+
+      const productionId = parseInt(joinProductionOptions.productionId, 10);
+      const lineId = parseInt(joinProductionOptions.lineId, 10);
+
+      if (sessionId) {
+        API.deleteAudioSession({
+          sessionId,
+          productionId,
+          lineId,
+        });
+      }
+    },
+    [sessionId, joinProductionOptions]
+  );
 
   return {
     sdpOffer,
