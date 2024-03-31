@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { useAudioInput } from "./use-audio-input.ts";
 import { useRtcConnection } from "./use-rtc-connection.ts";
-import { useGetRtcOffer } from "./use-get-rtc-offer.ts";
+import { useEstablishSession } from "./use-establish-session.ts";
 import { SubmitButton } from "../landing-page/form-elements.tsx";
 
 const TempDiv = styled.div`
@@ -56,7 +56,7 @@ export const Production: FC = () => {
     inputId: joinProductionOptions?.audioinput ?? null,
   });
 
-  const { sessionId, sdpOffer } = useGetRtcOffer({
+  const { sessionId, sdpOffer } = useEstablishSession({
     joinProductionOptions,
   });
 
