@@ -37,6 +37,8 @@ export const useFetchProduction: TUseFetchProduction = (id) => {
 
           setError(e);
         });
+    } else {
+      setProduction(null);
     }
 
     return () => {
