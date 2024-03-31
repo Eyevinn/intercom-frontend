@@ -1,5 +1,4 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import "./App.css";
 import styled from "@emotion/styled";
 import { Production } from "./components/production/production.tsx";
 import { ErrorPage } from "./components/router-error.tsx";
