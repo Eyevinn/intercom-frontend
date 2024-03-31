@@ -1,7 +1,7 @@
 import {
   TJoinProductionOptions,
   TProduction,
-} from "../components/production/types.ts";
+} from "../components/production-line/types.ts";
 
 export type TGlobalState = {
   production: TProduction | null;
