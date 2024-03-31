@@ -17,5 +17,5 @@ export type TUpdateDevicesAction = {
 
 export type TUpdateJoinProductionOptions = {
   type: "UPDATE_JOIN_PRODUCTION_OPTIONS";
-  payload: TJoinProductionOptions;
+  payload: TJoinProductionOptions | null;
 };
