@@ -52,7 +52,7 @@ const handleFetchRequest = async <T>(
       throw new Error(text);
     }
 
-    if ("message" in json) {
+    if (json && "message" in json) {
       throw new Error(json.message);
     }
 
@@ -68,6 +68,29 @@ const handleFetchRequest = async <T>(
   }
 
   return json;
+};
+
+type TOfferAudioSessionOptions = {
+  productionId: number;
+  lineId: number;
+  username: string;
+};
+
+type TOfferAudioSessionResponse = {
+  sdp: string;
+  sessionid: string;
+};
+
+type TPatchAudioSessionOptions = {
+  productionId: number;
+  lineId: number;
+  sessionId: string;
+  sdpAnswer: string;
+};
+
+type TPatchAudioSessionResponse = {
+  sdp: string;
+  sessionid: string;
 };
 
 export const API = {
@@ -92,7 +115,6 @@ export const API = {
     handleFetchRequest<TFetchProductionResponse>(
       fetch(`${API_URL}productions/${id}`, { method: "GET" })
     ),
-  // TODO add response types, headers, handleFetchRequest
   deleteProduction: (id: number) =>
     fetch(`${API_URL}productions/${id}`, { method: "DELETE" }).then(
       (response) => response.json()
@@ -105,7 +127,31 @@ export const API = {
     fetch(`${API_URL}productions/${productionId}/lines/${lineId}`, {
       method: "GET",
     }).then((response) => response.json()),
-  offerAudioSession: () => Promise.resolve(),
-  patchAudioSession: () => Promise.resolve(),
+  offerAudioSession: ({
+    productionId,
+    lineId,
+    username,
+  }: TOfferAudioSessionOptions): Promise<TOfferAudioSessionResponse> =>
+    handleFetchRequest<TOfferAudioSessionResponse>(
+      fetch(
+        `${rootUrl}productions/${productionId}/lines/${lineId}/users/${username}`,
+        { method: "POST" }
+      )
+    ),
+  patchAudioSession: ({
+    productionId,
+    lineId,
+    sessionId,
+    sdpAnswer,
+  }: TPatchAudioSessionOptions): Promise<TPatchAudioSessionResponse> =>
+    handleFetchRequest<TPatchAudioSessionResponse>(
+      fetch(
+        `${rootUrl}productions/${productionId}/lines/${lineId}/session/${sessionId}`,
+        {
+          method: "PATCH",
+          body: sdpAnswer,
+        }
+      )
+    ),
   deleteAudioSession: () => Promise.resolve(),
 };
