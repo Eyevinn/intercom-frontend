@@ -58,9 +58,9 @@ const handleFetchRequest = async <T>(
     );
   }
 
-  console.log("Request response:", json);
+  console.log("Request response:", text || json);
 
-  return json;
+  return text || json;
 };
 
 type TOfferAudioSessionOptions = {
