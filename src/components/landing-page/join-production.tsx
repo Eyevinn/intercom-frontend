@@ -14,7 +14,7 @@ import {
 import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { useFetchProduction } from "./use-fetch-production.ts";
 import { darkText, errorColour } from "../../css-helpers/defaults.ts";
-import { TJoinProductionOptions } from "../production/types.ts";
+import { TJoinProductionOptions } from "../production-line/types.ts";
 
 type FormValues = TJoinProductionOptions;
 

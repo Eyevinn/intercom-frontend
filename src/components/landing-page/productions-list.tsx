@@ -1,7 +1,7 @@
 import styled from "@emotion/styled";
 import { useEffect, useState } from "react";
 import { API } from "../../api/api.ts";
-import { TProduction } from "../production/types.ts";
+import { TProduction } from "../production-line/types.ts";
 
 const ProductionListContainer = styled.div`
   display: flex;

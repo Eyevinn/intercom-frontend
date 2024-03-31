@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import styled from "@emotion/styled";
-import { Production } from "./components/production/production.tsx";
+import { ProductionLine } from "./components/production-line/production-line.tsx";
 import { ErrorPage } from "./components/router-error.tsx";
 import { useDevicePermissions } from "./use-device-permission.ts";
 import { LandingPage } from "./components/landing-page/landing-page.tsx";
@@ -62,7 +62,7 @@ const App = () => {
             />
             <Route
               path="/production/:productionId/line/:lineId"
-              element={<Production />}
+              element={<ProductionLine />}
               errorElement={<ErrorPage />}
             />
           </Routes>

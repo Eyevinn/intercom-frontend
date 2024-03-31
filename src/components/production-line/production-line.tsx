@@ -14,7 +14,7 @@ import { SubmitButton } from "../landing-page/form-elements.tsx";
 const TempDiv = styled.div`
   padding: 1rem;
 `;
-export const Production: FC = () => {
+export const ProductionLine: FC = () => {
   //  const { productionId, lineId } = useParams();
   const [{ joinProductionOptions }, dispatch] = useGlobalState();
   const navigate = useNavigate();
