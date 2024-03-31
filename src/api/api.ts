@@ -36,13 +36,9 @@ const handleFetchRequest = async <T>(
 
   const contentType = response.headers.get("content-type");
 
-  if (!contentType) {
-    throw new Error("No content-type on response. Report to your developer.");
-  }
-
-  if (contentType.indexOf("text/plain") > -1) {
+  if (contentType && contentType.indexOf("text/plain") > -1) {
     text = await response.text();
-  } else if (contentType.indexOf("application/json") > -1) {
+  } else if (contentType && contentType.indexOf("application/json") > -1) {
     json = await response.json();
   }
 
@@ -63,10 +59,6 @@ const handleFetchRequest = async <T>(
   }
 
   console.log("Request response:", json);
-
-  if (!json) {
-    throw new Error(`No response data. Response text: ${text}`);
-  }
 
   return json;
 };
@@ -92,6 +84,12 @@ type TPatchAudioSessionOptions = {
 type TPatchAudioSessionResponse = {
   sdp: string;
   sessionid: string;
+};
+
+type TDeleteAudioSessionOptions = {
+  productionId: number;
+  lineId: number;
+  sessionId: string;
 };
 
 export const API = {
@@ -154,5 +152,15 @@ export const API = {
         }
       )
     ),
-  deleteAudioSession: () => Promise.resolve(),
+  deleteAudioSession: ({
+    productionId,
+    lineId,
+    sessionId,
+  }: TDeleteAudioSessionOptions): Promise<string> =>
+    handleFetchRequest<string>(
+      fetch(
+        `${rootUrl}productions/${productionId}/lines/${lineId}/session/${sessionId}`,
+        { method: "DELETE" }
+      )
+    ),
 };
