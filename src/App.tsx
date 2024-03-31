@@ -3,13 +3,13 @@ import "./App.css";
 import styled from "@emotion/styled";
 import { Production } from "./components/production/production.tsx";
 import { ErrorPage } from "./components/router-error.tsx";
-import { useDevicePermissions } from "./hooks/device-permission.ts";
+import { useDevicePermissions } from "./use-device-permission.ts";
 import { LandingPage } from "./components/landing-page/landing-page.tsx";
 import { useInitializeGlobalStateReducer } from "./global-state/global-state-reducer.ts";
 import { GlobalStateContext } from "./global-state/context-provider.tsx";
 import { Header } from "./components/landing-page/header.tsx";
 import { Error } from "./components/landing-page/error.tsx";
-import { useFetchDevices } from "./hooks/fetch-devices.ts";
+import { useFetchDevices } from "./use-fetch-devices.ts";
 import { FlexContainer } from "./components/generic-components.ts";
 import { DisplayWarning } from "./components/display-box.tsx";
 
