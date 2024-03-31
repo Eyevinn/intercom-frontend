@@ -7,7 +7,7 @@ export type TGlobalStateAction =
 
 export type TPublishError = {
   type: "ERROR";
-  payload: Error;
+  payload: Error | null;
 };
 
 export type TUpdateDevicesAction = {

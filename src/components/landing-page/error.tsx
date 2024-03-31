@@ -11,12 +11,42 @@ const ErrorDisplay = styled.div`
   font-weight: bold;
   margin: 0 0 1rem 0;
   color: #1a1a1a;
+  display: flex;
+  align-content: flex-start;
+`;
+
+const CloseErrorButton = styled.button`
+  border: none;
+  background: #1a1a1a;
+  color: #ddd;
+  font-weight: bold;
+  border-radius: 0.5rem;
+  margin-left: auto;
+
+  &:hover {
+    cursor: pointer;
+  }
 `;
 
 export const Error: FC = () => {
-  const [{ error }] = useGlobalState();
+  const [{ error }, dispatch] = useGlobalState();
 
   return (
-    error && <ErrorDisplay>{`${error.name}: ${error.message}`}</ErrorDisplay>
+    error && (
+      <ErrorDisplay>
+        {`${error.name}: ${error.message}`}{" "}
+        <CloseErrorButton
+          type="button"
+          onClick={() =>
+            dispatch({
+              type: "ERROR",
+              payload: null,
+            })
+          }
+        >
+          close
+        </CloseErrorButton>
+      </ErrorDisplay>
+    )
   );
 };
