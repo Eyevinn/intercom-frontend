@@ -1,15 +1,12 @@
-import {
-  FilteredMediaEvent,
-  getMediaEventFilter,
-} from "@eyevinn/media-event-filter";
 import styled from "@emotion/styled";
-import { FC, useEffect, useRef, useState } from "react";
+import { FC, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { useAudioInput } from "./use-audio-input.ts";
 import { useRtcConnection } from "./use-rtc-connection.ts";
 import { useEstablishSession } from "./use-establish-session.ts";
 import { SubmitButton } from "../landing-page/form-elements.tsx";
+import { useAudioElement } from "./use-audio-element.ts";
 
 const TempDiv = styled.div`
   padding: 1rem;
@@ -18,40 +15,11 @@ export const ProductionLine: FC = () => {
   //  const { productionId, lineId } = useParams();
   const [{ joinProductionOptions }, dispatch] = useGlobalState();
   const navigate = useNavigate();
-  const [audioElement] = useState(new Audio());
   const audioContainerRef = useRef<HTMLDivElement>(null);
-  const [playbackState, setPlaybackState] = useState<FilteredMediaEvent | null>(
-    null
-  );
 
-  // TODO extract audio element hooks to separate file
-  // Set up audio element
-  useEffect(() => {
-    audioElement.controls = true;
-    audioElement.autoplay = true;
-    audioElement.onerror = console.error;
-
-    const { teardown } = getMediaEventFilter({
-      // @ts-expect-error audio works
-      videoElement: audioElement,
-      callback: (ev) => {
-        if (ev === FilteredMediaEvent.TIME_UPDATE) return;
-
-        setPlaybackState(ev);
-      },
-    });
-
-    return teardown;
-  }, [audioElement]);
-
-  // Attach audio element to DOM
-  useEffect(() => {
-    if (!audioContainerRef) return;
-
-    if (audioContainerRef.current) {
-      audioContainerRef.current.appendChild(audioElement);
-    }
-  }, [audioContainerRef, audioElement]);
+  const { playbackState, audioElement } = useAudioElement({
+    audioContainerRef,
+  });
 
   const inputAudioStream = useAudioInput({
     inputId: joinProductionOptions?.audioinput ?? null,
