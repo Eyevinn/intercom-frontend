@@ -72,6 +72,14 @@ export const JoinProduction = () => {
     console.log(payload);
   };
 
+  const outputDevices = devices
+    ? devices.filter((d) => d.kind === "audiooutput")
+    : [];
+
+  const inputDevices = devices
+    ? devices.filter((d) => d.kind === "audioinput")
+    : [];
+
   return (
     <FormContainer>
       <DisplayContainerHeader>Join Production</DisplayContainerHeader>
@@ -117,49 +125,59 @@ export const JoinProduction = () => {
 
           <FormLabel>
             <DecorativeLabel>Input</DecorativeLabel>
-            <FormSelect
-              // eslint-disable-next-line
-              {...register(`audioinput`)}
-            >
-              {devices
-                .filter((d) => d.kind === "audioinput")
-                .map((device) => (
-                  <option key={device.deviceId} value={device.deviceId}>
-                    {device.label}
-                  </option>
-                ))}
-            </FormSelect>
+            {inputDevices.length > 0 ? (
+              <FormSelect
+                // eslint-disable-next-line
+                {...register(`audioinput`)}
+              >
+                {devices
+                  .filter((d) => d.kind === "audioinput")
+                  .map((device) => (
+                    <option key={device.deviceId} value={device.deviceId}>
+                      {device.label}
+                    </option>
+                  ))}
+              </FormSelect>
+            ) : (
+              <div>Input selection unavailable</div>
+            )}
           </FormLabel>
 
           <FormLabel>
             <DecorativeLabel>Output</DecorativeLabel>
-            <FormSelect
-              // eslint-disable-next-line
-              {...register(`audiooutput`)}
-            >
-              {devices
-                .filter((d) => d.kind === "audiooutput")
-                .map((device) => (
+            {outputDevices.length > 0 ? (
+              <FormSelect
+                // eslint-disable-next-line
+                {...register(`audiooutput`)}
+              >
+                {outputDevices.map((device) => (
                   <option key={device.deviceId} value={device.deviceId}>
                     {device.label}
                   </option>
                 ))}
-            </FormSelect>
+              </FormSelect>
+            ) : (
+              <div>Output selection unavailable</div>
+            )}
           </FormLabel>
 
           <FormLabel>
             <DecorativeLabel>Line</DecorativeLabel>
-            <FormSelect
-              // eslint-disable-next-line
-              {...register(`lineId`)}
-            >
-              {production &&
-                production.lines.map((line) => (
-                  <option key={line.id} value={line.id}>
-                    {line.name || line.id}
-                  </option>
-                ))}
-            </FormSelect>
+            {production ? (
+              <FormSelect
+                // eslint-disable-next-line
+                {...register(`lineId`)}
+              >
+                {production &&
+                  production.lines.map((line) => (
+                    <option key={line.id} value={line.id}>
+                      {line.name || line.id}
+                    </option>
+                  ))}
+              </FormSelect>
+            ) : (
+              <div>Please enter a production id.</div>
+            )}
           </FormLabel>
 
           <SubmitButton type="submit" onClick={handleSubmit(onSubmit)}>
