@@ -82,7 +82,10 @@ export const JoinProduction = () => {
             <FormInput
               onChange={(ev) => {
                 onChange(ev);
-                setJoinProductionId(parseInt(ev.target.value, 10));
+
+                const pid = parseInt(ev.target.value, 10);
+
+                setJoinProductionId(Number.isNaN(pid) ? null : pid);
               }}
               name={name}
               ref={ref}
