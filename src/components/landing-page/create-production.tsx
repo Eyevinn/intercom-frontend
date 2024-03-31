@@ -26,6 +26,7 @@ const ProductionConfirmation = styled.div`
   border: 1px solid #b2ffa1;
   color: #1a1a1a;
 `;
+
 export const CreateProduction = () => {
   const [, dispatch] = useGlobalState();
   const [createdProductionId, setCreatedProductionId] = useState<string | null>(
@@ -60,6 +61,7 @@ export const CreateProduction = () => {
       });
   };
 
+  // Reset form values when created production id changes
   useEffect(() => {
     if (createdProductionId) {
       reset({
