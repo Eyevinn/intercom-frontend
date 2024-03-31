@@ -1,7 +1,7 @@
 import styled from "@emotion/styled";
 import { FC } from "react";
-import { errorColour } from "../../css-helpers/defaults.ts";
-import { useGlobalState } from "../../global-state/context-provider.tsx";
+import { errorColour } from "../css-helpers/defaults";
+import { useGlobalState } from "../global-state/context-provider";
 
 const ErrorDisplay = styled.div`
   width: 100%;
