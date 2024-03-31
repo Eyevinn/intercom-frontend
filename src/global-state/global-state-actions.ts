@@ -1,15 +1,9 @@
-import { TProduction } from "../components/production/types.ts";
+import { TJoinProductionOptions } from "../components/production/types.ts";
 
 export type TGlobalStateAction =
-  | TUpdateProductionAction
   | TPublishError
   | TUpdateDevicesAction
   | TUpdateJoinProductionOptions;
-
-export type TUpdateProductionAction = {
-  type: "UPDATE_PRODUCTION";
-  payload: TProduction;
-};
 
 export type TPublishError = {
   type: "ERROR";
