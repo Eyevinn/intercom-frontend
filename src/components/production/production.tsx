@@ -24,6 +24,7 @@ export const Production: FC = () => {
     null
   );
 
+  // TODO extract audio element hooks to separate file
   // Set up audio element
   useEffect(() => {
     audioElement.controls = true;
