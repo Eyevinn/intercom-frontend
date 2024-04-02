@@ -148,7 +148,9 @@ export const JoinProduction = () => {
                   ))}
               </FormSelect>
             ) : (
-              <div>Input selection unavailable</div>
+              <StyledWarningMessage>
+                Input selection unavailable
+              </StyledWarningMessage>
             )}
           </FormLabel>
 
@@ -166,7 +168,9 @@ export const JoinProduction = () => {
                 ))}
               </FormSelect>
             ) : (
-              <div>Output selection unavailable</div>
+              <StyledWarningMessage>
+                Output selection unavailable
+              </StyledWarningMessage>
             )}
           </FormLabel>
 
