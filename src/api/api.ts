@@ -16,7 +16,7 @@ type TLine = {
   name: string;
   id: string;
   smbid: string;
-  connections: unknown;
+  participants: { name: string; sessionid: string }[];
 };
 
 type TFetchProductionResponse = {
