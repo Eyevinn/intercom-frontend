@@ -84,6 +84,7 @@ export const CreateProduction = () => {
             required: "Production name is required",
             minLength: 1,
           })}
+          autoComplete="off"
           placeholder="Production Name"
         />
       </FormLabel>
@@ -100,7 +101,7 @@ export const CreateProduction = () => {
             required: "Line name is required",
             minLength: 1,
           })}
-          type="text"
+          autoComplete="off"
           placeholder="Line Name"
         />
       </FormLabel>
@@ -119,7 +120,7 @@ export const CreateProduction = () => {
                 required: "Line name is required",
                 minLength: 1,
               })}
-              type="text"
+              autoComplete="off"
               placeholder="Line Name"
             />
           </FormLabel>
