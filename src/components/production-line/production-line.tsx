@@ -52,10 +52,6 @@ export const ProductionLine: FC = () => {
     const productionId = parseInt(joinProductionOptions.productionId, 10);
     const lineId = parseInt(joinProductionOptions.lineId, 10);
 
-    API.fetchProductionLine(productionId, lineId)
-      .then((line) => setParticipants(line.participants))
-      .catch(console.error);
-
     interval = window.setInterval(() => {
       API.fetchProductionLine(productionId, lineId)
         .then((line) => setParticipants(line.participants))
