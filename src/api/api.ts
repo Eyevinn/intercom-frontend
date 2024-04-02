@@ -1,3 +1,5 @@
+import { handleFetchRequest } from "./handle-fetch-request.ts";
+
 const API_URL = import.meta.env.VITE_BASE_URL ?? "";
 
 type TCreateProductionOptions = {
@@ -94,7 +96,7 @@ export const API = {
   }: TOfferAudioSessionOptions): Promise<TOfferAudioSessionResponse> =>
     handleFetchRequest<TOfferAudioSessionResponse>(
       fetch(
-        `${rootUrl}productions/${productionId}/lines/${lineId}/users/${username}`,
+        `${API_URL}productions/${productionId}/lines/${lineId}/users/${username}`,
         { method: "POST" }
       )
     ),
@@ -106,7 +108,7 @@ export const API = {
   }: TPatchAudioSessionOptions): Promise<TPatchAudioSessionResponse> =>
     handleFetchRequest<TPatchAudioSessionResponse>(
       fetch(
-        `${rootUrl}productions/${productionId}/lines/${lineId}/session/${sessionId}`,
+        `${API_URL}productions/${productionId}/lines/${lineId}/session/${sessionId}`,
         {
           method: "PATCH",
           body: sdpAnswer,
@@ -120,7 +122,7 @@ export const API = {
   }: TDeleteAudioSessionOptions): Promise<string> =>
     handleFetchRequest<string>(
       fetch(
-        `${rootUrl}productions/${productionId}/lines/${lineId}/session/${sessionId}`,
+        `${API_URL}productions/${productionId}/lines/${lineId}/session/${sessionId}`,
         { method: "DELETE" }
       )
     ),
