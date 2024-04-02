@@ -148,12 +148,7 @@ export const useRtcConnection = ({
     useState<RTCPeerConnectionState | null>(null);
 
   useEffect(() => {
-    if (
-      !inputAudioStream ||
-      !sdpOffer ||
-      !sessionId ||
-      !joinProductionOptions
-    ) {
+    if (!sdpOffer || !sessionId || !joinProductionOptions) {
       return noop;
     }
 
@@ -166,10 +161,14 @@ export const useRtcConnection = ({
       onConnectionStateChange
     );
 
-    attachInputAudioToPeerConnection({
-      rtcPeerConnection,
-      inputAudioStream,
-    });
+    // Input Audio Stream is optional, but it should generally
+    // exist as long as the device has an input option available.
+    if (inputAudioStream) {
+      attachInputAudioToPeerConnection({
+        rtcPeerConnection,
+        inputAudioStream,
+      });
+    }
 
     const { teardown } = establishConnection({
       rtcPeerConnection,
