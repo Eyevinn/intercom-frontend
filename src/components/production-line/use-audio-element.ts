@@ -24,8 +24,7 @@ export const useAudioElement = ({
     audioElement.onerror = console.error;
 
     const { teardown } = getMediaEventFilter({
-      // @ts-expect-error audio works
-      videoElement: audioElement,
+      mediaElement: audioElement,
       callback: (ev) => {
         if (ev === FilteredMediaEvent.TIME_UPDATE) return;
 

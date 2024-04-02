@@ -15,7 +15,7 @@
   "dependencies": {
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.0",
-    "@eyevinn/media-event-filter": "^1.0.4",
+    "@eyevinn/media-event-filter": "^2.0.0",
     "@hookform/error-message": "^2.0.1",
     "@types/react-router-dom": "^5.3.3",
     "react": "^18.2.0",
