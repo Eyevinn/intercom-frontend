@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { FC, useEffect, useRef } from "react";
+import { FC, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { useAudioInput } from "./use-audio-input.ts";
@@ -7,6 +7,9 @@ import { useRtcConnection } from "./use-rtc-connection.ts";
 import { useEstablishSession } from "./use-establish-session.ts";
 import { ActionButton } from "../landing-page/form-elements.tsx";
 import { useAudioElement } from "./use-audio-element.ts";
+import { UserList } from "./user-list.tsx";
+import { API } from "../../api/api.ts";
+import { noop } from "../../helpers.ts";
 
 const TempDiv = styled.div`
   padding: 1rem;
@@ -16,6 +19,9 @@ export const ProductionLine: FC = () => {
   const [{ joinProductionOptions }, dispatch] = useGlobalState();
   const navigate = useNavigate();
   const audioContainerRef = useRef<HTMLDivElement>(null);
+  const [participants, setParticipants] = useState<
+    { name: string; sessionid: string }[] | null
+  >(null);
 
   const { playbackState, audioElement } = useAudioElement({
     audioContainerRef,
@@ -36,6 +42,30 @@ export const ProductionLine: FC = () => {
     sessionId,
     audioElement,
   });
+
+  // Participant list, TODO extract hook to separate file
+  useEffect(() => {
+    if (!joinProductionOptions) return noop;
+
+    let interval: number | null = null;
+
+    const productionId = parseInt(joinProductionOptions.productionId, 10);
+    const lineId = parseInt(joinProductionOptions.lineId, 10);
+
+    API.fetchProductionLine(productionId, lineId).then((line) =>
+      setParticipants(line.participants)
+    );
+
+    interval = window.setInterval(() => {
+      API.fetchProductionLine(productionId, lineId).then((line) =>
+        setParticipants(line.participants)
+      );
+    }, 1000);
+
+    return () => {
+      window.clearInterval(interval);
+    };
+  }, [joinProductionOptions]);
 
   // TODO temporary, this view should handle direct links
   useEffect(() => {
@@ -73,6 +103,8 @@ export const ProductionLine: FC = () => {
       {connectionState && (
         <TempDiv>RTC Connection State: {connectionState}</TempDiv>
       )}
+
+      <UserList participants={participants} />
     </div>
   );
 };
