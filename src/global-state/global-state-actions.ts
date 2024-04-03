@@ -29,4 +29,3 @@ export type TUpdateJoinProductionOptions = {
   type: "UPDATE_JOIN_PRODUCTION_OPTIONS";
   payload: TJoinProductionOptions | null;
 };
-// let interval: number | null = null;
