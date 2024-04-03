@@ -47,7 +47,7 @@ export const ProductionLine: FC = () => {
   useEffect(() => {
     if (!joinProductionOptions) return noop;
 
-    let interval: number | null = null;
+    let interval: number = 0;
 
     const productionId = parseInt(joinProductionOptions.productionId, 10);
     const lineId = parseInt(joinProductionOptions.lineId, 10);
