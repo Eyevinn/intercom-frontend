@@ -11,7 +11,7 @@ type TUseAudioElementOptions = {
 export const useAudioElement = ({
   audioContainerRef,
 }: TUseAudioElementOptions) => {
-  const [audioElement] = useState(new Audio());
+  const [audioElement] = useState(() => new Audio());
   const [playbackState, setPlaybackState] = useState<FilteredMediaEvent | null>(
     null
   );
