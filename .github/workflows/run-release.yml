@@ -1,4 +1,4 @@
-name: Manually trigger deploy to demo site
+name: Demo Site Deploy
 on: workflow_dispatch
 
 jobs:
