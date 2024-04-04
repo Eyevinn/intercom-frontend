@@ -134,24 +134,20 @@ export const JoinProduction = () => {
 
           <FormLabel>
             <DecorativeLabel>Input</DecorativeLabel>
-            {inputDevices.length > 0 ? (
-              <FormSelect
-                // eslint-disable-next-line
-                {...register(`audioinput`)}
-              >
-                {devices
-                  .filter((d) => d.kind === "audioinput")
-                  .map((device) => (
-                    <option key={device.deviceId} value={device.deviceId}>
-                      {device.label}
-                    </option>
-                  ))}
-              </FormSelect>
-            ) : (
-              <StyledWarningMessage>
-                Input selection unavailable
-              </StyledWarningMessage>
-            )}
+            <FormSelect
+              // eslint-disable-next-line
+              {...register(`audioinput`)}
+            >
+              {inputDevices.length > 0 ? (
+                inputDevices.map((device) => (
+                  <option key={device.deviceId} value={device.deviceId}>
+                    {device.label}
+                  </option>
+                ))
+              ) : (
+                <option value="no-device">No device available</option>
+              )}
+            </FormSelect>
           </FormLabel>
 
           <FormLabel>
