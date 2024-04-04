@@ -3,7 +3,7 @@ export type TJoinProductionOptions = {
   lineId: string;
   username: string;
   // Not all devices have input available
-  audioinput: string | null;
+  audioinput: string | "no-device";
   // Not all devices allow choosing output
   audiooutput: string | null;
 };

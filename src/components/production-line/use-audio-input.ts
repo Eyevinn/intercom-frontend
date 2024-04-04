@@ -1,20 +1,27 @@
 import { useEffect, useState } from "react";
 import { noop } from "../../helpers";
+import { TJoinProductionOptions } from "./types.ts";
 
 type TGetMediaDevicesOptions = {
-  inputId: string | null;
+  inputId: TJoinProductionOptions["audioinput"] | null;
 };
 
+export type TUseAudioInputValues = MediaStream | "no-device" | null;
+
+type TUseAudioInput = (
+  options: TGetMediaDevicesOptions
+) => TUseAudioInputValues;
+
 // A hook for fetching the user selected audio input as a MediaStream
-export const useAudioInput = ({
-  inputId,
-}: TGetMediaDevicesOptions): MediaStream | null => {
-  const [audioInput, setAudioInput] = useState<MediaStream | null>(null);
+export const useAudioInput: TUseAudioInput = ({ inputId }) => {
+  const [audioInput, setAudioInput] = useState<TUseAudioInputValues>(null);
 
   useEffect(() => {
     let aborted = false;
 
     if (!inputId) return noop;
+
+    if (inputId === "no-device") return setAudioInput("no-device");
 
     navigator.mediaDevices
       .getUserMedia({

@@ -4,9 +4,10 @@ import { API } from "../../api/api.ts";
 import { TJoinProductionOptions } from "./types.ts";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { TGlobalStateAction } from "../../global-state/global-state-actions.ts";
+import { TUseAudioInputValues } from "./use-audio-input.ts";
 
 type TRtcConnectionOptions = {
-  inputAudioStream: MediaStream | null;
+  inputAudioStream: TUseAudioInputValues;
   sdpOffer: string | null;
   joinProductionOptions: TJoinProductionOptions | null;
   sessionId: string | null;
@@ -148,7 +149,12 @@ export const useRtcConnection = ({
     useState<RTCPeerConnectionState | null>(null);
 
   useEffect(() => {
-    if (!sdpOffer || !sessionId || !joinProductionOptions) {
+    if (
+      !sdpOffer ||
+      !sessionId ||
+      !joinProductionOptions ||
+      !inputAudioStream
+    ) {
       return noop;
     }
 
@@ -163,7 +169,7 @@ export const useRtcConnection = ({
 
     // Input Audio Stream is optional, but it should generally
     // exist as long as the device has an input option available.
-    if (inputAudioStream) {
+    if (inputAudioStream !== "no-device") {
       attachInputAudioToPeerConnection({
         rtcPeerConnection,
         inputAudioStream,
