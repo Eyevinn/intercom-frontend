@@ -47,12 +47,10 @@ export const ProductionLine: FC = () => {
   useEffect(() => {
     if (!joinProductionOptions) return noop;
 
-    let interval: number | null = null;
-
     const productionId = parseInt(joinProductionOptions.productionId, 10);
     const lineId = parseInt(joinProductionOptions.lineId, 10);
 
-    interval = window.setInterval(() => {
+    const interval = window.setInterval(() => {
       API.fetchProductionLine(productionId, lineId)
         .then((line) => setParticipants(line.participants))
         .catch(console.error);
