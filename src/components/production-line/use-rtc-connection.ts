@@ -141,7 +141,7 @@ export const useRtcConnection = ({
   audioElement,
 }: TRtcConnectionOptions) => {
   const [rtcPeerConnection] = useState<RTCPeerConnection>(
-    new RTCPeerConnection()
+    () => new RTCPeerConnection()
   );
   const [, dispatch] = useGlobalState();
   const [connectionState, setConnectionState] =
