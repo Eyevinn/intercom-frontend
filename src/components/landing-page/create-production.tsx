@@ -57,12 +57,16 @@ export const CreateProduction = () => {
       name: value.productionName,
       lines: [{ name: value.defaultLine }, ...value.lines],
     })
-      .then((v) => setCreatedProductionId(v.productionid))
+      .then((v) => {
+        setCreatedProductionId(v.productionid);
+        setLoading(false);
+      })
       .catch((error) => {
         dispatch({
           type: "ERROR",
           payload: error,
         });
+        setLoading(false);
       });
   };
 
