@@ -86,9 +86,11 @@ export const API = {
       (response) => response.json()
     ),
   fetchProductionLine: (productionId: number, lineId: number): Promise<TLine> =>
-    fetch(`${API_URL}productions/${productionId}/lines/${lineId}`, {
-      method: "GET",
-    }).then((response) => response.json()),
+    handleFetchRequest<TLine>(
+      fetch(`${API_URL}productions/${productionId}/lines/${lineId}`, {
+        method: "GET",
+      })
+    ),
   offerAudioSession: ({
     productionId,
     lineId,
