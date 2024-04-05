@@ -16,6 +16,7 @@ import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { useFetchProduction } from "./use-fetch-production.ts";
 import { darkText, errorColour } from "../../css-helpers/defaults.ts";
 import { TJoinProductionOptions } from "../production-line/types.ts";
+import { Loader } from "../loader/loader.tsx";
 
 type FormValues = TJoinProductionOptions;
 
@@ -28,6 +29,7 @@ const FetchErrorMessage = styled.div`
 
 export const JoinProduction = () => {
   const [joinProductionId, setJoinProductionId] = useState<null | number>(null);
+  const [loading, setLoading] = useState<boolean>(false);
   const {
     formState: { errors },
     register,
@@ -65,6 +67,7 @@ export const JoinProduction = () => {
   });
 
   const onSubmit: SubmitHandler<FormValues> = (payload) => {
+    setLoading(true);
     dispatch({
       type: "UPDATE_JOIN_PRODUCTION_OPTIONS",
       payload,
@@ -80,6 +83,14 @@ export const JoinProduction = () => {
   const inputDevices = devices
     ? devices.filter((d) => d.kind === "audioinput")
     : [];
+
+  if (loading) {
+    return (
+      <FormContainer>
+        <Loader />
+      </FormContainer>
+    );
+  }
 
   return (
     <FormContainer>
