@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { FC } from "react";
+import { FC, useEffect, useState } from "react";
 
 const Loading = styled.div`
   border: 4px solid rgba(0, 0, 0, 0.1);
@@ -49,8 +49,41 @@ const Loading = styled.div`
   }
 `;
 
+const Wrapper = styled.div`
+  position: relative;
+`;
+
+const Dots = styled.span`
+  padding-left: 2rem;
+  color: #cdcdcd;
+  font-size: xx-large;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+`;
+
 type Props = { className: string };
 
 export const Loader: FC<Props> = ({ className }: Props) => {
   return <Loading className={className} />;
+};
+
+export const LoaderDots: FC = () => {
+  const [dots, setDots] = useState<string>(".");
+
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      setDots((prevDots) => (prevDots.length > 2 ? "." : `${prevDots}.`));
+    }, 1000);
+
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, []);
+
+  return (
+    <Wrapper>
+      <Dots>{dots}</Dots>
+    </Wrapper>
+  );
 };
