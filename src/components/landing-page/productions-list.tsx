@@ -3,8 +3,19 @@ import { useEffect, useState } from "react";
 import { API } from "../../api/api.ts";
 import { TProduction } from "../production-line/types.ts";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
+import { LoaderDots } from "../loader/loader.tsx";
+
+const Wrapper = styled.div`
+  position: relative;
+  display: flex;
+  padding: 2rem 0 2rem 2rem;
+  flex-wrap: wrap;
+  flex-direction: column;
+`;
 
 const ProductionListContainer = styled.div`
+  position: absolute;
+  top: 2rem;
   display: flex;
   padding: 2rem 0 2rem 2rem;
   flex-wrap: wrap;
@@ -33,6 +44,7 @@ const ProductionId = styled.div`
 
 export const ProductionsList = () => {
   const [productions, setProductions] = useState<TProduction[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const [intervalLoad, setIntervalLoad] = useState<boolean>(false);
   const [{ reloadProductionList }, dispatch] = useGlobalState();
 
@@ -70,6 +82,7 @@ export const ProductionsList = () => {
           dispatch({
             type: "PRODUCTION_LIST_FETCHED",
           });
+          setLoading(false);
         })
         .catch(() => {
           // TODO handle error/retry
@@ -92,16 +105,18 @@ export const ProductionsList = () => {
   }, []);
 
   return (
-    <ProductionListContainer>
-      {/* // TODO handle so future load-component isn't shown on every update
+    <Wrapper>
+      {loading && <LoaderDots />}
+      <ProductionListContainer>
+        {/* // TODO handle so future load-component isn't shown on every update
       // TODO ex className={loading && !intervalLoad ? "active" : "in-active"} */}
-      {/* TODO add loading indicator */}
-      {productions.map((p) => (
-        <ProductionItem key={p.id}>
-          <ProductionName>{p.name}</ProductionName>
-          <ProductionId>{p.id}</ProductionId>
-        </ProductionItem>
-      ))}
-    </ProductionListContainer>
+        {productions.map((p) => (
+          <ProductionItem key={p.id}>
+            <ProductionName>{p.name}</ProductionName>
+            <ProductionId>{p.id}</ProductionId>
+          </ProductionItem>
+        ))}
+      </ProductionListContainer>
+    </Wrapper>
   );
 };
