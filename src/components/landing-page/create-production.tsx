@@ -13,6 +13,7 @@ import {
 } from "./form-elements.tsx";
 import { API } from "../../api/api.ts";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
+import { Loader } from "../loader/loader.tsx";
 import { isMobile } from "../../bowser.ts";
 
 type FormValues = {
@@ -34,6 +35,7 @@ export const CreateProduction = () => {
   const [createdProductionId, setCreatedProductionId] = useState<string | null>(
     null
   );
+  const [loading, setLoading] = useState<boolean>(false);
   const {
     formState: { errors },
     control,
@@ -50,6 +52,7 @@ export const CreateProduction = () => {
   });
 
   const onSubmit: SubmitHandler<FormValues> = (value) => {
+    setLoading(true);
     API.createProduction({
       name: value.productionName,
       lines: [{ name: value.defaultLine }, ...value.lines],
@@ -78,6 +81,10 @@ export const CreateProduction = () => {
       });
     }
   }, [createdProductionId, dispatch, reset]);
+
+  if (loading) {
+    return <Loader />;
+  }
 
   return (
     <FormContainer>
