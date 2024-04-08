@@ -53,6 +53,7 @@ export const ProductionsList = () => {
     let aborted = false;
 
     if (reloadProductionList || intervalLoad) {
+      setLoading(true);
       setIntervalLoad(false);
       API.listProductions()
         .then((result) => {
@@ -86,6 +87,7 @@ export const ProductionsList = () => {
         })
         .catch(() => {
           // TODO handle error/retry
+          setLoading(false);
         });
     }
 
