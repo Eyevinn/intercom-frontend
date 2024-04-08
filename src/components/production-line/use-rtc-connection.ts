@@ -25,15 +25,21 @@ type TEstablishConnection = {
 type TAttachAudioStream = {
   inputAudioStream: MediaStream;
   rtcPeerConnection: RTCPeerConnection;
+  dispatch: Dispatch<TGlobalStateAction>;
 };
 
 const attachInputAudioToPeerConnection = ({
   inputAudioStream,
   rtcPeerConnection,
+  dispatch,
 }: TAttachAudioStream) =>
-  inputAudioStream
-    .getTracks()
-    .forEach((track) => rtcPeerConnection.addTrack(track));
+  inputAudioStream.getTracks().forEach((track) => {
+    rtcPeerConnection.addTrack(track);
+    dispatch({
+      type: "CONNECTED_MEDIASTREAM_TRACK",
+      payload: track,
+    });
+  });
 
 const establishConnection = ({
   rtcPeerConnection,
@@ -200,6 +206,7 @@ export const useRtcConnection = ({
       attachInputAudioToPeerConnection({
         rtcPeerConnection,
         inputAudioStream,
+        dispatch,
       });
     }
 
