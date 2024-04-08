@@ -9,16 +9,26 @@ import { ActionButton } from "../landing-page/form-elements.tsx";
 import { UserList } from "./user-list.tsx";
 import { API } from "../../api/api.ts";
 import { noop } from "../../helpers.ts";
+import { MicMuted, MicUnmuted } from "../../icons/icon.tsx";
 import { Spinner } from "../loader/loader.tsx";
 
 const TempDiv = styled.div`
   padding: 1rem;
 `;
+
+const UserControlBtn = styled.button`
+  background-color: transparent;
+  border-color: transparent;
+  z-index: 100;
+  position: relative;
+`;
+
 export const ProductionLine: FC = () => {
   //  const { productionId, lineId } = useParams();
   const [{ joinProductionOptions }, dispatch] = useGlobalState();
   const navigate = useNavigate();
   const audioContainerRef = useRef<HTMLDivElement>(null);
+  const [micMute, setMicMute] = useState(true);
   const [participants, setParticipants] = useState<
     { name: string; sessionid: string }[] | null
   >(null);
@@ -81,7 +91,18 @@ export const ProductionLine: FC = () => {
     navigate("/");
   };
 
-  // Mute/Unmute mic
+  useEffect(() => {
+    const audioTracks =
+      inputAudioStream !== "no-device" && inputAudioStream !== null
+        ? inputAudioStream.getAudioTracks()
+        : null;
+
+    audioTracks?.forEach((track) => {
+      // eslint-disable-next-line no-param-reassign
+      track.enabled = !micMute;
+    });
+  }, [inputAudioStream, micMute]);
+
   // Mute/Unmute speaker
   // Show active sink and mic
   // Exit button (link to /, clear production from state)
@@ -95,6 +116,11 @@ export const ProductionLine: FC = () => {
       {!loading && (
         <>
           <TempDiv>Production View</TempDiv>
+          <TempDiv>
+            <UserControlBtn type="button" onClick={() => setMicMute(!micMute)}>
+              {micMute ? <MicMuted /> : <MicUnmuted />}
+            </UserControlBtn>
+          </TempDiv>
           <TempDiv ref={audioContainerRef} />
           {audioElements.length && (
             <TempDiv>Incoming Audio Channels: {audioElements.length}</TempDiv>
