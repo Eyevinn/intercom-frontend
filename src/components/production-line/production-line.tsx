@@ -19,8 +19,6 @@ const TempDiv = styled.div`
 const UserControlBtn = styled.button`
   background-color: transparent;
   border-color: transparent;
-  z-index: 100;
-  position: relative;
 `;
 
 export const ProductionLine: FC = () => {
