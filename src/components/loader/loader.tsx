@@ -1,102 +1,28 @@
 import styled from "@emotion/styled";
 import { FC } from "react";
 
-const Wrapper = styled.div`
-  height: auto;
-  width: 20vw;
-`;
-
 const Loading = styled.div`
-  background-color: #bdbdbd;
-  aspect-ratio: 1;
-  height: 1rem;
-  border-radius: 10%;
-  opacity: 0;
-  animation:
-    fadeEffect 4s ease-in-out infinite,
-    slider 4s linear 0s infinite reverse;
-  -webkit-animation:
-    fadeEffect 4s ease-in-out infinite,
-    slider 4s linear 0s infinite reverse;
-  -moz-animation:
-    fadeEffect 4s ease-in-out infinite,
-    slider 4s linear 0s infinite reverse;
+  position: absolute;
+  top: 5px;
+  left: 60px;
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-top: 4px solid #333;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  animation: spin 1s linear infinite;
+  margin: auto;
 
-  @keyframes fadeEffect {
+  @keyframes spin {
     0% {
-      opacity: 0;
-    }
-    25% {
-      opacity: 1;
-    }
-    95% {
-      opacity: 1;
+      transform: rotate(0deg);
     }
     100% {
-      opacity: 0;
-    }
-  }
-
-  @-webkit-keyframes fadeEffect {
-    0% {
-      opacity: 0;
-    }
-    25% {
-      opacity: 1;
-    }
-    95% {
-      opacity: 1;
-    }
-    100% {
-      opacity: 0;
-    }
-  }
-
-  @-moz-keyframes fadeEffect {
-    0% {
-      opacity: 0;
-    }
-    25% {
-      opacity: 1;
-    }
-    95% {
-      opacity: 1;
-    }
-    100% {
-      opacity: 0;
-    }
-  }
-
-  @keyframes slider {
-    from {
-      transform: translateX(15rem) rotate(359deg);
-    }
-    to {
-      transform: translateX(0) rotate(0deg);
-    }
-  }
-  @-webkit-keyframes slider {
-    from {
-      transform: translateX(15rem) rotate(359deg);
-    }
-    to {
-      transform: translateX(0) rotate(0deg);
-    }
-  }
-  @-moz-keyframes slider {
-    from {
-      transform: translateX(15rem) rotate(359deg);
-    }
-    to {
-      transform: translateX(0) rotate(0deg);
+      transform: rotate(360deg);
     }
   }
 `;
 
 export const Loader: FC = () => {
-  return (
-    <Wrapper>
-      <Loading />
-    </Wrapper>
-  );
+  return <Loading />;
 };
