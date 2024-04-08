@@ -49,6 +49,11 @@ export const ActionButton = styled.button`
   &:hover {
     cursor: pointer;
   }
+
+  &.submit {
+    position: relative;
+    color: rgba(255, 255, 255, 0);
+  }
 `;
 
 export const StyledWarningMessage = styled.div`
