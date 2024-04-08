@@ -23,7 +23,7 @@ const UserControlBtn = styled.button`
 
 export const ProductionLine: FC = () => {
   //  const { productionId, lineId } = useParams();
-  const [{ joinProductionOptions }, dispatch] = useGlobalState();
+  const [{ joinProductionOptions, audioInput }, dispatch] = useGlobalState();
   const navigate = useNavigate();
   const audioContainerRef = useRef<HTMLDivElement>(null);
   const [micMute, setMicMute] = useState(true);
@@ -90,16 +90,10 @@ export const ProductionLine: FC = () => {
   };
 
   useEffect(() => {
-    const audioTracks =
-      inputAudioStream !== "no-device" && inputAudioStream !== null
-        ? inputAudioStream.getAudioTracks()
-        : null;
-
-    audioTracks?.forEach((track) => {
-      // eslint-disable-next-line no-param-reassign
-      track.enabled = !micMute;
-    });
-  }, [inputAudioStream, micMute]);
+    if (audioInput) {
+      audioInput.enabled = !micMute;
+    }
+  }, [audioInput, micMute]);
 
   // Mute/Unmute speaker
   // Show active sink and mic
