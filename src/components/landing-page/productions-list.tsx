@@ -6,7 +6,6 @@ import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { LoaderDots } from "../loader/loader.tsx";
 
 const Wrapper = styled.div`
-  position: relative;
   display: flex;
   padding: 2rem 0 2rem 2rem;
   flex-wrap: wrap;
@@ -14,8 +13,6 @@ const Wrapper = styled.div`
 `;
 
 const ProductionListContainer = styled.div`
-  position: absolute;
-  top: 2rem;
   display: flex;
   padding: 2rem 0 2rem 2rem;
   flex-wrap: wrap;
@@ -108,7 +105,7 @@ export const ProductionsList = () => {
 
   return (
     <Wrapper>
-      {loading && <LoaderDots />}
+      <LoaderDots className={loading ? "active" : "in-active"} />
       <ProductionListContainer>
         {/* // TODO handle so future load-component isn't shown on every update
       // TODO ex className={loading && !intervalLoad ? "active" : "in-active"} */}
