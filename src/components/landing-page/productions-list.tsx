@@ -35,6 +35,14 @@ export const ProductionsList = () => {
   const [productions, setProductions] = useState<TProduction[]>([]);
   const [{ reloadProductionList }, dispatch] = useGlobalState();
 
+  useEffect(() => {
+    if (productions.length < 1) {
+      dispatch({
+        type: "PRODUCTION_CREATED",
+      });
+    }
+  }, [dispatch, productions]);
+
   // TODO extract to separate hook file
   useEffect(() => {
     let aborted = false;
