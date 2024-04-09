@@ -5,13 +5,6 @@ import { TProduction } from "../production-line/types.ts";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { LoaderDots } from "../loader/loader.tsx";
 
-const Wrapper = styled.div`
-  display: flex;
-  padding: 2rem 0 2rem 2rem;
-  flex-wrap: wrap;
-  flex-direction: column;
-`;
-
 const ProductionListContainer = styled.div`
   display: flex;
   padding: 2rem 0 2rem 2rem;
@@ -80,11 +73,15 @@ export const ProductionsList = () => {
           dispatch({
             type: "PRODUCTION_LIST_FETCHED",
           });
-          setLoading(false);
+          window.setTimeout(() => {
+            setLoading(false);
+          }, 2500);
         })
         .catch(() => {
           // TODO handle error/retry
-          setLoading(false);
+          window.setTimeout(() => {
+            setLoading(false);
+          }, 2500);
         });
     }
 
@@ -104,7 +101,7 @@ export const ProductionsList = () => {
   }, []);
 
   return (
-    <Wrapper>
+    <>
       <LoaderDots className={loading ? "active" : "in-active"} />
       <ProductionListContainer>
         {/* // TODO handle so future load-component isn't shown on every update
@@ -116,6 +113,6 @@ export const ProductionsList = () => {
           </ProductionItem>
         ))}
       </ProductionListContainer>
-    </Wrapper>
+    </>
   );
 };
