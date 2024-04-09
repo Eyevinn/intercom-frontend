@@ -13,7 +13,7 @@ import {
 } from "./form-elements.tsx";
 import { API } from "../../api/api.ts";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
-import { isDesktop, isMobile } from "../../api/bowser.ts";
+import { isDesktop, isMobile } from "../../bowser.ts";
 
 type FormValues = {
   productionName: string;
