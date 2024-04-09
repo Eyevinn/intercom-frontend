@@ -13,6 +13,7 @@ import {
 } from "./form-elements.tsx";
 import { API } from "../../api/api.ts";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
+import { isDesktop, isMobile } from "../../api/bowser.ts";
 
 type FormValues = {
   productionName: string;
@@ -64,6 +65,9 @@ export const CreateProduction = () => {
 
   // Reset form values when created production id changes
   useEffect(() => {
+    // TODO remove this after testing
+    console.log(`Is this a mobile? "${isMobile}"`);
+    console.log(`Is this a desktop? "${isDesktop}"`);
     if (createdProductionId) {
       reset({
         productionName: "",
