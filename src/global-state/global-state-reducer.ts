@@ -6,7 +6,7 @@ import { uniqBy } from "../helpers";
 const initialGlobalState: TGlobalState = {
   production: null,
   error: null,
-  reloadProductionList: true,
+  reloadProductionList: false,
   devices: null,
   joinProductionOptions: null,
 };
