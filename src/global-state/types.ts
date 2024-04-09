@@ -9,5 +9,5 @@ export type TGlobalState = {
   reloadProductionList: boolean;
   devices: MediaDeviceInfo[] | null;
   joinProductionOptions: TJoinProductionOptions | null;
-  audioInput: MediaStreamTrack | null;
+  mediaStreamInput: MediaStream | null;
 };

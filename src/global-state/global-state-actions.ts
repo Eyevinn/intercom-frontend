@@ -6,7 +6,7 @@ export type TGlobalStateAction =
   | TProductionListFetched
   | TUpdateDevicesAction
   | TUpdateJoinProductionOptions
-  | TMediaStreamTrack;
+  | TMediaStream;
 
 export type TPublishError = {
   type: "ERROR";
@@ -31,7 +31,7 @@ export type TUpdateJoinProductionOptions = {
   payload: TJoinProductionOptions | null;
 };
 
-export type TMediaStreamTrack = {
-  type: "CONNECTED_MEDIASTREAM_TRACK";
-  payload: MediaStreamTrack | null;
+export type TMediaStream = {
+  type: "CONNECTED_MEDIASTREAM";
+  payload: MediaStream | null;
 };
