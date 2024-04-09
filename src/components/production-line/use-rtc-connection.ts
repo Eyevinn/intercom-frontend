@@ -32,14 +32,15 @@ const attachInputAudioToPeerConnection = ({
   inputAudioStream,
   rtcPeerConnection,
   dispatch,
-}: TAttachAudioStream) =>
+}: TAttachAudioStream) => {
   inputAudioStream.getTracks().forEach((track) => {
     rtcPeerConnection.addTrack(track);
-    dispatch({
-      type: "CONNECTED_MEDIASTREAM_TRACK",
-      payload: track,
-    });
   });
+  dispatch({
+    type: "CONNECTED_MEDIASTREAM",
+    payload: inputAudioStream,
+  });
+};
 
 const establishConnection = ({
   rtcPeerConnection,
