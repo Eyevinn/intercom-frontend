@@ -9,7 +9,7 @@ const initialGlobalState: TGlobalState = {
   reloadProductionList: true,
   devices: null,
   joinProductionOptions: null,
-  audioInput: null,
+  mediaStreamInput: null,
 };
 
 const globalReducer: Reducer<TGlobalState, TGlobalStateAction> = (
@@ -44,10 +44,10 @@ const globalReducer: Reducer<TGlobalState, TGlobalStateAction> = (
         ...state,
         joinProductionOptions: action.payload,
       };
-    case "CONNECTED_MEDIASTREAM_TRACK":
+    case "CONNECTED_MEDIASTREAM":
       return {
         ...state,
-        audioInput: action.payload,
+        mediaStreamInput: action.payload,
       };
     default:
       return state;
