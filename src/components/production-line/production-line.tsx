@@ -22,7 +22,7 @@ export const ProductionLine: FC = () => {
   const [participants, setParticipants] = useState<
     { name: string; sessionid: string }[] | null
   >(null);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
 
   const inputAudioStream = useAudioInput({
     inputId: joinProductionOptions?.audioinput ?? null,
@@ -65,10 +65,10 @@ export const ProductionLine: FC = () => {
   }, [navigate, joinProductionOptions]);
 
   useEffect(() => {
-    setLoading(true);
     if (connectionState === "connected") {
       setLoading(false);
     }
+    // TODO add handling for `connectionState === "failed"`
   }, [connectionState]);
 
   // TODO if (!input !output !username) return <JoinProductionForm />
