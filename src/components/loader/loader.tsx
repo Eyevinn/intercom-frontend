@@ -49,17 +49,17 @@ const Loading = styled.div`
   }
 `;
 
-const Wrapper = styled.div`
-  position: relative;
-`;
-
 const Dots = styled.span`
-  padding-left: 2rem;
-  color: #cdcdcd;
-  font-size: xx-large;
-  position: absolute;
-  top: 50%;
+  padding-left: 0.2rem;
+  font-size: 2rem;
   transform: translateY(-50%);
+
+  &.active {
+    color: #cdcdcd;
+  }
+  &.in-active {
+    color: #242424;
+  }
 `;
 
 type Props = { className: string };
@@ -68,7 +68,7 @@ export const Loader: FC<Props> = ({ className }: Props) => {
   return <Loading className={className} />;
 };
 
-export const LoaderDots: FC = () => {
+export const LoaderDots: FC<Props> = ({ className }: Props) => {
   const [dots, setDots] = useState<string>(".");
 
   useEffect(() => {
@@ -82,8 +82,9 @@ export const LoaderDots: FC = () => {
   }, []);
 
   return (
-    <Wrapper>
-      <Dots>{dots}</Dots>
-    </Wrapper>
+    <div>
+      <Text className={className}>refreshing</Text>
+      <Dots className={className}>{dots}</Dots>
+    </div>
   );
 };
