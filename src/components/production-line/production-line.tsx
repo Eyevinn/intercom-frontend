@@ -9,6 +9,7 @@ import { ActionButton } from "../landing-page/form-elements.tsx";
 import { UserList } from "./user-list.tsx";
 import { API } from "../../api/api.ts";
 import { noop } from "../../helpers.ts";
+import { Loader } from "../loader/loader.tsx";
 
 const TempDiv = styled.div`
   padding: 1rem;
@@ -21,6 +22,7 @@ export const ProductionLine: FC = () => {
   const [participants, setParticipants] = useState<
     { name: string; sessionid: string }[] | null
   >(null);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const inputAudioStream = useAudioInput({
     inputId: joinProductionOptions?.audioinput ?? null,
@@ -62,7 +64,12 @@ export const ProductionLine: FC = () => {
     }
   }, [navigate, joinProductionOptions]);
 
-  // TODO pretty spinner component
+  useEffect(() => {
+    setLoading(true);
+    if (connectionState === "connected") {
+      setLoading(false);
+    }
+  }, [connectionState]);
 
   // TODO if (!input !output !username) return <JoinProductionForm />
 
@@ -78,21 +85,27 @@ export const ProductionLine: FC = () => {
   // Mute/Unmute speaker
   // Show active sink and mic
   // Exit button (link to /, clear production from state)
+
   return (
     <div>
       <TempDiv>
         <ActionButton onClick={exit}>Exit</ActionButton>
       </TempDiv>
-      <TempDiv>Production View</TempDiv>
-      <TempDiv ref={audioContainerRef} />
-      {audioElements.length && (
-        <TempDiv>Incoming Audio Channels: {audioElements.length}</TempDiv>
-      )}
-      {connectionState && (
-        <TempDiv>RTC Connection State: {connectionState}</TempDiv>
-      )}
+      {loading && <Loader className="join-production" />}
+      {!loading && (
+        <>
+          <TempDiv>Production View</TempDiv>
+          <TempDiv ref={audioContainerRef} />
+          {audioElements.length && (
+            <TempDiv>Incoming Audio Channels: {audioElements.length}</TempDiv>
+          )}
+          {connectionState && (
+            <TempDiv>RTC Connection State: {connectionState}</TempDiv>
+          )}
 
-      <UserList participants={participants} />
+          <UserList participants={participants} />
+        </>
+      )}
     </div>
   );
 };
