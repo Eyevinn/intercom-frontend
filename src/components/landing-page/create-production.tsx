@@ -86,19 +86,6 @@ export const CreateProduction = () => {
     }
   }, [createdProductionId, dispatch, reset]);
 
-  useEffect(() => {
-    if (createdProductionId) {
-      reset({
-        productionName: "",
-        defaultLine: "",
-        lines: [],
-      });
-      dispatch({
-        type: "PRODUCTION_CREATED",
-      });
-    }
-  }, [createdProductionId, dispatch, reset]);
-
   return (
     <FormContainer>
       <DisplayContainerHeader>Create Production</DisplayContainerHeader>
@@ -167,7 +154,7 @@ export const CreateProduction = () => {
         onClick={handleSubmit(onSubmit)}
       >
         Create Production
-        {loading && <Loader />}
+        {loading && <Loader className="create-production" />}
       </ActionButton>
       {createdProductionId !== null && (
         <ProductionConfirmation>
