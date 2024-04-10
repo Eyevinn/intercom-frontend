@@ -40,7 +40,6 @@ export const ProductionsList = () => {
   useEffect(() => {
     let aborted = false;
 
-    // TODO handle so future load-component isn't shown on every update
     if (reloadProductionList || intervalLoad) {
       setIntervalLoad(false);
       API.listProductions()
@@ -94,6 +93,8 @@ export const ProductionsList = () => {
 
   return (
     <ProductionListContainer>
+      {/* // TODO handle so future load-component isn't shown on every update
+      // TODO ex className={loading && !intervalLoad ? "active" : "in-active"} */}
       {/* TODO add loading indicator */}
       {productions.map((p) => (
         <ProductionItem key={p.id}>
