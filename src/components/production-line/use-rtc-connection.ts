@@ -1,4 +1,4 @@
-import { Dispatch, useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { noop } from "../../helpers";
 import { API } from "../../api/api.ts";
 import { TJoinProductionOptions } from "./types.ts";
@@ -11,7 +11,6 @@ type TRtcConnectionOptions = {
   sdpOffer: string | null;
   joinProductionOptions: TJoinProductionOptions | null;
   sessionId: string | null;
-  audioElement: HTMLAudioElement;
 };
 
 type TEstablishConnection = {
@@ -19,8 +18,8 @@ type TEstablishConnection = {
   sdpOffer: string;
   joinProductionOptions: TJoinProductionOptions;
   sessionId: string;
-  audioElement: HTMLAudioElement;
   dispatch: Dispatch<TGlobalStateAction>;
+  setAudioElements: Dispatch<SetStateAction<HTMLAudioElement[]>>;
 };
 
 type TAttachAudioStream = {
@@ -41,20 +40,30 @@ const establishConnection = ({
   sdpOffer,
   joinProductionOptions,
   sessionId,
-  audioElement,
   dispatch,
+  setAudioElements,
 }: TEstablishConnection): { teardown: () => void } => {
   const onRtcTrack = ({ streams }: RTCTrackEvent) => {
-    // We can count on there being only a single stream for now.
-    // Needs updating if a video stream is also added.
+    // We can count on there being only a single stream per event for now.
     const selectedStream = streams[0];
 
-    if (selectedStream) {
-      if (selectedStream.getAudioTracks().length !== 0) {
-        // Add incoming stream to output audio element
-        // eslint-disable-next-line no-param-reassign
-        audioElement.srcObject = selectedStream;
-      }
+    if (selectedStream && selectedStream.getAudioTracks().length !== 0) {
+      const audioElement = new Audio();
+
+      audioElement.controls = false;
+      audioElement.autoplay = true;
+      audioElement.onerror = () => {
+        dispatch({
+          type: "ERROR",
+          payload: new Error(
+            `Audio Error: ${audioElement.error?.code} - ${audioElement.error?.message}`
+          ),
+        });
+      };
+
+      audioElement.srcObject = selectedStream;
+
+      setAudioElements((prevArray) => [audioElement, ...prevArray]);
     } else {
       // TODO handle error case of 0 available streams
     }
@@ -139,7 +148,6 @@ export const useRtcConnection = ({
   sdpOffer,
   joinProductionOptions,
   sessionId,
-  audioElement,
 }: TRtcConnectionOptions) => {
   const [rtcPeerConnection] = useState<RTCPeerConnection>(
     () => new RTCPeerConnection()
@@ -147,6 +155,20 @@ export const useRtcConnection = ({
   const [, dispatch] = useGlobalState();
   const [connectionState, setConnectionState] =
     useState<RTCPeerConnectionState | null>(null);
+  const [audioElements, setAudioElements] = useState<HTMLAudioElement[]>([]);
+
+  // Teardown
+  useEffect(
+    () => () => {
+      audioElements.forEach((el) => {
+        console.log("Tearing down audio element");
+        el.pause();
+        // eslint-disable-next-line no-param-reassign
+        el.srcObject = null;
+      });
+    },
+    [audioElements]
+  );
 
   useEffect(() => {
     if (
@@ -157,6 +179,8 @@ export const useRtcConnection = ({
     ) {
       return noop;
     }
+
+    console.log("Setting up RTC Peer Connection");
 
     const onConnectionStateChange = () => {
       setConnectionState(rtcPeerConnection.connectionState);
@@ -181,8 +205,8 @@ export const useRtcConnection = ({
       sdpOffer,
       joinProductionOptions,
       sessionId,
-      audioElement,
       dispatch,
+      setAudioElements,
     });
 
     return () => {
@@ -201,7 +225,6 @@ export const useRtcConnection = ({
     sessionId,
     joinProductionOptions,
     rtcPeerConnection,
-    audioElement,
     dispatch,
   ]);
 
@@ -268,5 +291,5 @@ export const useRtcConnection = ({
     };
   }, [rtcPeerConnection]);
 
-  return { connectionState };
+  return { connectionState, audioElements };
 };
