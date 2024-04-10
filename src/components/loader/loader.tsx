@@ -49,11 +49,21 @@ const Loading = styled.div`
   }
 `;
 
+const Text = styled.span`
+  padding-left: 2rem;
+  font-size: 1.8rem;
+  &.active {
+    color: #cdcdcd;
+  }
+  &.in-active {
+    color: #242424;
+  }
+`;
+
 const Dots = styled.span`
   padding-left: 0.2rem;
   font-size: 2rem;
   transform: translateY(-50%);
-
   &.active {
     color: #cdcdcd;
   }
@@ -64,7 +74,7 @@ const Dots = styled.span`
 
 type Props = { className: string };
 
-export const Loader: FC<Props> = ({ className }: Props) => {
+export const Spinner: FC<Props> = ({ className }: Props) => {
   return <Loading className={className} />;
 };
 
