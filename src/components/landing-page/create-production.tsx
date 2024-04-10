@@ -13,7 +13,7 @@ import {
 } from "./form-elements.tsx";
 import { API } from "../../api/api.ts";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
-import { Loader } from "../loader/loader.tsx";
+import { Spinner } from "../loader/loader.tsx";
 import { isMobile } from "../../bowser.ts";
 
 type FormValues = {
@@ -154,7 +154,7 @@ export const CreateProduction = () => {
         onClick={handleSubmit(onSubmit)}
       >
         Create Production
-        {loading && <Loader className="create-production" />}
+        {loading && <Spinner className="create-production" />}
       </ActionButton>
       {createdProductionId !== null && (
         <ProductionConfirmation>

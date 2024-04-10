@@ -9,7 +9,7 @@ import { ActionButton } from "../landing-page/form-elements.tsx";
 import { UserList } from "./user-list.tsx";
 import { API } from "../../api/api.ts";
 import { noop } from "../../helpers.ts";
-import { Loader } from "../loader/loader.tsx";
+import { Spinner } from "../loader/loader.tsx";
 
 const TempDiv = styled.div`
   padding: 1rem;
@@ -91,7 +91,7 @@ export const ProductionLine: FC = () => {
       <TempDiv>
         <ActionButton onClick={exit}>Exit</ActionButton>
       </TempDiv>
-      {loading && <Loader className="join-production" />}
+      {loading && <Spinner className="join-production" />}
       {!loading && (
         <>
           <TempDiv>Production View</TempDiv>
