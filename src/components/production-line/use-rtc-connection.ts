@@ -25,20 +25,14 @@ type TEstablishConnection = {
 type TAttachAudioStream = {
   inputAudioStream: MediaStream;
   rtcPeerConnection: RTCPeerConnection;
-  dispatch: Dispatch<TGlobalStateAction>;
 };
 
 const attachInputAudioToPeerConnection = ({
   inputAudioStream,
   rtcPeerConnection,
-  dispatch,
 }: TAttachAudioStream) => {
   inputAudioStream.getTracks().forEach((track) => {
     rtcPeerConnection.addTrack(track);
-  });
-  dispatch({
-    type: "CONNECTED_MEDIASTREAM",
-    payload: inputAudioStream,
   });
 };
 
@@ -167,14 +161,28 @@ export const useRtcConnection = ({
   // Teardown
   useEffect(
     () => () => {
+      if (inputAudioStream !== "no-device") {
+        // TODO remove check-log
+        console.log("Dispatch of mediastream");
+        dispatch({
+          type: "CONNECTED_MEDIASTREAM",
+          payload: inputAudioStream,
+        });
+      }
       audioElements.forEach((el) => {
         console.log("Tearing down audio element");
         el.pause();
         // eslint-disable-next-line no-param-reassign
         el.srcObject = null;
+        // TODO remove check-log
+        console.log("Remove mediastream");
+        dispatch({
+          type: "CONNECTED_MEDIASTREAM",
+          payload: null,
+        });
       });
     },
-    [audioElements]
+    [audioElements, dispatch, inputAudioStream]
   );
 
   useEffect(() => {
@@ -204,7 +212,6 @@ export const useRtcConnection = ({
       attachInputAudioToPeerConnection({
         rtcPeerConnection,
         inputAudioStream,
-        dispatch,
       });
     }
 
