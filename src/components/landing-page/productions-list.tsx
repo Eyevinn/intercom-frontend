@@ -108,10 +108,10 @@ export const ProductionsList = () => {
 
   return (
     <>
+      {/* // TODO handle so future load-component isn't shown on every update
+      // TODO ex className={loading && !intervalLoad ? "active" : "in-active"} */}
       <LoaderDots className={loading ? "active" : "in-active"} />
       <ProductionListContainer>
-        {/* // TODO handle so future load-component isn't shown on every update
-      // TODO ex className={loading && !intervalLoad ? "active" : "in-active"} */}
         {productions.map((p) => (
           <ProductionItem key={p.id}>
             <ProductionName>{p.name}</ProductionName>
