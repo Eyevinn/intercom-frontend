@@ -41,13 +41,19 @@ export const ProductionsList = () => {
   // TODO extract to separate hook file
   useEffect(() => {
     let aborted = false;
+    let timeout: number | null = null;
 
     if (reloadProductionList || intervalLoad) {
       setLoading(true);
       setIntervalLoad(false);
       API.listProductions()
         .then((result) => {
-          if (aborted) return;
+          if (aborted) {
+            if (timeout !== null) {
+              window.clearTimeout(timeout);
+            }
+            return;
+          }
 
           setProductions(
             result
@@ -73,13 +79,13 @@ export const ProductionsList = () => {
           dispatch({
             type: "PRODUCTION_LIST_FETCHED",
           });
-          window.setTimeout(() => {
+          timeout = window.setTimeout(() => {
             setLoading(false);
           }, 2500);
         })
         .catch(() => {
           // TODO handle error/retry
-          window.setTimeout(() => {
+          timeout = window.setTimeout(() => {
             setLoading(false);
           }, 2500);
         });
