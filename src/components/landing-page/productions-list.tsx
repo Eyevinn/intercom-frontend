@@ -33,13 +33,16 @@ const ProductionId = styled.div`
 
 export const ProductionsList = () => {
   const [productions, setProductions] = useState<TProduction[]>([]);
+  const [intervalLoad, setIntervalLoad] = useState<boolean>(false);
   const [{ reloadProductionList }, dispatch] = useGlobalState();
 
   // TODO extract to separate hook file
   useEffect(() => {
     let aborted = false;
 
-    if (reloadProductionList) {
+    // TODO handle so future load-component isn't shown on every update
+    if (reloadProductionList || intervalLoad) {
+      setIntervalLoad(false);
       API.listProductions()
         .then((result) => {
           if (aborted) return;
@@ -73,10 +76,21 @@ export const ProductionsList = () => {
           // TODO handle error/retry
         });
     }
+
     return () => {
       aborted = true;
     };
-  }, [dispatch, reloadProductionList]);
+  }, [dispatch, reloadProductionList, intervalLoad]);
+
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      setIntervalLoad(true);
+    }, 10000);
+
+    return () => {
+      window.clearInterval(interval);
+    };
+  }, []);
 
   return (
     <ProductionListContainer>
