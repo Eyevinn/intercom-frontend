@@ -6,7 +6,6 @@ import { useAudioInput } from "./use-audio-input.ts";
 import { useRtcConnection } from "./use-rtc-connection.ts";
 import { useEstablishSession } from "./use-establish-session.ts";
 import { ActionButton } from "../landing-page/form-elements.tsx";
-import { useAudioElement } from "./use-audio-element.ts";
 import { UserList } from "./user-list.tsx";
 import { API } from "../../api/api.ts";
 import { noop } from "../../helpers.ts";
@@ -23,10 +22,6 @@ export const ProductionLine: FC = () => {
     { name: string; sessionid: string }[] | null
   >(null);
 
-  const { playbackState, audioElement } = useAudioElement({
-    audioContainerRef,
-  });
-
   const inputAudioStream = useAudioInput({
     inputId: joinProductionOptions?.audioinput ?? null,
   });
@@ -35,12 +30,11 @@ export const ProductionLine: FC = () => {
     joinProductionOptions,
   });
 
-  const { connectionState } = useRtcConnection({
+  const { connectionState, audioElements } = useRtcConnection({
     inputAudioStream,
     sdpOffer,
     joinProductionOptions,
     sessionId,
-    audioElement,
   });
 
   // Participant list, TODO extract hook to separate file
@@ -91,8 +85,8 @@ export const ProductionLine: FC = () => {
       </TempDiv>
       <TempDiv>Production View</TempDiv>
       <TempDiv ref={audioContainerRef} />
-      {playbackState && (
-        <TempDiv>Audio Playback State: {playbackState}</TempDiv>
+      {audioElements.length && (
+        <TempDiv>Incoming Audio Channels: {audioElements.length}</TempDiv>
       )}
       {connectionState && (
         <TempDiv>RTC Connection State: {connectionState}</TempDiv>
