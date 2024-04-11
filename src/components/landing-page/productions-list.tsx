@@ -37,15 +37,17 @@ export const ProductionsList = () => {
   const [productions, setProductions] = useState<TProduction[]>([]);
   const [intervalLoad, setIntervalLoad] = useState<boolean>(false);
   const [{ reloadProductionList }, dispatch] = useGlobalState();
+  const [doInitialLoad, setDoInitialLoad] = useState(true);
 
   // TODO extract to separate hook file
   useEffect(() => {
     let aborted = false;
 
-    if (reloadProductionList || intervalLoad) {
+    if (reloadProductionList || intervalLoad || doInitialLoad) {
       API.listProductions()
         .then((result) => {
           if (aborted) return;
+
           setProductions(
             result
               // pick laste 10 items
@@ -67,10 +69,14 @@ export const ProductionsList = () => {
                 };
               })
           );
+
           dispatch({
             type: "PRODUCTION_LIST_FETCHED",
           });
+
           setIntervalLoad(false);
+
+          setDoInitialLoad(false);
         })
         .catch(() => {
           // TODO handle error/retry
@@ -80,9 +86,12 @@ export const ProductionsList = () => {
     return () => {
       aborted = true;
     };
-  }, [dispatch, intervalLoad, reloadProductionList]);
+  }, [dispatch, intervalLoad, reloadProductionList, doInitialLoad]);
 
-  const showRefreshing = useRefreshAnimation({ reloadProductionList });
+  const showRefreshing = useRefreshAnimation({
+    reloadProductionList,
+    doInitialLoad,
+  });
 
   useEffect(() => {
     const interval = window.setInterval(() => {

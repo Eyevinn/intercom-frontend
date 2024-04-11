@@ -2,17 +2,19 @@ import { useEffect, useState } from "react";
 
 type TUseRefreshAnimationOptions = {
   reloadProductionList: boolean;
+  doInitialLoad: boolean;
 };
 
 export const useRefreshAnimation = ({
   reloadProductionList,
+  doInitialLoad,
 }: TUseRefreshAnimationOptions) => {
   const [showRefreshing, setShowRefreshing] = useState(true);
 
   useEffect(() => {
     let timeout: number | null = null;
 
-    if (showRefreshing) {
+    if (showRefreshing || doInitialLoad) {
       timeout = window.setTimeout(() => {
         setShowRefreshing(false);
       }, 1500);
@@ -23,13 +25,13 @@ export const useRefreshAnimation = ({
         window.clearTimeout(timeout);
       }
     };
-  }, [showRefreshing]);
+  }, [showRefreshing, doInitialLoad]);
 
   useEffect(() => {
     if (reloadProductionList) {
       setShowRefreshing(true);
     }
-  }, [reloadProductionList]);
+  }, [reloadProductionList, doInitialLoad]);
 
   return showRefreshing;
 };
