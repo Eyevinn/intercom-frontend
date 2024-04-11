@@ -186,7 +186,7 @@ export const JoinProduction = () => {
               </FormSelect>
             ) : (
               <StyledWarningMessage>
-                Please enter a production id.
+                Please enter a production id
               </StyledWarningMessage>
             )}
           </FormLabel>
