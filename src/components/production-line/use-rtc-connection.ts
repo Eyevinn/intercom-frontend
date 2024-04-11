@@ -30,11 +30,10 @@ type TAttachAudioStream = {
 const attachInputAudioToPeerConnection = ({
   inputAudioStream,
   rtcPeerConnection,
-}: TAttachAudioStream) => {
-  inputAudioStream.getTracks().forEach((track) => {
-    rtcPeerConnection.addTrack(track);
-  });
-};
+}: TAttachAudioStream) =>
+  inputAudioStream
+    .getTracks()
+    .forEach((track) => rtcPeerConnection.addTrack(track));
 
 const establishConnection = ({
   rtcPeerConnection,
@@ -171,7 +170,7 @@ export const useRtcConnection = ({
         el.srcObject = null;
       });
     },
-    [audioElements, dispatch]
+    [audioElements]
   );
 
   useEffect(() => {
