@@ -161,28 +161,14 @@ export const useRtcConnection = ({
   // Teardown
   useEffect(
     () => () => {
-      if (inputAudioStream !== "no-device") {
-        // TODO remove check-log
-        console.log("Dispatch of mediastream");
-        dispatch({
-          type: "CONNECTED_MEDIASTREAM",
-          payload: inputAudioStream,
-        });
-      }
       audioElements.forEach((el) => {
         console.log("Tearing down audio element");
         el.pause();
         // eslint-disable-next-line no-param-reassign
         el.srcObject = null;
-        // TODO remove check-log
-        console.log("Remove mediastream");
-        dispatch({
-          type: "CONNECTED_MEDIASTREAM",
-          payload: null,
-        });
       });
     },
-    [audioElements, dispatch, inputAudioStream]
+    [audioElements, dispatch]
   );
 
   useEffect(() => {
@@ -213,6 +199,11 @@ export const useRtcConnection = ({
         rtcPeerConnection,
         inputAudioStream,
       });
+
+      dispatch({
+        type: "CONNECTED_MEDIASTREAM",
+        payload: inputAudioStream,
+      });
     }
 
     const { teardown } = establishConnection({
@@ -231,6 +222,11 @@ export const useRtcConnection = ({
         "connectionstatechange",
         onConnectionStateChange
       );
+
+      dispatch({
+        type: "CONNECTED_MEDIASTREAM",
+        payload: null,
+      });
 
       rtcPeerConnection.close();
     };
