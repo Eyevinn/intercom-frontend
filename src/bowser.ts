@@ -4,3 +4,5 @@ const deviceInfo = Bowser.parse(window.navigator.userAgent);
 
 // platform type, can be either "desktop", "tablet" or "mobile"
 export const isMobile = deviceInfo.platform.type === "mobile";
+
+export const isSafari = deviceInfo.browser.name === "Safari";
