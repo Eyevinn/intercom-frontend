@@ -4,6 +4,7 @@ import { API } from "../../api/api.ts";
 import { TProduction } from "../production-line/types.ts";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { LoaderDots } from "../loader/loader.tsx";
+import { useRefreshAnimation } from "./use-refresh-animation.ts";
 
 const ProductionListContainer = styled.div`
   display: flex;
@@ -34,27 +35,17 @@ const ProductionId = styled.div`
 
 export const ProductionsList = () => {
   const [productions, setProductions] = useState<TProduction[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
   const [intervalLoad, setIntervalLoad] = useState<boolean>(false);
   const [{ reloadProductionList }, dispatch] = useGlobalState();
 
   // TODO extract to separate hook file
   useEffect(() => {
     let aborted = false;
-    let timeout: number | null = null;
 
     if (reloadProductionList || intervalLoad) {
-      setLoading(true);
-      setIntervalLoad(false);
       API.listProductions()
         .then((result) => {
-          if (aborted) {
-            if (timeout !== null) {
-              window.clearTimeout(timeout);
-            }
-            return;
-          }
-
+          if (aborted) return;
           setProductions(
             result
               // pick laste 10 items
@@ -79,22 +70,19 @@ export const ProductionsList = () => {
           dispatch({
             type: "PRODUCTION_LIST_FETCHED",
           });
-          timeout = window.setTimeout(() => {
-            setLoading(false);
-          }, 2500);
+          setIntervalLoad(false);
         })
         .catch(() => {
           // TODO handle error/retry
-          timeout = window.setTimeout(() => {
-            setLoading(false);
-          }, 2500);
         });
     }
 
     return () => {
       aborted = true;
     };
-  }, [dispatch, reloadProductionList, intervalLoad]);
+  }, [dispatch, intervalLoad, reloadProductionList]);
+
+  const showRefreshing = useRefreshAnimation({ reloadProductionList });
 
   useEffect(() => {
     const interval = window.setInterval(() => {
@@ -108,9 +96,7 @@ export const ProductionsList = () => {
 
   return (
     <>
-      {/* // TODO handle so future load-component isn't shown on every update
-      // TODO ex className={loading && !intervalLoad ? "active" : "in-active"} */}
-      <LoaderDots className={loading ? "active" : "in-active"} />
+      <LoaderDots className={showRefreshing ? "active" : "in-active"} />
       <ProductionListContainer>
         {productions.map((p) => (
           <ProductionItem key={p.id}>
