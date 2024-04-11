@@ -1,4 +1,11 @@
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import {
+  Dispatch,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { noop } from "../../helpers";
 import { API } from "../../api/api.ts";
 import { TJoinProductionOptions } from "./types.ts";
@@ -159,18 +166,29 @@ export const useRtcConnection = ({
   const [connectionState, setConnectionState] =
     useState<RTCPeerConnectionState | null>(null);
   const [audioElements, setAudioElements] = useState<HTMLAudioElement[]>([]);
+  const audioElementsRef = useRef<HTMLAudioElement[]>(audioElements);
+
+  // Use a ref to make sure we only clean up
+  // audio elements once, and not every time
+  // the array is updated.
+  useEffect(() => {
+    audioElementsRef.current = audioElements;
+  }, [audioElements]);
+
+  const cleanUpAudio = useCallback(() => {
+    audioElementsRef.current.forEach((el) => {
+      el.pause();
+      // eslint-disable-next-line no-param-reassign
+      el.srcObject = null;
+    });
+  }, [audioElementsRef]);
 
   // Teardown
   useEffect(
     () => () => {
-      audioElements.forEach((el) => {
-        console.log("Tearing down audio element");
-        el.pause();
-        // eslint-disable-next-line no-param-reassign
-        el.srcObject = null;
-      });
+      cleanUpAudio();
     },
-    [audioElements]
+    [cleanUpAudio]
   );
 
   useEffect(() => {
