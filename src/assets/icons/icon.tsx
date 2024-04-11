@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
-import MicMute from "./microphone-off-red.png";
-import MicUnmute from "./microphone-green.png";
+import MicMute from "./mic_off_24dp.svg";
+import MicUnmute from "./mic_on_24dp.svg";
 
 const Icon = styled.img`
   width: 5rem;

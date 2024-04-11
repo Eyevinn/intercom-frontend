@@ -9,7 +9,7 @@ import { ActionButton } from "../landing-page/form-elements.tsx";
 import { UserList } from "./user-list.tsx";
 import { API } from "../../api/api.ts";
 import { noop } from "../../helpers.ts";
-import { MicMuted, MicUnmuted } from "../../icons/icon.tsx";
+import { MicMuted, MicUnmuted } from "../../assets/icons/icon.tsx";
 import { Spinner } from "../loader/loader.tsx";
 
 const TempDiv = styled.div`
