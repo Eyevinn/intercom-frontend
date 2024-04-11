@@ -1,6 +1,12 @@
+import styled from "@emotion/styled";
 import MicMute from "./mic_off.svg";
 import MicUnmute from "./mic_on.svg";
 
-export const MicMuted = () => <img src={MicMute} alt="off-microphone" />;
+const Icon = styled.img`
+  width: 8rem;
+  padding-right: 1em;
+`;
 
-export const MicUnmuted = () => <img src={MicUnmute} alt="on-microphone" />;
+export const MicMuted = () => <Icon src={MicMute} alt="off-microphone" />;
+
+export const MicUnmuted = () => <Icon src={MicUnmute} alt="on-microphone" />;
