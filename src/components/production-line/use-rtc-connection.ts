@@ -5,7 +5,6 @@ import { TJoinProductionOptions } from "./types.ts";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { TGlobalStateAction } from "../../global-state/global-state-actions.ts";
 import { TUseAudioInputValues } from "./use-audio-input.ts";
-import { isSafari } from "../../bowser.ts";
 
 type TRtcConnectionOptions = {
   inputAudioStream: TUseAudioInputValues;
@@ -65,12 +64,8 @@ const establishConnection = ({
       audioElement.srcObject = selectedStream;
 
       setAudioElements((prevArray) => [audioElement, ...prevArray]);
-      if (!isSafari) {
-        audioElement.setSinkId(
-          joinProductionOptions?.audiooutput
-            ? joinProductionOptions.audiooutput
-            : "default"
-        );
+      if (joinProductionOptions.audiooutput) {
+        audioElement.setSinkId(joinProductionOptions.audiooutput);
       }
     } else {
       // TODO handle error case of 0 available streams
