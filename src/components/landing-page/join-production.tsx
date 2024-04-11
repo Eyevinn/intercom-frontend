@@ -165,7 +165,7 @@ export const JoinProduction = () => {
               </FormSelect>
             ) : (
               <StyledWarningMessage>
-                Output selection unavailable
+                Controlled by operating system
               </StyledWarningMessage>
             )}
           </FormLabel>
