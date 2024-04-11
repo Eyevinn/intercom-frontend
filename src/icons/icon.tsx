@@ -8,10 +8,6 @@ const Icon = styled.img`
   pointer-events: none;
 `;
 
-export const MicMuted = () => (
-  <Icon className="skin" src={MicMute} alt="red-microphone" />
-);
+export const MicMuted = () => <Icon src={MicMute} alt="red-microphone" />;
 
-export const MicUnmuted = () => (
-  <Icon className="skin" src={MicUnmute} alt="green-microphone" />
-);
+export const MicUnmuted = () => <Icon src={MicUnmute} alt="green-microphone" />;
