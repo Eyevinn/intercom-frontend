@@ -84,7 +84,7 @@ export const LoaderDots: FC<Props> = ({ className }: Props) => {
   useEffect(() => {
     const intervalId = window.setInterval(() => {
       setDots((prevDots) => (prevDots.length > 2 ? "." : `${prevDots}.`));
-    }, 1000);
+    }, 300);
 
     return () => {
       clearInterval(intervalId);
