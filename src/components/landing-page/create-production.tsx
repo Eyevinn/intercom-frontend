@@ -22,6 +22,23 @@ type FormValues = {
   lines: { name: string }[];
 };
 
+const RemoveLineBtn = styled.button`
+  position: absolute;
+  top: -1rem;
+  right: 0rem;
+  font-family: "Courier New", Courier, monospace;
+  font-weight: bold;
+  font-size: 2.5rem;
+  padding: 1rem;
+  background: transparent;
+  border: transparent;
+  color: #cdcdcd;
+`;
+
+const ListItemWrapper = styled.div`
+  position: relative;
+`;
+
 const ProductionConfirmation = styled.div`
   background: #91fa8c;
   padding: 1rem;
@@ -43,7 +60,7 @@ export const CreateProduction = () => {
     handleSubmit,
     reset,
   } = useForm<FormValues>();
-  const { fields, append } = useFieldArray({
+  const { fields, append, remove } = useFieldArray({
     control,
     name: "lines",
     rules: {
@@ -127,15 +144,22 @@ export const CreateProduction = () => {
         <div key={field.id}>
           <FormLabel>
             <DecorativeLabel>Line</DecorativeLabel>
-            <FormInput
-              // eslint-disable-next-line
-              {...register(`lines.${index}.name`, {
-                required: "Line name is required",
-                minLength: 1,
-              })}
-              autoComplete="off"
-              placeholder="Line Name"
-            />
+            <ListItemWrapper>
+              <FormInput
+                // eslint-disable-next-line
+                {...register(`lines.${index}.name`, {
+                  required: "Line name is required",
+                  minLength: 1,
+                })}
+                autoComplete="off"
+                placeholder="Line Name"
+              />
+              {index === fields.length - 1 && (
+                <RemoveLineBtn type="button" onClick={() => remove(index)}>
+                  x
+                </RemoveLineBtn>
+              )}
+            </ListItemWrapper>
           </FormLabel>
           <ErrorMessage
             errors={errors}
