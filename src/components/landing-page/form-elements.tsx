@@ -9,6 +9,10 @@ export const FormInput = styled.input`
   margin: 0 0 1rem;
   border: 1px solid #6f6e6e;
   border-radius: 0.5rem;
+
+  &.additional-line {
+    padding-right: 3.5rem;
+  }
 `;
 
 export const FormSelect = styled.select`
