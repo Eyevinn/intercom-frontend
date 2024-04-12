@@ -15,6 +15,7 @@ import { API } from "../../api/api.ts";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { Spinner } from "../loader/loader.tsx";
 import { isMobile } from "../../bowser.ts";
+import { RemoveLine } from "../../assets/icons/icon.tsx";
 
 type FormValues = {
   productionName: string;
@@ -23,16 +24,13 @@ type FormValues = {
 };
 
 const RemoveLineBtn = styled.button`
+  cursor: pointer;
   position: absolute;
-  top: -1rem;
-  right: 0rem;
-  font-family: "Courier New", Courier, monospace;
-  font-weight: bold;
-  font-size: 2.5rem;
+  top: -0.7rem;
+  right: -0.5rem;
   padding: 1rem;
   background: transparent;
   border: transparent;
-  color: #cdcdcd;
 `;
 
 const ListItemWrapper = styled.div`
@@ -151,12 +149,13 @@ export const CreateProduction = () => {
                   required: "Line name is required",
                   minLength: 1,
                 })}
+                className="additional-line"
                 autoComplete="off"
                 placeholder="Line Name"
               />
               {index === fields.length - 1 && (
                 <RemoveLineBtn type="button" onClick={() => remove(index)}>
-                  x
+                  <RemoveLine />
                 </RemoveLineBtn>
               )}
             </ListItemWrapper>
