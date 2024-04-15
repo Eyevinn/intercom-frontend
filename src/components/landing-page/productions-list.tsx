@@ -5,6 +5,8 @@ import { TBasicProduction } from "../production-line/types.ts";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { LoaderDots } from "../loader/loader.tsx";
 import { useRefreshAnimation } from "./use-refresh-animation.ts";
+import { DisplayContainerHeader } from "./display-container-header.tsx";
+import { DisplayContainer } from "../generic-components.ts";
 
 const ProductionListContainer = styled.div`
   display: flex;
@@ -54,13 +56,6 @@ export const ProductionsList = () => {
               .slice(-10)
               // display in reverse order
               .toReversed()
-              // convert to local format
-              .map((prod) => {
-                return {
-                  name: prod.name,
-                  id: parseInt(prod.productionid, 10),
-                };
-              })
           );
 
           dispatch({
@@ -99,11 +94,14 @@ export const ProductionsList = () => {
   return (
     <>
       <LoaderDots className={showRefreshing ? "active" : "in-active"} />
+      <DisplayContainer>
+        <DisplayContainerHeader>Production List</DisplayContainerHeader>
+      </DisplayContainer>
       <ProductionListContainer>
         {productions.map((p) => (
-          <ProductionItem key={p.id}>
+          <ProductionItem key={p.productionid}>
             <ProductionName>{p.name}</ProductionName>
-            <ProductionId>{p.id}</ProductionId>
+            <ProductionId>{p.productionid}</ProductionId>
           </ProductionItem>
         ))}
       </ProductionListContainer>

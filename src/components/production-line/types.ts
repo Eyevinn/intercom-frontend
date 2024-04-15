@@ -10,19 +10,19 @@ export type TJoinProductionOptions = {
 
 export type TParticipant = {
   name: string;
-  active: boolean;
+  sessionid: string;
+  isActive: boolean;
 };
 
 export type TLine = {
   name: string;
-  id: number;
-  connected: boolean;
+  id: string;
   participants: TParticipant[];
 };
 
 export type TBasicProduction = {
   name: string;
-  id: number;
+  productionid: string;
 };
 
 export type TProduction = TBasicProduction & {
