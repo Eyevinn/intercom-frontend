@@ -21,7 +21,7 @@ jobs:
       - name: Build
         run: |
           yarn
-          yarn build
+          yarn build --mode staging
 
       - name: Sync to Dev bucket
         uses: jakejarvis/s3-sync-action@v0.5.1

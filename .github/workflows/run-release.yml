@@ -18,7 +18,7 @@ jobs:
       - name: Build
         run: |
           yarn
-          yarn build
+          yarn build --mode production
 
       - name: Sync to Demo bucket
         uses: jakejarvis/s3-sync-action@v0.5.1
