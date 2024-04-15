@@ -57,6 +57,9 @@ export const ProductionLine: FC = () => {
   const [{ joinProductionOptions }, dispatch] = useGlobalState();
   const navigate = useNavigate();
   const [isInputMuted, setIsInputMuted] = useState(true);
+  const [downTime, setDownTime] = useState(0);
+  const [longPressTimeout, setLongPressTimeout] =
+    useState<ReturnType<typeof setTimeout>>();
 
   const inputAudioStream = useAudioInput({
     inputId: joinProductionOptions?.audioinput ?? null,
@@ -124,6 +127,24 @@ export const ProductionLine: FC = () => {
 
   useHeartbeat({ sessionId });
 
+  const exit = () => {
+    dispatch({
+      type: "UPDATE_JOIN_PRODUCTION_OPTIONS",
+      payload: null,
+    });
+    navigate("/");
+  };
+
+  useEffect(() => {
+    if (mediaStreamInput) {
+      mediaStreamInput.getTracks().forEach((track) => {
+        // eslint-disable-next-line no-param-reassign
+        track.enabled = !micMute;
+        console.log("Is audio enabled?", track.enabled);
+      });
+    }
+  }, [mediaStreamInput, micMute]);
+
   const deviceLabels = useDeviceLabels({ joinProductionOptions });
 
   useCheckBadLineData({
@@ -134,6 +155,41 @@ export const ProductionLine: FC = () => {
   });
 
   // TODO detect if browser back button is pressed and run exit();
+  useEffect(() => {
+    return () => {
+      if (longPressTimeout) {
+        clearTimeout(longPressTimeout);
+      }
+    };
+  }, [longPressTimeout]);
+
+  const getKeyPressTime = (
+    e: React.TouchEvent<HTMLButtonElement> | React.MouseEvent<HTMLButtonElement>
+  ) => {
+    let timeoutId: NodeJS.Timeout;
+
+    const caseStart = isMobile ? "touchstart" : "mousedown";
+    const caseStop = isMobile ? "touchend" : "mouseup";
+
+    switch (e.type) {
+      case caseStart:
+        setDownTime(e.timeStamp);
+        timeoutId = setTimeout(() => {
+          // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+          e.timeStamp - downTime > 800 ? setMicMute(true) : setMicMute(false);
+          setMicMute(false);
+        }, 800);
+        setLongPressTimeout(timeoutId);
+        break;
+      case caseStop:
+        setMicMute(true);
+        clearTimeout(longPressTimeout);
+        break;
+      default:
+        console.error(`Invalid event type received: ${e.type}`);
+    }
+  };
+
   return (
     <>
       <HeaderWrapper>
