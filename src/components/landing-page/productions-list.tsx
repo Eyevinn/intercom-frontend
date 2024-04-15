@@ -1,7 +1,7 @@
 import styled from "@emotion/styled";
 import { useEffect, useState } from "react";
 import { API } from "../../api/api.ts";
-import { TProduction } from "../production-line/types.ts";
+import { TBasicProduction } from "../production-line/types.ts";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { LoaderDots } from "../loader/loader.tsx";
 import { useRefreshAnimation } from "./use-refresh-animation.ts";
@@ -34,7 +34,7 @@ const ProductionId = styled.div`
 `;
 
 export const ProductionsList = () => {
-  const [productions, setProductions] = useState<TProduction[]>([]);
+  const [productions, setProductions] = useState<TBasicProduction[]>([]);
   const [intervalLoad, setIntervalLoad] = useState<boolean>(false);
   const [{ reloadProductionList }, dispatch] = useGlobalState();
 
@@ -57,13 +57,6 @@ export const ProductionsList = () => {
                 return {
                   name: prod.name,
                   id: parseInt(prod.productionid, 10),
-                  lines: prod.lines.map((l) => ({
-                    name: l.name,
-                    id: parseInt(l.id, 10),
-                    connected: false,
-                    connectionId: "1",
-                    participants: [],
-                  })),
                 };
               })
           );
