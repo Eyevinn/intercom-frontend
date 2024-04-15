@@ -1,5 +1,6 @@
 import styled from "@emotion/styled";
 import { DisplayContainerHeader } from "../landing-page/display-container-header.tsx";
+import { TParticipant } from "./types.ts";
 
 const ListWrapper = styled.div`
   padding: 1rem;
@@ -12,7 +13,6 @@ const User = styled.div`
   color: #ddd;
   max-width: 32rem;
   display: flex;
-  align-items: center;
 `;
 
 const GreenCircle = styled.div`
@@ -25,7 +25,7 @@ const GreenCircle = styled.div`
 `;
 
 type TUserListOptions = {
-  participants: { name: string; sessionid: string }[] | null;
+  participants: TParticipant[];
 };
 export const UserList = ({ participants }: TUserListOptions) => {
   if (!participants) return null;

@@ -21,16 +21,7 @@ export const useFetchProduction: TUseFetchProduction = (id) => {
 
           setError(null);
 
-          setProduction({
-            name: p.name,
-            id: parseInt(p.productionid, 10),
-            lines: p.lines.map((line) => ({
-              name: line.name,
-              id: parseInt(line.id, 10),
-              participants: [],
-              connected: false,
-            })),
-          });
+          setProduction(p);
         })
         .catch((e) => {
           setProduction(null);
