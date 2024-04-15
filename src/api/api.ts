@@ -7,24 +7,29 @@ type TCreateProductionOptions = {
   lines: { name: string }[];
 };
 
-type TCreateProductionResponse = {
-  productionid: string;
+type TParticipant = {
+  name: string;
+  sessionid: string;
+  isActive: boolean;
 };
 
 type TLine = {
   name: string;
   id: string;
-  smbid: string;
-  participants: { name: string; sessionid: string }[];
+  smbconferenceid: string;
+  participants: TParticipant[];
 };
 
-type TFetchProductionResponse = {
+type TBasicProductionResponse = {
   name: string;
   productionid: string;
+};
+
+type TFetchProductionResponse = TBasicProductionResponse & {
   lines: TLine[];
 };
 
-type TListProductionsResponse = TFetchProductionResponse[];
+type TListProductionsResponse = TBasicProductionResponse[];
 
 type TOfferAudioSessionOptions = {
   productionId: number;
@@ -44,10 +49,7 @@ type TPatchAudioSessionOptions = {
   sdpAnswer: string;
 };
 
-type TPatchAudioSessionResponse = {
-  sdp: string;
-  sessionid: string;
-};
+type TPatchAudioSessionResponse = null;
 
 type TDeleteAudioSessionOptions = {
   productionId: number;
@@ -57,7 +59,7 @@ type TDeleteAudioSessionOptions = {
 
 export const API = {
   createProduction: async ({ name, lines }: TCreateProductionOptions) =>
-    handleFetchRequest<TCreateProductionResponse>(
+    handleFetchRequest<TBasicProductionResponse>(
       fetch(`${API_URL}production/`, {
         method: "POST",
         headers: {
@@ -77,13 +79,14 @@ export const API = {
     handleFetchRequest<TFetchProductionResponse>(
       fetch(`${API_URL}productions/${id}`, { method: "GET" })
     ),
+  // TODO apply handleFetchRequest
   deleteProduction: (id: number) =>
     fetch(`${API_URL}productions/${id}`, { method: "DELETE" }).then(
       (response) => response.json()
     ),
   listProductionLines: (id: number) =>
-    fetch(`${API_URL}productions/${id}/lines`, { method: "GET" }).then(
-      (response) => response.json()
+    handleFetchRequest<TLine[]>(
+      fetch(`${API_URL}productions/${id}/lines`, { method: "GET" })
     ),
   fetchProductionLine: (productionId: number, lineId: number): Promise<TLine> =>
     handleFetchRequest<TLine>(

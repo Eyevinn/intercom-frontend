@@ -20,8 +20,11 @@ export type TLine = {
   participants: TParticipant[];
 };
 
-export type TProduction = {
+export type TBasicProduction = {
   name: string;
   id: number;
+};
+
+export type TProduction = TBasicProduction & {
   lines: TLine[];
 };
