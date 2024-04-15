@@ -131,4 +131,8 @@ export const API = {
         { method: "DELETE" }
       )
     ),
+  heartbeat: ({ sessionId }: TDeleteAudioSessionOptions): Promise<string> =>
+    handleFetchRequest<string>(
+      fetch(`${API_URL}heartbeat/${sessionId}`, { method: "GET" })
+    ),
 };
