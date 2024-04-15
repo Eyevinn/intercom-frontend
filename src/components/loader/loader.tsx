@@ -2,23 +2,31 @@ import styled from "@emotion/styled";
 import { FC, useEffect, useState } from "react";
 
 const Loading = styled.div`
-  border: 4px solid rgba(0, 0, 0, 0.1);
-  border-top: 4px solid #333;
+  border: 0.4rem solid rgba(0, 0, 0, 0.1);
+  border-top: 0.4rem solid #333;
   border-radius: 50%;
-  width: 30px;
-  height: 30px;
+  width: 3rem;
+  height: 3rem;
   animation: spin 1s linear infinite;
   margin: auto;
 
   &.create-production {
     position: absolute;
-    top: 5px;
-    left: 60px;
+    top: 0.5rem;
+    left: 6rem;
   }
 
   &.join-production {
-    border: 4px solid rgba(201, 201, 201, 0.1);
-    border-top: 4px solid #e2e2e2;
+    border: 0.4rem solid rgba(201, 201, 201, 0.1);
+    border-top: 0.4rem solid #e2e2e2;
+  }
+
+  &.push-to-talk {
+    border: 0.4rem solid rgba(0, 173, 43, 0.1);
+    border-top: 0.4rem solid #00be10;
+    position: absolute;
+    top: 0.5rem;
+    left: 4.5rem;
   }
 
   @keyframes spin {
