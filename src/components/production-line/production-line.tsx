@@ -14,6 +14,7 @@ import { Spinner } from "../loader/loader.tsx";
 import { TLine, TProduction } from "./types.ts";
 import { DisplayContainerHeader } from "../landing-page/display-container-header.tsx";
 import { DisplayContainer, FlexContainer } from "../generic-components.ts";
+import { useHeartbeat } from "./use-heartbeat.ts";
 
 const TempDiv = styled.div`
   padding: 1rem 0;
@@ -105,6 +106,8 @@ export const ProductionLine: FC = () => {
     }
     // TODO add handling for `connectionState === "failed"`
   }, [connectionState]);
+
+  useHeartbeat({ sessionId });
 
   // TODO if (!input !output !username) return <JoinProductionForm />
 

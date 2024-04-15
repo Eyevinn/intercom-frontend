@@ -57,6 +57,10 @@ type TDeleteAudioSessionOptions = {
   sessionId: string;
 };
 
+type THeartbeatOptions = {
+  sessionId: string;
+};
+
 export const API = {
   createProduction: async ({ name, lines }: TCreateProductionOptions) =>
     handleFetchRequest<TBasicProductionResponse>(
@@ -131,7 +135,7 @@ export const API = {
         { method: "DELETE" }
       )
     ),
-  heartbeat: ({ sessionId }: TDeleteAudioSessionOptions): Promise<string> =>
+  heartbeat: ({ sessionId }: THeartbeatOptions): Promise<string> =>
     handleFetchRequest<string>(
       fetch(`${API_URL}heartbeat/${sessionId}`, { method: "GET" })
     ),
