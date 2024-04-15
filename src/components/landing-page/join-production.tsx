@@ -51,9 +51,15 @@ export const JoinProduction = () => {
 
   // Update selected line id when a new production is fetched
   useEffect(() => {
-    if (!production) return;
+    if (!production) {
+      reset({
+        lineId: undefined,
+      });
 
-    const lineId = production.lines[0]?.id?.toString() || "";
+      return;
+    }
+
+    const lineId = production.lines[0]?.id?.toString() || undefined;
 
     reset({
       lineId,
