@@ -33,6 +33,7 @@ export const JoinProduction = () => {
     register,
     handleSubmit,
     reset,
+    setValue,
   } = useForm<FormValues>({
     defaultValues: {
       productionId: "",
@@ -59,12 +60,25 @@ export const JoinProduction = () => {
     });
   }, [production, reset]);
 
+  // Use local cache
+  useEffect(() => {
+    const cachedUsername = window.localStorage?.getItem("username");
+
+    if (cachedUsername) {
+      setValue("username", cachedUsername);
+    }
+  }, [setValue]);
+
   const { onChange, onBlur, name, ref } = register("productionId", {
     required: "Production ID is required",
     min: 1,
   });
 
   const onSubmit: SubmitHandler<FormValues> = (payload) => {
+    if (payload.username) {
+      window.localStorage?.setItem("username", payload.username);
+    }
+
     dispatch({
       type: "UPDATE_JOIN_PRODUCTION_OPTIONS",
       payload,
