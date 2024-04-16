@@ -182,6 +182,10 @@ img {
   height: 100%;
 }
 
+strong {
+  font-weight: bold;
+}
+
 /*
 * media queries here, or as part of layout component
   @media only screen and (min-width: 768px) {
