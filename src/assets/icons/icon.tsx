@@ -9,7 +9,7 @@ const Icon = styled.img`
   display: block;
 `;
 
-const RemoveLineStyleing = styled.img`
+const RemoveLineStyling = styled.img`
   width: 2.5rem;
 `;
 
@@ -18,5 +18,5 @@ export const MicMuted = () => <Icon src={MicMute} alt="off-microphone" />;
 export const MicUnmuted = () => <Icon src={MicUnmute} alt="on-microphone" />;
 
 export const RemoveLine = () => (
-  <RemoveLineStyleing src={RemoveIcon} alt="cross" />
+  <RemoveLineStyling src={RemoveIcon} alt="cross" />
 );
