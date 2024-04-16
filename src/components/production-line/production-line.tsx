@@ -212,7 +212,12 @@ export const ProductionLine: FC = () => {
             </div>
           </DisplayContainer>
           <DisplayContainer>
-            {line && <UserList participants={line.participants} />}
+            {line && (
+              <UserList
+                sessionid={sessionId}
+                participants={line.participants}
+              />
+            )}
           </DisplayContainer>
         </FlexContainer>
       )}
