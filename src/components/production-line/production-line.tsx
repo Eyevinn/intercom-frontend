@@ -16,6 +16,7 @@ import { DisplayContainerHeader } from "../landing-page/display-container-header
 import { DisplayContainer, FlexContainer } from "../generic-components.ts";
 import { useHeartbeat } from "./use-heartbeat.ts";
 import { JoinProduction } from "../landing-page/join-production.tsx";
+import { useDeviceLabels } from "./use-device-labels.ts";
 
 const TempDiv = styled.div`
   padding: 1rem 0;
@@ -59,7 +60,7 @@ export const ProductionLine: FC = () => {
     joinProductionOptions,
   });
 
-  const { connectionState, audioElements } = useRtcConnection({
+  const { connectionState } = useRtcConnection({
     inputAudioStream,
     sdpOffer,
     joinProductionOptions,
@@ -120,6 +121,8 @@ export const ProductionLine: FC = () => {
     }
   }, [mediaStreamInput, micMute]);
 
+  const deviceLabels = useDeviceLabels({ joinProductionOptions });
+
   // Check if we have what's needed to join a production line
   if (!joinProductionOptions) {
     const pidIsNan = Number.isNaN(
@@ -141,8 +144,6 @@ export const ProductionLine: FC = () => {
   }
 
   // TODO detect if browser back button is pressed and run exit();
-
-  // TODO Show active sink and mic labels
   return (
     <>
       <HeaderWrapper>
@@ -170,6 +171,14 @@ export const ProductionLine: FC = () => {
         </FlexContainer>
       )}
 
+      {joinProductionOptions && connectionState && (
+        <FlexContainer>
+          <DisplayContainer>
+            <TempDiv>Status: {connectionState}</TempDiv>
+          </DisplayContainer>
+        </FlexContainer>
+      )}
+
       {joinProductionOptions && loading && (
         <Spinner className="join-production" />
       )}
@@ -180,16 +189,6 @@ export const ProductionLine: FC = () => {
             <div>
               <DisplayContainerHeader>Controls</DisplayContainerHeader>
 
-              {audioElements.length && (
-                <TempDiv>
-                  Incoming Audio Channels: {audioElements.length}
-                </TempDiv>
-              )}
-
-              {connectionState && (
-                <TempDiv>RTC Connection State: {connectionState}</TempDiv>
-              )}
-
               <TempDiv>
                 <UserControlBtn
                   type="button"
@@ -198,6 +197,18 @@ export const ProductionLine: FC = () => {
                   {micMute ? <MicMuted /> : <MicUnmuted />}
                 </UserControlBtn>
               </TempDiv>
+
+              {deviceLabels?.inputLabel && (
+                <TempDiv>
+                  <strong>Audio Input:</strong> {deviceLabels.inputLabel}
+                </TempDiv>
+              )}
+
+              {deviceLabels?.outputLabel && (
+                <TempDiv>
+                  <strong>Audio Output:</strong> {deviceLabels.outputLabel}
+                </TempDiv>
+              )}
             </div>
           </DisplayContainer>
           <DisplayContainer>
