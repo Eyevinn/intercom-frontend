@@ -16,6 +16,7 @@ import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { useFetchProduction } from "./use-fetch-production.ts";
 import { darkText, errorColour } from "../../css-helpers/defaults.ts";
 import { TJoinProductionOptions } from "../production-line/types.ts";
+import { uniqBy } from "../../helpers.ts";
 
 type FormValues = TJoinProductionOptions;
 
@@ -105,11 +106,17 @@ export const JoinProduction = ({ preSelected }: TProps) => {
   };
 
   const outputDevices = devices
-    ? devices.filter((d) => d.kind === "audiooutput")
+    ? uniqBy(
+        devices.filter((d) => d.kind === "audiooutput"),
+        (item) => item.deviceId
+      )
     : [];
 
   const inputDevices = devices
-    ? devices.filter((d) => d.kind === "audioinput")
+    ? uniqBy(
+        devices.filter((d) => d.kind === "audioinput"),
+        (item) => item.deviceId
+      )
     : [];
 
   return (
