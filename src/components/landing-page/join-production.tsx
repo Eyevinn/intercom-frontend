@@ -26,7 +26,14 @@ const FetchErrorMessage = styled.div`
   margin: 1rem 0;
 `;
 
-export const JoinProduction = () => {
+type TProps = {
+  preSelected?: {
+    preSelectedProductionId: string;
+    preSelectedLineId: string;
+  };
+};
+
+export const JoinProduction = ({ preSelected }: TProps) => {
   const [joinProductionId, setJoinProductionId] = useState<null | number>(null);
   const {
     formState: { errors },
@@ -36,7 +43,8 @@ export const JoinProduction = () => {
     setValue,
   } = useForm<FormValues>({
     defaultValues: {
-      productionId: "",
+      productionId: preSelected?.preSelectedProductionId || "",
+      lineId: preSelected?.preSelectedLineId || undefined,
     },
     resetOptions: {
       keepDirtyValues: true, // user-interacted input will be retained
@@ -51,6 +59,9 @@ export const JoinProduction = () => {
 
   // Update selected line id when a new production is fetched
   useEffect(() => {
+    // Don't run this hook if we have pre-selected values
+    if (preSelected) return;
+
     if (!production) {
       reset({
         lineId: "",
@@ -64,7 +75,7 @@ export const JoinProduction = () => {
     reset({
       lineId,
     });
-  }, [production, reset]);
+  }, [preSelected, production, reset]);
 
   // Use local cache
   useEffect(() => {
@@ -106,34 +117,38 @@ export const JoinProduction = () => {
       <DisplayContainerHeader>Join Production</DisplayContainerHeader>
       {devices && (
         <>
-          <FormLabel>
-            <DecorativeLabel>Production ID</DecorativeLabel>
-            <FormInput
-              onChange={(ev) => {
-                onChange(ev);
+          {!preSelected && (
+            <>
+              <FormLabel>
+                <DecorativeLabel>Production ID</DecorativeLabel>
+                <FormInput
+                  onChange={(ev) => {
+                    onChange(ev);
 
-                const pid = parseInt(ev.target.value, 10);
+                    const pid = parseInt(ev.target.value, 10);
 
-                setJoinProductionId(Number.isNaN(pid) ? null : pid);
-              }}
-              name={name}
-              ref={ref}
-              onBlur={onBlur}
-              type="number"
-              placeholder="Production ID"
-            />
-          </FormLabel>
-          {productionFetchError && (
-            <FetchErrorMessage>
-              The production ID could not be fetched.{" "}
-              {productionFetchError.name} {productionFetchError.message}.
-            </FetchErrorMessage>
+                    setJoinProductionId(Number.isNaN(pid) ? null : pid);
+                  }}
+                  name={name}
+                  ref={ref}
+                  onBlur={onBlur}
+                  type="number"
+                  placeholder="Production ID"
+                />
+              </FormLabel>
+              {productionFetchError && (
+                <FetchErrorMessage>
+                  The production ID could not be fetched.{" "}
+                  {productionFetchError.name} {productionFetchError.message}.
+                </FetchErrorMessage>
+              )}
+              <ErrorMessage
+                errors={errors}
+                name="productionId"
+                as={StyledWarningMessage}
+              />
+            </>
           )}
-          <ErrorMessage
-            errors={errors}
-            name="productionId"
-            as={StyledWarningMessage}
-          />
 
           <FormLabel>
             <DecorativeLabel>Username</DecorativeLabel>
@@ -190,26 +205,28 @@ export const JoinProduction = () => {
             )}
           </FormLabel>
 
-          <FormLabel>
-            <DecorativeLabel>Line</DecorativeLabel>
-            {production ? (
-              <FormSelect
-                // eslint-disable-next-line
-                {...register(`lineId`)}
-              >
-                {production &&
-                  production.lines.map((line) => (
-                    <option key={line.id} value={line.id}>
-                      {line.name || line.id}
-                    </option>
-                  ))}
-              </FormSelect>
-            ) : (
-              <StyledWarningMessage>
-                Please enter a production id
-              </StyledWarningMessage>
-            )}
-          </FormLabel>
+          {!preSelected && (
+            <FormLabel>
+              <DecorativeLabel>Line</DecorativeLabel>
+              {production ? (
+                <FormSelect
+                  // eslint-disable-next-line
+                  {...register(`lineId`)}
+                >
+                  {production &&
+                    production.lines.map((line) => (
+                      <option key={line.id} value={line.id}>
+                        {line.name || line.id}
+                      </option>
+                    ))}
+                </FormSelect>
+              ) : (
+                <StyledWarningMessage>
+                  Please enter a production id
+                </StyledWarningMessage>
+              )}
+            </FormLabel>
+          )}
 
           <ActionButton type="submit" onClick={handleSubmit(onSubmit)}>
             Join
