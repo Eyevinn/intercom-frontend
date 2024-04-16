@@ -2,9 +2,7 @@ import styled from "@emotion/styled";
 import { DisplayContainerHeader } from "../landing-page/display-container-header.tsx";
 import { TParticipant } from "./types.ts";
 
-const ListWrapper = styled.div`
-  padding: 1rem;
-`;
+const ListWrapper = styled.div``;
 
 const User = styled.div`
   margin: 0 0 1rem;
