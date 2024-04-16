@@ -83,10 +83,9 @@ export const API = {
     handleFetchRequest<TFetchProductionResponse>(
       fetch(`${API_URL}productions/${id}`, { method: "GET" })
     ),
-  // TODO apply handleFetchRequest
-  deleteProduction: (id: number) =>
-    fetch(`${API_URL}productions/${id}`, { method: "DELETE" }).then(
-      (response) => response.json()
+  deleteProduction: (id: number): Promise<string> =>
+    handleFetchRequest<string>(
+      fetch(`${API_URL}productions/${id}`, { method: "DELETE" })
     ),
   listProductionLines: (id: number) =>
     handleFetchRequest<TLine[]>(
