@@ -1,15 +1,18 @@
-import { useEffect, useState } from "react";
+import { Dispatch, useEffect, useState } from "react";
 import { TJoinProductionOptions } from "./types.ts";
 import { noop } from "../../helpers.ts";
 import { API } from "../../api/api.ts";
+import { TGlobalStateAction } from "../../global-state/global-state-actions.ts";
 
 type TUseGetRtcOfferOptions = {
   joinProductionOptions: TJoinProductionOptions | null;
+  dispatch: Dispatch<TGlobalStateAction>;
 };
 
 // A hook for fetching the web rtc sdp offer from the backend
 export const useEstablishSession = ({
   joinProductionOptions,
+  dispatch,
 }: TUseGetRtcOfferOptions) => {
   const [sdpOffer, setSdpOffer] = useState<string | null>(null);
   const [sessionId, setSessionId] = useState<string | null>(null);
@@ -27,17 +30,27 @@ export const useEstablishSession = ({
       productionId,
       lineId,
       username: joinProductionOptions.username,
-    }).then((response) => {
-      if (aborted) return;
+    })
+      .then((response) => {
+        if (aborted) return;
 
-      setSessionId(response.sessionid);
-      setSdpOffer(response.sdp);
-    });
+        setSessionId(response.sessionid);
+        setSdpOffer(response.sdp);
+      })
+      .catch((e) => {
+        dispatch({
+          type: "ERROR",
+          payload:
+            e instanceof Error
+              ? e
+              : new Error("Failed to establish audio session."),
+        });
+      });
 
     return () => {
       aborted = true;
     };
-  }, [joinProductionOptions]);
+  }, [dispatch, joinProductionOptions]);
 
   // Clean up audio session
   useEffect(
@@ -52,7 +65,7 @@ export const useEstablishSession = ({
           sessionId,
           productionId,
           lineId,
-        });
+        }).catch(console.error);
       }
     },
     [sessionId, joinProductionOptions]
