@@ -40,11 +40,13 @@ export const DecorativeLabel = styled.span`
 `;
 
 export const ActionButton = styled.button`
-  background: rgba(255, 255, 255, 0.87);
+  background: rgba(255, 255, 255, 0.78);
+  border: 0.1rem solid rgba(255, 255, 255, 0.68);
+  border-right: 0.1rem solid #000;
+  border-bottom: 0.1rem solid #000;
   color: #1a1a1a;
   font-weight: bold;
   border-radius: 0.5rem;
-  border: none;
   font-size: 1.6rem;
   padding: 1rem;
   display: block;
@@ -54,9 +56,19 @@ export const ActionButton = styled.button`
     cursor: pointer;
   }
 
+  &:active {
+    background: rgba(255, 255, 255, 0.62);
+    box-shadow: inset 0.1rem 0.1rem 0 rgba(0, 0, 0, 0.2);
+  }
+
   &.submit {
     position: relative;
     color: rgba(255, 255, 255, 0);
+  }
+
+  &:disabled {
+    background: rgba(255, 255, 255, 0.5);
+    cursor: not-allowed;
   }
 `;
 
