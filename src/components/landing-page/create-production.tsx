@@ -15,7 +15,7 @@ import { API } from "../../api/api.ts";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { Spinner } from "../loader/loader.tsx";
 import { isMobile } from "../../bowser.ts";
-import { RemoveLine } from "../../assets/icons/icon.tsx";
+import { RemoveIcon } from "../../assets/icons/icon.tsx";
 
 type FormValues = {
   productionName: string;
@@ -31,6 +31,10 @@ const RemoveLineBtn = styled.button`
   padding: 1rem;
   background: transparent;
   border: transparent;
+`;
+
+const ButtonIcon = styled.div`
+  width: 2.5rem;
 `;
 
 const ListItemWrapper = styled.div`
@@ -155,7 +159,9 @@ export const CreateProduction = () => {
               />
               {index === fields.length - 1 && (
                 <RemoveLineBtn type="button" onClick={() => remove(index)}>
-                  <RemoveLine />
+                  <ButtonIcon>
+                    <RemoveIcon />
+                  </ButtonIcon>
                 </RemoveLineBtn>
               )}
             </ListItemWrapper>
