@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 import { FC, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { useAudioInput } from "./use-audio-input.ts";
 import { useRtcConnection } from "./use-rtc-connection.ts";
@@ -15,6 +15,7 @@ import { TLine, TProduction } from "./types.ts";
 import { DisplayContainerHeader } from "../landing-page/display-container-header.tsx";
 import { DisplayContainer, FlexContainer } from "../generic-components.ts";
 import { useHeartbeat } from "./use-heartbeat.ts";
+import { JoinProduction } from "../landing-page/join-production.tsx";
 
 const TempDiv = styled.div`
   padding: 1rem 0;
@@ -40,7 +41,7 @@ const UserControlBtn = styled.button`
 `;
 
 export const ProductionLine: FC = () => {
-  //  const { productionId, lineId } = useParams();
+  const { productionId: paramProductionId, lineId: paramLineId } = useParams();
   const [{ joinProductionOptions, mediaStreamInput }, dispatch] =
     useGlobalState();
   const navigate = useNavigate();
@@ -93,13 +94,6 @@ export const ProductionLine: FC = () => {
     });
   }, [joinProductionOptions]);
 
-  // TODO temporary, this view should handle direct links
-  useEffect(() => {
-    if (!joinProductionOptions) {
-      navigate("/");
-    }
-  }, [navigate, joinProductionOptions]);
-
   useEffect(() => {
     if (connectionState === "connected") {
       setLoading(false);
@@ -108,8 +102,6 @@ export const ProductionLine: FC = () => {
   }, [connectionState]);
 
   useHeartbeat({ sessionId });
-
-  // TODO if (!input !output !username) return <JoinProductionForm />
 
   const exit = () => {
     dispatch({
@@ -128,9 +120,29 @@ export const ProductionLine: FC = () => {
     }
   }, [mediaStreamInput, micMute]);
 
-  // Mute/Unmute speaker
-  // Show active sink and mic
+  // Check if we have what's needed to join a production line
+  if (!joinProductionOptions) {
+    const pidIsNan = Number.isNaN(
+      paramProductionId && parseInt(paramProductionId, 10)
+    );
 
+    const lidIsNan = Number.isNaN(paramLineId && parseInt(paramLineId, 10));
+
+    if (pidIsNan || lidIsNan) {
+      // Someone entered a production id in the URL that's not a number
+
+      const errorString = `Bad URL. ${pidIsNan ? "Production ID is not a number." : ""} ${lidIsNan ? "Line ID is not a number." : ""}`;
+
+      dispatch({
+        type: "ERROR",
+        payload: new Error(errorString),
+      });
+    }
+  }
+
+  // TODO detect if browser back button is pressed and run exit();
+
+  // TODO Show active sink and mic labels
   return (
     <>
       <HeaderWrapper>
@@ -145,9 +157,24 @@ export const ProductionLine: FC = () => {
         )}
       </HeaderWrapper>
 
-      {loading && <Spinner className="join-production" />}
+      {!joinProductionOptions && paramProductionId && paramLineId && (
+        <FlexContainer>
+          <DisplayContainer>
+            <JoinProduction
+              preSelected={{
+                preSelectedProductionId: paramProductionId,
+                preSelectedLineId: paramLineId,
+              }}
+            />
+          </DisplayContainer>
+        </FlexContainer>
+      )}
 
-      {!loading && (
+      {joinProductionOptions && loading && (
+        <Spinner className="join-production" />
+      )}
+
+      {joinProductionOptions && !loading && (
         <FlexContainer>
           <DisplayContainer>
             <div>
@@ -158,6 +185,7 @@ export const ProductionLine: FC = () => {
                   Incoming Audio Channels: {audioElements.length}
                 </TempDiv>
               )}
+
               {connectionState && (
                 <TempDiv>RTC Connection State: {connectionState}</TempDiv>
               )}
@@ -180,19 +208,3 @@ export const ProductionLine: FC = () => {
     </>
   );
 };
-
-// TODO hook that handles setting up a production to join when given a direct link
-//  useEffect(() => {
-//    if (joinProductionOptions) return noop;
-//    // Should not be a real scenario, but keeps typescript happy
-//    if (!productionId || !lineId) return noop;
-//
-//    const productionIdAsNumber = parseInt(productionId, 10);
-//    const lineIdAsNumber = parseInt(lineId, 10);
-//
-//    if (Number.isNaN(productionIdAsNumber) || Number.isNaN(lineIdAsNumber)) {
-//      // Someone entered a production id in the URL that's not a number
-//      // TODO dispatch error
-//      return noop;
-//    }
-//  }, [productionId, lineId, joinProductionOptions]);
