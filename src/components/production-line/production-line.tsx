@@ -66,6 +66,7 @@ export const ProductionLine: FC = () => {
 
   const { sessionId, sdpOffer } = useEstablishSession({
     joinProductionOptions,
+    dispatch,
   });
 
   const { connectionState } = useRtcConnection({
@@ -98,10 +99,18 @@ export const ProductionLine: FC = () => {
 
     const productionId = parseInt(joinProductionOptions.productionId, 10);
 
-    API.fetchProduction(productionId).then((p) => {
-      setProduction(p);
-    });
-  }, [joinProductionOptions]);
+    API.fetchProduction(productionId)
+      .then((p) => {
+        setProduction(p);
+      })
+      .catch((e) => {
+        dispatch({
+          type: "ERROR",
+          payload:
+            e instanceof Error ? e : new Error("Error fetching production."),
+        });
+      });
+  }, [dispatch, joinProductionOptions]);
 
   useEffect(() => {
     if (connectionState === "connected") {
