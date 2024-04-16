@@ -50,3 +50,7 @@ export const ErrorBanner: FC = () => {
     )
   );
 };
+
+export const LocalError = ({ error }: { error: Error }) => {
+  return <ErrorDisplay>{`${error.name}: ${error.message}`} </ErrorDisplay>;
+};
