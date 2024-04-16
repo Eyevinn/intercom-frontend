@@ -7,6 +7,7 @@ import { LoaderDots } from "../loader/loader.tsx";
 import { useRefreshAnimation } from "./use-refresh-animation.ts";
 import { DisplayContainerHeader } from "./display-container-header.tsx";
 import { DisplayContainer } from "../generic-components.ts";
+import { LocalError } from "../error.tsx";
 
 const ProductionListContainer = styled.div`
   display: flex;
@@ -40,6 +41,7 @@ export const ProductionsList = () => {
   const [intervalLoad, setIntervalLoad] = useState<boolean>(false);
   const [{ reloadProductionList }, dispatch] = useGlobalState();
   const [doInitialLoad, setDoInitialLoad] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
 
   // TODO extract to separate hook file
   useEffect(() => {
@@ -65,9 +67,15 @@ export const ProductionsList = () => {
           setIntervalLoad(false);
 
           setDoInitialLoad(false);
+
+          setError(null);
         })
-        .catch(() => {
-          // TODO handle error/retry
+        .catch((e) => {
+          setError(
+            e instanceof Error
+              ? e
+              : new Error("Failed to fetch production list.")
+          );
         });
     }
 
@@ -98,12 +106,14 @@ export const ProductionsList = () => {
         <DisplayContainerHeader>Production List</DisplayContainerHeader>
       </DisplayContainer>
       <ProductionListContainer>
-        {productions.map((p) => (
-          <ProductionItem key={p.productionid}>
-            <ProductionName>{p.name}</ProductionName>
-            <ProductionId>{p.productionid}</ProductionId>
-          </ProductionItem>
-        ))}
+        {error && <LocalError error={error} />}
+        {!error &&
+          productions.map((p) => (
+            <ProductionItem key={p.productionid}>
+              <ProductionName>{p.name}</ProductionName>
+              <ProductionId>{p.productionid}</ProductionId>
+            </ProductionItem>
+          ))}
       </ProductionListContainer>
     </>
   );
