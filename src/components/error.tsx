@@ -28,7 +28,7 @@ const CloseErrorButton = styled.button`
   }
 `;
 
-export const Error: FC = () => {
+export const ErrorBanner: FC = () => {
   const [{ error }, dispatch] = useGlobalState();
 
   return (
