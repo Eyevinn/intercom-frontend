@@ -72,7 +72,13 @@ const establishConnection = ({
 
       setAudioElements((prevArray) => [audioElement, ...prevArray]);
       if (joinProductionOptions.audiooutput) {
-        audioElement.setSinkId(joinProductionOptions.audiooutput);
+        audioElement.setSinkId(joinProductionOptions.audiooutput).catch((e) => {
+          dispatch({
+            type: "ERROR",
+            payload:
+              e instanceof Error ? e : new Error("Error assigning audio sink."),
+          });
+        });
       }
     } else {
       // TODO handle error case of 0 available streams
