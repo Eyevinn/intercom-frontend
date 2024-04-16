@@ -11,6 +11,7 @@ import { Error } from "./components/error";
 import { useFetchDevices } from "./use-fetch-devices.ts";
 import { FlexContainer } from "./components/generic-components.ts";
 import { DisplayWarning } from "./components/display-box.tsx";
+import { ManageProductions } from "./components/manage-productions/manage-productions.tsx";
 
 const DisplayBoxPositioningContainer = styled(FlexContainer)`
   justify-content: center;
@@ -58,6 +59,11 @@ const App = () => {
             <Route
               path="/"
               element={<LandingPage />}
+              errorElement={<ErrorPage />}
+            />
+            <Route
+              path="/manage-productions"
+              element={<ManageProductions />}
               errorElement={<ErrorPage />}
             />
             <Route
