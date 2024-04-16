@@ -1,7 +1,6 @@
 import { Dispatch, Reducer, useReducer } from "react";
 import { TGlobalStateAction } from "./global-state-actions";
 import { TGlobalState } from "./types";
-import { uniqBy } from "../helpers";
 
 const initialGlobalState: TGlobalState = {
   production: null,
@@ -37,7 +36,7 @@ const globalReducer: Reducer<TGlobalState, TGlobalStateAction> = (
     case "DEVICES_UPDATED":
       return {
         ...state,
-        devices: uniqBy(action.payload, (item) => item.deviceId),
+        devices: action.payload,
       };
     case "UPDATE_JOIN_PRODUCTION_OPTIONS":
       return {
