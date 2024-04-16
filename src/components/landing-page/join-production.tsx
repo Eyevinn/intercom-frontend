@@ -37,7 +37,7 @@ type TProps = {
 export const JoinProduction = ({ preSelected }: TProps) => {
   const [joinProductionId, setJoinProductionId] = useState<null | number>(null);
   const {
-    formState: { errors },
+    formState: { errors, isValid },
     register,
     handleSubmit,
     reset,
@@ -156,7 +156,6 @@ export const JoinProduction = ({ preSelected }: TProps) => {
               />
             </>
           )}
-
           <FormLabel>
             <DecorativeLabel>Username</DecorativeLabel>
             <FormInput
@@ -173,7 +172,6 @@ export const JoinProduction = ({ preSelected }: TProps) => {
             name="username"
             as={StyledWarningMessage}
           />
-
           <FormLabel>
             <DecorativeLabel>Input</DecorativeLabel>
             <FormSelect
@@ -191,7 +189,6 @@ export const JoinProduction = ({ preSelected }: TProps) => {
               )}
             </FormSelect>
           </FormLabel>
-
           <FormLabel>
             <DecorativeLabel>Output</DecorativeLabel>
             {outputDevices.length > 0 ? (
@@ -211,23 +208,28 @@ export const JoinProduction = ({ preSelected }: TProps) => {
               </StyledWarningMessage>
             )}
           </FormLabel>
-
           {!preSelected && (
             <FormLabel>
               <DecorativeLabel>Line</DecorativeLabel>
-              {production ? (
-                <FormSelect
-                  // eslint-disable-next-line
-                  {...register(`lineId`)}
-                >
-                  {production &&
-                    production.lines.map((line) => (
-                      <option key={line.id} value={line.id}>
-                        {line.name || line.id}
-                      </option>
-                    ))}
-                </FormSelect>
-              ) : (
+
+              <FormSelect
+                // eslint-disable-next-line
+                {...register(`lineId`, {
+                  required: "Line id is required",
+                  minLength: 1,
+                })}
+                style={{
+                  display: production ? "block" : "none",
+                }}
+              >
+                {production &&
+                  production.lines.map((line) => (
+                    <option key={line.id} value={line.id}>
+                      {line.name || line.id}
+                    </option>
+                  ))}
+              </FormSelect>
+              {!production && (
                 <StyledWarningMessage>
                   Please enter a production id
                 </StyledWarningMessage>
@@ -235,7 +237,11 @@ export const JoinProduction = ({ preSelected }: TProps) => {
             </FormLabel>
           )}
 
-          <ActionButton type="submit" onClick={handleSubmit(onSubmit)}>
+          <ActionButton
+            type="submit"
+            disabled={!isValid}
+            onClick={handleSubmit(onSubmit)}
+          >
             Join
           </ActionButton>
         </>
