@@ -6,7 +6,6 @@ import { DisplayContainerHeader } from "../landing-page/display-container-header
 import {
   ActionButton,
   DecorativeLabel,
-  FormContainer,
   FormInput,
   FormLabel,
   StyledWarningMessage,
@@ -20,6 +19,11 @@ import { darkText, errorColour } from "../../css-helpers/defaults";
 type FormValue = {
   productionId: string;
 };
+
+const Container = styled.form`
+  max-width: 45rem;
+  padding: 1rem 0 0 2rem;
+`;
 
 const RemoveConfirmation = styled.div`
   background: #91fa8c;
@@ -37,7 +41,16 @@ const FetchErrorMessage = styled.div`
 `;
 
 const VerifyBtnWrapper = styled.div`
+  padding: 1rem 0 0 2rem;
+`;
+
+const VerifyButtons = styled.div`
   display: flex;
+  padding: 1rem 0 0 0;
+`;
+
+const Button = styled(ActionButton)`
+  margin: 0 1rem 0 0;
 `;
 
 export const ManageProductions = () => {
@@ -93,7 +106,7 @@ export const ManageProductions = () => {
   // TODO return button
 
   return (
-    <FormContainer>
+    <Container>
       <DisplayContainerHeader>Remove Production</DisplayContainerHeader>
       <FormLabel>
         <DecorativeLabel>Production ID</DecorativeLabel>
@@ -142,18 +155,18 @@ export const ManageProductions = () => {
               </ActionButton>
             )}
             {verifyRemove && (
-              <>
+              <VerifyBtnWrapper>
                 <p>Are you sure?</p>
-                <VerifyBtnWrapper>
-                  <ActionButton
+                <VerifyButtons>
+                  <Button
                     type="submit"
                     className={loading ? "submit" : ""}
                     onClick={handleSubmit(onSubmit)}
                   >
                     Yes
                     {loading && <Spinner className="create-production" />}
-                  </ActionButton>
-                  <ActionButton
+                  </Button>
+                  <Button
                     type="submit"
                     className={loading ? "submit" : ""}
                     onClick={() => {
@@ -166,9 +179,9 @@ export const ManageProductions = () => {
                   >
                     Go back
                     {loading && <Spinner className="create-production" />}
-                  </ActionButton>
-                </VerifyBtnWrapper>
-              </>
+                  </Button>
+                </VerifyButtons>
+              </VerifyBtnWrapper>
             )}
           </>
         )
@@ -182,6 +195,6 @@ export const ManageProductions = () => {
           The production {production?.name} has been removed
         </RemoveConfirmation>
       )}
-    </FormContainer>
+    </Container>
   );
 };
