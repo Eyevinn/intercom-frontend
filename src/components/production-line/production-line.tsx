@@ -36,9 +36,17 @@ const ButtonWrapper = styled.span`
   margin: 0 2rem 0 0;
 `;
 
-const UserControlBtn = styled.button`
-  background-color: transparent;
-  border-color: transparent;
+const ButtonIcon = styled.div`
+  width: 2.5rem;
+  display: inline-block;
+  vertical-align: middle;
+  margin: 0 0.5rem 0 0;
+`;
+
+const UserControlBtn = styled(ActionButton)`
+  line-height: 2;
+  min-width: 12rem;
+  text-align: left;
 `;
 
 export const ProductionLine: FC = () => {
@@ -194,7 +202,10 @@ export const ProductionLine: FC = () => {
                   type="button"
                   onClick={() => setMicMute(!micMute)}
                 >
-                  {micMute ? <MicMuted /> : <MicUnmuted />}
+                  <ButtonIcon>
+                    {micMute ? <MicMuted /> : <MicUnmuted />}
+                  </ButtonIcon>
+                  {micMute ? "Muted" : "Unmuted"}
                 </UserControlBtn>
               </TempDiv>
 

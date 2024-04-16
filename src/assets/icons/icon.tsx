@@ -3,8 +3,9 @@ import MicMute from "./mic_off.svg";
 import MicUnmute from "./mic_on.svg";
 
 const Icon = styled.img`
-  width: 8rem;
-  padding-right: 1em;
+  width: 100%;
+  height: auto;
+  display: block;
 `;
 
 export const MicMuted = () => <Icon src={MicMute} alt="off-microphone" />;
