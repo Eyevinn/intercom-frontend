@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 
-export const FormContainer = styled.div``;
+export const FormContainer = styled.form``;
 
 export const FormInput = styled.input`
   width: 100%;
