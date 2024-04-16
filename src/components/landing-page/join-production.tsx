@@ -53,7 +53,7 @@ export const JoinProduction = () => {
   useEffect(() => {
     if (!production) {
       reset({
-        lineId: undefined,
+        lineId: "",
       });
 
       return;
