@@ -14,8 +14,9 @@ import { DisplayContainer, FlexContainer } from "../generic-components.ts";
 import { useHeartbeat } from "./use-heartbeat.ts";
 import { JoinProduction } from "../landing-page/join-production.tsx";
 import { useDeviceLabels } from "./use-device-labels.ts";
-import { useLineHotkeys } from "./use-line-hotkeys.ts";
 import { isMobile } from "../../bowser.ts";
+import { useLineHotkeys } from "./use-line-hotkeys.ts";
+import { LongPressToTalkButton } from "./long-press-to-talk-button.tsx";
 import { useLinePolling } from "./use-line-polling.ts";
 import { useFetchProduction } from "../landing-page/use-fetch-production.ts";
 import { useIsLoading } from "./use-is-loading.ts";
@@ -57,9 +58,6 @@ export const ProductionLine: FC = () => {
   const [{ joinProductionOptions }, dispatch] = useGlobalState();
   const navigate = useNavigate();
   const [isInputMuted, setIsInputMuted] = useState(true);
-  const [downTime, setDownTime] = useState(0);
-  const [longPressTimeout, setLongPressTimeout] =
-    useState<ReturnType<typeof setTimeout>>();
 
   const inputAudioStream = useAudioInput({
     inputId: joinProductionOptions?.audioinput ?? null,
@@ -155,40 +153,6 @@ export const ProductionLine: FC = () => {
   });
 
   // TODO detect if browser back button is pressed and run exit();
-  useEffect(() => {
-    return () => {
-      if (longPressTimeout) {
-        clearTimeout(longPressTimeout);
-      }
-    };
-  }, [longPressTimeout]);
-
-  const getKeyPressTime = (
-    e: React.TouchEvent<HTMLButtonElement> | React.MouseEvent<HTMLButtonElement>
-  ) => {
-    let timeoutId: NodeJS.Timeout;
-
-    const caseStart = isMobile ? "touchstart" : "mousedown";
-    const caseStop = isMobile ? "touchend" : "mouseup";
-
-    switch (e.type) {
-      case caseStart:
-        setDownTime(e.timeStamp);
-        timeoutId = setTimeout(() => {
-          // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-          e.timeStamp - downTime > 800 ? setMicMute(true) : setMicMute(false);
-          setMicMute(false);
-        }, 800);
-        setLongPressTimeout(timeoutId);
-        break;
-      case caseStop:
-        setMicMute(true);
-        clearTimeout(longPressTimeout);
-        break;
-      default:
-        console.error(`Invalid event type received: ${e.type}`);
-    }
-  };
 
   return (
     <>
@@ -248,6 +212,23 @@ export const ProductionLine: FC = () => {
                   </UserControlBtn>
                 </TempDiv>
               )}
+              <TempDiv>
+                <UserControlBtn
+                  type="button"
+                  onClick={() => {
+                    setIsInputMuted(!isInputMuted);
+                  }}
+                >
+                  <ButtonIcon>
+                    {isInputMuted ? <MicMuted /> : <MicUnmuted />}
+                  </ButtonIcon>
+                  {isInputMuted ? "Muted" : "Unmuted"}
+                </UserControlBtn>
+                <LongPressToTalkButton
+                  micMute={isInputMuted}
+                  setMicMute={(input: boolean) => setIsInputMuted(input)}
+                />
+              </TempDiv>
 
               {deviceLabels?.inputLabel && (
                 <TempDiv>
