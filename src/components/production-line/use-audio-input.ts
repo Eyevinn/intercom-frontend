@@ -35,6 +35,12 @@ export const useAudioInput: TUseAudioInput = ({ inputId }) => {
       .then((stream) => {
         if (aborted) return;
 
+        // Default to muted input
+        stream.getTracks().forEach((t) => {
+          // eslint-disable-next-line no-param-reassign
+          t.enabled = false;
+        });
+
         setAudioInput(stream);
       });
 
