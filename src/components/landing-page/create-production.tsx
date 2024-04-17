@@ -14,7 +14,6 @@ import {
 import { API } from "../../api/api.ts";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { Spinner } from "../loader/loader.tsx";
-import { isMobile } from "../../bowser.ts";
 import { RemoveIcon } from "../../assets/icons/icon.tsx";
 
 type FormValues = {
@@ -91,8 +90,6 @@ export const CreateProduction = () => {
 
   // Reset form values when created production id changes
   useEffect(() => {
-    // TODO remove this after testing
-    console.log(`Is this a mobile? "${isMobile}"`);
     if (createdProductionId) {
       reset({
         productionName: "",
