@@ -1,11 +1,25 @@
 import { useEffect, useState } from "react";
+import styled from "@emotion/styled";
 import { ActionButton } from "../landing-page/form-elements";
-import { Spinner } from "../loader/loader";
+import { PulseLoader } from "../loader/loader";
+import { isMobile } from "../../bowser";
 
 type TLongPressToTalkButton = {
   micMute: boolean;
   setMicMute: (input: boolean) => void;
 };
+
+const Button = styled(ActionButton)`
+  position: relative;
+
+  &:active {
+    color: rgba(255, 255, 255, 0);
+  }
+
+  &.mobile {
+    user-select: none;
+  }
+`;
 
 export const LongPressToTalkButton = ({
   micMute,
@@ -33,7 +47,7 @@ export const LongPressToTalkButton = ({
       case "pointerdown":
         timeoutId = setTimeout(() => {
           setMicMute(false);
-        }, 800);
+        }, 600);
         setLongPressTimeout(timeoutId);
         break;
       case "pointerup":
@@ -46,8 +60,8 @@ export const LongPressToTalkButton = ({
   };
 
   return (
-    <ActionButton
-      className={!micMute ? "submit" : ""}
+    <Button
+      className={isMobile ? "mobile" : ""}
       type="button"
       onPointerDown={(e) => {
         toggleMuteAfterTimeout(e);
@@ -57,7 +71,7 @@ export const LongPressToTalkButton = ({
       }}
     >
       Press to Talk
-      {!micMute && <Spinner className="push-to-talk" />}
-    </ActionButton>
+      {!micMute && <PulseLoader />}
+    </Button>
   );
 };
