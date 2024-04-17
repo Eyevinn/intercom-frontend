@@ -61,7 +61,7 @@ export const ActionButton = styled.button`
     box-shadow: inset 0.1rem 0.1rem 0 rgba(0, 0, 0, 0.2);
   }
 
-  &.submit {
+  &.with-loader {
     position: relative;
     color: rgba(255, 255, 255, 0);
   }

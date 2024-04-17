@@ -176,7 +176,7 @@ export const CreateProduction = () => {
 
       <ActionButton
         type="submit"
-        className={loading ? "submit" : ""}
+        className={loading ? "with-loader" : ""}
         onClick={handleSubmit(onSubmit)}
       >
         Create Production
