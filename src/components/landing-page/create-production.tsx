@@ -153,7 +153,7 @@ export const CreateProduction = () => {
                   required: "Line name is required",
                   minLength: 1,
                 })}
-                className="additional-line"
+                className={index === fields.length - 1 ? "additional-line" : ""}
                 autoComplete="off"
                 placeholder="Line Name"
               />
