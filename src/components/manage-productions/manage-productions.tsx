@@ -15,6 +15,7 @@ import { API } from "../../api/api";
 import { useGlobalState } from "../../global-state/context-provider";
 import { useFetchProduction } from "../landing-page/use-fetch-production";
 import { darkText, errorColour } from "../../css-helpers/defaults";
+import { BackBtn } from "../back-btn/back-btn";
 
 type FormValue = {
   productionId: string;
@@ -51,6 +52,10 @@ const VerifyButtons = styled.div`
 
 const Button = styled(ActionButton)`
   margin: 0 1rem 0 0;
+`;
+const StyledBackBtnIcon = styled.div`
+  padding: 0 0 3rem 0;
+  width: 4rem;
 `;
 
 export const ManageProductions = () => {
@@ -112,6 +117,9 @@ export const ManageProductions = () => {
 
   return (
     <Container>
+      <StyledBackBtnIcon>
+        <BackBtn />
+      </StyledBackBtnIcon>
       <DisplayContainerHeader>Remove Production</DisplayContainerHeader>
       <FormLabel>
         <DecorativeLabel>Production ID</DecorativeLabel>
