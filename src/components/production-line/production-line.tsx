@@ -125,24 +125,6 @@ export const ProductionLine: FC = () => {
 
   useHeartbeat({ sessionId });
 
-  const exit = () => {
-    dispatch({
-      type: "UPDATE_JOIN_PRODUCTION_OPTIONS",
-      payload: null,
-    });
-    navigate("/");
-  };
-
-  useEffect(() => {
-    if (mediaStreamInput) {
-      mediaStreamInput.getTracks().forEach((track) => {
-        // eslint-disable-next-line no-param-reassign
-        track.enabled = !micMute;
-        console.log("Is audio enabled?", track.enabled);
-      });
-    }
-  }, [mediaStreamInput, micMute]);
-
   const deviceLabels = useDeviceLabels({ joinProductionOptions });
 
   useCheckBadLineData({
@@ -210,25 +192,12 @@ export const ProductionLine: FC = () => {
                     </ButtonIcon>
                     {isInputMuted ? "Muted" : "Unmuted"}
                   </UserControlBtn>
+                  <LongPressToTalkButton
+                    micMute={isInputMuted}
+                    setMicMute={(input: boolean) => setIsInputMuted(input)}
+                  />
                 </TempDiv>
               )}
-              <TempDiv>
-                <UserControlBtn
-                  type="button"
-                  onClick={() => {
-                    setIsInputMuted(!isInputMuted);
-                  }}
-                >
-                  <ButtonIcon>
-                    {isInputMuted ? <MicMuted /> : <MicUnmuted />}
-                  </ButtonIcon>
-                  {isInputMuted ? "Muted" : "Unmuted"}
-                </UserControlBtn>
-                <LongPressToTalkButton
-                  micMute={isInputMuted}
-                  setMicMute={(input: boolean) => setIsInputMuted(input)}
-                />
-              </TempDiv>
 
               {deviceLabels?.inputLabel && (
                 <TempDiv>
