@@ -14,7 +14,7 @@ export const BackBtn = () => {
   const navigate = useNavigate();
 
   return (
-    <StyledBackBtn type="button" onClick={() => navigate(-1)}>
+    <StyledBackBtn type="button" onClick={() => navigate("/")}>
       <BackArrow />
     </StyledBackBtn>
   );
