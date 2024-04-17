@@ -7,11 +7,8 @@ import { useRtcConnection } from "./use-rtc-connection.ts";
 import { useEstablishSession } from "./use-establish-session.ts";
 import { ActionButton } from "../landing-page/form-elements.tsx";
 import { UserList } from "./user-list.tsx";
-import { API } from "../../api/api.ts";
-import { noop } from "../../helpers.ts";
 import { MicMuted, MicUnmuted } from "../../assets/icons/icon.tsx";
 import { Spinner } from "../loader/loader.tsx";
-import { TLine, TProduction } from "./types.ts";
 import { DisplayContainerHeader } from "../landing-page/display-container-header.tsx";
 import { DisplayContainer, FlexContainer } from "../generic-components.ts";
 import { useHeartbeat } from "./use-heartbeat.ts";
@@ -19,6 +16,10 @@ import { JoinProduction } from "../landing-page/join-production.tsx";
 import { useDeviceLabels } from "./use-device-labels.ts";
 import { useLineHotkeys } from "./use-line-hotkeys.ts";
 import { isMobile } from "../../bowser.ts";
+import { useLinePolling } from "./use-line-polling.ts";
+import { useFetchProduction } from "../landing-page/use-fetch-production.ts";
+import { useIsLoading } from "./use-is-loading.ts";
+import { useCheckBadLineData } from "./use-check-bad-line-data.ts";
 
 const TempDiv = styled.div`
   padding: 1rem 0;
@@ -56,10 +57,6 @@ export const ProductionLine: FC = () => {
   const [{ joinProductionOptions }, dispatch] = useGlobalState();
   const navigate = useNavigate();
   const [isInputMuted, setIsInputMuted] = useState(true);
-  const [line, setLine] = useState<TLine | null>(null);
-
-  const [loading, setLoading] = useState<boolean>(true);
-  const [production, setProduction] = useState<TProduction | null>(null);
 
   const inputAudioStream = useAudioInput({
     inputId: joinProductionOptions?.audioinput ?? null,
@@ -72,11 +69,20 @@ export const ProductionLine: FC = () => {
           // eslint-disable-next-line no-param-reassign
           t.enabled = !mute;
           setIsInputMuted(mute);
+          console.log("input audio enabled", t.enabled);
         });
       }
     },
     [inputAudioStream]
   );
+
+  const exit = useCallback(() => {
+    dispatch({
+      type: "UPDATE_JOIN_PRODUCTION_OPTIONS",
+      payload: null,
+    });
+    navigate("/");
+  }, [dispatch, navigate]);
 
   useLineHotkeys({
     muteInput,
@@ -95,80 +101,38 @@ export const ProductionLine: FC = () => {
     sessionId,
   });
 
-  // Participant list, TODO extract hook to separate file
-  useEffect(() => {
-    if (!joinProductionOptions) return noop;
+  const line = useLinePolling({ joinProductionOptions });
 
-    const productionId = parseInt(joinProductionOptions.productionId, 10);
-    const lineId = parseInt(joinProductionOptions.lineId, 10);
-
-    const interval = window.setInterval(() => {
-      API.fetchProductionLine(productionId, lineId)
-        .then((l) => setLine(l))
-        .catch(console.error);
-    }, 1000);
-
-    return () => {
-      window.clearInterval(interval);
-    };
-  }, [joinProductionOptions]);
+  const { production, error: fetchProductionError } = useFetchProduction(
+    joinProductionOptions
+      ? parseInt(joinProductionOptions.productionId, 10)
+      : null
+  );
 
   useEffect(() => {
-    if (!joinProductionOptions) return;
+    if (!fetchProductionError) return;
 
-    const productionId = parseInt(joinProductionOptions.productionId, 10);
+    dispatch({
+      type: "ERROR",
+      payload:
+        fetchProductionError instanceof Error
+          ? fetchProductionError
+          : new Error("Error fetching production."),
+    });
+  }, [dispatch, fetchProductionError]);
 
-    API.fetchProduction(productionId)
-      .then((p) => {
-        setProduction(p);
-      })
-      .catch((e) => {
-        dispatch({
-          type: "ERROR",
-          payload:
-            e instanceof Error ? e : new Error("Error fetching production."),
-        });
-      });
-  }, [dispatch, joinProductionOptions]);
-
-  useEffect(() => {
-    if (connectionState === "connected") {
-      setLoading(false);
-    }
-    // TODO add handling for `connectionState === "failed"`
-  }, [connectionState]);
+  const loading = useIsLoading({ connectionState });
 
   useHeartbeat({ sessionId });
 
-  const exit = () => {
-    dispatch({
-      type: "UPDATE_JOIN_PRODUCTION_OPTIONS",
-      payload: null,
-    });
-    navigate("/");
-  };
-
   const deviceLabels = useDeviceLabels({ joinProductionOptions });
 
-  // Check if we have what's needed to join a production line
-  if (!joinProductionOptions) {
-    const pidIsNan = Number.isNaN(
-      paramProductionId && parseInt(paramProductionId, 10)
-    );
-
-    const lidIsNan = Number.isNaN(paramLineId && parseInt(paramLineId, 10));
-
-    if (pidIsNan || lidIsNan) {
-      // Someone entered a production id in the URL that's not a number
-
-      const errorString = `Bad URL. ${pidIsNan ? "Production ID is not a number." : ""} ${lidIsNan ? "Line ID is not a number." : ""}`;
-
-      dispatch({
-        type: "ERROR",
-        payload: new Error(errorString),
-      });
-    }
-  }
+  useCheckBadLineData({
+    joinProductionOptions,
+    paramLineId,
+    paramProductionId,
+    dispatch,
+  });
 
   // TODO detect if browser back button is pressed and run exit();
   return (
