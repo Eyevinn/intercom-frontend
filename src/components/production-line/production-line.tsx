@@ -69,7 +69,6 @@ export const ProductionLine: FC = () => {
           // eslint-disable-next-line no-param-reassign
           t.enabled = !mute;
           setIsInputMuted(mute);
-          console.log("input audio enabled", t.enabled);
         });
       }
     },
