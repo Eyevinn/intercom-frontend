@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { FC, useEffect, useState } from "react";
+import { FC, useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { useAudioInput } from "./use-audio-input.ts";
@@ -17,6 +17,8 @@ import { DisplayContainer, FlexContainer } from "../generic-components.ts";
 import { useHeartbeat } from "./use-heartbeat.ts";
 import { JoinProduction } from "../landing-page/join-production.tsx";
 import { useDeviceLabels } from "./use-device-labels.ts";
+import { useLineHotkeys } from "./use-line-hotkeys.ts";
+import { isMobile } from "../../bowser.ts";
 
 const TempDiv = styled.div`
   padding: 1rem 0;
@@ -51,10 +53,9 @@ const UserControlBtn = styled(ActionButton)`
 
 export const ProductionLine: FC = () => {
   const { productionId: paramProductionId, lineId: paramLineId } = useParams();
-  const [{ joinProductionOptions, mediaStreamInput }, dispatch] =
-    useGlobalState();
+  const [{ joinProductionOptions }, dispatch] = useGlobalState();
   const navigate = useNavigate();
-  const [micMute, setMicMute] = useState(true);
+  const [isInputMuted, setIsInputMuted] = useState(true);
   const [line, setLine] = useState<TLine | null>(null);
 
   const [loading, setLoading] = useState<boolean>(true);
@@ -62,6 +63,24 @@ export const ProductionLine: FC = () => {
 
   const inputAudioStream = useAudioInput({
     inputId: joinProductionOptions?.audioinput ?? null,
+  });
+
+  const muteInput = useCallback(
+    (mute: boolean) => {
+      if (inputAudioStream && inputAudioStream !== "no-device") {
+        inputAudioStream.getTracks().forEach((t) => {
+          // eslint-disable-next-line no-param-reassign
+          t.enabled = !mute;
+          setIsInputMuted(mute);
+        });
+      }
+    },
+    [inputAudioStream]
+  );
+
+  useLineHotkeys({
+    muteInput,
+    isInputMuted,
   });
 
   const { sessionId, sdpOffer } = useEstablishSession({
@@ -128,15 +147,6 @@ export const ProductionLine: FC = () => {
     });
     navigate("/");
   };
-
-  useEffect(() => {
-    if (mediaStreamInput) {
-      mediaStreamInput.getTracks().forEach((track) => {
-        // eslint-disable-next-line no-param-reassign
-        track.enabled = !micMute;
-      });
-    }
-  }, [mediaStreamInput, micMute]);
 
   const deviceLabels = useDeviceLabels({ joinProductionOptions });
 
@@ -206,17 +216,19 @@ export const ProductionLine: FC = () => {
             <div>
               <DisplayContainerHeader>Controls</DisplayContainerHeader>
 
-              <TempDiv>
-                <UserControlBtn
-                  type="button"
-                  onClick={() => setMicMute(!micMute)}
-                >
-                  <ButtonIcon>
-                    {micMute ? <MicMuted /> : <MicUnmuted />}
-                  </ButtonIcon>
-                  {micMute ? "Muted" : "Unmuted"}
-                </UserControlBtn>
-              </TempDiv>
+              {inputAudioStream && inputAudioStream !== "no-device" && (
+                <TempDiv>
+                  <UserControlBtn
+                    type="button"
+                    onClick={() => muteInput(!isInputMuted)}
+                  >
+                    <ButtonIcon>
+                      {isInputMuted ? <MicMuted /> : <MicUnmuted />}
+                    </ButtonIcon>
+                    {isInputMuted ? "Muted" : "Unmuted"}
+                  </UserControlBtn>
+                </TempDiv>
+              )}
 
               {deviceLabels?.inputLabel && (
                 <TempDiv>
@@ -228,6 +240,20 @@ export const ProductionLine: FC = () => {
                 <TempDiv>
                   <strong>Audio Output:</strong> {deviceLabels.outputLabel}
                 </TempDiv>
+              )}
+
+              {!isMobile && (
+                <>
+                  <TempDiv>
+                    <strong>Hotkeys</strong>
+                  </TempDiv>
+                  <TempDiv>
+                    <strong>M:</strong> Toggle Input Mute
+                  </TempDiv>
+                  <TempDiv>
+                    <strong>T:</strong> Push to Talk
+                  </TempDiv>
+                </>
               )}
             </div>
           </DisplayContainer>
