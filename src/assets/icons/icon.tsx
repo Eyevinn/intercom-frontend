@@ -7,8 +7,6 @@ const Icon = styled.img`
   width: 100%;
   height: auto;
   display: block;
-  pointer-events: none;
-  user-select: none;
 `;
 
 export const MicMuted = () => <Icon src={MicMute} alt="off-microphone" />;
