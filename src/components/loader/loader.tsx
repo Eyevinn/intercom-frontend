@@ -21,14 +21,6 @@ const Loading = styled.div`
     border-top: 0.4rem solid #e2e2e2;
   }
 
-  &.push-to-talk {
-    border: 0.4rem solid rgba(0, 173, 43, 0.1);
-    border-top: 0.4rem solid #00be10;
-    position: absolute;
-    top: 0.5rem;
-    left: 4.5rem;
-  }
-
   @keyframes spin {
     0% {
       transform: rotate(0deg);
@@ -80,10 +72,35 @@ const Dots = styled.span`
   }
 `;
 
+const Pulse = styled.span`
+  position: absolute;
+  top: 1rem;
+  left: 5rem;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  border: 0.4rem solid #6fd84f;
+  margin: auto;
+  animation: pulse 1s ease-in-out infinite alternate;
+
+  @keyframes pulse {
+    0% {
+      transform: scale(1);
+    }
+    100% {
+      transform: scale(1.5);
+    }
+  }
+`;
+
 type Props = { className: string };
 
 export const Spinner: FC<Props> = ({ className }: Props) => {
   return <Loading className={className} />;
+};
+
+export const PulseLoader: FC = () => {
+  return <Pulse />;
 };
 
 export const LoaderDots: FC<Props> = ({ className }: Props) => {
