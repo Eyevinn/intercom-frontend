@@ -242,19 +242,21 @@ export const ProductionLine: FC = () => {
                 </TempDiv>
               )}
 
-              {!isMobile && (
-                <>
-                  <TempDiv>
-                    <strong>Hotkeys</strong>
-                  </TempDiv>
-                  <TempDiv>
-                    <strong>M:</strong> Toggle Input Mute
-                  </TempDiv>
-                  <TempDiv>
-                    <strong>T:</strong> Push to Talk
-                  </TempDiv>
-                </>
-              )}
+              {inputAudioStream &&
+                inputAudioStream !== "no-device" &&
+                !isMobile && (
+                  <>
+                    <TempDiv>
+                      <strong>Hotkeys</strong>
+                    </TempDiv>
+                    <TempDiv>
+                      <strong>M:</strong> Toggle Input Mute
+                    </TempDiv>
+                    <TempDiv>
+                      <strong>T:</strong> Push to Talk
+                    </TempDiv>
+                  </>
+                )}
             </div>
           </DisplayContainer>
           <DisplayContainer>
