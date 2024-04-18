@@ -7,6 +7,7 @@ import { LoaderDots } from "../loader/loader.tsx";
 import { useRefreshAnimation } from "./use-refresh-animation.ts";
 import { DisplayContainerHeader } from "./display-container-header.tsx";
 import { DisplayContainer } from "../generic-components.ts";
+import { ManageProductionButton } from "./manage-production-button.tsx";
 
 const ProductionListContainer = styled.div`
   display: flex;
@@ -105,6 +106,7 @@ export const ProductionsList = () => {
           </ProductionItem>
         ))}
       </ProductionListContainer>
+      {productions.length && <ManageProductionButton />}
     </>
   );
 };

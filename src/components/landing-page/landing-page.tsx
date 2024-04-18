@@ -5,7 +5,6 @@ import { useNavigateToProduction } from "./use-navigate-to-production.ts";
 import { DisplayContainer, FlexContainer } from "../generic-components.ts";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { isMobile } from "../../bowser.ts";
-import { ManageProductionButton } from "../manage-productions/manage-production-button.tsx";
 
 export const LandingPage = () => {
   const [{ joinProductionOptions }] = useGlobalState();
@@ -25,7 +24,6 @@ export const LandingPage = () => {
         )}
       </FlexContainer>
       <ProductionsList />
-      <ManageProductionButton />
     </>
   );
 };
