@@ -1,9 +1,9 @@
 import styled from "@emotion/styled";
 import { useNavigate } from "react-router-dom";
 import { BackArrow } from "../../assets/icons/icon";
+import { ActionButton } from "../landing-page/form-elements";
 
-const StyledBackBtn = styled.button`
-  cursor: pointer;
+const StyledBackBtn = styled(ActionButton)`
   padding: 0;
   margin: 0;
   background: transparent;
