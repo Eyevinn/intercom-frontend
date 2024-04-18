@@ -88,6 +88,48 @@ const establishConnection = ({
   // Listen to incoming audio streams and attach them to a HTMLAudioElement
   rtcPeerConnection.addEventListener("track", onRtcTrack);
 
+  const elChannel = rtcPeerConnection.createDataChannel("somechannel", {
+    ordered: true,
+  });
+
+  elChannel.addEventListener("message", (m) =>
+    console.log("el message del recivo!\n", m)
+  );
+
+  elChannel.addEventListener("close", () => console.log("datachannel close"));
+  elChannel.addEventListener("open", () => console.log("datachannel open"));
+  elChannel.addEventListener("error", () => console.log("datachannel error"));
+  elChannel.addEventListener("bufferedamountlow", () =>
+    console.log("datachannel bufferedamountlow")
+  );
+
+  rtcPeerConnection.addEventListener(
+    "datachannel",
+    ({ channel: dataChannel }) => {
+      console.log("RTC Peer Connection: datachannel event");
+
+      dataChannel.addEventListener("close", () =>
+        console.log("datachannel close")
+      );
+      dataChannel.addEventListener("open", () =>
+        console.log("datachannel open")
+      );
+      dataChannel.addEventListener("error", () =>
+        console.log("datachannel error")
+      );
+      dataChannel.addEventListener("bufferedamountlow", () =>
+        console.log("datachannel bufferedamountlow")
+      );
+
+      dataChannel.addEventListener("message", (m) =>
+        console.log(
+          "secondary listener for data channel - message received\n",
+          m
+        )
+      );
+    }
+  );
+
   // Promisified "icegatherstatechange" listener for use with async/await
   const iceGatheringComplete = (): Promise<void> =>
     new Promise((resolve, reject) => {
@@ -119,6 +161,8 @@ const establishConnection = ({
       sdp: sdpOffer,
       type: "offer",
     });
+
+    console.log("sdpOffer", sdpOffer);
 
     const sdpAnswer = await rtcPeerConnection.createAnswer();
 
