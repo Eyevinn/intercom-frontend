@@ -14,10 +14,20 @@ const Button = styled(ActionButton)`
 
   &:active {
     color: rgba(255, 255, 255, 0);
+    animation: pulse 0.7s ease-in-out infinite alternate;
   }
 
   &.mobile {
     user-select: none;
+  }
+
+  @keyframes pulse {
+    0% {
+      background: #4ada1e;
+    }
+    100% {
+      background: rgba(255, 255, 255, 0.78);
+    }
   }
 `;
 
@@ -47,7 +57,7 @@ export const LongPressToTalkButton = ({
       case "pointerdown":
         timeoutId = setTimeout(() => {
           setMicMute(false);
-        }, 600);
+        }, 300);
         setLongPressTimeout(timeoutId);
         break;
       case "pointerup":

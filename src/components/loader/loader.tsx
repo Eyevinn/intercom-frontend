@@ -73,7 +73,7 @@ const Dots = styled.span`
 `;
 
 const Pulse = styled.span`
-  position: absolute;
+  /* position: absolute;
   top: 1rem;
   left: 5rem;
   width: 2rem;
@@ -90,7 +90,7 @@ const Pulse = styled.span`
     100% {
       transform: scale(1.5);
     }
-  }
+  } */
 `;
 
 type Props = { className: string };
