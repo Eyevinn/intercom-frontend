@@ -7,7 +7,12 @@ import { useRtcConnection } from "./use-rtc-connection.ts";
 import { useEstablishSession } from "./use-establish-session.ts";
 import { ActionButton } from "../landing-page/form-elements.tsx";
 import { UserList } from "./user-list.tsx";
-import { MicMuted, MicUnmuted } from "../../assets/icons/icon.tsx";
+import {
+  MicMuted,
+  MicUnmuted,
+  SpeakerOff,
+  SpeakerOn,
+} from "../../assets/icons/icon.tsx";
 import { Spinner } from "../loader/loader.tsx";
 import { DisplayContainerHeader } from "../landing-page/display-container-header.tsx";
 import { DisplayContainer, FlexContainer } from "../generic-components.ts";
@@ -58,6 +63,7 @@ export const ProductionLine: FC = () => {
   const [{ joinProductionOptions }, dispatch] = useGlobalState();
   const navigate = useNavigate();
   const [isInputMuted, setIsInputMuted] = useState(true);
+  const [isOutputMuted, setIsOutputMuted] = useState(false);
 
   const inputAudioStream = useAudioInput({
     inputId: joinProductionOptions?.audioinput ?? null,
@@ -94,12 +100,23 @@ export const ProductionLine: FC = () => {
     dispatch,
   });
 
-  const { connectionState } = useRtcConnection({
+  const { connectionState, audioElements } = useRtcConnection({
     inputAudioStream,
     sdpOffer,
     joinProductionOptions,
     sessionId,
   });
+
+  const muteOutput = useCallback(
+    (mute: boolean) => {
+      audioElements.map((singleElement: HTMLAudioElement) => {
+        // eslint-disable-next-line no-param-reassign, no-return-assign
+        singleElement.muted = !mute;
+        return setIsOutputMuted(!mute);
+      });
+    },
+    [audioElements]
+  );
 
   const line = useLinePolling({ joinProductionOptions });
 
@@ -180,6 +197,17 @@ export const ProductionLine: FC = () => {
           <DisplayContainer>
             <div>
               <DisplayContainerHeader>Controls</DisplayContainerHeader>
+              <TempDiv>
+                <UserControlBtn
+                  type="button"
+                  onClick={() => muteOutput(isOutputMuted)}
+                >
+                  <ButtonIcon>
+                    {isOutputMuted ? <SpeakerOff /> : <SpeakerOn />}
+                  </ButtonIcon>
+                  {isOutputMuted ? "Muted" : "Unmuted"}
+                </UserControlBtn>
+              </TempDiv>
 
               {inputAudioStream && inputAudioStream !== "no-device" && (
                 <TempDiv>
