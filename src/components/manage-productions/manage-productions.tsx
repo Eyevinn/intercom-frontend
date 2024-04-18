@@ -88,6 +88,8 @@ export const ManageProductions = () => {
   }, [formState.isSubmitSuccessful, isSubmitSuccessful, reset]);
 
   const onSubmit: SubmitHandler<FormValue> = (value) => {
+    if (loading) return;
+
     setLoading(true);
     API.deleteProduction(parseInt(value.productionId, 10))
       .then(() => {
@@ -161,6 +163,7 @@ export const ManageProductions = () => {
                 <Button
                   type="submit"
                   className={loading ? "submit" : ""}
+                  disabled={loading}
                   onClick={handleSubmit(onSubmit)}
                 >
                   Yes
