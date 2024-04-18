@@ -98,7 +98,10 @@ export const ManageProductions = () => {
       .catch((error) => {
         dispatch({
           type: "ERROR",
-          payload: error instanceof Error ? error : new Error("Failed to delete production"),
+          payload:
+            error instanceof Error
+              ? error
+              : new Error("Failed to delete production"),
         });
         setLoading(false);
       });
@@ -139,52 +142,48 @@ export const ManageProductions = () => {
         as={StyledWarningMessage}
       />
       {production ? (
-        production && (
-          <>
-            <DecorativeLabel>
-              Production name: {production.name}
-            </DecorativeLabel>
-            {!verifyRemove && (
-              <ActionButton
-                type="submit"
-                className={loading ? "submit" : ""}
-                onClick={() => setVerifyRemove(true)}
-              >
-                Remove
-                {loading && <Spinner className="create-production" />}
-              </ActionButton>
-            )}
-            {verifyRemove && (
-              <VerifyBtnWrapper>
-                <p>Are you sure?</p>
-                <VerifyButtons>
-                  <Button
-                    type="submit"
-                    className={loading ? "submit" : ""}
-                    onClick={handleSubmit(onSubmit)}
-                  >
-                    Yes
-                    {loading && <Spinner className="create-production" />}
-                  </Button>
-                  <Button
-                    type="submit"
-                    className={loading ? "submit" : ""}
-                    onClick={() => {
-                      setRemoveProductionId(null);
-                      setVerifyRemove(false);
-                      reset({
-                        productionId: "",
-                      });
-                    }}
-                  >
-                    Go back
-                    {loading && <Spinner className="create-production" />}
-                  </Button>
-                </VerifyButtons>
-              </VerifyBtnWrapper>
-            )}
-          </>
-        )
+        <>
+          <DecorativeLabel>Production name: {production.name}</DecorativeLabel>
+          {!verifyRemove && (
+            <ActionButton
+              type="submit"
+              className={loading ? "submit" : ""}
+              onClick={() => setVerifyRemove(true)}
+            >
+              Remove
+              {loading && <Spinner className="create-production" />}
+            </ActionButton>
+          )}
+          {verifyRemove && (
+            <VerifyBtnWrapper>
+              <p>Are you sure?</p>
+              <VerifyButtons>
+                <Button
+                  type="submit"
+                  className={loading ? "submit" : ""}
+                  onClick={handleSubmit(onSubmit)}
+                >
+                  Yes
+                  {loading && <Spinner className="create-production" />}
+                </Button>
+                <Button
+                  type="submit"
+                  className={loading ? "submit" : ""}
+                  onClick={() => {
+                    setRemoveProductionId(null);
+                    setVerifyRemove(false);
+                    reset({
+                      productionId: "",
+                    });
+                  }}
+                >
+                  Go back
+                  {loading && <Spinner className="create-production" />}
+                </Button>
+              </VerifyButtons>
+            </VerifyBtnWrapper>
+          )}
+        </>
       ) : (
         <StyledWarningMessage>
           Please enter a production id
