@@ -6,8 +6,6 @@ import { ActionButton } from "../landing-page/form-elements";
 const StyledBackBtn = styled(ActionButton)`
   padding: 0;
   margin: 0;
-  background: transparent;
-  border: transparent;
 `;
 
 export const BackBtn = () => {
