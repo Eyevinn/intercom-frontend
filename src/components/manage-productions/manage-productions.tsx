@@ -98,7 +98,7 @@ export const ManageProductions = () => {
       .catch((error) => {
         dispatch({
           type: "ERROR",
-          payload: error,
+          payload: error instanceof Error ? error : new Error("Failed to delete production"),
         });
         setLoading(false);
       });
