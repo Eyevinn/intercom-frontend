@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import styled from "@emotion/styled";
-import { ActionButton } from "../landing-page/form-elements";
+import { ActionButton } from "./form-elements";
 
 const ButtonWrapper = styled.div`
   display: flex;
