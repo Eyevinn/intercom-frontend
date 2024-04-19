@@ -1,18 +1,16 @@
 import { useEffect, useState } from "react";
 import styled from "@emotion/styled";
 import { ActionButton } from "../landing-page/form-elements";
-import { PulseLoader } from "../loader/loader";
 import { isMobile } from "../../bowser";
 
 type TLongPressToTalkButton = {
-  micMute: boolean;
   setMicMute: (input: boolean) => void;
 };
 
 const Button = styled(ActionButton)`
   position: relative;
 
-  &:active {
+  &.active-btn {
     color: rgba(255, 255, 255, 0);
     animation: pulse 0.7s ease-in-out infinite alternate;
   }
@@ -32,9 +30,9 @@ const Button = styled(ActionButton)`
 `;
 
 export const LongPressToTalkButton = ({
-  micMute,
   setMicMute,
 }: TLongPressToTalkButton) => {
+  const [isToggled, setIsToggled] = useState(false);
   const [longPressTimeout, setLongPressTimeout] =
     useState<ReturnType<typeof setTimeout>>();
 
@@ -57,10 +55,12 @@ export const LongPressToTalkButton = ({
       case "pointerdown":
         timeoutId = setTimeout(() => {
           setMicMute(false);
+          setIsToggled(true);
         }, 300);
         setLongPressTimeout(timeoutId);
         break;
       case "pointerup":
+        setIsToggled(false);
         setMicMute(true);
         clearTimeout(longPressTimeout);
         break;
@@ -71,7 +71,7 @@ export const LongPressToTalkButton = ({
 
   return (
     <Button
-      className={isMobile ? "mobile" : ""}
+      className={`${isMobile ? "mobile" : ""} ${isToggled ? "active-btn" : ""}`}
       type="button"
       onPointerDown={(e) => {
         toggleMuteAfterTimeout(e);
@@ -81,7 +81,6 @@ export const LongPressToTalkButton = ({
       }}
     >
       Press to Talk
-      {!micMute && <PulseLoader />}
     </Button>
   );
 };
