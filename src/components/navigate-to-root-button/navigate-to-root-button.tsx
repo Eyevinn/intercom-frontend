@@ -6,6 +6,7 @@ import { ActionButton } from "../landing-page/form-elements";
 const StyledBackBtn = styled(ActionButton)`
   padding: 0;
   margin: 0;
+  width: 4rem;
 `;
 
 export const NavigateToRootButton = () => {

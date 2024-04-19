@@ -53,8 +53,7 @@ const Button = styled(ActionButton)`
   margin: 0 1rem 0 0;
 `;
 const StyledBackBtnIcon = styled.div`
-  padding: 0 0 3rem 0;
-  width: 4rem;
+  margin: 0 0 3rem 0;
 `;
 
 export const ManageProductions = () => {
