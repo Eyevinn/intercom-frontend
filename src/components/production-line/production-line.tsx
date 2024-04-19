@@ -110,8 +110,8 @@ export const ProductionLine: FC = () => {
     audioElements.forEach((singleElement: HTMLAudioElement) => {
       // eslint-disable-next-line no-param-reassign
       singleElement.muted = !isOutputMuted;
-      setIsOutputMuted(!isOutputMuted);
     });
+    setIsOutputMuted(!isOutputMuted);
   }, [audioElements, isOutputMuted]);
 
   const line = useLinePolling({ joinProductionOptions });
