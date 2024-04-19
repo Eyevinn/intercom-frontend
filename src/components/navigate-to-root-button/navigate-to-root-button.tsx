@@ -8,7 +8,7 @@ const StyledBackBtn = styled(ActionButton)`
   margin: 0;
 `;
 
-export const BackBtn = () => {
+export const NavigateToRootButton = () => {
   const navigate = useNavigate();
 
   return (

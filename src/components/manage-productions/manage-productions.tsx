@@ -15,7 +15,7 @@ import { API } from "../../api/api";
 import { useGlobalState } from "../../global-state/context-provider";
 import { useFetchProduction } from "../landing-page/use-fetch-production";
 import { darkText, errorColour } from "../../css-helpers/defaults";
-import { BackBtn } from "../back-btn/back-btn";
+import { NavigateToRootButton } from "../navigate-to-root-button/navigate-to-root-button";
 
 type FormValue = {
   productionId: string;
@@ -118,7 +118,7 @@ export const ManageProductions = () => {
   return (
     <Container>
       <StyledBackBtnIcon>
-        <BackBtn />
+        <NavigateToRootButton />
       </StyledBackBtnIcon>
       <DisplayContainerHeader>Remove Production</DisplayContainerHeader>
       <FormLabel>
