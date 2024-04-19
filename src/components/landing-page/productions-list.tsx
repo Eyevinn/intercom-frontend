@@ -116,7 +116,7 @@ export const ProductionsList = () => {
             </ProductionItem>
           ))}
       </ProductionListContainer>
-      {productions.length && <ManageProductionButton />}
+      {!!productions.length && <ManageProductionButton />}
     </>
   );
 };
