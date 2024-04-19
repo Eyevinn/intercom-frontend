@@ -31,9 +31,5 @@ export const handleFetchRequest = async <T>(
     );
   }
 
-  if (text || json) {
-    console.log("Request response:", text || json);
-  }
-
   return text || json;
 };
