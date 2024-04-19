@@ -12,14 +12,24 @@ export const useDeviceLabels = ({ joinProductionOptions }: TProps) => {
   useEffect(() => {
     if (!joinProductionOptions) return;
 
-    navigator.mediaDevices.enumerateDevices().then((devices) => {
-      setDeviceLabels([
-        devices.find((d) => d.deviceId === joinProductionOptions.audioinput)
-          ?.label,
-        devices.find((d) => d.deviceId === joinProductionOptions.audiooutput)
-          ?.label,
-      ]);
-    });
+    navigator.mediaDevices
+      .getUserMedia({
+        audio: true,
+      })
+      .then(() => {
+        navigator.mediaDevices.enumerateDevices().then((devices) => {
+          setDeviceLabels([
+            devices
+              .filter((d) => d.kind === "audioinput")
+              .find((d) => d.deviceId === joinProductionOptions.audioinput)
+              ?.label,
+            devices
+              .filter((d) => d.kind === "audiooutput")
+              .find((d) => d.deviceId === joinProductionOptions.audiooutput)
+              ?.label,
+          ]);
+        });
+      });
   }, [joinProductionOptions]);
 
   return deviceLabels
