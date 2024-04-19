@@ -1,5 +1,5 @@
 import { ErrorMessage } from "@hookform/error-message";
-import { SubmitHandler, useForm } from "react-hook-form";
+import { SubmitHandler, useForm, useWatch } from "react-hook-form";
 import { useEffect, useState } from "react";
 import styled from "@emotion/styled";
 import { DisplayContainerHeader } from "../landing-page/display-container-header";
@@ -11,10 +11,9 @@ import {
   StyledWarningMessage,
 } from "../landing-page/form-elements";
 import { Spinner } from "../loader/loader";
-import { API } from "../../api/api";
-import { useGlobalState } from "../../global-state/context-provider";
 import { useFetchProduction } from "../landing-page/use-fetch-production";
 import { darkText, errorColour } from "../../css-helpers/defaults";
+import { useDeleteProduction } from "./use-delete-production";
 import { NavigateToRootButton } from "../navigate-to-root-button/navigate-to-root-button";
 
 type FormValue = {
@@ -59,14 +58,12 @@ const StyledBackBtnIcon = styled.div`
 `;
 
 export const ManageProductions = () => {
-  const [loading, setLoading] = useState<boolean>(false);
-  const [deleteDone, setDeleteDone] = useState<boolean>(false);
+  const [showDeleteDoneMessage, setShowDeleteDoneMessage] =
+    useState<boolean>(false);
   const [verifyRemove, setVerifyRemove] = useState<boolean>(false);
-  const [removeProductionId, setRemoveProductionId] = useState<null | number>(
-    null
-  );
-  const [, dispatch] = useGlobalState();
+  const [removeId, setRemoveId] = useState<null | number>(null);
   const {
+    control,
     reset,
     formState,
     formState: { errors, isSubmitSuccessful },
@@ -74,44 +71,43 @@ export const ManageProductions = () => {
     handleSubmit,
   } = useForm<FormValue>();
 
+  const productionId = useWatch({ name: "productionId", control });
+
   const { onChange, onBlur, name, ref } = register("productionId", {
     required: "Production ID is required",
     min: 1,
   });
 
-  const { error: productionFetchError, production } =
-    useFetchProduction(removeProductionId);
+  const { error: productionFetchError, production } = useFetchProduction(
+    parseInt(productionId, 10)
+  );
+
+  const {
+    loading,
+    error: productionDeleteError,
+    successfullDelete,
+  } = useDeleteProduction(removeId);
 
   useEffect(() => {
     if (formState.isSubmitSuccessful) {
       reset({
         productionId: "",
       });
-      setRemoveProductionId(null);
       setVerifyRemove(false);
     }
   }, [formState.isSubmitSuccessful, isSubmitSuccessful, reset]);
 
+  useEffect(() => {
+    if (successfullDelete) {
+      setVerifyRemove(false);
+      setShowDeleteDoneMessage(true);
+    }
+  }, [successfullDelete]);
+
   const onSubmit: SubmitHandler<FormValue> = (value) => {
     if (loading) return;
 
-    setLoading(true);
-    API.deleteProduction(parseInt(value.productionId, 10))
-      .then(() => {
-        setDeleteDone(true);
-        setLoading(false);
-        setVerifyRemove(false);
-      })
-      .catch((error) => {
-        dispatch({
-          type: "ERROR",
-          payload:
-            error instanceof Error
-              ? error
-              : new Error("Failed to delete production"),
-        });
-        setLoading(false);
-      });
+    setRemoveId(parseInt(value.productionId, 10));
   };
   // TODO return button
 
@@ -125,12 +121,8 @@ export const ManageProductions = () => {
         <DecorativeLabel>Production ID</DecorativeLabel>
         <FormInput
           onChange={(ev) => {
-            setDeleteDone(false);
+            setShowDeleteDoneMessage(false);
             onChange(ev);
-
-            const pid = parseInt(ev.target.value, 10);
-
-            setRemoveProductionId(Number.isNaN(pid) ? null : pid);
           }}
           name={name}
           ref={ref}
@@ -144,6 +136,12 @@ export const ManageProductions = () => {
         <FetchErrorMessage>
           The production ID could not be fetched. {productionFetchError.name}{" "}
           {productionFetchError.message}.
+        </FetchErrorMessage>
+      )}
+      {productionDeleteError && (
+        <FetchErrorMessage>
+          The production ID could not be deleted. {productionDeleteError.name}{" "}
+          {productionDeleteError.message}.
         </FetchErrorMessage>
       )}
       <ErrorMessage
@@ -181,7 +179,6 @@ export const ManageProductions = () => {
                   type="submit"
                   className={loading ? "submit" : ""}
                   onClick={() => {
-                    setRemoveProductionId(null);
                     setVerifyRemove(false);
                     reset({
                       productionId: "",
@@ -200,7 +197,7 @@ export const ManageProductions = () => {
           Please enter a production id
         </StyledWarningMessage>
       )}
-      {deleteDone && (
+      {showDeleteDoneMessage && (
         <RemoveConfirmation>
           The production {production?.name} has been removed
         </RemoveConfirmation>
