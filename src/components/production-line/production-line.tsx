@@ -74,8 +74,8 @@ export const ProductionLine: FC = () => {
         inputAudioStream.getTracks().forEach((t) => {
           // eslint-disable-next-line no-param-reassign
           t.enabled = !mute;
-          setIsInputMuted(mute);
         });
+        setIsInputMuted(mute);
       }
     },
     [inputAudioStream]
@@ -106,16 +106,13 @@ export const ProductionLine: FC = () => {
     sessionId,
   });
 
-  const muteOutput = useCallback(
-    (mute: boolean) => {
-      audioElements.map((singleElement: HTMLAudioElement) => {
-        // eslint-disable-next-line no-param-reassign, no-return-assign
-        singleElement.muted = !mute;
-        return setIsOutputMuted(!mute);
-      });
-    },
-    [audioElements]
-  );
+  const muteOutput = useCallback(() => {
+    audioElements.forEach((singleElement: HTMLAudioElement) => {
+      // eslint-disable-next-line no-param-reassign
+      singleElement.muted = !isOutputMuted;
+      setIsOutputMuted(!isOutputMuted);
+    });
+  }, [audioElements, isOutputMuted]);
 
   const line = useLinePolling({ joinProductionOptions });
 
@@ -196,10 +193,7 @@ export const ProductionLine: FC = () => {
             <div>
               <DisplayContainerHeader>Controls</DisplayContainerHeader>
               <TempDiv>
-                <UserControlBtn
-                  type="button"
-                  onClick={() => muteOutput(isOutputMuted)}
-                >
+                <UserControlBtn type="button" onClick={() => muteOutput()}>
                   <ButtonIcon>
                     {isOutputMuted ? <SpeakerOff /> : <SpeakerOn />}
                   </ButtonIcon>
