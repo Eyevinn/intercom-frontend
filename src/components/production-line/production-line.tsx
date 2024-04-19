@@ -193,7 +193,6 @@ export const ProductionLine: FC = () => {
                     {isInputMuted ? "Muted" : "Unmuted"}
                   </UserControlBtn>
                   <LongPressToTalkButton
-                    micMute={isInputMuted}
                     setMicMute={(input: boolean) => setIsInputMuted(input)}
                   />
                 </TempDiv>
