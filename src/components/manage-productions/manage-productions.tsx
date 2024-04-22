@@ -111,7 +111,6 @@ export const ManageProductions = () => {
 
     setRemoveId(parseInt(value.productionId, 10));
   };
-  // TODO return button
 
   return (
     <Container>
