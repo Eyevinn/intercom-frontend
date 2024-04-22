@@ -52,6 +52,7 @@ const VerifyButtons = styled.div`
 const Button = styled(ActionButton)`
   margin: 0 1rem 0 0;
 `;
+
 const StyledBackBtnIcon = styled.div`
   margin: 0 0 3rem 0;
 `;
@@ -113,7 +114,7 @@ export const ManageProductions = () => {
   return (
     <Container>
       <StyledBackBtnIcon>
-        <NavigateToRootButton />
+        <NavigateToRootButton resetOnExit={() => null} />
       </StyledBackBtnIcon>
       <DisplayContainerHeader>Remove Production</DisplayContainerHeader>
       <FormLabel>
