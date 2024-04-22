@@ -9,11 +9,21 @@ const StyledBackBtn = styled(ActionButton)`
   width: 4rem;
 `;
 
-export const NavigateToRootButton = () => {
+export const NavigateToRootButton = ({
+  resetOnExit,
+}: {
+  resetOnExit: () => void | null;
+}) => {
   const navigate = useNavigate();
 
   return (
-    <StyledBackBtn type="button" onClick={() => navigate("/")}>
+    <StyledBackBtn
+      type="button"
+      onClick={() => {
+        navigate("/");
+        resetOnExit();
+      }}
+    >
       <BackArrow />
     </StyledBackBtn>
   );
