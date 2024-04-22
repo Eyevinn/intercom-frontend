@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 import { FC, useCallback, useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { useAudioInput } from "./use-audio-input.ts";
 import { useRtcConnection } from "./use-rtc-connection.ts";
@@ -26,6 +26,7 @@ import { useLinePolling } from "./use-line-polling.ts";
 import { useFetchProduction } from "../landing-page/use-fetch-production.ts";
 import { useIsLoading } from "./use-is-loading.ts";
 import { useCheckBadLineData } from "./use-check-bad-line-data.ts";
+import { NavigateToRootButton } from "../navigate-to-root-button/navigate-to-root-button.tsx";
 
 const TempDiv = styled.div`
   padding: 1rem 0;
@@ -41,10 +42,6 @@ const SmallText = styled.span`
   font-size: 1.6rem;
 `;
 
-const ButtonWrapper = styled.span`
-  margin: 0 2rem 0 0;
-`;
-
 const ButtonIcon = styled.div`
   width: 2.5rem;
   display: inline-block;
@@ -58,10 +55,13 @@ const UserControlBtn = styled(ActionButton)`
   text-align: left;
 `;
 
+const StyledBackBtnIcon = styled.span`
+  margin: 0 2rem 0 0;
+`;
+
 export const ProductionLine: FC = () => {
   const { productionId: paramProductionId, lineId: paramLineId } = useParams();
   const [{ joinProductionOptions }, dispatch] = useGlobalState();
-  const navigate = useNavigate();
   const [isInputMuted, setIsInputMuted] = useState(true);
   const [isOutputMuted, setIsOutputMuted] = useState(false);
 
@@ -87,8 +87,7 @@ export const ProductionLine: FC = () => {
       type: "UPDATE_JOIN_PRODUCTION_OPTIONS",
       payload: null,
     });
-    navigate("/");
-  }, [dispatch, navigate]);
+  }, [dispatch]);
 
   useLineHotkeys({
     muteInput,
@@ -153,9 +152,9 @@ export const ProductionLine: FC = () => {
   return (
     <>
       <HeaderWrapper>
-        <ButtonWrapper>
-          <ActionButton onClick={exit}>Exit</ActionButton>
-        </ButtonWrapper>
+        <StyledBackBtnIcon>
+          <NavigateToRootButton resetOnExit={exit} />
+        </StyledBackBtnIcon>
         {!loading && production && line && (
           <DisplayContainerHeader>
             <SmallText>Production:</SmallText> {production.name}{" "}
