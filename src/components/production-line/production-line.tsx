@@ -55,7 +55,7 @@ const UserControlBtn = styled(ActionButton)`
   text-align: left;
 `;
 
-const StyledBackBtnIcon = styled.span`
+const ButtonWrapper = styled.span`
   margin: 0 2rem 0 0;
 `;
 
@@ -152,9 +152,9 @@ export const ProductionLine: FC = () => {
   return (
     <>
       <HeaderWrapper>
-        <StyledBackBtnIcon>
+        <ButtonWrapper>
           <NavigateToRootButton resetOnExit={exit} />
-        </StyledBackBtnIcon>
+        </ButtonWrapper>
         {!loading && production && line && (
           <DisplayContainerHeader>
             <SmallText>Production:</SmallText> {production.name}{" "}
