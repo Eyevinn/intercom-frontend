@@ -80,4 +80,6 @@ export const StyledWarningMessage = styled.div`
   color: #1a1a1a;
   margin: 0 0 1rem;
   border: 1px solid #ebca6a;
+  display: flex;
+  align-items: center;
 `;
