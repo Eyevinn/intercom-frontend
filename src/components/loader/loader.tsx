@@ -72,13 +72,18 @@ const Dots = styled.span`
   }
 `;
 
-type Props = { className: string };
+type TSpinner = { className: string };
 
-export const Spinner: FC<Props> = ({ className }: Props) => {
+type TLoaderDots = { className: string; text: string };
+
+export const Spinner: FC<TSpinner> = ({ className }: TSpinner) => {
   return <Loading className={className} />;
 };
 
-export const LoaderDots: FC<Props> = ({ className }: Props) => {
+export const LoaderDots: FC<TLoaderDots> = ({
+  className,
+  text,
+}: TLoaderDots) => {
   const [dots, setDots] = useState<string>(".");
 
   useEffect(() => {
@@ -93,7 +98,7 @@ export const LoaderDots: FC<Props> = ({ className }: Props) => {
 
   return (
     <div>
-      <Text className={className}>refreshing</Text>
+      <Text className={className}>{text}</Text>
       <Dots className={className}>{dots}</Dots>
     </div>
   );
