@@ -113,7 +113,7 @@ export const ManageProductions = () => {
   return (
     <Container>
       <StyledBackBtnIcon>
-        <NavigateToRootButton resetOnExit={() => null} />
+        <NavigateToRootButton />
       </StyledBackBtnIcon>
       <DisplayContainerHeader>Remove Production</DisplayContainerHeader>
       <FormLabel>
