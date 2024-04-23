@@ -22,7 +22,7 @@ type FormValue = {
 
 const Container = styled.form`
   max-width: 45rem;
-  padding: 1rem 0 0 2rem;
+  padding: 1rem 2rem 0 2rem;
 `;
 
 const RemoveConfirmation = styled.div`
@@ -194,7 +194,7 @@ export const ManageProductions = () => {
           )}
         </>
       ) : (
-        <StyledWarningMessage>
+        <StyledWarningMessage className="with-loader">
           Please enter a production id
           {fetchLoader && <LoaderDots className="in-active" text="" />}
         </StyledWarningMessage>
