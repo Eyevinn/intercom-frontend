@@ -13,7 +13,13 @@ const Loading = styled.div`
   &.create-production {
     position: absolute;
     top: 0.5rem;
-    left: 6rem;
+    left: 40%;
+  }
+
+  &.manage-production {
+    position: absolute;
+    top: 0.5rem;
+    left: 30%;
   }
 
   &.join-production {
