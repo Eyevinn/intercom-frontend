@@ -234,7 +234,7 @@ export const JoinProduction = ({ preSelected }: TProps) => {
                   ))}
               </FormSelect>
               {!production && (
-                <StyledWarningMessage>
+                <StyledWarningMessage className="with-loader">
                   Please enter a production id
                   {loading && <LoaderDots className="in-active" text="" />}
                 </StyledWarningMessage>
