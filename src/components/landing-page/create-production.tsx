@@ -41,6 +41,10 @@ const ListItemWrapper = styled.div`
   position: relative;
 `;
 
+const ButtonWrapper = styled.div`
+  margin: 2rem 0 2rem 0;
+`;
+
 const ProductionConfirmation = styled.div`
   background: #91fa8c;
   padding: 1rem;
@@ -171,18 +175,21 @@ export const CreateProduction = () => {
           />
         </div>
       ))}
-      <SecondaryButton type="button" onClick={() => append({ name: "" })}>
-        Add Line
-      </SecondaryButton>
-
-      <PrimaryButton
-        type="submit"
-        className={loading ? "with-loader" : ""}
-        onClick={handleSubmit(onSubmit)}
-      >
-        Create Production
-        {loading && <Spinner className="create-production" />}
-      </PrimaryButton>
+      <ButtonWrapper>
+        <SecondaryButton type="button" onClick={() => append({ name: "" })}>
+          Add Line
+        </SecondaryButton>
+      </ButtonWrapper>
+      <ButtonWrapper>
+        <PrimaryButton
+          type="submit"
+          className={loading ? "with-loader" : ""}
+          onClick={handleSubmit(onSubmit)}
+        >
+          Create Production
+          {loading && <Spinner className="create-production" />}
+        </PrimaryButton>
+      </ButtonWrapper>
       {createdProductionId !== null && (
         <ProductionConfirmation>
           The production ID is: {createdProductionId.toString()}

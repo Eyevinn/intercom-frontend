@@ -28,6 +28,10 @@ const FetchErrorMessage = styled.div`
   margin: 1rem 0;
 `;
 
+const ButtonWrapper = styled.div`
+  margin: 2rem 0 2rem 0;
+`;
+
 type TProps = {
   preSelected?: {
     preSelectedProductionId: string;
@@ -241,14 +245,15 @@ export const JoinProduction = ({ preSelected }: TProps) => {
               )}
             </FormLabel>
           )}
-
-          <PrimaryButton
-            type="submit"
-            disabled={!isValid}
-            onClick={handleSubmit(onSubmit)}
-          >
-            Join
-          </PrimaryButton>
+          <ButtonWrapper>
+            <PrimaryButton
+              type="submit"
+              disabled={!isValid}
+              onClick={handleSubmit(onSubmit)}
+            >
+              Join
+            </PrimaryButton>
+          </ButtonWrapper>
         </>
       )}
     </FormContainer>

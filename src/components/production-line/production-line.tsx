@@ -55,6 +55,10 @@ const UserControlBtn = styled(PrimaryButton)`
   text-align: left;
 `;
 
+const LongPressWrapper = styled.div`
+  margin: 2rem 0 2rem 0;
+`;
+
 const ButtonWrapper = styled.span`
   margin: 0 2rem 0 0;
 `;
@@ -213,9 +217,11 @@ export const ProductionLine: FC = () => {
                     </ButtonIcon>
                     {isInputMuted ? "Muted" : "Unmuted"}
                   </UserControlBtn>
-                  <LongPressToTalkButton
-                    setMicMute={(input: boolean) => setIsInputMuted(input)}
-                  />
+                  <LongPressWrapper>
+                    <LongPressToTalkButton
+                      setMicMute={(input: boolean) => setIsInputMuted(input)}
+                    />
+                  </LongPressWrapper>
                 </TempDiv>
               )}
 
