@@ -26,7 +26,7 @@
     "react-router-dom": "^6.22.3"
   },
   "devDependencies": {
-    "@commitlint/cli": "^19.2.2",
+    "@commitlint/cli": "^19.3.0",
     "@commitlint/config-conventional": "^19.2.2",
     "@types/react": "^18.2.79",
     "@types/react-dom": "^18.2.25",
