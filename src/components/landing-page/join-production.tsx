@@ -17,6 +17,7 @@ import { useFetchProduction } from "./use-fetch-production.ts";
 import { darkText, errorColour } from "../../css-helpers/defaults.ts";
 import { TJoinProductionOptions } from "../production-line/types.ts";
 import { uniqBy } from "../../helpers.ts";
+import { LoaderDots } from "../loader/loader.tsx";
 
 type FormValues = TJoinProductionOptions;
 
@@ -55,8 +56,11 @@ export const JoinProduction = ({ preSelected }: TProps) => {
 
   const [{ devices }, dispatch] = useGlobalState();
 
-  const { error: productionFetchError, production } =
-    useFetchProduction(joinProductionId);
+  const {
+    error: productionFetchError,
+    production,
+    loading,
+  } = useFetchProduction(joinProductionId);
 
   // Update selected line id when a new production is fetched
   useEffect(() => {
@@ -232,6 +236,7 @@ export const JoinProduction = ({ preSelected }: TProps) => {
               {!production && (
                 <StyledWarningMessage>
                   Please enter a production id
+                  {loading && <LoaderDots className="in-active" text="" />}
                 </StyledWarningMessage>
               )}
             </FormLabel>
