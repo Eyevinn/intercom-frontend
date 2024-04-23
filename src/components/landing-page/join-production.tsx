@@ -211,7 +211,7 @@ export const JoinProduction = ({ preSelected }: TProps) => {
                 ))}
               </FormSelect>
             ) : (
-              <StyledWarningMessage>
+              <StyledWarningMessage className="with-loader">
                 Controlled by operating system
               </StyledWarningMessage>
             )}
