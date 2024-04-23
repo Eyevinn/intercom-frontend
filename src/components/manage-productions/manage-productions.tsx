@@ -10,7 +10,7 @@ import {
   FormLabel,
   StyledWarningMessage,
 } from "../landing-page/form-elements";
-import { Spinner } from "../loader/loader";
+import { LoaderDots, Spinner } from "../loader/loader";
 import { useFetchProduction } from "../landing-page/use-fetch-production";
 import { darkText, errorColour } from "../../css-helpers/defaults";
 import { useDeleteProduction } from "./use-delete-production";
@@ -77,12 +77,14 @@ export const ManageProductions = () => {
     min: 1,
   });
 
-  const { error: productionFetchError, production } = useFetchProduction(
-    parseInt(productionId, 10)
-  );
+  const {
+    error: productionFetchError,
+    production,
+    loading: fetchLoader,
+  } = useFetchProduction(parseInt(productionId, 10));
 
   const {
-    loading,
+    loading: deleteLoader,
     error: productionDeleteError,
     successfullDelete,
   } = useDeleteProduction(removeId);
@@ -104,7 +106,7 @@ export const ManageProductions = () => {
   }, [successfullDelete]);
 
   const onSubmit: SubmitHandler<FormValue> = (value) => {
-    if (loading) return;
+    if (deleteLoader) return;
 
     setRemoveId(parseInt(value.productionId, 10));
   };
@@ -154,11 +156,11 @@ export const ManageProductions = () => {
           {!verifyRemove && (
             <ActionButton
               type="submit"
-              className={loading ? "submit" : ""}
+              className={deleteLoader ? "submit" : ""}
               onClick={() => setVerifyRemove(true)}
             >
               Remove
-              {loading && <Spinner className="create-production" />}
+              {deleteLoader && <Spinner className="create-production" />}
             </ActionButton>
           )}
           {verifyRemove && (
@@ -167,16 +169,16 @@ export const ManageProductions = () => {
               <VerifyButtons>
                 <Button
                   type="submit"
-                  className={loading ? "submit" : ""}
-                  disabled={loading}
+                  className={deleteLoader ? "submit" : ""}
+                  disabled={deleteLoader}
                   onClick={handleSubmit(onSubmit)}
                 >
                   Yes
-                  {loading && <Spinner className="create-production" />}
+                  {deleteLoader && <Spinner className="create-production" />}
                 </Button>
                 <Button
                   type="submit"
-                  className={loading ? "submit" : ""}
+                  className={deleteLoader ? "submit" : ""}
                   onClick={() => {
                     setVerifyRemove(false);
                     reset({
@@ -185,7 +187,7 @@ export const ManageProductions = () => {
                   }}
                 >
                   Go back
-                  {loading && <Spinner className="create-production" />}
+                  {deleteLoader && <Spinner className="create-production" />}
                 </Button>
               </VerifyButtons>
             </VerifyBtnWrapper>
@@ -194,6 +196,7 @@ export const ManageProductions = () => {
       ) : (
         <StyledWarningMessage>
           Please enter a production id
+          {fetchLoader && <LoaderDots className="in-active" text="" />}
         </StyledWarningMessage>
       )}
       {showDeleteDoneMessage && (
