@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import styled from "@emotion/styled";
 import { DisplayContainerHeader } from "../landing-page/display-container-header";
 import {
-  ActionButton,
+  PrimaryButton,
   DecorativeLabel,
   FormInput,
   FormLabel,
@@ -49,7 +49,7 @@ const VerifyButtons = styled.div`
   padding: 1rem 0 0 0;
 `;
 
-const Button = styled(ActionButton)`
+const Button = styled(PrimaryButton)`
   margin: 0 1rem 0 0;
 `;
 
@@ -154,14 +154,14 @@ export const ManageProductions = () => {
         <>
           <DecorativeLabel>Production name: {production.name}</DecorativeLabel>
           {!verifyRemove && (
-            <ActionButton
+            <PrimaryButton
               type="submit"
               className={deleteLoader ? "submit" : ""}
               onClick={() => setVerifyRemove(true)}
             >
               Remove
-              {deleteLoader && <Spinner className="create-production" />}
-            </ActionButton>
+              {deleteLoader && <Spinner className="manage-production" />}
+            </PrimaryButton>
           )}
           {verifyRemove && (
             <VerifyBtnWrapper>
@@ -174,7 +174,7 @@ export const ManageProductions = () => {
                   onClick={handleSubmit(onSubmit)}
                 >
                   Yes
-                  {deleteLoader && <Spinner className="create-production" />}
+                  {deleteLoader && <Spinner className="manage-production" />}
                 </Button>
                 <Button
                   type="submit"
@@ -187,7 +187,7 @@ export const ManageProductions = () => {
                   }}
                 >
                   Go back
-                  {deleteLoader && <Spinner className="create-production" />}
+                  {deleteLoader && <Spinner className="manage-production" />}
                 </Button>
               </VerifyButtons>
             </VerifyBtnWrapper>
