@@ -41,7 +41,7 @@ const FetchErrorMessage = styled.div`
 `;
 
 const VerifyBtnWrapper = styled.div`
-  padding: 1rem 0 0 2rem;
+  margin: 3rem 0 2rem 2rem;
 `;
 
 const VerifyButtons = styled.div`
@@ -55,6 +55,10 @@ const Button = styled(PrimaryButton)`
 
 const StyledBackBtnIcon = styled.div`
   margin: 0 0 3rem 0;
+`;
+
+const ButtonWrapper = styled.div`
+  margin: 2rem 0 2rem 0;
 `;
 
 export const ManageProductions = () => {
@@ -154,14 +158,16 @@ export const ManageProductions = () => {
         <>
           <DecorativeLabel>Production name: {production.name}</DecorativeLabel>
           {!verifyRemove && (
-            <PrimaryButton
-              type="submit"
-              className={deleteLoader ? "submit" : ""}
-              onClick={() => setVerifyRemove(true)}
-            >
-              Remove
-              {deleteLoader && <Spinner className="manage-production" />}
-            </PrimaryButton>
+            <ButtonWrapper>
+              <PrimaryButton
+                type="submit"
+                className={deleteLoader ? "submit" : ""}
+                onClick={() => setVerifyRemove(true)}
+              >
+                Remove
+                {deleteLoader && <Spinner className="manage-production" />}
+              </PrimaryButton>
+            </ButtonWrapper>
           )}
           {verifyRemove && (
             <VerifyBtnWrapper>
