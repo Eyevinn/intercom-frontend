@@ -102,7 +102,10 @@ export const ProductionsList = () => {
 
   return (
     <>
-      <LoaderDots className={showRefreshing ? "active" : "in-active"} />
+      <LoaderDots
+        className={showRefreshing ? "active" : "in-active"}
+        text="refreshing"
+      />
       <DisplayContainer>
         <DisplayContainerHeader>Production List</DisplayContainerHeader>
       </DisplayContainer>
