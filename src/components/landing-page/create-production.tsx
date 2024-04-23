@@ -9,7 +9,8 @@ import {
   FormInput,
   FormLabel,
   StyledWarningMessage,
-  ActionButton,
+  PrimaryButton,
+  SecondaryButton,
 } from "./form-elements.tsx";
 import { API } from "../../api/api.ts";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
@@ -170,18 +171,18 @@ export const CreateProduction = () => {
           />
         </div>
       ))}
-      <ActionButton type="button" onClick={() => append({ name: "" })}>
+      <SecondaryButton type="button" onClick={() => append({ name: "" })}>
         Add Line
-      </ActionButton>
+      </SecondaryButton>
 
-      <ActionButton
+      <PrimaryButton
         type="submit"
         className={loading ? "with-loader" : ""}
         onClick={handleSubmit(onSubmit)}
       >
         Create Production
         {loading && <Spinner className="create-production" />}
-      </ActionButton>
+      </PrimaryButton>
       {createdProductionId !== null && (
         <ProductionConfirmation>
           The production ID is: {createdProductionId.toString()}

@@ -5,7 +5,7 @@ import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { useAudioInput } from "./use-audio-input.ts";
 import { useRtcConnection } from "./use-rtc-connection.ts";
 import { useEstablishSession } from "./use-establish-session.ts";
-import { ActionButton } from "../landing-page/form-elements.tsx";
+import { PrimaryButton } from "../landing-page/form-elements.tsx";
 import { UserList } from "./user-list.tsx";
 import {
   MicMuted,
@@ -49,7 +49,7 @@ const ButtonIcon = styled.div`
   margin: 0 0.5rem 0 0;
 `;
 
-const UserControlBtn = styled(ActionButton)`
+const UserControlBtn = styled(PrimaryButton)`
   line-height: 2;
   min-width: 12rem;
   text-align: left;
