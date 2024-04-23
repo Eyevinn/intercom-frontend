@@ -82,4 +82,8 @@ export const StyledWarningMessage = styled.div`
   border: 1px solid #ebca6a;
   display: flex;
   align-items: center;
+
+  &.with-loader {
+    min-width: 27rem;
+  }
 `;
