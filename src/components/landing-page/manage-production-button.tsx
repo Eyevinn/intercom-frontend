@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import styled from "@emotion/styled";
-import { ActionButton } from "./form-elements";
+import { PrimaryButton } from "./form-elements";
 
 const ButtonWrapper = styled.div`
   display: flex;
@@ -13,12 +13,12 @@ export const ManageProductionButton = () => {
 
   return (
     <ButtonWrapper>
-      <ActionButton
+      <PrimaryButton
         type="button"
         onClick={() => navigate("/manage-productions")}
       >
         Manage Productions
-      </ActionButton>
+      </PrimaryButton>
     </ButtonWrapper>
   );
 };

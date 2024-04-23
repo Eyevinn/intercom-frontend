@@ -9,7 +9,7 @@ import {
   FormContainer,
   FormInput,
   FormSelect,
-  ActionButton,
+  PrimaryButton,
   StyledWarningMessage,
 } from "./form-elements.tsx";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
@@ -242,13 +242,13 @@ export const JoinProduction = ({ preSelected }: TProps) => {
             </FormLabel>
           )}
 
-          <ActionButton
+          <PrimaryButton
             type="submit"
             disabled={!isValid}
             onClick={handleSubmit(onSubmit)}
           >
             Join
-          </ActionButton>
+          </PrimaryButton>
         </>
       )}
     </FormContainer>

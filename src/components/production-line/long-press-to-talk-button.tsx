@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import styled from "@emotion/styled";
-import { ActionButton } from "../landing-page/form-elements";
+import { PrimaryButton } from "../landing-page/form-elements";
 import { isMobile } from "../../bowser";
 
 type TLongPressToTalkButton = {
   setMicMute: (input: boolean) => void;
 };
 
-const Button = styled(ActionButton)`
+const Button = styled(PrimaryButton)`
   position: relative;
 
   &.active-btn {
