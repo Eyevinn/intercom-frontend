@@ -68,7 +68,7 @@ const ActionButton = styled.button`
   font-size: 100%;
   font-weight: 700;
   line-height: 2.4rem;
-  margin: 1rem;
+  margin: 0;
   outline: 0.2rem solid transparent;
   padding: 1rem 1.5rem;
   text-align: center;
@@ -94,7 +94,7 @@ const ActionButton = styled.button`
 `;
 
 export const PrimaryButton = styled(ActionButton)`
-  &:active {
+  &:active:enabled {
     background-color: #f3f4f6;
     box-shadow:
       -0.1rem 0.2rem 0.5rem rgba(81, 41, 10, 0.15),
