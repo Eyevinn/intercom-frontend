@@ -1,20 +1,19 @@
 import { ErrorMessage } from "@hookform/error-message";
-import { SubmitHandler, useForm, useWatch } from "react-hook-form";
+import { SubmitHandler, useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
 import styled from "@emotion/styled";
 import { DisplayContainerHeader } from "../landing-page/display-container-header";
 import {
   PrimaryButton,
   DecorativeLabel,
-  FormInput,
-  FormLabel,
   StyledWarningMessage,
 } from "../landing-page/form-elements";
-import { LoaderDots, Spinner } from "../loader/loader";
+import { Spinner } from "../loader/loader";
 import { useFetchProduction } from "../landing-page/use-fetch-production";
 import { darkText, errorColour } from "../../css-helpers/defaults";
 import { useDeleteProduction } from "./use-delete-production";
 import { NavigateToRootButton } from "../navigate-to-root-button/navigate-to-root-button";
+import { FormInputWithLoader } from "../landing-page/form-input-with-loader";
 
 type FormValue = {
   productionId: string;
@@ -67,15 +66,14 @@ export const ManageProductions = () => {
   const [verifyRemove, setVerifyRemove] = useState<boolean>(false);
   const [removeId, setRemoveId] = useState<null | number>(null);
   const {
-    control,
+    // control,
     reset,
     formState,
     formState: { errors, isSubmitSuccessful },
     register,
     handleSubmit,
   } = useForm<FormValue>();
-
-  const productionId = useWatch({ name: "productionId", control });
+  const [productionId, setProductionId] = useState<null | number>(null);
 
   const { onChange, onBlur, name, ref } = register("productionId", {
     required: "Production ID is required",
@@ -86,7 +84,7 @@ export const ManageProductions = () => {
     error: productionFetchError,
     production,
     loading: fetchLoader,
-  } = useFetchProduction(parseInt(productionId, 10));
+  } = useFetchProduction(productionId);
 
   const {
     loading: deleteLoader,
@@ -122,21 +120,22 @@ export const ManageProductions = () => {
         <NavigateToRootButton />
       </StyledBackBtnIcon>
       <DisplayContainerHeader>Remove Production</DisplayContainerHeader>
-      <FormLabel>
-        <DecorativeLabel>Production ID</DecorativeLabel>
-        <FormInput
-          onChange={(ev) => {
-            setShowDeleteDoneMessage(false);
-            onChange(ev);
-          }}
-          name={name}
-          ref={ref}
-          onBlur={onBlur}
-          type="number"
-          autoComplete="off"
-          placeholder="Production ID"
-        />
-      </FormLabel>
+      <FormInputWithLoader
+        onChange={(ev) => {
+          onChange(ev);
+          const pid = parseInt(ev.target.value, 10);
+
+          setProductionId(Number.isNaN(pid) ? null : pid);
+          setShowDeleteDoneMessage(false);
+        }}
+        label="Production ID"
+        placeholder="Production ID"
+        name={name}
+        ref={ref}
+        onBlur={onBlur}
+        type="number"
+        loading={fetchLoader}
+      />
       {productionFetchError && (
         <FetchErrorMessage>
           The production ID could not be fetched. {productionFetchError.name}{" "}
@@ -200,9 +199,8 @@ export const ManageProductions = () => {
           )}
         </>
       ) : (
-        <StyledWarningMessage className="with-loader">
+        <StyledWarningMessage>
           Please enter a production id
-          {fetchLoader && <LoaderDots className="in-active" text="" />}
         </StyledWarningMessage>
       )}
       {showDeleteDoneMessage && (
