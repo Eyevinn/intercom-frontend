@@ -200,7 +200,7 @@ export const ManageProductions = () => {
           )}
         </>
       ) : (
-        <StyledWarningMessage className="with-loader">
+        <StyledWarningMessage className="with-min-width">
           Please enter a production id
           {fetchLoader && <LoaderDots className="in-active" text="" />}
         </StyledWarningMessage>

@@ -211,7 +211,7 @@ export const JoinProduction = ({ preSelected }: TProps) => {
                 ))}
               </FormSelect>
             ) : (
-              <StyledWarningMessage className="with-loader">
+              <StyledWarningMessage className="with-min-width">
                 Controlled by operating system
               </StyledWarningMessage>
             )}
@@ -238,7 +238,7 @@ export const JoinProduction = ({ preSelected }: TProps) => {
                   ))}
               </FormSelect>
               {!production && (
-                <StyledWarningMessage className="with-loader">
+                <StyledWarningMessage className="with-min-width">
                   Please enter a production id
                   {loading && <LoaderDots className="in-active" text="" />}
                 </StyledWarningMessage>

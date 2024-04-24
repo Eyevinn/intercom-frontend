@@ -50,7 +50,7 @@ export const StyledWarningMessage = styled.div`
   display: flex;
   align-items: center;
 
-  &.with-loader {
+  &.with-min-width {
     min-width: 27rem;
   }
 `;
