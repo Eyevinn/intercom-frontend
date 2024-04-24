@@ -17,7 +17,7 @@ import { useFetchProduction } from "./use-fetch-production.ts";
 import { darkText, errorColour } from "../../css-helpers/defaults.ts";
 import { TJoinProductionOptions } from "../production-line/types.ts";
 import { uniqBy } from "../../helpers.ts";
-import { LoaderDots } from "../loader/loader.tsx";
+import { FormInputWithLoader } from "./form-input-with-loader.tsx";
 
 type FormValues = TJoinProductionOptions;
 
@@ -134,23 +134,22 @@ export const JoinProduction = ({ preSelected }: TProps) => {
         <>
           {!preSelected && (
             <>
-              <FormLabel>
-                <DecorativeLabel>Production ID</DecorativeLabel>
-                <FormInput
-                  onChange={(ev) => {
-                    onChange(ev);
+              <FormInputWithLoader
+                onChange={(ev) => {
+                  onChange(ev);
 
-                    const pid = parseInt(ev.target.value, 10);
+                  const pid = parseInt(ev.target.value, 10);
 
-                    setJoinProductionId(Number.isNaN(pid) ? null : pid);
-                  }}
-                  name={name}
-                  ref={ref}
-                  onBlur={onBlur}
-                  type="number"
-                  placeholder="Production ID"
-                />
-              </FormLabel>
+                  setJoinProductionId(Number.isNaN(pid) ? null : pid);
+                }}
+                label="Production ID"
+                placeholder="Production ID"
+                name={name}
+                ref={ref}
+                onBlur={onBlur}
+                type="number"
+                loading={loading}
+              />
               {productionFetchError && (
                 <FetchErrorMessage>
                   The production ID could not be fetched.{" "}
@@ -238,9 +237,8 @@ export const JoinProduction = ({ preSelected }: TProps) => {
                   ))}
               </FormSelect>
               {!production && (
-                <StyledWarningMessage className="with-loader">
+                <StyledWarningMessage>
                   Please enter a production id
-                  {loading && <LoaderDots className="in-active" text="" />}
                 </StyledWarningMessage>
               )}
             </FormLabel>
