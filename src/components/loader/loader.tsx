@@ -27,6 +27,16 @@ const Loading = styled.div`
     border-top: 0.4rem solid #e2e2e2;
   }
 
+  &.form-loader {
+    position: absolute;
+    top: 0.5rem;
+    right: 1rem;
+    width: 1.8rem;
+    height: 1.8rem;
+    border: 0.4rem solid rgba(0, 0, 0, 0.2);
+    border-top: 0.4rem solid #595959;
+  }
+
   @keyframes spin {
     0% {
       transform: rotate(0deg);
@@ -68,6 +78,7 @@ const Text = styled.span`
 
 const Dots = styled.span`
   padding-left: 0.2rem;
+  width: 2rem;
   font-size: 2rem;
   transform: translateY(-50%);
   &.active {
