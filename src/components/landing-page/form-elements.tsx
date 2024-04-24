@@ -13,6 +13,24 @@ export const FormInput = styled.input`
   &.additional-line {
     padding-right: 3.5rem;
   }
+
+  &.with-loader {
+    padding-right: 3.5rem;
+
+    &::-webkit-inner-spin-button {
+      appearance: none;
+    }
+
+    &::-webkit-outer-spin-button,
+    &::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    &[type="number"] {
+      -moz-appearance: textfield;
+    }
+  }
 `;
 
 export const FormSelect = styled.select`
@@ -49,10 +67,6 @@ export const StyledWarningMessage = styled.div`
   border: 1px solid #ebca6a;
   display: flex;
   align-items: center;
-
-  &.with-loader {
-    min-width: 27rem;
-  }
 `;
 
 const ActionButton = styled.button`
