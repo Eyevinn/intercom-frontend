@@ -66,7 +66,6 @@ export const ManageProductions = () => {
   const [verifyRemove, setVerifyRemove] = useState<boolean>(false);
   const [removeId, setRemoveId] = useState<null | number>(null);
   const {
-    // control,
     reset,
     formState,
     formState: { errors, isSubmitSuccessful },
