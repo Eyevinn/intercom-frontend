@@ -10,6 +10,7 @@ const initialGlobalState: TGlobalState = {
   joinProductionOptions: null,
   mediaStreamInput: null,
   dominantSpeaker: null,
+  audioLevelAboveThreshold: false,
 };
 
 const globalReducer: Reducer<TGlobalState, TGlobalStateAction> = (
@@ -53,6 +54,14 @@ const globalReducer: Reducer<TGlobalState, TGlobalStateAction> = (
       return {
         ...state,
         dominantSpeaker: action.payload,
+      };
+    case "AUDIO_LEVEL_ABOVE_THRESHOLD":
+      // Don't update state if receiving the same value
+      if (state.audioLevelAboveThreshold === action.payload) return state;
+
+      return {
+        ...state,
+        audioLevelAboveThreshold: action.payload,
       };
     default:
       return state;
