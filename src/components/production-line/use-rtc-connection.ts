@@ -88,47 +88,42 @@ const establishConnection = ({
   // Listen to incoming audio streams and attach them to a HTMLAudioElement
   rtcPeerConnection.addEventListener("track", onRtcTrack);
 
-  const elChannel = rtcPeerConnection.createDataChannel("somechannel", {
-    ordered: true,
-  });
-
-  elChannel.addEventListener("message", (m) =>
-    console.log("el message del recivo!\n", m)
-  );
-
-  elChannel.addEventListener("close", () => console.log("datachannel close"));
-  elChannel.addEventListener("open", () => console.log("datachannel open"));
-  elChannel.addEventListener("error", () => console.log("datachannel error"));
-  elChannel.addEventListener("bufferedamountlow", () =>
-    console.log("datachannel bufferedamountlow")
-  );
-
-  rtcPeerConnection.addEventListener(
-    "datachannel",
-    ({ channel: dataChannel }) => {
-      console.log("RTC Peer Connection: datachannel event");
-
-      dataChannel.addEventListener("close", () =>
-        console.log("datachannel close")
-      );
-      dataChannel.addEventListener("open", () =>
-        console.log("datachannel open")
-      );
-      dataChannel.addEventListener("error", () =>
-        console.log("datachannel error")
-      );
-      dataChannel.addEventListener("bufferedamountlow", () =>
-        console.log("datachannel bufferedamountlow")
-      );
-
-      dataChannel.addEventListener("message", (m) =>
-        console.log(
-          "secondary listener for data channel - message received\n",
-          m
-        )
-      );
+  // Set up a data channel
+  const dataChannel = rtcPeerConnection.createDataChannel(
+    "conference-data-channel",
+    {
+      ordered: true,
     }
   );
+
+  const onDataChannelMessage = ({ data }: MessageEvent) => {
+    let message: unknown;
+
+    try {
+      message = JSON.parse(data);
+    } catch (e) {
+      console.error(e);
+    }
+
+    if (
+      message &&
+      typeof message === "object" &&
+      "type" in message &&
+      message.type === "DominantSpeaker" &&
+      "endpoint" in message &&
+      typeof message.endpoint === "string"
+    ) {
+      dispatch({
+        type: "DOMINANT_SPEAKER",
+        payload: message.endpoint,
+      });
+    } else {
+      console.error("Unexpected data channel message structure");
+    }
+  };
+
+  // Listen for data channel messages to parse dominant speaker
+  dataChannel.addEventListener("message", onDataChannelMessage);
 
   // Promisified "icegatherstatechange" listener for use with async/await
   const iceGatheringComplete = (): Promise<void> =>
@@ -198,6 +193,8 @@ const establishConnection = ({
 
   return {
     teardown: () => {
+      dataChannel.removeEventListener("message", onDataChannelMessage);
+
       rtcPeerConnection.removeEventListener("track", onRtcTrack);
     },
   };
