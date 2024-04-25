@@ -11,6 +11,7 @@ export type TJoinProductionOptions = {
 export type TParticipant = {
   name: string;
   sessionid: string;
+  endpointid: string;
   isActive: boolean;
 };
 
