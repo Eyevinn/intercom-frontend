@@ -6,11 +6,17 @@ export type TGlobalStateAction =
   | TProductionListFetched
   | TUpdateDevicesAction
   | TUpdateJoinProductionOptions
+  | TDominantSpeaker
   | TMediaStream;
 
 export type TPublishError = {
   type: "ERROR";
   payload: Error | null;
+};
+
+export type TDominantSpeaker = {
+  type: "DOMINANT_SPEAKER";
+  payload: string;
 };
 
 export type TProductionCreated = {

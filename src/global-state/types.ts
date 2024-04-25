@@ -10,4 +10,5 @@ export type TGlobalState = {
   devices: MediaDeviceInfo[] | null;
   joinProductionOptions: TJoinProductionOptions | null;
   mediaStreamInput: MediaStream | null;
+  dominantSpeaker: string | null;
 };

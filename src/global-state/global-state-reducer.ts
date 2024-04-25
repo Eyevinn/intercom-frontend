@@ -9,12 +9,13 @@ const initialGlobalState: TGlobalState = {
   devices: null,
   joinProductionOptions: null,
   mediaStreamInput: null,
+  dominantSpeaker: null,
 };
 
 const globalReducer: Reducer<TGlobalState, TGlobalStateAction> = (
   state,
   action
-) => {
+): TGlobalState => {
   // Simple Debug
   // console.log(action.type, action.payload);
   switch (action.type) {
@@ -47,6 +48,11 @@ const globalReducer: Reducer<TGlobalState, TGlobalStateAction> = (
       return {
         ...state,
         mediaStreamInput: action.payload,
+      };
+    case "DOMINANT_SPEAKER":
+      return {
+        ...state,
+        dominantSpeaker: action.payload,
       };
     default:
       return state;
