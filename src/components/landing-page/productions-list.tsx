@@ -12,8 +12,12 @@ import { LocalError } from "../error.tsx";
 
 const ProductionListContainer = styled.div`
   display: flex;
-  padding: 2rem 0 2rem 2rem;
+  padding: 0 0 2rem 2rem;
   flex-wrap: wrap;
+`;
+
+const HeaderContainer = styled(DisplayContainer)`
+  padding: 0 2rem 0 2rem;
 `;
 
 const ProductionItem = styled.div`
@@ -106,9 +110,9 @@ export const ProductionsList = () => {
         className={showRefreshing ? "active" : "in-active"}
         text="refreshing"
       />
-      <DisplayContainer>
+      <HeaderContainer>
         <DisplayContainerHeader>Production List</DisplayContainerHeader>
-      </DisplayContainer>
+      </HeaderContainer>
       <ProductionListContainer>
         {error && <LocalError error={error} />}
         {!error &&
