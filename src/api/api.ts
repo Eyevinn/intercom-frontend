@@ -10,6 +10,7 @@ type TCreateProductionOptions = {
 type TParticipant = {
   name: string;
   sessionid: string;
+  endpointid: string;
   isActive: boolean;
 };
 
