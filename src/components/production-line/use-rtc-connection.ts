@@ -12,6 +12,7 @@ import { TJoinProductionOptions } from "./types.ts";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { TGlobalStateAction } from "../../global-state/global-state-actions.ts";
 import { TUseAudioInputValues } from "./use-audio-input.ts";
+import { startRtcStatInterval } from "./rtc-stat-interval.ts";
 
 type TRtcConnectionOptions = {
   inputAudioStream: TUseAudioInputValues;
@@ -191,11 +192,18 @@ const establishConnection = ({
     });
   });
 
+  const rtcStatIntervalTeardown = startRtcStatInterval({
+    rtcPeerConnection,
+    dispatch,
+  });
+
   return {
     teardown: () => {
       dataChannel.removeEventListener("message", onDataChannelMessage);
 
       rtcPeerConnection.removeEventListener("track", onRtcTrack);
+
+      rtcStatIntervalTeardown();
     },
   };
 };
