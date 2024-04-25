@@ -8,7 +8,7 @@ type TFormInputWithLoader = {
   placeholder: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   name: string;
-  ref: RefCallBack;
+  inputRef: RefCallBack;
   onBlur: ChangeHandler;
   type: string;
   loading: boolean;
@@ -23,7 +23,7 @@ export const FormInputWithLoader = ({
   placeholder,
   onChange,
   name,
-  ref,
+  inputRef,
   onBlur,
   type,
   loading,
@@ -36,7 +36,7 @@ export const FormInputWithLoader = ({
           className="with-loader"
           onChange={onChange}
           name={name}
-          ref={ref}
+          ref={inputRef}
           onBlur={onBlur}
           type={type}
           placeholder={placeholder}

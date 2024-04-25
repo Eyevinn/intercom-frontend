@@ -145,7 +145,7 @@ export const JoinProduction = ({ preSelected }: TProps) => {
                 label="Production ID"
                 placeholder="Production ID"
                 name={name}
-                ref={ref}
+                inputRef={ref}
                 onBlur={onBlur}
                 type="number"
                 loading={loading}
