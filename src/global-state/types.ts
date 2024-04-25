@@ -11,4 +11,5 @@ export type TGlobalState = {
   joinProductionOptions: TJoinProductionOptions | null;
   mediaStreamInput: MediaStream | null;
   dominantSpeaker: string | null;
+  audioLevelAboveThreshold: boolean;
 };

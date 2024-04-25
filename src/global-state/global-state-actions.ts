@@ -7,6 +7,7 @@ export type TGlobalStateAction =
   | TUpdateDevicesAction
   | TUpdateJoinProductionOptions
   | TDominantSpeaker
+  | TAudioLevel
   | TMediaStream;
 
 export type TPublishError = {
@@ -40,4 +41,9 @@ export type TUpdateJoinProductionOptions = {
 export type TMediaStream = {
   type: "CONNECTED_MEDIASTREAM";
   payload: MediaStream | null;
+};
+
+export type TAudioLevel = {
+  type: "AUDIO_LEVEL_ABOVE_THRESHOLD";
+  payload: boolean;
 };
