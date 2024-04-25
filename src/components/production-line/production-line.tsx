@@ -29,7 +29,7 @@ import { useCheckBadLineData } from "./use-check-bad-line-data.ts";
 import { NavigateToRootButton } from "../navigate-to-root-button/navigate-to-root-button.tsx";
 
 const TempDiv = styled.div`
-  padding: 1rem 0;
+  padding: 0 0 2rem 0;
 `;
 
 const HeaderWrapper = styled.div`
@@ -68,6 +68,11 @@ const LongPressWrapper = styled.div`
 
 const ButtonWrapper = styled.span`
   margin: 0 2rem 0 0;
+`;
+
+const ListWrapper = styled(DisplayContainer)`
+  width: 100%;
+  height: fit-content;
 `;
 
 export const ProductionLine: FC = () => {
@@ -268,7 +273,7 @@ export const ProductionLine: FC = () => {
                 )}
             </div>
           </DisplayContainer>
-          <DisplayContainer>
+          <ListWrapper>
             {line && (
               <UserList
                 sessionid={sessionId}
@@ -277,7 +282,7 @@ export const ProductionLine: FC = () => {
                 audioLevelAboveThreshold={audioLevelAboveThreshold}
               />
             )}
-          </DisplayContainer>
+          </ListWrapper>
         </FlexContainer>
       )}
     </>
