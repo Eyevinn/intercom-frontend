@@ -65,8 +65,10 @@ const ButtonWrapper = styled.span`
 
 export const ProductionLine: FC = () => {
   const { productionId: paramProductionId, lineId: paramLineId } = useParams();
-  const [{ joinProductionOptions, dominantSpeaker }, dispatch] =
-    useGlobalState();
+  const [
+    { joinProductionOptions, dominantSpeaker, audioLevelAboveThreshold },
+    dispatch,
+  ] = useGlobalState();
   const [isInputMuted, setIsInputMuted] = useState(true);
   const [isOutputMuted, setIsOutputMuted] = useState(false);
 
@@ -261,6 +263,7 @@ export const ProductionLine: FC = () => {
                 sessionid={sessionId}
                 participants={line.participants}
                 dominantSpeaker={dominantSpeaker}
+                audioLevelAboveThreshold={audioLevelAboveThreshold}
               />
             )}
           </DisplayContainer>
