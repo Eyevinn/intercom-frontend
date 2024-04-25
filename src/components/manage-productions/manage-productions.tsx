@@ -130,7 +130,7 @@ export const ManageProductions = () => {
         label="Production ID"
         placeholder="Production ID"
         name={name}
-        ref={ref}
+        inputRef={ref}
         onBlur={onBlur}
         type="number"
         loading={fetchLoader}
