@@ -25,7 +25,8 @@ const FetchErrorMessage = styled.div`
   background: ${errorColour};
   color: ${darkText};
   padding: 0.5rem;
-  margin: 1rem 0;
+  margin: 0 0 2rem;
+  border-radius: 0.5rem;
 `;
 
 const ButtonWrapper = styled.div`
