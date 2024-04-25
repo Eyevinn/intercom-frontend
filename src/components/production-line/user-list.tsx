@@ -15,10 +15,10 @@ const ListWrapper = styled.div`
 `;
 
 type TUserProps = {
-  firstPerson: boolean;
-  lastPerson: boolean;
-  onlyPerson: boolean;
   isYou: boolean;
+};
+
+type TIsTalkingIndicator = {
   isTalking: boolean;
 };
 
@@ -33,29 +33,33 @@ const User = styled.div<TUserProps>`
   padding: 1rem;
   color: #ddd;
   border: transparent;
+  border-bottom: 0.1rem solid #464646;
 
-  ${({ firstPerson }) => (firstPerson ? `border-radius: 1rem 1rem 0 0;` : "")}
+  &:first-of-type {
+    border-radius: 1rem 1rem 0 0;
+  }
 
-  ${({ lastPerson }) => (lastPerson ? `border-radius: 0 0 1rem 1rem;` : "")}
-
-${({ lastPerson, onlyPerson }) =>
-    lastPerson || onlyPerson
-      ? `border-bottom: 0;`
-      : `border-bottom: 0.1rem solid #464646;`}
-
-  ${({ onlyPerson }) => (onlyPerson ? `border-radius: 1rem;` : "")}
+  &:last-of-type {
+    border-radius: 0 0 1rem 1rem;
+    border-bottom: 0;
+  }
 
   ${({ isYou }) => (isYou ? `background: #353434;` : "")}
+`;
 
-  ${({ isTalking }) =>
-    `border-bottom: 0.5rem solid ${isTalking ? "#7be27b;" : "#353434;"}`}
+const IsTalkingIndicator = styled.div<TIsTalkingIndicator>`
+  width: 4rem;
+  height: 4rem;
+  border-radius: 5rem;
+  margin-right: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   ${({ isTalking }) =>
     isTalking
       ? `
-  border-top: 0.1rem solid #7be27b;
-  border-bottom: 0.1rem solid #7be27b;
-  border-right: 0.1rem solid #7be27b;
+  border: 0.3rem solid #ddd;
   `
       : ""}
 `;
@@ -64,7 +68,6 @@ const OnlineIndicator = styled.div<TIndicatorProps>`
   width: 2.5rem;
   height: 2.5rem;
   border-radius: 5rem;
-  margin-right: 1rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -95,22 +98,19 @@ export const UserList = ({
     <Container>
       <DisplayContainerHeader>Participants</DisplayContainerHeader>
       <ListWrapper>
-        {participants.map((p, i) => (
-          <User
-            key={p.sessionid}
-            firstPerson={i === 0 && i !== participants.length - 1}
-            lastPerson={i !== 0 && i === participants.length - 1}
-            onlyPerson={i === 0 && i === participants.length - 1}
-            isYou={p.sessionid === sessionid}
-            isTalking={
-              audioLevelAboveThreshold && p.endpointid === dominantSpeaker
-            }
-          >
-            <OnlineIndicator isActive={p.isActive}>
-              <IconWrapper>
-                <UserIcon />
-              </IconWrapper>
-            </OnlineIndicator>
+        {participants.map((p) => (
+          <User key={p.sessionid} isYou={p.sessionid === sessionid}>
+            <IsTalkingIndicator
+              isTalking={
+                audioLevelAboveThreshold && p.endpointid === dominantSpeaker
+              }
+            >
+              <OnlineIndicator isActive={p.isActive}>
+                <IconWrapper>
+                  <UserIcon />
+                </IconWrapper>
+              </OnlineIndicator>
+            </IsTalkingIndicator>
             {p.name} {p.isActive ? "" : "(inactive)"}
           </User>
         ))}
