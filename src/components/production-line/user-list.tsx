@@ -8,6 +8,7 @@ type TUserProps = {
   isYou: boolean;
   isActive: boolean;
   isTalking: boolean;
+  isDominant: boolean;
 };
 
 const User = styled.div<TUserProps>`
@@ -24,6 +25,9 @@ const User = styled.div<TUserProps>`
   ${({ isActive }) =>
     `border-left: 1rem solid ${isActive ? "#7be27b;" : "#ebca6a;"}`}
 
+  ${({ isDominant }) =>
+    `border-bottom: 0.5rem solid ${isDominant ? "#7be27b;" : "#353434;"}`}
+
   ${({ isTalking }) =>
     isTalking
       ? `
@@ -37,8 +41,13 @@ const User = styled.div<TUserProps>`
 type TUserListOptions = {
   participants: TParticipant[];
   sessionid: string | null;
+  dominantSpeaker: string | null;
 };
-export const UserList = ({ participants, sessionid }: TUserListOptions) => {
+export const UserList = ({
+  participants,
+  sessionid,
+  dominantSpeaker,
+}: TUserListOptions) => {
   if (!participants) return null;
 
   return (
@@ -49,6 +58,7 @@ export const UserList = ({ participants, sessionid }: TUserListOptions) => {
           key={p.sessionid}
           isYou={p.sessionid === sessionid}
           isActive={p.isActive}
+          isDominant={p.endpointid === dominantSpeaker}
           // TODO connect to rtc data channel to get talking session id
           isTalking={false}
         >
