@@ -2,13 +2,17 @@ import styled from "@emotion/styled";
 
 export const FormContainer = styled.form``;
 
+const sharedMargin = `margin: 0 0 2rem`;
+
 export const FormInput = styled.input`
   width: 100%;
   font-size: 1.6rem;
   padding: 0.5rem;
-  margin: 0 0 1rem;
-  border: 1px solid #6f6e6e;
+  margin: 0 0 2rem;
+  border: 0.1rem solid #6f6e6e;
   border-radius: 0.5rem;
+
+  ${sharedMargin};
 
   &.additional-line {
     padding-right: 3.5rem;
@@ -37,7 +41,8 @@ export const FormSelect = styled.select`
   width: 100%;
   font-size: 1.6rem;
   padding: 0.5rem;
-  margin: 0 0 1rem;
+  ${sharedMargin};
+
   border: 1px solid #6f6e6e;
   border-radius: 0.5rem;
 `;
@@ -63,7 +68,7 @@ export const StyledWarningMessage = styled.div`
   background: #ebca6a;
   border-radius: 0.5rem;
   color: #1a1a1a;
-  margin: 0 0 1rem;
+  ${sharedMargin};
   border: 1px solid #ebca6a;
   display: flex;
   align-items: center;
@@ -124,11 +129,10 @@ export const PrimaryButton = styled(ActionButton)`
   }
 
   &:not(:disabled):hover {
-    transform: scale(1.05);
   }
 
   &:not(:disabled):hover:active {
-    transform: scale(1.05) translateY(0.125rem);
+    transform: translateY(0.125rem);
   }
 
   &:focus {

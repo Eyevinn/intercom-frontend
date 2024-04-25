@@ -16,6 +16,7 @@ import { API } from "../../api/api.ts";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { Spinner } from "../loader/loader.tsx";
 import { RemoveIcon } from "../../assets/icons/icon.tsx";
+import { FlexContainer } from "../generic-components.ts";
 
 type FormValues = {
   productionName: string;
@@ -42,7 +43,10 @@ const ListItemWrapper = styled.div`
 `;
 
 const ButtonWrapper = styled.div`
-  margin: 2rem 0 2rem 0;
+  margin: 0 1rem 1rem 0;
+  :last-of-type {
+    margin: 0 0 1rem;
+  }
 `;
 
 const ProductionConfirmation = styled.div`
@@ -175,21 +179,23 @@ export const CreateProduction = () => {
           />
         </div>
       ))}
-      <ButtonWrapper>
-        <SecondaryButton type="button" onClick={() => append({ name: "" })}>
-          Add Line
-        </SecondaryButton>
-      </ButtonWrapper>
-      <ButtonWrapper>
-        <PrimaryButton
-          type="submit"
-          className={loading ? "with-loader" : ""}
-          onClick={handleSubmit(onSubmit)}
-        >
-          Create Production
-          {loading && <Spinner className="create-production" />}
-        </PrimaryButton>
-      </ButtonWrapper>
+      <FlexContainer>
+        <ButtonWrapper>
+          <SecondaryButton type="button" onClick={() => append({ name: "" })}>
+            Add Line
+          </SecondaryButton>
+        </ButtonWrapper>
+        <ButtonWrapper>
+          <PrimaryButton
+            type="submit"
+            className={loading ? "with-loader" : ""}
+            onClick={handleSubmit(onSubmit)}
+          >
+            Create Production
+            {loading && <Spinner className="create-production" />}
+          </PrimaryButton>
+        </ButtonWrapper>
+      </FlexContainer>
       {createdProductionId !== null && (
         <ProductionConfirmation>
           The production ID is: {createdProductionId.toString()}

@@ -5,7 +5,7 @@ import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { useAudioInput } from "./use-audio-input.ts";
 import { useRtcConnection } from "./use-rtc-connection.ts";
 import { useEstablishSession } from "./use-establish-session.ts";
-import { PrimaryButton } from "../landing-page/form-elements.tsx";
+import { SecondaryButton } from "../landing-page/form-elements.tsx";
 import { UserList } from "./user-list.tsx";
 import {
   MicMuted,
@@ -43,20 +43,27 @@ const SmallText = styled.span`
 `;
 
 const ButtonIcon = styled.div`
-  width: 2.5rem;
+  width: 3rem;
   display: inline-block;
   vertical-align: middle;
-  margin: 0 0.5rem 0 0;
+  margin: 0 auto;
 `;
 
-const UserControlBtn = styled(PrimaryButton)`
-  line-height: 2;
-  min-width: 12rem;
-  text-align: left;
+const FlexButtonWrapper = styled.div`
+  width: 50%;
+  padding: 0 2rem 2rem 0;
+
+  :last-of-type {
+    padding: 0 0 2rem 0;
+  }
+`;
+
+const UserControlBtn = styled(SecondaryButton)`
+  width: 100%;
 `;
 
 const LongPressWrapper = styled.div`
-  margin: 2rem 0 2rem 0;
+  margin: 0 0 2rem 0;
 `;
 
 const ButtonWrapper = styled.span`
@@ -200,32 +207,36 @@ export const ProductionLine: FC = () => {
           <DisplayContainer>
             <div>
               <DisplayContainerHeader>Controls</DisplayContainerHeader>
-              <TempDiv>
-                <UserControlBtn type="button" onClick={() => muteOutput()}>
-                  <ButtonIcon>
-                    {isOutputMuted ? <SpeakerOff /> : <SpeakerOn />}
-                  </ButtonIcon>
-                  {isOutputMuted ? "Muted" : "Unmuted"}
-                </UserControlBtn>
-              </TempDiv>
+
+              <FlexContainer>
+                <FlexButtonWrapper>
+                  <UserControlBtn type="button" onClick={() => muteOutput()}>
+                    <ButtonIcon>
+                      {isOutputMuted ? <SpeakerOff /> : <SpeakerOn />}
+                    </ButtonIcon>
+                  </UserControlBtn>
+                </FlexButtonWrapper>
+
+                {inputAudioStream && inputAudioStream !== "no-device" && (
+                  <FlexButtonWrapper>
+                    <UserControlBtn
+                      type="button"
+                      onClick={() => muteInput(!isInputMuted)}
+                    >
+                      <ButtonIcon>
+                        {isInputMuted ? <MicMuted /> : <MicUnmuted />}
+                      </ButtonIcon>
+                    </UserControlBtn>
+                  </FlexButtonWrapper>
+                )}
+              </FlexContainer>
 
               {inputAudioStream && inputAudioStream !== "no-device" && (
-                <TempDiv>
-                  <UserControlBtn
-                    type="button"
-                    onClick={() => muteInput(!isInputMuted)}
-                  >
-                    <ButtonIcon>
-                      {isInputMuted ? <MicMuted /> : <MicUnmuted />}
-                    </ButtonIcon>
-                    {isInputMuted ? "Muted" : "Unmuted"}
-                  </UserControlBtn>
-                  <LongPressWrapper>
-                    <LongPressToTalkButton
-                      setMicMute={(input: boolean) => setIsInputMuted(input)}
-                    />
-                  </LongPressWrapper>
-                </TempDiv>
+                <LongPressWrapper>
+                  <LongPressToTalkButton
+                    setMicMute={(input: boolean) => setIsInputMuted(input)}
+                  />
+                </LongPressWrapper>
               )}
 
               {deviceLabels?.inputLabel && (
