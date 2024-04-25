@@ -1,27 +1,18 @@
-import styled from "@emotion/styled";
-import MicMute from "./mic_off.svg";
-import MicUnmute from "./mic_on.svg";
-import Arrow from "./arrow_back.svg";
-import RemoveSvg from "./clear.svg";
-import VolumeOn from "./volume_on.svg";
-import VolumeOff from "./volume_off.svg";
+import MicMute from "./mic_off.svg?react";
+import MicUnmute from "./mic_on.svg?react";
+import Arrow from "./arrow_back.svg?react";
+import RemoveSvg from "./clear.svg?react";
+import VolumeOn from "./volume_on.svg?react";
+import VolumeOff from "./volume_off.svg?react";
 
-const Icon = styled.img`
-  width: 100%;
-  height: auto;
-  display: block;
-`;
+export const MicMuted = () => <MicMute />;
 
-export const MicMuted = () => <Icon src={MicMute} alt="off-microphone" />;
+export const MicUnmuted = () => <MicUnmute />;
 
-export const MicUnmuted = () => <Icon src={MicUnmute} alt="on-microphone" />;
+export const BackArrow = () => <Arrow />;
 
-export const BackArrow = () => <Icon src={Arrow} alt="arrow-left" />;
+export const RemoveIcon = () => <RemoveSvg />;
 
-export const RemoveIcon = () => <Icon src={RemoveSvg} alt="cross" />;
+export const SpeakerOff = () => <VolumeOff />;
 
-export const SpeakerOff = () => (
-  <Icon src={VolumeOff} alt="speaker-crossed-over" />
-);
-
-export const SpeakerOn = () => <Icon src={VolumeOn} alt="speaker" />;
+export const SpeakerOn = () => <VolumeOn />;

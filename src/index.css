@@ -172,10 +172,12 @@ body {
 }
 
 /* image size contstrained to container size */
-img {
+img,
+svg {
   /* max-width: 100%; */
   width: 100%;
   height: auto;
+  display: block;
 }
 
 #root {
