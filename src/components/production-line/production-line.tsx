@@ -51,10 +51,14 @@ const ButtonIcon = styled.div`
 
 const FlexButtonWrapper = styled.div`
   width: 50%;
-  padding: 0 2rem 2rem 0;
+  padding: 0 1rem 2rem 1rem;
+
+  :first-of-type {
+    padding-left: 0;
+  }
 
   :last-of-type {
-    padding: 0 0 2rem 0;
+    padding-right: 0;
   }
 `;
 
@@ -72,7 +76,21 @@ const ButtonWrapper = styled.span`
 
 const ListWrapper = styled(DisplayContainer)`
   width: 100%;
-  height: fit-content;
+`;
+
+const StateText = styled.span<{ state: string }>`
+  font-weight: 700;
+  color: ${({ state }) => {
+    console.log(state);
+    switch (state) {
+      case "connected":
+        return "#7be27b";
+      case "failed":
+        return "#f96c6c";
+      default:
+        return "#ddd";
+    }
+  }};
 `;
 
 export const ProductionLine: FC = () => {
@@ -198,7 +216,10 @@ export const ProductionLine: FC = () => {
       {joinProductionOptions && connectionState && (
         <FlexContainer>
           <DisplayContainer>
-            <TempDiv>Status: {connectionState}</TempDiv>
+            <span>
+              <strong>Status</strong>:{" "}
+              <StateText state={connectionState}>{connectionState}</StateText>
+            </span>
           </DisplayContainer>
         </FlexContainer>
       )}
@@ -209,8 +230,12 @@ export const ProductionLine: FC = () => {
 
       {joinProductionOptions && !loading && (
         <FlexContainer>
-          <DisplayContainer>
-            <div>
+          <ListWrapper>
+            <div
+              style={{
+                width: "100%",
+              }}
+            >
               <DisplayContainerHeader>Controls</DisplayContainerHeader>
 
               <FlexContainer>
@@ -270,7 +295,7 @@ export const ProductionLine: FC = () => {
                   </>
                 )}
             </div>
-          </DisplayContainer>
+          </ListWrapper>
           <ListWrapper>
             {line && (
               <UserList

@@ -81,7 +81,14 @@ export const LongPressToTalkButton = ({
         toggleMuteAfterTimeout(e);
       }}
     >
-      Press to Talk
+      <span
+        style={{
+          textAlign: "center",
+          width: "100%",
+        }}
+      >
+        Press to Talk
+      </span>
     </Button>
   );
 };
