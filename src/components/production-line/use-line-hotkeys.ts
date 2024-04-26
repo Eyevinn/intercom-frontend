@@ -1,11 +1,19 @@
 import { useHotkeys } from "react-hotkeys-hook";
 
-type TProps = {
+type TuseLineHotkeys = {
   muteInput: (mute: boolean) => void;
   isInputMuted: boolean;
 };
 
-export const useLineHotkeys = ({ muteInput, isInputMuted }: TProps) => {
+type TuseSpeakerHotkeys = {
+  muteOutput: (mute: boolean) => void;
+  isOutputMuted: boolean;
+};
+
+export const useLineHotkeys = ({
+  muteInput,
+  isInputMuted,
+}: TuseLineHotkeys) => {
   useHotkeys("m", () => {
     muteInput(!isInputMuted);
   });
@@ -24,4 +32,13 @@ export const useLineHotkeys = ({ muteInput, isInputMuted }: TProps) => {
       keydown: true,
     }
   );
+};
+
+export const useSpeakerHotkeys = ({
+  muteOutput,
+  isOutputMuted,
+}: TuseSpeakerHotkeys) => {
+  useHotkeys("n", () => {
+    muteOutput(!isOutputMuted);
+  });
 };
