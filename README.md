@@ -2,6 +2,8 @@
 
 User interface for web based intercom solution.
 
+Frontend application for [Intercom Manager](https://github.com/Eyevinn/intercom-manager/).
+
 ## Get Started
 
 Pre-requisites: Node v20, yarn
