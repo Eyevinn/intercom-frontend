@@ -7,7 +7,7 @@ import { LoaderDots } from "../loader/loader.tsx";
 import { useRefreshAnimation } from "./use-refresh-animation.ts";
 import { DisplayContainerHeader } from "./display-container-header.tsx";
 import { DisplayContainer } from "../generic-components.ts";
-import { ManageProductionButton } from "./manage-production-button.tsx";
+// import { ManageProductionButton } from "./manage-production-button.tsx";
 import { LocalError } from "../error.tsx";
 
 const ProductionListContainer = styled.div`
@@ -123,7 +123,7 @@ export const ProductionsList = () => {
             </ProductionItem>
           ))}
       </ProductionListContainer>
-      {!!productions.length && <ManageProductionButton />}
+      {/* --> TODO disabled for demo only! <-- !!productions.length && <ManageProductionButton /> */}
     </>
   );
 };
