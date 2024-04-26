@@ -20,7 +20,7 @@ import { useHeartbeat } from "./use-heartbeat.ts";
 import { JoinProduction } from "../landing-page/join-production.tsx";
 import { useDeviceLabels } from "./use-device-labels.ts";
 import { isMobile } from "../../bowser.ts";
-import { useLineHotkeys } from "./use-line-hotkeys.ts";
+import { useLineHotkeys, useSpeakerHotkeys } from "./use-line-hotkeys.ts";
 import { LongPressToTalkButton } from "./long-press-to-talk-button.tsx";
 import { useLinePolling } from "./use-line-polling.ts";
 import { useFetchProduction } from "../landing-page/use-fetch-production.ts";
@@ -150,6 +150,11 @@ export const ProductionLine: FC = () => {
     });
     setIsOutputMuted(!isOutputMuted);
   }, [audioElements, isOutputMuted]);
+
+  useSpeakerHotkeys({
+    muteOutput,
+    isOutputMuted,
+  });
 
   const line = useLinePolling({ joinProductionOptions });
 
@@ -288,6 +293,9 @@ export const ProductionLine: FC = () => {
                     </TempDiv>
                     <TempDiv>
                       <strong>M:</strong> Toggle Input Mute
+                    </TempDiv>
+                    <TempDiv>
+                      <strong>N:</strong> Toggle Output Mute
                     </TempDiv>
                     <TempDiv>
                       <strong>T:</strong> Push to Talk
