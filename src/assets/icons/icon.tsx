@@ -4,7 +4,7 @@ import Arrow from "./arrow_back.svg?react";
 import RemoveSvg from "./clear.svg?react";
 import VolumeOn from "./volume_on.svg?react";
 import VolumeOff from "./volume_off.svg?react";
-import UserSvg from "./user.svg";
+import UserSvg from "./user.svg?react";
 
 export const MicMuted = () => <MicMute />;
 
@@ -18,4 +18,4 @@ export const SpeakerOff = () => <VolumeOff />;
 
 export const SpeakerOn = () => <VolumeOn />;
 
-export const UserIcon = () => <img src={UserSvg} alt="person-outline" />;
+export const UserIcon = () => <UserSvg />;
