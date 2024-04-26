@@ -238,9 +238,7 @@ export const ProductionLine: FC = () => {
 
               {inputAudioStream && inputAudioStream !== "no-device" && (
                 <LongPressWrapper>
-                  <LongPressToTalkButton
-                    setMicMute={(input: boolean) => setIsInputMuted(input)}
-                  />
+                  <LongPressToTalkButton muteInput={muteInput} />
                 </LongPressWrapper>
               )}
 
