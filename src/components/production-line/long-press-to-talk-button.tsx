@@ -4,7 +4,7 @@ import { PrimaryButton } from "../landing-page/form-elements";
 import { isMobile } from "../../bowser";
 
 type TLongPressToTalkButton = {
-  setMicMute: (input: boolean) => void;
+  muteInput: (input: boolean) => void;
 };
 
 const Button = styled(PrimaryButton)`
@@ -31,7 +31,7 @@ const Button = styled(PrimaryButton)`
 `;
 
 export const LongPressToTalkButton = ({
-  setMicMute,
+  muteInput,
 }: TLongPressToTalkButton) => {
   const [isToggled, setIsToggled] = useState(false);
   const [longPressTimeout, setLongPressTimeout] =
@@ -55,14 +55,14 @@ export const LongPressToTalkButton = ({
     switch (e.type) {
       case "pointerdown":
         timeoutId = setTimeout(() => {
-          setMicMute(false);
+          muteInput(false);
           setIsToggled(true);
         }, 300);
         setLongPressTimeout(timeoutId);
         break;
       case "pointerup":
         setIsToggled(false);
-        setMicMute(true);
+        muteInput(true);
         clearTimeout(longPressTimeout);
         break;
       default:
