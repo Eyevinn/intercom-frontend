@@ -19,6 +19,7 @@ type TRtcConnectionOptions = {
   sdpOffer: string | null;
   joinProductionOptions: TJoinProductionOptions | null;
   sessionId: string | null;
+  onEnterNotificationSound: HTMLAudioElement;
 };
 
 type TEstablishConnection = {
@@ -211,6 +212,7 @@ export const useRtcConnection = ({
   sdpOffer,
   joinProductionOptions,
   sessionId,
+  onEnterNotificationSound,
 }: TRtcConnectionOptions) => {
   const [rtcPeerConnection] = useState<RTCPeerConnection>(
     () => new RTCPeerConnection()
@@ -258,6 +260,9 @@ export const useRtcConnection = ({
 
     const onConnectionStateChange = () => {
       setConnectionState(rtcPeerConnection.connectionState);
+      if (rtcPeerConnection.connectionState === "connected") {
+        onEnterNotificationSound.play();
+      }
     };
 
     rtcPeerConnection.addEventListener(
@@ -310,6 +315,7 @@ export const useRtcConnection = ({
     joinProductionOptions,
     rtcPeerConnection,
     dispatch,
+    onEnterNotificationSound,
   ]);
 
   // Debug hook for logging RTC events TODO remove
