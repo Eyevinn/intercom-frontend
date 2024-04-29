@@ -68,6 +68,7 @@ const UserControlBtn = styled(SecondaryButton)`
 
 const LongPressWrapper = styled.div`
   margin: 0 0 2rem 0;
+  touch-action: none;
 `;
 
 const ButtonWrapper = styled.span`
