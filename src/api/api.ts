@@ -1,6 +1,7 @@
 import { handleFetchRequest } from "./handle-fetch-request.ts";
 
-const API_URL = import.meta.env.VITE_BACKEND_URL ?? "";
+const API_URL =
+  import.meta.env.VITE_BACKEND_URL ?? `${window.location.origin}/api/v1/`;
 
 type TCreateProductionOptions = {
   name: string;
