@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { FC, useCallback, useEffect, useMemo, useState } from "react";
+import { FC, useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { useAudioInput } from "./use-audio-input.ts";
@@ -27,9 +27,7 @@ import { useFetchProduction } from "../landing-page/use-fetch-production.ts";
 import { useIsLoading } from "./use-is-loading.ts";
 import { useCheckBadLineData } from "./use-check-bad-line-data.ts";
 import { NavigateToRootButton } from "../navigate-to-root-button/navigate-to-root-button.tsx";
-// TODO update audio to non-questionable-licensed-audio
-import connectionStart from "../../assets/sounds/start-connection.mp3";
-import connectionStop from "../../assets/sounds/stop-connection.mp3";
+import { useAudioCue } from "./use-audio-cue.ts";
 
 const TempDiv = styled.div`
   padding: 0 0 2rem 0;
@@ -105,18 +103,7 @@ export const ProductionLine: FC = () => {
   ] = useGlobalState();
   const [isInputMuted, setIsInputMuted] = useState(true);
   const [isOutputMuted, setIsOutputMuted] = useState(false);
-
-  const onEnterNotificationSound = useMemo(() => {
-    const audio = new Audio(connectionStart);
-    audio.load();
-    return audio;
-  }, []);
-
-  const onExitNotificationSound = useMemo(() => {
-    const audio = new Audio(connectionStop);
-    audio.load();
-    return audio;
-  }, []);
+  const [enterEffect, setEnterEffect] = useState(true);
 
   const inputAudioStream = useAudioInput({
     inputId: joinProductionOptions?.audioinput ?? null,
@@ -135,13 +122,15 @@ export const ProductionLine: FC = () => {
     [inputAudioStream]
   );
 
+  const { playEnterSound, playExitSound } = useAudioCue();
+
   const exit = useCallback(() => {
-    onExitNotificationSound.play();
+    playExitSound();
     dispatch({
       type: "UPDATE_JOIN_PRODUCTION_OPTIONS",
       payload: null,
     });
-  }, [dispatch, onExitNotificationSound]);
+  }, [dispatch, playExitSound]);
 
   useLineHotkeys({
     muteInput,
@@ -158,8 +147,14 @@ export const ProductionLine: FC = () => {
     sdpOffer,
     joinProductionOptions,
     sessionId,
-    onEnterNotificationSound,
   });
+
+  useEffect(() => {
+    if (connectionState === "connected" && enterEffect) {
+      playEnterSound();
+      setEnterEffect(false);
+    }
+  }, [connectionState, enterEffect, playEnterSound]);
 
   const muteOutput = useCallback(() => {
     audioElements.forEach((singleElement: HTMLAudioElement) => {
