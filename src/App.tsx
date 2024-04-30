@@ -9,15 +9,38 @@ import { GlobalStateContext } from "./global-state/context-provider.tsx";
 import { Header } from "./components/header.tsx";
 import { ErrorBanner } from "./components/error";
 import { useFetchDevices } from "./use-fetch-devices.ts";
-import { FlexContainer } from "./components/generic-components.ts";
+import {
+  DisplayContainer,
+  FlexContainer,
+} from "./components/generic-components.ts";
 import { DisplayWarning } from "./components/display-box.tsx";
 import { ManageProductions } from "./components/manage-productions/manage-productions.tsx";
+import { DisplayContainerHeader } from "./components/landing-page/display-container-header.tsx";
+import { NavigateToRootButton } from "./components/navigate-to-root-button/navigate-to-root-button.tsx";
 
 const DisplayBoxPositioningContainer = styled(FlexContainer)`
   justify-content: center;
   align-items: center;
   padding-top: 12rem;
 `;
+
+const ButtonWrapper = styled.div`
+  margin: 0 2rem 2rem;
+  display: inline-block;
+`;
+
+const NotFound = () => {
+  return (
+    <DisplayContainer>
+      <DisplayContainerHeader>
+        <ButtonWrapper>
+          <NavigateToRootButton />
+        </ButtonWrapper>
+        Page not found.
+      </DisplayContainerHeader>
+    </DisplayContainer>
+  );
+};
 
 const App = () => {
   const { denied, permission } = useDevicePermissions();
@@ -71,6 +94,7 @@ const App = () => {
               element={<ProductionLine />}
               errorElement={<ErrorPage />}
             />
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
       )}
