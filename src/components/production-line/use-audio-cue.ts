@@ -4,24 +4,24 @@ import connectionStart from "../../assets/sounds/start-connection.mp3";
 import connectionStop from "../../assets/sounds/stop-connection.mp3";
 
 export const useAudioCue = () => {
-  const onEnterNotificationSound = useMemo(() => {
+  const playEnterSound = useMemo(() => {
     const audio = new Audio(connectionStart);
     audio.load();
-    return audio;
+    return () => {
+      audio.play();
+    };
   }, []);
 
-  const onExitNotificationSound = useMemo(() => {
+  const playExitSound = useMemo(() => {
     const audio = new Audio(connectionStop);
     audio.load();
-    return audio;
+    return () => {
+      audio.play();
+    };
   }, []);
 
   return {
-    playEnterSound: () => {
-      onEnterNotificationSound.play();
-    },
-    playExitSound: () => {
-      onExitNotificationSound.play();
-    },
+    playEnterSound,
+    playExitSound,
   };
 };
