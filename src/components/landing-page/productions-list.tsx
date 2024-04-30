@@ -61,8 +61,6 @@ export const ProductionsList = () => {
             result
               // pick laste 10 items
               .slice(-10)
-              // display in reverse order
-              .toReversed()
           );
 
           dispatch({
