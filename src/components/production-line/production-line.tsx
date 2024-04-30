@@ -83,7 +83,6 @@ const ListWrapper = styled(DisplayContainer)`
 const StateText = styled.span<{ state: string }>`
   font-weight: 700;
   color: ${({ state }) => {
-    console.log(state);
     switch (state) {
       case "connected":
         return "#7be27b";
@@ -103,7 +102,6 @@ export const ProductionLine: FC = () => {
   ] = useGlobalState();
   const [isInputMuted, setIsInputMuted] = useState(true);
   const [isOutputMuted, setIsOutputMuted] = useState(false);
-  const [enterEffect, setEnterEffect] = useState(true);
 
   const inputAudioStream = useAudioInput({
     inputId: joinProductionOptions?.audioinput ?? null,
@@ -150,11 +148,10 @@ export const ProductionLine: FC = () => {
   });
 
   useEffect(() => {
-    if (connectionState === "connected" && enterEffect) {
+    if (connectionState === "connected") {
       playEnterSound();
-      setEnterEffect(false);
     }
-  }, [connectionState, enterEffect, playEnterSound]);
+  }, [connectionState, playEnterSound]);
 
   const muteOutput = useCallback(() => {
     audioElements.forEach((singleElement: HTMLAudioElement) => {
