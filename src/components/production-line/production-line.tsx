@@ -120,6 +120,13 @@ export const ProductionLine: FC = () => {
     [inputAudioStream]
   );
 
+  const exit = useCallback(() => {
+    dispatch({
+      type: "UPDATE_JOIN_PRODUCTION_OPTIONS",
+      payload: null,
+    });
+  }, [dispatch]);
+
   useLineHotkeys({
     muteInput,
     isInputMuted,
@@ -189,7 +196,7 @@ export const ProductionLine: FC = () => {
     <>
       <HeaderWrapper>
         <ButtonWrapper>
-          <NavigateToRootButton resetOnExit />
+          <NavigateToRootButton resetOnExit={exit} />
         </ButtonWrapper>
         {!loading && production && line && (
           <DisplayContainerHeader>
