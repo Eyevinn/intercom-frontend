@@ -58,10 +58,11 @@ const App = () => {
 
   return (
     <GlobalStateContext.Provider value={initializedGlobalState}>
-      <Header />
-      <ErrorBanner />
+      <BrowserRouter>
+        <Header />
+        <ErrorBanner />
 
-      {!isValidBrowser && !unsupportedContinue && (
+        {!isValidBrowser && !unsupportedContinue && (
         <DisplayBoxPositioningContainer>
           <DisplayWarning
             text={
@@ -84,46 +85,47 @@ const App = () => {
       {continueToApp && (
         <>
           {denied && (
-            <DisplayBoxPositioningContainer>
-              <DisplayWarning
-                text="To use this application it has to be granted access to audio devices. Reload browser and/or reset permissions to try
+              <DisplayBoxPositioningContainer>
+                <DisplayWarning
+                  text="To use this application it has to be granted access to audio devices. Reload browser and/or reset permissions to try
             again."
-                title="Permissions have been denied"
-              />
-            </DisplayBoxPositioningContainer>
-          )}
-          {!permission && !denied && (
-            <DisplayBoxPositioningContainer>
-              <DisplayWarning
-                text="To use this application it has to be granted access to audio devices."
-                title="Waiting for device permissions"
-              />
-            </DisplayBoxPositioningContainer>
-          )}
-          {permission && !denied && (
-            <BrowserRouter>
-              <Routes>
-                <Route
-                  path="/"
-                  element={<LandingPage />}
-                  errorElement={<ErrorPage />}
+                  title="Permissions have been denied"
                 />
-                <Route
-                  path="/manage-productions"
-                  element={<ManageProductions />}
-                  errorElement={<ErrorPage />}
+              </DisplayBoxPositioningContainer>
+            )}
+            {!permission && !denied && (
+              <DisplayBoxPositioningContainer>
+                <DisplayWarning
+                  text="To use this application it has to be granted access to audio devices."
+                  title="Waiting for device permissions"
                 />
-                <Route
-                  path="/production/:productionId/line/:lineId"
-                  element={<ProductionLine />}
-                  errorElement={<ErrorPage />}
-                />
-                <Route path="*" element={<NotFound />} />
+              </DisplayBoxPositioningContainer>
+            )}
+            {permission && !denied && (
+                  <Routes>
+            <>
+                  <Route
+                    path="/"
+                    element={<LandingPage />}
+                    errorElement={<ErrorPage />}
+                  />
+                  <Route
+                    path="/manage-productions"
+                    element={<ManageProductions />}
+                    errorElement={<ErrorPage />}
+                  />
+                  <Route
+                    path="/production/:productionId/line/:lineId"
+                    element={<ProductionLine />}
+                    errorElement={<ErrorPage />}
+                  />
+                  <Route path="*" element={<NotFound />} />
+            </>
               </Routes>
-            </BrowserRouter>
+        )}
+          </BrowserRouter>
           )}
         </>
-      )}
     </GlobalStateContext.Provider>
   );
 };
