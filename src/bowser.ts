@@ -7,8 +7,8 @@ const browser = Bowser.getParser(window.navigator.userAgent);
 export const isMobile = deviceInfo.platform.type === "mobile";
 
 export const isValidBrowser = browser.satisfies({
-  chrome: ">=80",
-  edge: ">=80",
+  chrome: ">=115",
+  edge: ">=115",
   firefox: ">=113",
   safari: ">=16.4",
   samsung: ">=21",
