@@ -16,7 +16,7 @@ import {
 } from "./components/generic-components.ts";
 import { DisplayWarning } from "./components/display-box.tsx";
 import { ManageProductions } from "./components/manage-productions/manage-productions.tsx";
-import { useCheckForSupportedBrowser } from "./use-check-for-supported-browser.ts";
+import { isValidBrowser } from "./bowser.ts";
 import { DisplayContainerHeader } from "./components/landing-page/display-container-header.tsx";
 import { NavigateToRootButton } from "./components/navigate-to-root-button/navigate-to-root-button.tsx";
 
@@ -45,14 +45,11 @@ const NotFound = () => {
 };
 
 const App = () => {
-  const { browserSupported, browserUpdated } = useCheckForSupportedBrowser();
-  const { denied, permission } = useDevicePermissions();
+  const [unsupportedContinue, setUnsupportedContinue] = useState(false);
+  const continueToApp = isValidBrowser || unsupportedContinue;
+  const { denied, permission } = useDevicePermissions({ continueToApp });
   const initializedGlobalState = useInitializeGlobalStateReducer();
   const [, dispatch] = initializedGlobalState;
-  const [unsupportedContinue, setUnsupportedContinue] = useState(false);
-
-  const continueToApp =
-    (browserSupported && browserUpdated) || unsupportedContinue;
 
   useFetchDevices({
     dispatch,
@@ -64,21 +61,12 @@ const App = () => {
       <Header />
       <ErrorBanner />
 
-      {!browserSupported && !unsupportedContinue && (
+      {!isValidBrowser && !unsupportedContinue && (
         <DisplayBoxPositioningContainer>
           <DisplayWarning
-            text="To use this application it is recommended to use one of the following browsers: Chrome, Windows Edge, Firefox or Safari."
+            text="To use this application it is recommended to use one of the following browsers: Chrome, Edge, Firefox or Safari.
+            If you are using one of the recommended browsers, then it is an older version and  should be updated before continuing."
             title="Browser not supported"
-            btn={() => setUnsupportedContinue(true)}
-          />
-        </DisplayBoxPositioningContainer>
-      )}
-
-      {browserSupported && !browserUpdated && !unsupportedContinue && (
-        <DisplayBoxPositioningContainer>
-          <DisplayWarning
-            text="To use this application we recommend using a newer version of your browser, please update and try again."
-            title="Browser to old"
             btn={() => setUnsupportedContinue(true)}
           />
         </DisplayBoxPositioningContainer>
