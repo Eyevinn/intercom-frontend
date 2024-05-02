@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { BackArrow } from "../../assets/icons/icon";
 import { PrimaryButton } from "../landing-page/form-elements";
 import { useGlobalState } from "../../global-state/context-provider";
@@ -22,10 +22,6 @@ export const NavigateToRootButton = ({
   const [, dispatch] = useGlobalState();
   const navigate = useNavigate();
 
-  const location = useLocation();
-
-  const isHome = location.pathname === "/";
-
   const reset = () => {
     dispatch({
       type: "UPDATE_JOIN_PRODUCTION_OPTIONS",
@@ -42,7 +38,6 @@ export const NavigateToRootButton = ({
         }
         navigate("/");
       }}
-      disabled={isHome}
     >
       {!header ? <BackArrow /> : children}
     </StyledBackBtn>
