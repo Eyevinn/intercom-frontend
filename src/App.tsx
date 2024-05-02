@@ -63,32 +63,32 @@ const App = () => {
         <ErrorBanner />
 
         {!isValidBrowser && !unsupportedContinue && (
-        <DisplayBoxPositioningContainer>
-          <DisplayWarning
-            text={
-              <>
-                <p>
-                  To use this application it is recommended to use one of the
-                  following browsers: Chrome, Edge, Firefox or Safari.
-                </p>
-                <p>
-                  If you are using one of the recommended browsers, then it is
-                  an older version and should be updated before continuing.
-                </p>
-              </>
-            }
-            title="Browser not supported"
-            btn={() => setUnsupportedContinue(true)}
-          />
-        </DisplayBoxPositioningContainer>
-      )}
-      {continueToApp && (
-        <>
-          {denied && (
+          <DisplayBoxPositioningContainer>
+            <DisplayWarning
+              text={
+                <>
+                  <p>
+                    To use this application it is recommended to use one of the
+                    following browsers: Chrome, Edge, Firefox or Safari.
+                  </p>
+                  <p>
+                    If you are using one of the recommended browsers, then it is
+                    an older version and should be updated before continuing.
+                  </p>
+                </>
+              }
+              title="Browser not supported"
+              btn={() => setUnsupportedContinue(true)}
+            />
+          </DisplayBoxPositioningContainer>
+        )}
+        {continueToApp && (
+          <>
+            {denied && (
               <DisplayBoxPositioningContainer>
                 <DisplayWarning
                   text="To use this application it has to be granted access to audio devices. Reload browser and/or reset permissions to try
-            again."
+              again."
                   title="Permissions have been denied"
                 />
               </DisplayBoxPositioningContainer>
@@ -102,8 +102,8 @@ const App = () => {
               </DisplayBoxPositioningContainer>
             )}
             {permission && !denied && (
-                  <Routes>
-            <>
+              <Routes>
+                <>
                   <Route
                     path="/"
                     element={<LandingPage />}
@@ -120,12 +120,12 @@ const App = () => {
                     errorElement={<ErrorPage />}
                   />
                   <Route path="*" element={<NotFound />} />
-            </>
+                </>
               </Routes>
+            )}
+          </>
         )}
-          </BrowserRouter>
-          )}
-        </>
+      </BrowserRouter>
     </GlobalStateContext.Provider>
   );
 };
