@@ -118,7 +118,7 @@ const App = () => {
                   element={<ProductionLine />}
                   errorElement={<ErrorPage />}
                 />
-            <Route path="*" element={<NotFound />} />
+                <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>
           )}
