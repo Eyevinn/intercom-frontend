@@ -1,7 +1,8 @@
 import styled from "@emotion/styled";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { BackArrow } from "../../assets/icons/icon";
 import { PrimaryButton } from "../landing-page/form-elements";
+import { useGlobalState } from "../../global-state/context-provider";
 
 const StyledBackBtn = styled(PrimaryButton)`
   padding: 0;
@@ -10,23 +11,40 @@ const StyledBackBtn = styled(PrimaryButton)`
 `;
 
 export const NavigateToRootButton = ({
+  children,
   resetOnExit,
+  header,
 }: {
-  resetOnExit?: () => void;
+  children?: React.ReactNode;
+  resetOnExit?: boolean;
+  header?: boolean;
 }) => {
+  const [, dispatch] = useGlobalState();
   const navigate = useNavigate();
+
+  const location = useLocation();
+
+  const isHome = location.pathname === "/";
+
+  const reset = () => {
+    dispatch({
+      type: "UPDATE_JOIN_PRODUCTION_OPTIONS",
+      payload: null,
+    });
+  };
 
   return (
     <StyledBackBtn
       type="button"
       onClick={() => {
         if (resetOnExit) {
-          resetOnExit();
+          reset();
         }
         navigate("/");
       }}
+      disabled={isHome}
     >
-      <BackArrow />
+      {!header ? <BackArrow /> : children}
     </StyledBackBtn>
   );
 };
