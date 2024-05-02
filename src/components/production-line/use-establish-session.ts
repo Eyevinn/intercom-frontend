@@ -34,7 +34,7 @@ export const useEstablishSession = ({
       .then((response) => {
         if (aborted) return;
 
-        setSessionId(response.sessionid);
+        setSessionId(response.sessionId);
         setSdpOffer(response.sdp);
       })
       .catch((e) => {
@@ -57,14 +57,9 @@ export const useEstablishSession = ({
     () => () => {
       if (!joinProductionOptions) return;
 
-      const productionId = parseInt(joinProductionOptions.productionId, 10);
-      const lineId = parseInt(joinProductionOptions.lineId, 10);
-
       if (sessionId) {
         API.deleteAudioSession({
           sessionId,
-          productionId,
-          lineId,
         }).catch(console.error);
       }
     },

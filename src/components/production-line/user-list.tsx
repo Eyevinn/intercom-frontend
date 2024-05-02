@@ -81,14 +81,14 @@ const IconWrapper = styled.div`
 
 type TUserListOptions = {
   participants: TParticipant[];
-  sessionid: string | null;
+  sessionId: string | null;
   dominantSpeaker: string | null;
   audioLevelAboveThreshold: boolean;
 };
 
 export const UserList = ({
   participants,
-  sessionid,
+  sessionId,
   dominantSpeaker,
   audioLevelAboveThreshold,
 }: TUserListOptions) => {
@@ -99,10 +99,10 @@ export const UserList = ({
       <DisplayContainerHeader>Participants</DisplayContainerHeader>
       <ListWrapper>
         {participants.map((p) => (
-          <User key={p.sessionid} isYou={p.sessionid === sessionid}>
+          <User key={p.sessionId} isYou={p.sessionId === sessionId}>
             <IsTalkingIndicator
               isTalking={
-                audioLevelAboveThreshold && p.endpointid === dominantSpeaker
+                audioLevelAboveThreshold && p.endpointId === dominantSpeaker
               }
             >
               <OnlineIndicator isActive={p.isActive}>

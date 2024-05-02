@@ -85,7 +85,7 @@ export const CreateProduction = () => {
       lines: [{ name: value.defaultLine }, ...value.lines],
     })
       .then((v) => {
-        setCreatedProductionId(v.productionid);
+        setCreatedProductionId(v.productionId);
         setLoading(false);
       })
       .catch((error) => {

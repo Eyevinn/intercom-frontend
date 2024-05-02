@@ -10,21 +10,21 @@ type TCreateProductionOptions = {
 
 type TParticipant = {
   name: string;
-  sessionid: string;
-  endpointid: string;
+  sessionId: string;
+  endpointId: string;
   isActive: boolean;
 };
 
 type TLine = {
   name: string;
   id: string;
-  smbconferenceid: string;
+  smbConferenceId: string;
   participants: TParticipant[];
 };
 
 type TBasicProductionResponse = {
   name: string;
-  productionid: string;
+  productionId: string;
 };
 
 type TFetchProductionResponse = TBasicProductionResponse & {
@@ -41,12 +41,10 @@ type TOfferAudioSessionOptions = {
 
 type TOfferAudioSessionResponse = {
   sdp: string;
-  sessionid: string;
+  sessionId: string;
 };
 
 type TPatchAudioSessionOptions = {
-  productionId: number;
-  lineId: number;
   sessionId: string;
   sdpAnswer: string;
 };
@@ -54,8 +52,6 @@ type TPatchAudioSessionOptions = {
 type TPatchAudioSessionResponse = null;
 
 type TDeleteAudioSessionOptions = {
-  productionId: number;
-  lineId: number;
   sessionId: string;
 };
 
@@ -79,23 +75,23 @@ export const API = {
     ),
   listProductions: (): Promise<TListProductionsResponse> =>
     handleFetchRequest<TListProductionsResponse>(
-      fetch(`${API_URL}productions/`, { method: "GET" })
+      fetch(`${API_URL}production/`, { method: "GET" })
     ),
   fetchProduction: (id: number): Promise<TFetchProductionResponse> =>
     handleFetchRequest<TFetchProductionResponse>(
-      fetch(`${API_URL}productions/${id}`, { method: "GET" })
+      fetch(`${API_URL}production/${id}`, { method: "GET" })
     ),
   deleteProduction: (id: number): Promise<string> =>
     handleFetchRequest<string>(
-      fetch(`${API_URL}productions/${id}`, { method: "DELETE" })
+      fetch(`${API_URL}production/${id}`, { method: "DELETE" })
     ),
   listProductionLines: (id: number) =>
     handleFetchRequest<TLine[]>(
-      fetch(`${API_URL}productions/${id}/lines`, { method: "GET" })
+      fetch(`${API_URL}production/${id}/line`, { method: "GET" })
     ),
   fetchProductionLine: (productionId: number, lineId: number): Promise<TLine> =>
     handleFetchRequest<TLine>(
-      fetch(`${API_URL}productions/${productionId}/lines/${lineId}`, {
+      fetch(`${API_URL}production/${productionId}/line/${lineId}`, {
         method: "GET",
       })
     ),
@@ -105,36 +101,38 @@ export const API = {
     username,
   }: TOfferAudioSessionOptions): Promise<TOfferAudioSessionResponse> =>
     handleFetchRequest<TOfferAudioSessionResponse>(
-      fetch(
-        `${API_URL}productions/${productionId}/lines/${lineId}/users/${username}`,
-        { method: "POST" }
-      )
+      fetch(`${API_URL}session/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          productionId,
+          lineId,
+          username,
+        }),
+      })
     ),
   patchAudioSession: ({
-    productionId,
-    lineId,
     sessionId,
     sdpAnswer,
   }: TPatchAudioSessionOptions): Promise<TPatchAudioSessionResponse> =>
     handleFetchRequest<TPatchAudioSessionResponse>(
-      fetch(
-        `${API_URL}productions/${productionId}/lines/${lineId}/session/${sessionId}`,
-        {
-          method: "PATCH",
-          body: sdpAnswer,
-        }
-      )
+      fetch(`${API_URL}session/${sessionId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          sdpAnswer,
+        }),
+      })
     ),
   deleteAudioSession: ({
-    productionId,
-    lineId,
     sessionId,
   }: TDeleteAudioSessionOptions): Promise<string> =>
     handleFetchRequest<string>(
-      fetch(
-        `${API_URL}productions/${productionId}/lines/${lineId}/session/${sessionId}`,
-        { method: "DELETE" }
-      )
+      fetch(`${API_URL}session/${sessionId}`, { method: "DELETE" })
     ),
   heartbeat: ({ sessionId }: THeartbeatOptions): Promise<string> =>
     handleFetchRequest<string>(
