@@ -10,8 +10,8 @@ export type TJoinProductionOptions = {
 
 export type TParticipant = {
   name: string;
-  sessionid: string;
-  endpointid: string;
+  sessionId: string;
+  endpointId: string;
   isActive: boolean;
 };
 
@@ -23,7 +23,7 @@ export type TLine = {
 
 export type TBasicProduction = {
   name: string;
-  productionid: string;
+  productionId: string;
 };
 
 export type TProduction = TBasicProduction & {

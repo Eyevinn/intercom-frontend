@@ -308,7 +308,7 @@ export const ProductionLine: FC = () => {
           <ListWrapper>
             {line && (
               <UserList
-                sessionid={sessionId}
+                sessionId={sessionId}
                 participants={line.participants}
                 dominantSpeaker={dominantSpeaker}
                 audioLevelAboveThreshold={audioLevelAboveThreshold}

@@ -173,8 +173,6 @@ const establishConnection = ({
     console.log("sdp PATCH sent");
 
     await API.patchAudioSession({
-      productionId: parseInt(joinProductionOptions.productionId, 10),
-      lineId: parseInt(joinProductionOptions.lineId, 10),
       sessionId,
       sdpAnswer: sdpAnswer.sdp,
     });

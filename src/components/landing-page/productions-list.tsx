@@ -115,9 +115,9 @@ export const ProductionsList = () => {
         {error && <LocalError error={error} />}
         {!error &&
           productions.map((p) => (
-            <ProductionItem key={p.productionid}>
+            <ProductionItem key={p.productionId}>
               <ProductionName>{p.name}</ProductionName>
-              <ProductionId>{p.productionid}</ProductionId>
+              <ProductionId>{p.productionId}</ProductionId>
             </ProductionItem>
           ))}
       </ProductionListContainer>
