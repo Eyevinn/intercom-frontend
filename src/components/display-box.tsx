@@ -28,7 +28,11 @@ const DisplayBoxButton = styled(PrimaryButton)`
   margin: 1rem;
 `;
 
-type TDisplayWarning = { text: string; title?: string; btn?: () => void };
+type TDisplayWarning = {
+  text: string | JSX.Element;
+  title?: string;
+  btn?: () => void;
+};
 
 export const DisplayWarning = ({ text, title, btn }: TDisplayWarning) => {
   return (

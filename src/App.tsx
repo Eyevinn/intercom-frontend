@@ -64,8 +64,18 @@ const App = () => {
       {!isValidBrowser && !unsupportedContinue && (
         <DisplayBoxPositioningContainer>
           <DisplayWarning
-            text="To use this application it is recommended to use one of the following browsers: Chrome, Edge, Firefox or Safari.
-            If you are using one of the recommended browsers, then it is an older version and  should be updated before continuing."
+            text={
+              <>
+                <p>
+                  To use this application it is recommended to use one of the
+                  following browsers: Chrome, Edge, Firefox or Safari.
+                </p>
+                <p>
+                  If you are using one of the recommended browsers, then it is
+                  an older version and should be updated before continuing.
+                </p>
+              </>
+            }
             title="Browser not supported"
             btn={() => setUnsupportedContinue(true)}
           />
