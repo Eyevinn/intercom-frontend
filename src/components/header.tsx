@@ -34,5 +34,5 @@ export const Header: FC = () => {
       navigate("/");
     }
   };
-  return <HeaderWrapper onClick={() => returnToRoot()}>Intercom</HeaderWrapper>;
+  return <HeaderWrapper onClick={returnToRoot}>Intercom</HeaderWrapper>;
 };
