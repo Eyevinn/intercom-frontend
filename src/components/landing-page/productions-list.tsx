@@ -1,7 +1,5 @@
 import styled from "@emotion/styled";
-import { useEffect, useState } from "react";
-import { API } from "../../api/api.ts";
-import { TBasicProduction } from "../production-line/types.ts";
+import { useEffect } from "react";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { LoaderDots } from "../loader/loader.tsx";
 import { useRefreshAnimation } from "./use-refresh-animation.ts";
@@ -9,6 +7,7 @@ import { DisplayContainerHeader } from "./display-container-header.tsx";
 import { DisplayContainer } from "../generic-components.ts";
 import { ManageProductionButton } from "./manage-production-button.tsx";
 import { LocalError } from "../error.tsx";
+import { useFetchProductionList } from "./use-fetch-production-list.ts";
 
 const ProductionListContainer = styled.div`
   display: flex;
@@ -42,50 +41,10 @@ const ProductionId = styled.div`
 `;
 
 export const ProductionsList = () => {
-  const [productions, setProductions] = useState<TBasicProduction[]>([]);
-  const [intervalLoad, setIntervalLoad] = useState<boolean>(false);
-  const [{ reloadProductionList }, dispatch] = useGlobalState();
-  const [doInitialLoad, setDoInitialLoad] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const [{ reloadProductionList }] = useGlobalState();
 
-  // TODO extract to separate hook file
-  useEffect(() => {
-    let aborted = false;
-
-    if (reloadProductionList || intervalLoad || doInitialLoad) {
-      API.listProductions()
-        .then((result) => {
-          if (aborted) return;
-
-          setProductions(
-            result
-              // pick laste 10 items
-              .slice(-10)
-          );
-
-          dispatch({
-            type: "PRODUCTION_LIST_FETCHED",
-          });
-
-          setIntervalLoad(false);
-
-          setDoInitialLoad(false);
-
-          setError(null);
-        })
-        .catch((e) => {
-          setError(
-            e instanceof Error
-              ? e
-              : new Error("Failed to fetch production list.")
-          );
-        });
-    }
-
-    return () => {
-      aborted = true;
-    };
-  }, [dispatch, intervalLoad, reloadProductionList, doInitialLoad]);
+  const { productions, doInitialLoad, error, setIntervalLoad } =
+    useFetchProductionList();
 
   const showRefreshing = useRefreshAnimation({
     reloadProductionList,
@@ -100,7 +59,7 @@ export const ProductionsList = () => {
     return () => {
       window.clearInterval(interval);
     };
-  }, []);
+  }, [setIntervalLoad]);
 
   return (
     <>
