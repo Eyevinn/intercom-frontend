@@ -2,7 +2,8 @@ import { handleFetchRequest } from "./handle-fetch-request.ts";
 
 const API_VERSION = import.meta.env.VITE_BACKEND_API_VERSION ?? "api/v1/";
 const API_URL =
-  import.meta.env.VITE_BACKEND_URL ?? `${window.location.origin}${API_VERSION}`;
+  `${import.meta.env.VITE_BACKEND_URL}${API_VERSION}` ??
+  `${window.location.origin}${API_VERSION}`;
 
 type TCreateProductionOptions = {
   name: string;
