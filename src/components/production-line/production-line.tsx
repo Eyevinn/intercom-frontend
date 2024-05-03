@@ -128,6 +128,7 @@ export const ProductionLine: FC = () => {
       type: "UPDATE_JOIN_PRODUCTION_OPTIONS",
       payload: null,
     });
+    window.removeEventListener("popstate", exit);
   }, [dispatch, playExitSound]);
 
   useLineHotkeys({
@@ -199,7 +200,7 @@ export const ProductionLine: FC = () => {
     dispatch,
   });
 
-  // TODO detect if browser back button is pressed and run exit();
+  window.addEventListener("popstate", exit);
 
   return (
     <>
