@@ -200,13 +200,11 @@ export const ProductionLine: FC = () => {
     dispatch,
   });
 
-  window.addEventListener("popstate", exit);
-
   return (
     <>
       <HeaderWrapper>
         <ButtonWrapper>
-          <NavigateToRootButton resetOnExit={exit} />
+          <NavigateToRootButton resetOnExit />
         </ButtonWrapper>
         {!loading && production && line && (
           <DisplayContainerHeader>
