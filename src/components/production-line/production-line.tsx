@@ -174,13 +174,13 @@ export const ProductionLine: FC = () => {
       type: "UPDATE_JOIN_PRODUCTION_OPTIONS",
       payload: null,
     });
+    window.removeEventListener("popstate", exit);
   }, [dispatch, navigate]);
 
   // Exit call and return to root if browser-back is clicked
-  window.onpopstate = () => {
-    exit();
-    navigate("/");
-  };
+  useEffect(() => {
+    window.addEventListener("popstate", exit);
+  }, [exit, navigate]);
 
   const line = useLinePolling({ joinProductionOptions });
 
@@ -219,7 +219,7 @@ export const ProductionLine: FC = () => {
     <>
       <HeaderWrapper>
         <ButtonWrapper>
-          <NavigateToRootButton resetOnExit={exit} />
+          <NavigateToRootButton onClickCallbackOverride={exit} />
         </ButtonWrapper>
         {!loading && production && line && (
           <DisplayContainerHeader>
