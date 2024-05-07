@@ -123,15 +123,6 @@ export const ProductionLine: FC = () => {
 
   const { playEnterSound, playExitSound } = useAudioCue();
 
-  const exit = useCallback(() => {
-    playExitSound();
-    dispatch({
-      type: "UPDATE_JOIN_PRODUCTION_OPTIONS",
-      payload: null,
-    });
-    window.removeEventListener("popstate", exit);
-  }, [dispatch, playExitSound]);
-
   useLineHotkeys({
     muteInput,
     isInputMuted,
@@ -169,13 +160,14 @@ export const ProductionLine: FC = () => {
   });
 
   const exit = useCallback(() => {
+    playExitSound();
     navigate("/");
     dispatch({
       type: "UPDATE_JOIN_PRODUCTION_OPTIONS",
       payload: null,
     });
     window.removeEventListener("popstate", exit);
-  }, [dispatch, navigate]);
+  }, [dispatch, navigate, playExitSound]);
 
   // Exit call and return to root if browser-back is clicked
   useEffect(() => {
