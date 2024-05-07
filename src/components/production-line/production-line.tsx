@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 import { FC, useCallback, useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { useAudioInput } from "./use-audio-input.ts";
 import { useRtcConnection } from "./use-rtc-connection.ts";
@@ -102,6 +102,7 @@ export const ProductionLine: FC = () => {
   ] = useGlobalState();
   const [isInputMuted, setIsInputMuted] = useState(true);
   const [isOutputMuted, setIsOutputMuted] = useState(false);
+  const navigate = useNavigate();
 
   const inputAudioStream = useAudioInput({
     inputId: joinProductionOptions?.audioinput ?? null,
@@ -167,6 +168,20 @@ export const ProductionLine: FC = () => {
     isOutputMuted,
   });
 
+  const exit = useCallback(() => {
+    navigate("/");
+    dispatch({
+      type: "UPDATE_JOIN_PRODUCTION_OPTIONS",
+      payload: null,
+    });
+  }, [dispatch, navigate]);
+
+  // Exit call and return to root if browser-back is clicked
+  window.onpopstate = () => {
+    exit();
+    navigate("/");
+  };
+
   const line = useLinePolling({ joinProductionOptions });
 
   const { production, error: fetchProductionError } = useFetchProduction(
@@ -204,7 +219,7 @@ export const ProductionLine: FC = () => {
     <>
       <HeaderWrapper>
         <ButtonWrapper>
-          <NavigateToRootButton resetOnExit />
+          <NavigateToRootButton resetOnExit={exit} />
         </ButtonWrapper>
         {!loading && production && line && (
           <DisplayContainerHeader>
