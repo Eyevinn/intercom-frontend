@@ -1,7 +1,6 @@
 import { useMemo } from "react";
-// TODO update audio to non-questionable-licensed-audio
-import connectionStart from "../../assets/sounds/start-connection.mp3";
-import connectionStop from "../../assets/sounds/stop-connection.mp3";
+import connectionStart from "../../assets/sounds/start-connection-451.wav";
+import connectionStop from "../../assets/sounds/stop-connection-451.wav";
 
 export const useAudioCue = () => {
   const playEnterSound = useMemo(() => {
