@@ -10,9 +10,9 @@ const StyledBackBtn = styled(PrimaryButton)`
 `;
 
 export const NavigateToRootButton = ({
-  resetOnExit,
+  onClickCallbackOverride,
 }: {
-  resetOnExit?: () => void;
+  onClickCallbackOverride?: () => void;
 }) => {
   const navigate = useNavigate();
 
@@ -20,8 +20,8 @@ export const NavigateToRootButton = ({
     <StyledBackBtn
       type="button"
       onClick={() => {
-        if (resetOnExit) {
-          resetOnExit();
+        if (onClickCallbackOverride) {
+          onClickCallbackOverride();
         } else {
           navigate("/");
         }
