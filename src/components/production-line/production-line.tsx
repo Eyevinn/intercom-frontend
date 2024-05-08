@@ -172,7 +172,7 @@ export const ProductionLine: FC = () => {
   // Exit call and return to root if browser-back is clicked
   useEffect(() => {
     window.addEventListener("popstate", exit);
-  }, [exit, navigate]);
+  }, [exit]);
 
   const line = useLinePolling({ joinProductionOptions });
 
