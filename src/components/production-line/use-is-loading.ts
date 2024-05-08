@@ -6,13 +6,18 @@ type TProps = {
 
 export const useIsLoading = ({ connectionState }: TProps) => {
   const [loading, setLoading] = useState<boolean>(true);
+  const [connectionError, setConnectionError] = useState<boolean>(false);
 
   useEffect(() => {
     if (connectionState === "connected") {
       setLoading(false);
+    } else if (connectionState === "failed") {
+      setConnectionError(true);
     }
-    // TODO add handling for `connectionState === "failed"`
   }, [connectionState]);
 
-  return loading;
+  return {
+    loading,
+    connectionError,
+  };
 };
