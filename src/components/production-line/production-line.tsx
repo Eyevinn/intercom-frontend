@@ -28,6 +28,7 @@ import { useIsLoading } from "./use-is-loading.ts";
 import { useCheckBadLineData } from "./use-check-bad-line-data.ts";
 import { NavigateToRootButton } from "../navigate-to-root-button/navigate-to-root-button.tsx";
 import { useAudioCue } from "./use-audio-cue.ts";
+import { DisplayWarning } from "../display-box.tsx";
 
 const TempDiv = styled.div`
   padding: 0 0 2rem 0;
@@ -92,6 +93,13 @@ const StateText = styled.span<{ state: string }>`
         return "#ddd";
     }
   }};
+`;
+
+const ConnectionErrorWrapper = styled(FlexContainer)`
+  width: 100vw;
+  justify-content: center;
+  align-items: center;
+  padding-top: 12rem;
 `;
 
 export const ProductionLine: FC = () => {
@@ -186,7 +194,7 @@ export const ProductionLine: FC = () => {
     });
   }, [dispatch, fetchProductionError]);
 
-  const loading = useIsLoading({ connectionState });
+  const { loading, connectionError } = useIsLoading({ connectionState });
 
   useHeartbeat({ sessionId });
 
@@ -239,9 +247,18 @@ export const ProductionLine: FC = () => {
         </FlexContainer>
       )}
 
-      {joinProductionOptions && loading && (
-        <Spinner className="join-production" />
-      )}
+      {joinProductionOptions &&
+        loading &&
+        (!connectionError ? (
+          <Spinner className="join-production" />
+        ) : (
+          <ConnectionErrorWrapper>
+            <DisplayWarning
+              text="Please return to previous page and try to join again."
+              title="Connection failed"
+            />
+          </ConnectionErrorWrapper>
+        ))}
 
       {joinProductionOptions && !loading && (
         <FlexContainer>
