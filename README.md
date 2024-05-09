@@ -16,6 +16,32 @@ To use a local manager instance, set `VITE_BACKEND_URL=http://0.0.0.0:8000/`
 
 `yarn dev` to start a dev server
 
+## Docker Container
+
+Build local Docker image
+
+```
+docker build -t intercom-frontend:dev
+```
+
+Run container on port 8080 and with intercom manager on https://intercom-manager.dev.eyevinn.technology/
+
+```
+docker run --rm -d -p 8080:8080 \
+  -e PORT=8080 \
+  -e MANAGER_URL=https://intercom-manager.dev.eyevinn.technology/ \
+  --name=frontend \
+  intercom-frontend:dev
+```
+
+Then the app is available at http://localhost:8080/
+
+Stop container
+
+```
+docker stop frontend
+```
+
 ## Contributing
 
 Contributions to are welcome.
