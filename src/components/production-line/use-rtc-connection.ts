@@ -6,6 +6,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { useNavigate } from "react-router-dom";
 import { noop } from "../../helpers";
 import { API } from "../../api/api.ts";
 import { TJoinProductionOptions } from "./types.ts";
@@ -28,6 +29,7 @@ type TEstablishConnection = {
   sessionId: string;
   dispatch: Dispatch<TGlobalStateAction>;
   setAudioElements: Dispatch<SetStateAction<HTMLAudioElement[]>>;
+  setNoStreamError: (input: boolean) => void;
 };
 
 type TAttachAudioStream = {
@@ -50,6 +52,7 @@ const establishConnection = ({
   sessionId,
   dispatch,
   setAudioElements,
+  setNoStreamError,
 }: TEstablishConnection): { teardown: () => void } => {
   const onRtcTrack = ({ streams }: RTCTrackEvent) => {
     // We can count on there being only a single stream per event for now.
@@ -81,8 +84,18 @@ const establishConnection = ({
           });
         });
       }
+    } else if (selectedStream && selectedStream.getAudioTracks().length === 0) {
+      setNoStreamError(true);
+      dispatch({
+        type: "ERROR",
+        payload: new Error("Stream-error: No MediaStreamTracks avaliable"),
+      });
     } else {
-      // TODO handle error case of 0 available streams
+      setNoStreamError(true);
+      dispatch({
+        type: "ERROR",
+        payload: new Error("Stream-error: No MediaStream avaliable"),
+      });
     }
   };
 
@@ -219,7 +232,9 @@ export const useRtcConnection = ({
   const [connectionState, setConnectionState] =
     useState<RTCPeerConnectionState | null>(null);
   const [audioElements, setAudioElements] = useState<HTMLAudioElement[]>([]);
+  const [noStreamError, setNoStreamError] = useState(false);
   const audioElementsRef = useRef<HTMLAudioElement[]>(audioElements);
+  const navigate = useNavigate();
 
   // Use a ref to make sure we only clean up
   // audio elements once, and not every time
@@ -243,6 +258,12 @@ export const useRtcConnection = ({
     },
     [cleanUpAudio]
   );
+
+  useEffect(() => {
+    if (noStreamError) {
+      navigate("/");
+    }
+  }, [navigate, noStreamError]);
 
   useEffect(() => {
     if (
@@ -286,6 +307,7 @@ export const useRtcConnection = ({
       sessionId,
       dispatch,
       setAudioElements,
+      setNoStreamError,
     });
 
     return () => {
@@ -310,6 +332,7 @@ export const useRtcConnection = ({
     joinProductionOptions,
     rtcPeerConnection,
     dispatch,
+    noStreamError,
   ]);
 
   // Debug hook for logging RTC events TODO remove
