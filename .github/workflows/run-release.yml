@@ -19,6 +19,9 @@ jobs:
         run: |
           yarn
           yarn build --mode production
+        env:
+          VITE_BACKEND_URL: ${{ secrets.MANAGER_PROD_URL }}
+          VITE_BACKEND_API_VERSION: api/v1
 
       - name: Sync to Demo bucket
         uses: jakejarvis/s3-sync-action@v0.5.1
