@@ -16,6 +16,41 @@ To use a local manager instance, set `VITE_BACKEND_URL=http://0.0.0.0:8000/`
 
 `yarn dev` to start a dev server
 
+### Manager in Open Source Cloud
+
+To develop against a manager in Open Source Cloud you need to provide a bearer token (service access token) in the Authorization header.
+
+```
+% export VITE_BACKEND_URL=https://<instance>.eyevinn-intercom-manager.auto.prod.osaas.io/
+% export OSC_ACCESS_TOKEN=<personal-access-token>
+```
+
+To obtain the service access token you need your Open Source Cloud personal access token. You find that one in the settings menu in the [user interface](https://app.osaas.io). Get the service access token with the following HTTP request using curl.
+
+```bash
+% curl -X 'POST' \
+  'https://token.svc.prod.osaas.io/servicetoken' \
+  -H 'accept: application/json' \
+  -H "x-pat-jwt: Bearer $OSC_ACCESS_TOKEN" \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "serviceId": "eyevinn-intercom-manager"
+}'
+{"serviceId":"eyevinn-intercom-manager","token":"<service-access-token>","expiry":1718315617}
+```
+
+Then you start the dev server with the `VITE_BACKEND_API_KEY` environment variable set. Either on the comand line or stored in the shell with `export VITE_BACKEND_API_KEY=<service-access-token>`. The token expires after a while so you might need to refresh the token using the same curl command line above.
+
+```bash
+% VITE_BACKEND_API_KEY=<service-access-token> yarn dev
+```
+
+As the Open Source Cloud platform apply same-origin principle you need to disable that check in your browser when developing locally. Example below on how to start Chrome on MacOS with this check disabled.
+
+```bash
+% open -a Google\ Chrome --args --disable-web-security --user-data-dir="/tmp"
+```
+
 ## Docker Container
 
 Build local Docker image
