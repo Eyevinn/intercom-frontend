@@ -15,28 +15,14 @@ import {
 import { API } from "../../api/api.ts";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { Spinner } from "../loader/loader.tsx";
-import { RemoveIcon } from "../../assets/icons/icon.tsx";
 import { FlexContainer } from "../generic-components.ts";
+import { RemoveLineButton } from "../remove-line-button/remove-line-button.tsx";
 
 type FormValues = {
   productionName: string;
   defaultLine: string;
   lines: { name: string }[];
 };
-
-const RemoveLineBtn = styled.button`
-  cursor: pointer;
-  position: absolute;
-  top: -0.7rem;
-  right: -0.5rem;
-  padding: 1rem;
-  background: transparent;
-  border: transparent;
-`;
-
-const ButtonIcon = styled.div`
-  width: 2.5rem;
-`;
 
 const ListItemWrapper = styled.div`
   position: relative;
@@ -164,11 +150,7 @@ export const CreateProduction = () => {
                 placeholder="Line Name"
               />
               {index === fields.length - 1 && (
-                <RemoveLineBtn type="button" onClick={() => remove(index)}>
-                  <ButtonIcon>
-                    <RemoveIcon />
-                  </ButtonIcon>
-                </RemoveLineBtn>
+                <RemoveLineButton removeLine={() => remove(index)} />
               )}
             </ListItemWrapper>
           </FormLabel>
