@@ -1,23 +1,29 @@
 import { ErrorMessage } from "@hookform/error-message";
-import { SubmitHandler, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
 import styled from "@emotion/styled";
 import { DisplayContainerHeader } from "../landing-page/display-container-header";
 import {
-  PrimaryButton,
   DecorativeLabel,
   StyledWarningMessage,
 } from "../landing-page/form-elements";
-import { Spinner } from "../loader/loader";
 import { useFetchProduction } from "../landing-page/use-fetch-production";
 import { darkText, errorColour } from "../../css-helpers/defaults";
 import { useDeleteProduction } from "./use-delete-production";
 import { NavigateToRootButton } from "../navigate-to-root-button/navigate-to-root-button";
 import { FormInputWithLoader } from "../landing-page/form-input-with-loader";
+import { RemoveProduction } from "./remove-production";
+import { ManageLines } from "./manage-lines";
 
 type FormValue = {
   productionId: string;
 };
+
+const SubContainers = styled.div`
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+`;
 
 const Container = styled.form`
   max-width: 45rem;
@@ -39,25 +45,8 @@ const FetchErrorMessage = styled.div`
   margin: 1rem 0;
 `;
 
-const VerifyBtnWrapper = styled.div`
-  margin: 3rem 0 2rem 2rem;
-`;
-
-const VerifyButtons = styled.div`
-  display: flex;
-  padding: 1rem 0 0 0;
-`;
-
-const Button = styled(PrimaryButton)`
-  margin: 0 1rem 0 0;
-`;
-
 const StyledBackBtnIcon = styled.div`
   margin: 0 0 3rem 0;
-`;
-
-const ButtonWrapper = styled.div`
-  margin: 2rem 0 2rem 0;
 `;
 
 export const ManageProductions = () => {
@@ -65,14 +54,17 @@ export const ManageProductions = () => {
     useState<boolean>(false);
   const [verifyRemove, setVerifyRemove] = useState<boolean>(false);
   const [removeId, setRemoveId] = useState<null | number>(null);
+  const [productionId, setProductionId] = useState<null | number>(null);
+  const [refresh, setRefresh] = useState<number>(0);
+
   const {
     reset,
     formState,
     formState: { errors, isSubmitSuccessful },
     register,
-    handleSubmit,
+    getValues,
+    trigger,
   } = useForm<FormValue>();
-  const [productionId, setProductionId] = useState<null | number>(null);
 
   const { onChange, onBlur, name, ref } = register("productionId", {
     required: "Production ID is required",
@@ -83,7 +75,7 @@ export const ManageProductions = () => {
     error: productionFetchError,
     production,
     loading: fetchLoader,
-  } = useFetchProduction(productionId);
+  } = useFetchProduction(productionId, refresh);
 
   const {
     loading: deleteLoader,
@@ -104,21 +96,32 @@ export const ManageProductions = () => {
     if (successfullDelete) {
       setVerifyRemove(false);
       setShowDeleteDoneMessage(true);
+      setProductionId(null);
     }
   }, [successfullDelete]);
 
-  const onSubmit: SubmitHandler<FormValue> = (value) => {
+  // Custom submit to stop keypress 'Enter' being active
+  const handleCustomSubmit = async () => {
     if (deleteLoader) return;
 
-    setRemoveId(parseInt(value.productionId, 10));
+    const isFormValid = await trigger();
+    if (isFormValid) {
+      const values = getValues();
+      setRemoveId(parseInt(values.productionId, 10));
+    }
+  };
+
+  // Prevent default form submission behavior
+  const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
   };
 
   return (
-    <Container>
+    <Container onSubmit={handleFormSubmit}>
       <StyledBackBtnIcon>
         <NavigateToRootButton />
       </StyledBackBtnIcon>
-      <DisplayContainerHeader>Remove Production</DisplayContainerHeader>
+      <DisplayContainerHeader>Manage Productions</DisplayContainerHeader>
       <FormInputWithLoader
         onChange={(ev) => {
           onChange(ev);
@@ -152,52 +155,35 @@ export const ManageProductions = () => {
         name="productionId"
         as={StyledWarningMessage}
       />
-      {production ? (
+      {production && (
         <>
-          <DecorativeLabel>Production name: {production.name}</DecorativeLabel>
-          {!verifyRemove && (
-            <ButtonWrapper>
-              <PrimaryButton
-                type="submit"
-                className={deleteLoader ? "submit" : ""}
-                onClick={() => setVerifyRemove(true)}
-              >
-                Remove
-                {deleteLoader && <Spinner className="manage-production" />}
-              </PrimaryButton>
-            </ButtonWrapper>
-          )}
-          {verifyRemove && (
-            <VerifyBtnWrapper>
-              <p>Are you sure?</p>
-              <VerifyButtons>
-                <Button
-                  type="submit"
-                  className={deleteLoader ? "submit" : ""}
-                  disabled={deleteLoader}
-                  onClick={handleSubmit(onSubmit)}
-                >
-                  Yes
-                  {deleteLoader && <Spinner className="manage-production" />}
-                </Button>
-                <Button
-                  type="submit"
-                  className={deleteLoader ? "submit" : ""}
-                  onClick={() => {
-                    setVerifyRemove(false);
-                    reset({
-                      productionId: "",
-                    });
-                  }}
-                >
-                  Go back
-                  {deleteLoader && <Spinner className="manage-production" />}
-                </Button>
-              </VerifyButtons>
-            </VerifyBtnWrapper>
-          )}
+          <DecorativeLabel>
+            <strong>Production name: {production.name}</strong>
+          </DecorativeLabel>
+          <SubContainers>
+            <ManageLines
+              production={production}
+              updateProduction={() => setRefresh((prev) => prev + 1)}
+            />
+            <RemoveProduction
+              deleteLoader={deleteLoader}
+              handleSubmit={() => handleCustomSubmit()}
+              verifyRemove={verifyRemove}
+              setVerifyRemove={(input) => setVerifyRemove(input)}
+              reset={() => {
+                setVerifyRemove(false);
+                reset({
+                  productionId: "",
+                });
+                setProductionId(null);
+                setRemoveId(null);
+                setRefresh((prev) => prev + 1);
+              }}
+            />
+          </SubContainers>
         </>
-      ) : (
+      )}
+      {!production && !showDeleteDoneMessage && (
         <StyledWarningMessage>
           Please enter a production id
         </StyledWarningMessage>
