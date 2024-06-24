@@ -122,6 +122,31 @@ export const API = {
         },
       })
     ),
+  addProductionLine: (productionId: number, name: string): Promise<TLine> =>
+    handleFetchRequest<TLine>(
+      fetch(`${API_URL}production/${productionId}/line`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
+        },
+        body: JSON.stringify({
+          name,
+        }),
+      })
+    ),
+  deleteProductionLine: (
+    productionId: number,
+    lineId: number
+  ): Promise<string> =>
+    handleFetchRequest<string>(
+      fetch(`${API_URL}production/${productionId}/line/${lineId}`, {
+        method: "DELETE",
+        headers: {
+          ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
+        },
+      })
+    ),
   offerAudioSession: ({
     productionId,
     lineId,
