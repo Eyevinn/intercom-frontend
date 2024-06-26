@@ -1,26 +1,26 @@
 import { useEffect, useState } from "react";
 import { API } from "../../api/api";
-import { useGlobalState } from "../../global-state/context-provider";
 
-type TUseDeleteProduction = (
+type TUseDeleteProductionLine = (
   productionId: number | null,
   lineId: number | null
 ) => {
   loading: boolean;
   successfullDelete: boolean;
+  error: Error | null;
 };
 
-export const useRemoveProductionLine: TUseDeleteProduction = (
+export const useRemoveProductionLine: TUseDeleteProductionLine = (
   productionId,
   lineId
 ) => {
   const [successfullDelete, setSuccessfullDelete] = useState(false);
   const [loading, setLoading] = useState<boolean>(false);
-
-  const [, dispatch] = useGlobalState();
+  const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
     let aborted = false;
+    setError(null);
     setSuccessfullDelete(false);
     setLoading(true);
     if (productionId && lineId) {
@@ -28,17 +28,12 @@ export const useRemoveProductionLine: TUseDeleteProduction = (
         .then(() => {
           if (aborted) return;
 
+          setError(null);
           setSuccessfullDelete(true);
           setLoading(false);
         })
         .catch((err) => {
-          dispatch({
-            type: "ERROR",
-            payload:
-              err instanceof Error
-                ? err
-                : new Error("Failed to delete production line"),
-          });
+          setError(err);
           setLoading(false);
         });
     } else {
@@ -48,10 +43,11 @@ export const useRemoveProductionLine: TUseDeleteProduction = (
     return () => {
       aborted = true;
     };
-  }, [dispatch, lineId, productionId]);
+  }, [lineId, productionId]);
 
   return {
     loading,
     successfullDelete,
+    error,
   };
 };

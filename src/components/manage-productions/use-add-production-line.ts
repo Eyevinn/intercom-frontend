@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import { API } from "../../api/api";
-import { useGlobalState } from "../../global-state/context-provider";
 
-type TUseDeleteProduction = (
+type TUseAddProductionLine = (
   productionId: number | null,
   lineNames: {
     lines: { name: string }[];
@@ -10,19 +9,20 @@ type TUseDeleteProduction = (
 ) => {
   loading: boolean;
   successfullCreate: boolean;
+  error: Error | null;
 };
 
-export const useAddProductionLine: TUseDeleteProduction = (
+export const useAddProductionLine: TUseAddProductionLine = (
   productionId,
   lineNames
 ) => {
   const [successfullCreate, setSuccessfullCreate] = useState(false);
   const [loading, setLoading] = useState<boolean>(false);
-
-  const [, dispatch] = useGlobalState();
+  const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
     let aborted = false;
+    setError(null);
     setSuccessfullCreate(false);
     setLoading(true);
     if (productionId && lineNames) {
@@ -30,17 +30,12 @@ export const useAddProductionLine: TUseDeleteProduction = (
         .then(() => {
           if (aborted) return;
 
+          setError(null);
           setSuccessfullCreate(true);
           setLoading(false);
         })
         .catch((err) => {
-          dispatch({
-            type: "ERROR",
-            payload:
-              err instanceof Error
-                ? err
-                : new Error("Failed to create production line"),
-          });
+          setError(err);
           setLoading(false);
         });
     } else {
@@ -50,10 +45,11 @@ export const useAddProductionLine: TUseDeleteProduction = (
     return () => {
       aborted = true;
     };
-  }, [dispatch, lineNames, productionId]);
+  }, [lineNames, productionId]);
 
   return {
     loading,
     successfullCreate,
+    error,
   };
 };
