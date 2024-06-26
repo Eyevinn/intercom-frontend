@@ -1,6 +1,6 @@
 import { SubmitHandler, useFieldArray, useForm } from "react-hook-form";
 import styled from "@emotion/styled";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ErrorMessage } from "@hookform/error-message";
 import { DisplayContainerHeader } from "../landing-page/display-container-header";
 import { TLine, TProduction } from "../production-line/types";
@@ -17,6 +17,7 @@ import { Spinner } from "../loader/loader";
 import { useRemoveProductionLine } from "./use-remove-production-line";
 import { useAddProductionLine } from "./use-add-production-line";
 import { RemoveLineButton } from "../remove-line-button/remove-line-button";
+import { darkText, errorColour } from "../../css-helpers/defaults";
 
 type TManageLines = {
   production: TProduction;
@@ -79,8 +80,16 @@ const ButtonWrapper = styled.div`
   }
 `;
 
+const FetchErrorMessage = styled.div`
+  background: ${errorColour};
+  color: ${darkText};
+  border-radius: 5rem;
+  padding: 0.5rem;
+  margin: 1rem 0;
+  border-radius: 0.5rem;
+`;
+
 export const ManageLines = ({ production, updateProduction }: TManageLines) => {
-  const [loading, setLoading] = useState<boolean>(false);
   const [removeActive, setRemoveActive] = useState<boolean>(false);
   const [updateLines, setUpdateLines] = useState<FormValues | null>(null);
   const [verifyRemove, setVerifyRemove] = useState<null | string>(null);
@@ -102,20 +111,25 @@ export const ManageLines = ({ production, updateProduction }: TManageLines) => {
     },
   });
 
-  const { loading: fetchInProgress, successfullCreate } = useAddProductionLine(
-    productionIdToNumber,
-    updateLines
+  const {
+    loading: fetchInProgress,
+    successfullCreate,
+    error: createError,
+  } = useAddProductionLine(productionIdToNumber, updateLines);
+
+  const {
+    loading: deleteInProgress,
+    successfullDelete,
+    error: deleteError,
+  } = useRemoveProductionLine(productionIdToNumber, removeId);
+
+  const onSubmit: SubmitHandler<FormValues> = useCallback(
+    (value) => {
+      if (fetchInProgress) return;
+      setUpdateLines(value);
+    },
+    [fetchInProgress]
   );
-
-  const { loading: deleteInProgress, successfullDelete } =
-    useRemoveProductionLine(productionIdToNumber, removeId);
-
-  const onSubmit: SubmitHandler<FormValues> = (value) => {
-    if (fetchInProgress) return;
-
-    setLoading(true);
-    setUpdateLines(value);
-  };
 
   // Reset form values when created production id changes
   useEffect(() => {
@@ -125,7 +139,6 @@ export const ManageLines = ({ production, updateProduction }: TManageLines) => {
       });
       setRemoveId(null);
       setVerifyRemove(null);
-      setLoading(false);
       setRemoveActive(false);
       updateProduction();
     }
@@ -220,15 +233,25 @@ export const ManageLines = ({ production, updateProduction }: TManageLines) => {
           <ButtonWrapper>
             <PrimaryButton
               type="submit"
-              className={loading ? "with-loader" : ""}
+              className={fetchInProgress ? "with-loader" : ""}
               onClick={handleSubmit(onSubmit)}
             >
               Save Changes
-              {loading && <Spinner className="create-production" />}
+              {fetchInProgress && <Spinner className="create-production" />}
             </PrimaryButton>
           </ButtonWrapper>
         )}
       </FlexContainer>
+      {deleteError && (
+        <FetchErrorMessage>
+          The production line could not be removed. {deleteError.message}.
+        </FetchErrorMessage>
+      )}
+      {createError && (
+        <FetchErrorMessage>
+          The production line could not be created. {createError.message}.
+        </FetchErrorMessage>
+      )}
     </Container>
   );
 };
