@@ -53,9 +53,12 @@ export const ManageProductions = () => {
   const [showDeleteDoneMessage, setShowDeleteDoneMessage] =
     useState<boolean>(false);
   const [verifyRemove, setVerifyRemove] = useState<boolean>(false);
+  const [delayOnGuideText, setDelayOnGuideText] = useState<boolean>(false);
   const [removeId, setRemoveId] = useState<null | number>(null);
   const [productionId, setProductionId] = useState<null | number>(null);
-  const [refresh, setRefresh] = useState<number>(0);
+  const [productionIdToFetch, setProductionIdToFetch] = useState<null | number>(
+    null
+  );
 
   const {
     reset,
@@ -75,7 +78,7 @@ export const ManageProductions = () => {
     error: productionFetchError,
     production,
     loading: fetchLoader,
-  } = useFetchProduction(productionId, refresh);
+  } = useFetchProduction(productionIdToFetch);
 
   const {
     loading: deleteLoader,
@@ -97,8 +100,35 @@ export const ManageProductions = () => {
       setVerifyRemove(false);
       setShowDeleteDoneMessage(true);
       setProductionId(null);
+      setProductionIdToFetch(null);
     }
   }, [successfullDelete]);
+
+  useEffect(() => {
+    if (!productionIdToFetch && productionId) {
+      setProductionIdToFetch(productionId);
+    }
+  }, [productionId, productionIdToFetch]);
+
+  // added a delay to "enter production id"-text to stop it flashing by
+  // when updating the fetch
+  useEffect(() => {
+    let timeout: number | null = null;
+
+    if (!productionIdToFetch && !productionId) {
+      timeout = window.setTimeout(() => {
+        setDelayOnGuideText(true);
+      }, 500);
+    } else {
+      setDelayOnGuideText(false);
+    }
+
+    return () => {
+      if (timeout !== null) {
+        window.clearTimeout(timeout);
+      }
+    };
+  }, [productionId, productionIdToFetch]);
 
   // Custom submit to stop keypress 'Enter' being active
   const handleCustomSubmit = async () => {
@@ -126,8 +156,10 @@ export const ManageProductions = () => {
         onChange={(ev) => {
           onChange(ev);
           const pid = parseInt(ev.target.value, 10);
+          const confirmedPid = Number.isNaN(pid) ? null : pid;
 
-          setProductionId(Number.isNaN(pid) ? null : pid);
+          setProductionId(confirmedPid);
+          setProductionIdToFetch(confirmedPid);
           setShowDeleteDoneMessage(false);
         }}
         label="Production ID"
@@ -163,7 +195,7 @@ export const ManageProductions = () => {
           <SubContainers>
             <ManageLines
               production={production}
-              updateProduction={() => setRefresh((prev) => prev + 1)}
+              updateProduction={() => setProductionIdToFetch(null)}
             />
             <RemoveProduction
               deleteLoader={deleteLoader}
@@ -176,14 +208,14 @@ export const ManageProductions = () => {
                   productionId: "",
                 });
                 setProductionId(null);
+                setProductionIdToFetch(null);
                 setRemoveId(null);
-                setRefresh((prev) => prev + 1);
               }}
             />
           </SubContainers>
         </>
       )}
-      {!production && !showDeleteDoneMessage && (
+      {delayOnGuideText && (
         <StyledWarningMessage>
           Please enter a production id
         </StyledWarningMessage>
