@@ -21,7 +21,7 @@ import { darkText, errorColour } from "../../css-helpers/defaults";
 
 type TManageLines = {
   production: TProduction;
-  updateProduction: () => void;
+  setProductionIdToFetch: (A: number) => void;
 };
 
 type FormValues = {
@@ -89,7 +89,10 @@ const FetchErrorMessage = styled.div`
   border-radius: 0.5rem;
 `;
 
-export const ManageLines = ({ production, updateProduction }: TManageLines) => {
+export const ManageLines = ({
+  production,
+  setProductionIdToFetch,
+}: TManageLines) => {
   const [removeActive, setRemoveActive] = useState<boolean>(false);
   const [updateLines, setUpdateLines] = useState<FormValues | null>(null);
   const [verifyRemove, setVerifyRemove] = useState<null | string>(null);
@@ -140,9 +143,15 @@ export const ManageLines = ({ production, updateProduction }: TManageLines) => {
       setRemoveId(null);
       setVerifyRemove(null);
       setRemoveActive(false);
-      updateProduction();
+      setProductionIdToFetch(parseInt(production.productionId, 10));
     }
-  }, [reset, successfullCreate, successfullDelete, updateProduction]);
+  }, [
+    production.productionId,
+    reset,
+    setProductionIdToFetch,
+    successfullCreate,
+    successfullDelete,
+  ]);
 
   return (
     <Container>
