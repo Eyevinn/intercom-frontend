@@ -14,6 +14,7 @@ import { NavigateToRootButton } from "../navigate-to-root-button/navigate-to-roo
 import { FormInputWithLoader } from "../landing-page/form-input-with-loader";
 import { RemoveProduction } from "./remove-production";
 import { ManageLines } from "./manage-lines";
+import { TProduction } from "../production-line/types";
 
 type FormValue = {
   productionId: string;
@@ -55,7 +56,9 @@ export const ManageProductions = () => {
   const [verifyRemove, setVerifyRemove] = useState<boolean>(false);
   const [delayOnGuideText, setDelayOnGuideText] = useState<boolean>(false);
   const [removeId, setRemoveId] = useState<null | number>(null);
-  const [productionId, setProductionId] = useState<null | number>(null);
+  const [cachedProduction, setCachedProduction] = useState<null | TProduction>(
+    null
+  );
   const [productionIdToFetch, setProductionIdToFetch] = useState<null | number>(
     null
   );
@@ -99,23 +102,23 @@ export const ManageProductions = () => {
     if (successfullDelete) {
       setVerifyRemove(false);
       setShowDeleteDoneMessage(true);
-      setProductionId(null);
       setProductionIdToFetch(null);
     }
   }, [successfullDelete]);
 
   useEffect(() => {
-    if (!productionIdToFetch && productionId) {
-      setProductionIdToFetch(productionId);
+    if (production) {
+      setCachedProduction(production);
+      setProductionIdToFetch(null);
     }
-  }, [productionId, productionIdToFetch]);
+  }, [production]);
 
   // added a delay to "enter production id"-text to stop it flashing by
   // when updating the fetch
   useEffect(() => {
     let timeout: number | null = null;
 
-    if (!productionIdToFetch && !productionId) {
+    if (!productionIdToFetch) {
       timeout = window.setTimeout(() => {
         setDelayOnGuideText(true);
       }, 500);
@@ -128,7 +131,7 @@ export const ManageProductions = () => {
         window.clearTimeout(timeout);
       }
     };
-  }, [productionId, productionIdToFetch]);
+  }, [productionIdToFetch]);
 
   // Custom submit to stop keypress 'Enter' being active
   const handleCustomSubmit = async () => {
@@ -158,7 +161,6 @@ export const ManageProductions = () => {
           const pid = parseInt(ev.target.value, 10);
           const confirmedPid = Number.isNaN(pid) ? null : pid;
 
-          setProductionId(confirmedPid);
           setProductionIdToFetch(confirmedPid);
           setShowDeleteDoneMessage(false);
         }}
@@ -187,15 +189,15 @@ export const ManageProductions = () => {
         name="productionId"
         as={StyledWarningMessage}
       />
-      {production && (
+      {cachedProduction && (
         <>
           <DecorativeLabel>
-            <strong>Production name: {production.name}</strong>
+            <strong>Production name: {cachedProduction.name}</strong>
           </DecorativeLabel>
           <SubContainers>
             <ManageLines
-              production={production}
-              updateProduction={() => setProductionIdToFetch(null)}
+              production={cachedProduction}
+              setProductionIdToFetch={setProductionIdToFetch}
             />
             <RemoveProduction
               deleteLoader={deleteLoader}
@@ -207,8 +209,6 @@ export const ManageProductions = () => {
                 reset({
                   productionId: "",
                 });
-                setProductionId(null);
-                setProductionIdToFetch(null);
                 setRemoveId(null);
               }}
             />
