@@ -102,7 +102,6 @@ export const ManageProductions = () => {
     if (successfullDelete) {
       setVerifyRemove(false);
       setShowDeleteDoneMessage(true);
-      setProductionIdToFetch(null);
     }
   }, [successfullDelete]);
 
@@ -118,7 +117,7 @@ export const ManageProductions = () => {
   useEffect(() => {
     let timeout: number | null = null;
 
-    if (!productionIdToFetch) {
+    if (!cachedProduction) {
       timeout = window.setTimeout(() => {
         setDelayOnGuideText(true);
       }, 500);
@@ -131,7 +130,7 @@ export const ManageProductions = () => {
         window.clearTimeout(timeout);
       }
     };
-  }, [productionIdToFetch]);
+  }, [cachedProduction]);
 
   // Custom submit to stop keypress 'Enter' being active
   const handleCustomSubmit = async () => {
