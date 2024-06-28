@@ -24,6 +24,7 @@ const SubContainers = styled.div`
   width: 100%;
   display: flex;
   flex-direction: row;
+  margin-bottom: 2rem;
 `;
 
 const Container = styled.form`
@@ -219,7 +220,7 @@ export const ManageProductions = () => {
           Please enter a production id
         </StyledWarningMessage>
       )}
-      {showDeleteDoneMessage && (
+      {!showDeleteDoneMessage && (
         <RemoveConfirmation>
           The production {production?.name} has been removed
         </RemoveConfirmation>
