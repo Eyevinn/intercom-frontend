@@ -18,6 +18,7 @@ import { useRemoveProductionLine } from "./use-remove-production-line";
 import { useAddProductionLine } from "./use-add-production-line";
 import { RemoveLineButton } from "../remove-line-button/remove-line-button";
 import { darkText, errorColour } from "../../css-helpers/defaults";
+import { ConfirmIcon } from "../../assets/icons/icon";
 
 type TManageLines = {
   production: TProduction;
@@ -64,13 +65,24 @@ const LineItem = styled(DecorativeLabel)`
 const ConfirmButton = styled.button`
   cursor: pointer;
   position: absolute;
+  font-size: 2rem;
+  padding: 0.7rem;
+  box-shadow: 0.5rem 0.5rem 1rem #212121;
   top: 1.5rem;
   right: 2.5rem;
   z-index: 100;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 
-  &:hover:active {
+  &:hover {
     transform: scale(1.1);
   }
+`;
+
+const ConfirmIconWrapper = styled.div`
+  width: 3rem;
+  margin-left: 1rem;
 `;
 
 const ButtonWrapper = styled.div`
@@ -182,6 +194,9 @@ export const ManageLines = ({
               }}
             >
               remove {singleLine.name}
+              <ConfirmIconWrapper>
+                <ConfirmIcon />
+              </ConfirmIconWrapper>
             </ConfirmButton>
           )}
         </ListItemWrapper>
