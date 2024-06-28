@@ -1,6 +1,6 @@
 import { JoinProduction } from "./join-production.tsx";
 import { CreateProduction } from "./create-production.tsx";
-import { ProductionsList } from "./productions-list.tsx";
+import { ProductionsListContainer } from "./productions-list-container.tsx";
 import { useNavigateToProduction } from "./use-navigate-to-production.ts";
 import { DisplayContainer, FlexContainer } from "../generic-components.ts";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
@@ -23,7 +23,7 @@ export const LandingPage = () => {
           </DisplayContainer>
         )}
       </FlexContainer>
-      <ProductionsList />
+      <ProductionsListContainer />
     </>
   );
 };
