@@ -220,7 +220,7 @@ export const ManageProductions = () => {
           Please enter a production id
         </StyledWarningMessage>
       )}
-      {!showDeleteDoneMessage && (
+      {showDeleteDoneMessage && (
         <RemoveConfirmation>
           The production {production?.name} has been removed
         </RemoveConfirmation>
