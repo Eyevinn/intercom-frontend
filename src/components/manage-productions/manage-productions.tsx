@@ -141,6 +141,10 @@ export const ManageProductions = () => {
     if (isFormValid) {
       const values = getValues();
       setRemoveId(parseInt(values.productionId, 10));
+      setCachedProduction(null);
+      reset({
+        productionId: "",
+      });
     }
   };
 
@@ -206,9 +210,6 @@ export const ManageProductions = () => {
               setVerifyRemove={(input) => setVerifyRemove(input)}
               reset={() => {
                 setVerifyRemove(false);
-                reset({
-                  productionId: "",
-                });
                 setRemoveId(null);
               }}
             />
