@@ -21,12 +21,6 @@ export const useFetchProductionList = () => {
 
           setProductions(
             result
-
-              // Make sure list is correctly sorted
-              .sort(
-                (a, b) =>
-                  parseInt(b.productionId, 10) - parseInt(a.productionId, 10)
-              )
               // pick last 10 items and display newest first
               .slice(0, 10)
           );
