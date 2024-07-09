@@ -16,36 +16,55 @@ import { FormInputWithLoader } from "../landing-page/form-input-with-loader";
 import { RemoveProduction } from "./remove-production";
 import { ManageLines } from "./manage-lines";
 import { TProduction } from "../production-line/types";
-import { ProductionsList } from "../productions-list";
 import { useFetchProductionList } from "../landing-page/use-fetch-production-list";
+import { isMobile } from "../../bowser";
+import { useGlobalState } from "../../global-state/context-provider";
+import { ProductionsList } from "../productions-list";
+import { LoaderDots } from "../loader/loader";
+import { useRefreshAnimation } from "../landing-page/use-refresh-animation";
 
 type FormValue = {
   productionId: string;
+};
+
+type MobileLayout = {
+  isMobile: boolean;
 };
 
 const ShowListBtn = styled(PrimaryButton)`
   margin-bottom: 2rem;
 `;
 
-const FormInputWrapper = styled.div`
-  max-width: 45rem;
-`;
-
-const SubContainers = styled.div`
-  width: 100%;
-  display: flex;
-  flex-direction: row;
-  margin-bottom: 2rem;
-`;
-
-const Container = styled.form`
-  padding: 1rem 2rem 0 2rem;
+const LoaderWrapper = styled.div`
+  padding-bottom: 1rem;
 `;
 
 const ListWrapper = styled.div`
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
+`;
+
+const FormInputWrapper = styled.div`
+  max-width: 45rem;
+  padding-bottom: 1rem;
+`;
+
+const SubContainers = styled.div<MobileLayout>`
+  width: 100%;
+  display: flex;
+  margin-bottom: 2rem;
+
+  ${() => (isMobile ? `flex-direction: column;` : `flex-direction: row;`)}
+`;
+
+const Container = styled.form`
+  padding: 1rem 2rem 0 2rem;
+`;
+
+const BottomMessagesWrapper = styled.div`
+  max-width: 45rem;
+  padding-bottom: 2rem;
 `;
 
 const RemoveConfirmation = styled.div`
@@ -82,6 +101,8 @@ export const ManageProductions = () => {
     null
   );
 
+  const [, dispatch] = useGlobalState();
+
   const {
     reset,
     formState,
@@ -96,7 +117,11 @@ export const ManageProductions = () => {
     min: 1,
   });
 
-  const { productions, error } = useFetchProductionList();
+  const { allProductions, doInitialLoad, error } = useFetchProductionList();
+
+  const showRefreshing = useRefreshAnimation({
+    doInitialLoad,
+  });
 
   const {
     error: productionFetchError,
@@ -123,8 +148,11 @@ export const ManageProductions = () => {
     if (successfullDelete) {
       setVerifyRemove(false);
       setShowDeleteDoneMessage(true);
+      dispatch({
+        type: "PRODUCTION_UPDATED",
+      });
     }
-  }, [successfullDelete]);
+  }, [dispatch, successfullDelete]);
 
   useEffect(() => {
     if (production) {
@@ -180,31 +208,6 @@ export const ManageProductions = () => {
         <NavigateToRootButton />
       </StyledBackBtnIcon>
       <DisplayContainerHeader>Manage Productions</DisplayContainerHeader>
-      {cachedProduction && !showProductionsList && (
-        <ShowListBtn
-          type="button"
-          onClick={() => {
-            setShowProductionsList(true);
-          }}
-        >
-          Show Productions List
-        </ShowListBtn>
-      )}
-      {(!cachedProduction || showProductionsList) && (
-        <ListWrapper>
-          <ProductionsList
-            productions={productions}
-            error={error}
-            manageProduction={(v: string) => {
-              setProductionIdToFetch(parseInt(v, 10));
-              reset({
-                productionId: `${v}`,
-              });
-              setShowProductionsList(false);
-            }}
-          />
-        </ListWrapper>
-      )}
       <FormInputWrapper>
         <FormInputWithLoader
           onChange={(ev) => {
@@ -241,11 +244,45 @@ export const ManageProductions = () => {
         as={StyledWarningMessage}
       />
       {cachedProduction && (
+        <ShowListBtn
+          type="button"
+          onClick={() => {
+            setShowProductionsList(!showProductionsList);
+          }}
+        >
+          {showProductionsList ? "Hide" : "Show"} Productions List
+        </ShowListBtn>
+      )}
+      {(!cachedProduction || showProductionsList) && (
+        <>
+          <LoaderWrapper>
+            <LoaderDots
+              className={showRefreshing ? "active" : "in-active"}
+              text="loading"
+            />
+          </LoaderWrapper>
+          <ListWrapper>
+            <ProductionsList
+              productions={allProductions}
+              error={error}
+              manageProduction={(v: string) => {
+                setProductionIdToFetch(parseInt(v, 10));
+                reset({
+                  productionId: `${v}`,
+                });
+                setShowProductionsList(false);
+                setShowDeleteDoneMessage(false);
+              }}
+            />
+          </ListWrapper>
+        </>
+      )}
+      {cachedProduction && (
         <>
           <DecorativeLabel>
             <strong>Production name: {cachedProduction.name}</strong>
           </DecorativeLabel>
-          <SubContainers>
+          <SubContainers isMobile={isMobile}>
             <ManageLines
               production={cachedProduction}
               setProductionIdToFetch={setProductionIdToFetch}
@@ -267,17 +304,19 @@ export const ManageProductions = () => {
           </SubContainers>
         </>
       )}
-      {productionDeleteError && (
-        <FetchErrorMessage>
-          The production ID could not be deleted. {productionDeleteError.name}{" "}
-          {productionDeleteError.message}.
-        </FetchErrorMessage>
-      )}
-      {showDeleteDoneMessage && (
-        <RemoveConfirmation>
-          The production {production?.name} has been removed
-        </RemoveConfirmation>
-      )}
+      <BottomMessagesWrapper>
+        {productionDeleteError && (
+          <FetchErrorMessage>
+            The production ID could not be deleted. {productionDeleteError.name}{" "}
+            {productionDeleteError.message}.
+          </FetchErrorMessage>
+        )}
+        {showDeleteDoneMessage && (
+          <RemoveConfirmation>
+            The production {production?.name} has been removed
+          </RemoveConfirmation>
+        )}
+      </BottomMessagesWrapper>
     </Container>
   );
 };
