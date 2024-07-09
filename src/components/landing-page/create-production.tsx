@@ -92,7 +92,7 @@ export const CreateProduction = () => {
         lines: [],
       });
       dispatch({
-        type: "PRODUCTION_CREATED",
+        type: "PRODUCTION_UPDATED",
       });
     }
   }, [createdProductionId, dispatch, reset]);
