@@ -27,7 +27,7 @@ const ProductionId = styled.div`
 `;
 
 type TProductionsList = {
-  productions: TBasicProduction[];
+  productions: TBasicProduction[] | undefined;
   error: Error | null;
   manageProduction?: (v: string) => void;
 };
@@ -41,6 +41,7 @@ export const ProductionsList = ({
     <>
       {error && <LocalError error={error} />}
       {!error &&
+        productions &&
         productions.map((p) => (
           <ProductionItem
             key={p.productionId}

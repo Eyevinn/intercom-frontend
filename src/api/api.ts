@@ -34,7 +34,12 @@ type TFetchProductionResponse = TBasicProductionResponse & {
   lines: TLine[];
 };
 
-type TListProductionsResponse = TBasicProductionResponse[];
+export type TListProductionsResponse = {
+  productions: TBasicProductionResponse[];
+  offset: 0;
+  limit: 0;
+  totalItems: 0;
+};
 
 type TOfferAudioSessionOptions = {
   productionId: number;
@@ -77,9 +82,13 @@ export const API = {
         }),
       })
     ),
-  listProductions: (): Promise<TListProductionsResponse> =>
+  listProductions: ({
+    searchParams,
+  }: {
+    searchParams: string;
+  }): Promise<TListProductionsResponse> =>
     handleFetchRequest<TListProductionsResponse>(
-      fetch(`${API_URL}production/`, {
+      fetch(`${API_URL}productionlist?${searchParams}`, {
         method: "GET",
         headers: {
           ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
