@@ -56,9 +56,12 @@ export const ProductionsListContainer = () => {
         <DisplayContainerHeader>Production List</DisplayContainerHeader>
       </HeaderContainer>
       <ListWrapper>
-        <ProductionsList productions={productions} error={error} />
+        <ProductionsList
+          productions={productions?.productions.slice(0, 10)}
+          error={error}
+        />
       </ListWrapper>
-      {!!productions.length && <ManageProductionButton />}
+      {!!productions?.productions.length && <ManageProductionButton />}
     </>
   );
 };
