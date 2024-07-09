@@ -21,7 +21,7 @@ export type TDominantSpeaker = {
 };
 
 export type TProductionCreated = {
-  type: "PRODUCTION_CREATED";
+  type: "PRODUCTION_UPDATED";
 };
 
 export type TProductionListFetched = {
