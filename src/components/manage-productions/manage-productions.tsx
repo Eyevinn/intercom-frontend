@@ -19,9 +19,8 @@ import { TProduction } from "../production-line/types";
 import { useFetchProductionList } from "../landing-page/use-fetch-production-list";
 import { isMobile } from "../../bowser";
 import { useGlobalState } from "../../global-state/context-provider";
-import { ProductionsList } from "../productions-list";
-import { LoaderDots } from "../loader/loader";
 import { useRefreshAnimation } from "../landing-page/use-refresh-animation";
+import { PaginatedList } from "./paginated-list";
 
 type FormValue = {
   productionId: string;
@@ -33,16 +32,6 @@ type MobileLayout = {
 
 const ShowListBtn = styled(PrimaryButton)`
   margin-bottom: 2rem;
-`;
-
-const LoaderWrapper = styled.div`
-  padding-bottom: 1rem;
-`;
-
-const ListWrapper = styled.div`
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
 `;
 
 const FormInputWrapper = styled.div`
@@ -101,6 +90,10 @@ export const ManageProductions = () => {
     null
   );
 
+  // Pagination
+  const [offset, setOffset] = useState("0");
+  const limit = "10";
+
   const [, dispatch] = useGlobalState();
 
   const {
@@ -117,7 +110,11 @@ export const ManageProductions = () => {
     min: 1,
   });
 
-  const { allProductions, doInitialLoad, error } = useFetchProductionList();
+  const { productions, doInitialLoad, error, setIntervalLoad } =
+    useFetchProductionList({
+      limit,
+      offset,
+    });
 
   const showRefreshing = useRefreshAnimation({
     doInitialLoad,
@@ -181,6 +178,12 @@ export const ManageProductions = () => {
       }
     };
   }, [cachedProduction]);
+
+  useEffect(() => {
+    if (offset !== productions?.offset.toString()) {
+      setIntervalLoad(true);
+    }
+  }, [offset, productions?.offset, setIntervalLoad]);
 
   // Custom submit to stop keypress 'Enter' being active
   const handleCustomSubmit = async () => {
@@ -254,28 +257,20 @@ export const ManageProductions = () => {
         </ShowListBtn>
       )}
       {(!cachedProduction || showProductionsList) && (
-        <>
-          <LoaderWrapper>
-            <LoaderDots
-              className={showRefreshing ? "active" : "in-active"}
-              text="loading"
-            />
-          </LoaderWrapper>
-          <ListWrapper>
-            <ProductionsList
-              productions={allProductions}
-              error={error}
-              manageProduction={(v: string) => {
-                setProductionIdToFetch(parseInt(v, 10));
-                reset({
-                  productionId: `${v}`,
-                });
-                setShowProductionsList(false);
-                setShowDeleteDoneMessage(false);
-              }}
-            />
-          </ListWrapper>
-        </>
+        <PaginatedList
+          setProductionPage={(input) => setOffset(input)}
+          showRefreshing={showRefreshing}
+          productions={productions}
+          error={error}
+          manageProduction={(v: string) => {
+            setProductionIdToFetch(parseInt(v, 10));
+            reset({
+              productionId: `${v}`,
+            });
+            setShowProductionsList(false);
+            setShowDeleteDoneMessage(false);
+          }}
+        />
       )}
       {cachedProduction && (
         <>
