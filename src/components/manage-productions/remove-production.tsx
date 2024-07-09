@@ -7,6 +7,7 @@ const Container = styled.div`
   max-width: 45rem;
   min-width: 35rem;
   padding: 2rem;
+  margin: 0 2rem 2rem 0;
   border-radius: 1rem;
   border: 0.2rem solid #434343;
 `;
