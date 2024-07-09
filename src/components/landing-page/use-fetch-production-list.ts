@@ -5,6 +5,7 @@ import { TBasicProduction } from "../production-line/types.ts";
 
 export const useFetchProductionList = () => {
   const [productions, setProductions] = useState<TBasicProduction[]>([]);
+  const [allProductions, setAllProductions] = useState<TBasicProduction[]>([]);
   const [doInitialLoad, setDoInitialLoad] = useState(true);
   const [intervalLoad, setIntervalLoad] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
@@ -21,9 +22,11 @@ export const useFetchProductionList = () => {
 
           setProductions(
             result
-              // pick last 10 items and display newest first
+              // pick last 10 items
               .slice(0, 10)
           );
+
+          setAllProductions(result);
 
           dispatch({
             type: "PRODUCTION_LIST_FETCHED",
@@ -48,6 +51,7 @@ export const useFetchProductionList = () => {
   }, [dispatch, intervalLoad, reloadProductionList, doInitialLoad]);
 
   return {
+    allProductions,
     productions,
     doInitialLoad,
     error,
