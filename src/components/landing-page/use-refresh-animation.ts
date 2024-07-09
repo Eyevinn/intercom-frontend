@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 type TUseRefreshAnimationOptions = {
-  reloadProductionList: boolean;
+  reloadProductionList?: boolean;
   doInitialLoad: boolean;
 };
 
