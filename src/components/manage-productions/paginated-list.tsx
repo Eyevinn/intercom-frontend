@@ -1,4 +1,5 @@
 import styled from "@emotion/styled";
+import { useEffect, useState } from "react";
 import { ProductionsList } from "../productions-list";
 import { LoaderDots } from "../loader/loader";
 import { TListProductionsResponse } from "../../api/api";
@@ -26,6 +27,7 @@ const PaginationWrapper = styled.div`
 `;
 
 const PageStep = styled.button`
+  cursor: pointer;
   border: 1px solid #424242;
   border-radius: 0.5rem;
   padding: 1rem;
@@ -57,10 +59,23 @@ export const PaginatedList = ({
   error,
   manageProduction,
 }: TPaginatedList) => {
-  if (!productions) return undefined;
+  const [pagesArray, setPagesArray] = useState<number[]>();
+  const totalPages = productions
+    ? Math.ceil(productions.totalItems / productions.limit)
+    : 0;
+
+  useEffect(() => {
+    const result: number[] = [];
+    // eslint-disable-next-line no-plusplus
+    for (let i = 1; i <= totalPages; i++) {
+      result.push(i);
+    }
+    return setPagesArray(result);
+  }, [totalPages]);
+
+  if (!productions) return null;
 
   const pageIndex = productions.offset / productions.limit;
-  const totalPages = Math.ceil(productions.totalItems / productions.limit);
   const currentPage = pageIndex + 1;
 
   const handleClick = (pageNumber: number) => {
@@ -82,6 +97,7 @@ export const PaginatedList = ({
           <ListWrapper>
             <ProductionsList
               productions={productions.productions}
+              className="clickableList"
               error={error}
               manageProduction={(v: string) => manageProduction(v)}
             />
@@ -96,16 +112,17 @@ export const PaginatedList = ({
               >
                 <StepLeftIcon />
               </PageStep>
-              {Array.from({ length: totalPages }, (_, index) => (
-                <PageStep
-                  key={index + 1}
-                  type="button"
-                  onClick={() => handleClick(index + 1)}
-                  disabled={currentPage === index + 1}
-                >
-                  <PageNumber>{index + 1}</PageNumber>
-                </PageStep>
-              ))}
+              {pagesArray &&
+                pagesArray.map((item: number, index) => (
+                  <PageStep
+                    key={item}
+                    type="button"
+                    onClick={() => handleClick(item)}
+                    disabled={currentPage === item}
+                  >
+                    <PageNumber>{index + 1}</PageNumber>
+                  </PageStep>
+                ))}
               <PageStep
                 type="button"
                 className="icon"
