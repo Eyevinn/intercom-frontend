@@ -110,11 +110,10 @@ export const ManageProductions = () => {
     min: 1,
   });
 
-  const { productions, doInitialLoad, error, setIntervalLoad } =
-    useFetchProductionList({
-      limit,
-      offset,
-    });
+  const { productions, doInitialLoad, error } = useFetchProductionList({
+    limit,
+    offset,
+  });
 
   const showRefreshing = useRefreshAnimation({
     doInitialLoad,
@@ -178,12 +177,6 @@ export const ManageProductions = () => {
       }
     };
   }, [cachedProduction]);
-
-  useEffect(() => {
-    if (offset !== productions?.offset.toString()) {
-      setIntervalLoad(true);
-    }
-  }, [offset, productions?.offset, setIntervalLoad]);
 
   // Custom submit to stop keypress 'Enter' being active
   const handleCustomSubmit = async () => {
