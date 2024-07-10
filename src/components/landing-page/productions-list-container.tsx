@@ -27,7 +27,9 @@ export const ProductionsListContainer = () => {
   const [{ reloadProductionList }] = useGlobalState();
 
   const { productions, doInitialLoad, error, setIntervalLoad } =
-    useFetchProductionList();
+    useFetchProductionList({
+      limit: "10",
+    });
 
   const showRefreshing = useRefreshAnimation({
     reloadProductionList,
@@ -56,10 +58,7 @@ export const ProductionsListContainer = () => {
         <DisplayContainerHeader>Production List</DisplayContainerHeader>
       </HeaderContainer>
       <ListWrapper>
-        <ProductionsList
-          productions={productions?.productions.slice(0, 10)}
-          error={error}
-        />
+        <ProductionsList productions={productions?.productions} error={error} />
       </ListWrapper>
       {!!productions?.productions.length && <ManageProductionButton />}
     </>
