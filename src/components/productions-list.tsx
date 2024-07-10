@@ -12,6 +12,10 @@ const ProductionItem = styled.button`
   border-radius: 0.5rem;
   padding: 2rem;
   margin: 0 2rem 2rem 0;
+
+  &.clickableList {
+    cursor: pointer;
+  }
 `;
 
 const ProductionName = styled.div`
@@ -28,12 +32,14 @@ const ProductionId = styled.div`
 
 type TProductionsList = {
   productions: TBasicProduction[] | undefined;
+  className?: string;
   error: Error | null;
   manageProduction?: (v: string) => void;
 };
 
 export const ProductionsList = ({
   productions,
+  className,
   error,
   manageProduction,
 }: TProductionsList) => {
@@ -46,6 +52,7 @@ export const ProductionsList = ({
           <ProductionItem
             key={p.productionId}
             type="button"
+            className={className}
             onClick={() =>
               manageProduction
                 ? manageProduction(p.productionId)
