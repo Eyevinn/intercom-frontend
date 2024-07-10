@@ -18,10 +18,13 @@ export const useFetchProductionList = (filter?: GetProductionListFilter) => {
   useEffect(() => {
     let aborted = false;
 
-    if (reloadProductionList || intervalLoad || doInitialLoad) {
-      const filterSearchParams = new URLSearchParams(filter);
-
-      const searchParams = new URLSearchParams(filterSearchParams).toString();
+    if (
+      reloadProductionList ||
+      intervalLoad ||
+      doInitialLoad ||
+      filter?.offset !== productions?.offset.toString()
+    ) {
+      const searchParams = new URLSearchParams(filter).toString();
 
       API.listProductions({ searchParams })
         .then((result) => {
@@ -49,7 +52,14 @@ export const useFetchProductionList = (filter?: GetProductionListFilter) => {
     return () => {
       aborted = true;
     };
-  }, [dispatch, intervalLoad, reloadProductionList, doInitialLoad, filter]);
+  }, [
+    dispatch,
+    intervalLoad,
+    reloadProductionList,
+    doInitialLoad,
+    filter,
+    productions?.offset,
+  ]);
 
   return {
     productions,
