@@ -12,4 +12,5 @@ export type TGlobalState = {
   mediaStreamInput: MediaStream | null;
   dominantSpeaker: string | null;
   audioLevelAboveThreshold: boolean;
+  selectedProductionId: string | null;
 };
