@@ -10,7 +10,8 @@
     "prepare": "husky install",
     "preview": "vite preview",
     "pretty": "prettier --write --ignore-unknown .",
-    "typecheck": "tsc --noEmit -p tsconfig.json"
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "postversion": "git push && git push --tags"
   },
   "dependencies": {
     "@emotion/react": "^11.11.4",
