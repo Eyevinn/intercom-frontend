@@ -24,7 +24,7 @@ const ListWrapper = styled.div`
 `;
 
 export const ProductionsListContainer = () => {
-  const [{ reloadProductionList }] = useGlobalState();
+  const [{ reloadProductionList }, dispatch] = useGlobalState();
 
   const { productions, doInitialLoad, error, setIntervalLoad } =
     useFetchProductionList({
@@ -58,7 +58,16 @@ export const ProductionsListContainer = () => {
         <DisplayContainerHeader>Production List</DisplayContainerHeader>
       </HeaderContainer>
       <ListWrapper>
-        <ProductionsList productions={productions?.productions} error={error} />
+        <ProductionsList
+          productions={productions?.productions}
+          error={error}
+          setProductionId={(input) =>
+            dispatch({
+              type: "SELECT_PRODUCTION_ID",
+              payload: input,
+            })
+          }
+        />
       </ListWrapper>
       {!!productions?.productions.length && <ManageProductionButton />}
     </>
