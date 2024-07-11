@@ -4,6 +4,7 @@ import { LocalError } from "./error.tsx";
 
 const ProductionItem = styled.button`
   text-align: start;
+  color: #ffffff;
   background-color: transparent;
   flex: 1 0 calc(25% - 2rem);
   justify-content: start;
@@ -12,10 +13,7 @@ const ProductionItem = styled.button`
   border-radius: 0.5rem;
   padding: 2rem;
   margin: 0 2rem 2rem 0;
-
-  &.clickableList {
-    cursor: pointer;
-  }
+  cursor: pointer;
 `;
 
 const ProductionName = styled.div`
@@ -32,16 +30,14 @@ const ProductionId = styled.div`
 
 type TProductionsList = {
   productions: TBasicProduction[] | undefined;
-  className?: string;
   error: Error | null;
-  manageProduction?: (v: string) => void;
+  setProductionId: (v: string) => void;
 };
 
 export const ProductionsList = ({
   productions,
-  className,
   error,
-  manageProduction,
+  setProductionId,
 }: TProductionsList) => {
   return (
     <>
@@ -52,12 +48,7 @@ export const ProductionsList = ({
           <ProductionItem
             key={p.productionId}
             type="button"
-            className={className}
-            onClick={() =>
-              manageProduction
-                ? manageProduction(p.productionId)
-                : console.log("")
-            }
+            onClick={() => setProductionId(p.productionId)}
           >
             <ProductionName>{p.name}</ProductionName>
             <ProductionId>{p.productionId}</ProductionId>
