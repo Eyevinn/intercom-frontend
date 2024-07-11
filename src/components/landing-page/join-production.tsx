@@ -59,7 +59,7 @@ export const JoinProduction = ({ preSelected }: TProps) => {
     },
   });
 
-  const [{ devices }, dispatch] = useGlobalState();
+  const [{ devices, selectedProductionId }, dispatch] = useGlobalState();
 
   const {
     error: productionFetchError,
@@ -96,6 +96,19 @@ export const JoinProduction = ({ preSelected }: TProps) => {
     }
   }, [setValue]);
 
+  // If user selects a production from the productionlist
+  useEffect(() => {
+    if (
+      selectedProductionId &&
+      selectedProductionId !== joinProductionId?.toString()
+    ) {
+      reset({
+        productionId: `${selectedProductionId}`,
+      });
+      setJoinProductionId(parseInt(selectedProductionId, 10));
+    }
+  }, [joinProductionId, reset, selectedProductionId]);
+
   const { onChange, onBlur, name, ref } = register("productionId", {
     required: "Production ID is required",
     min: 1,
@@ -109,6 +122,10 @@ export const JoinProduction = ({ preSelected }: TProps) => {
     dispatch({
       type: "UPDATE_JOIN_PRODUCTION_OPTIONS",
       payload,
+    });
+    dispatch({
+      type: "SELECT_PRODUCTION_ID",
+      payload: null,
     });
     // TODO remove
     console.log(payload);
