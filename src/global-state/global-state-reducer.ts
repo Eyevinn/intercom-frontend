@@ -11,6 +11,7 @@ const initialGlobalState: TGlobalState = {
   mediaStreamInput: null,
   dominantSpeaker: null,
   audioLevelAboveThreshold: false,
+  selectedProductionId: null,
 };
 
 const globalReducer: Reducer<TGlobalState, TGlobalStateAction> = (
@@ -62,6 +63,11 @@ const globalReducer: Reducer<TGlobalState, TGlobalStateAction> = (
       return {
         ...state,
         audioLevelAboveThreshold: action.payload,
+      };
+    case "SELECT_PRODUCTION_ID":
+      return {
+        ...state,
+        selectedProductionId: action.payload,
       };
     default:
       return state;
