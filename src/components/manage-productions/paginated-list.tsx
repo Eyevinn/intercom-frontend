@@ -97,9 +97,8 @@ export const PaginatedList = ({
           <ListWrapper>
             <ProductionsList
               productions={productions.productions}
-              className="clickableList"
               error={error}
-              manageProduction={(v: string) => manageProduction(v)}
+              setProductionId={(v: string) => manageProduction(v)}
             />
           </ListWrapper>
           {totalPages > 1 && (
