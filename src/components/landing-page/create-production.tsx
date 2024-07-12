@@ -17,6 +17,8 @@ import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { Spinner } from "../loader/loader.tsx";
 import { FlexContainer } from "../generic-components.ts";
 import { RemoveLineButton } from "../remove-line-button/remove-line-button.tsx";
+import { useFetchProduction } from "./use-fetch-production.ts";
+import { darkText, errorColour } from "../../css-helpers/defaults.ts";
 
 type FormValues = {
   productionName: string;
@@ -38,9 +40,27 @@ const ButtonWrapper = styled.div`
 const ProductionConfirmation = styled.div`
   background: #91fa8c;
   padding: 1rem;
+  margin-bottom: 1rem;
   border-radius: 0.5rem;
   border: 1px solid #b2ffa1;
   color: #1a1a1a;
+`;
+
+const CopyToClipboardWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+`;
+
+const CopyConfirmation = styled.p`
+  padding-left: 1rem;
+`;
+
+const FetchErrorMessage = styled.div`
+  background: ${errorColour};
+  color: ${darkText};
+  padding: 0.5rem;
+  margin: 1rem 0;
 `;
 
 export const CreateProduction = () => {
@@ -49,6 +69,7 @@ export const CreateProduction = () => {
     null
   );
   const [loading, setLoading] = useState<boolean>(false);
+  const [copiedUrl, setCopiedUrl] = useState<boolean>(false);
   const {
     formState: { errors },
     control,
@@ -63,6 +84,10 @@ export const CreateProduction = () => {
       minLength: 1,
     },
   });
+
+  const { error: productionFetchError, production } = useFetchProduction(
+    createdProductionId ? parseInt(createdProductionId, 10) : null
+  );
 
   const onSubmit: SubmitHandler<FormValues> = (value) => {
     setLoading(true);
@@ -96,6 +121,32 @@ export const CreateProduction = () => {
       });
     }
   }, [createdProductionId, dispatch, reset]);
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleCopyProdUrlsToClipboard = (input: any) => {
+    if (input !== null) {
+      navigator.clipboard
+        .writeText(input)
+        .then(() => {
+          let timeout: number | null = null;
+          setCopiedUrl(true);
+          console.log("Text copied to clipboard");
+
+          timeout = window.setTimeout(() => {
+            setCopiedUrl(false);
+          }, 11500);
+
+          return () => {
+            if (timeout !== null) {
+              window.clearTimeout(timeout);
+            }
+          };
+        })
+        .catch((err) => {
+          console.error("Failed to copy text: ", err);
+        });
+    }
+  };
 
   return (
     <FormContainer>
@@ -178,10 +229,36 @@ export const CreateProduction = () => {
           </PrimaryButton>
         </ButtonWrapper>
       </FlexContainer>
-      {createdProductionId !== null && (
-        <ProductionConfirmation>
-          The production ID is: {createdProductionId.toString()}
-        </ProductionConfirmation>
+      {createdProductionId !== null && production && (
+        <>
+          <ProductionConfirmation>
+            The production ID is: {createdProductionId.toString()}
+          </ProductionConfirmation>
+          {!productionFetchError && (
+            <CopyToClipboardWrapper>
+              <PrimaryButton
+                type="button"
+                onClick={() =>
+                  handleCopyProdUrlsToClipboard(
+                    production.lines.map((item) => {
+                      return ` ${item.name}: ${window.location.origin}/production/${production.productionId}/line/${item.id}`;
+                    })
+                  )
+                }
+                disabled={copiedUrl}
+              >
+                Copy Links
+              </PrimaryButton>
+              {copiedUrl && <CopyConfirmation>Copied</CopyConfirmation>}
+            </CopyToClipboardWrapper>
+          )}
+          {productionFetchError && (
+            <FetchErrorMessage>
+              The production information could not be fetched, not able to copy
+              to clipboard.
+            </FetchErrorMessage>
+          )}
+        </>
       )}
     </FormContainer>
   );
