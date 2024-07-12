@@ -134,7 +134,7 @@ export const CreateProduction = () => {
 
           timeout = window.setTimeout(() => {
             setCopiedUrl(false);
-          }, 11500);
+          }, 1500);
 
           return () => {
             if (timeout !== null) {
