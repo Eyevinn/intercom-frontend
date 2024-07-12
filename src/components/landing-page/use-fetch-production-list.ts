@@ -15,6 +15,9 @@ export const useFetchProductionList = (filter?: GetProductionListFilter) => {
 
   const [{ reloadProductionList }, dispatch] = useGlobalState();
 
+  const manageProdPaginationUpdate =
+    filter?.offset !== productions?.offset.toString();
+
   useEffect(() => {
     let aborted = false;
 
@@ -22,7 +25,8 @@ export const useFetchProductionList = (filter?: GetProductionListFilter) => {
       reloadProductionList ||
       intervalLoad ||
       doInitialLoad ||
-      filter?.offset !== productions?.offset.toString()
+      // offset-param is never present on launch-page
+      (filter?.offset ? manageProdPaginationUpdate : false)
     ) {
       const searchParams = new URLSearchParams(filter).toString();
 
@@ -58,7 +62,7 @@ export const useFetchProductionList = (filter?: GetProductionListFilter) => {
     reloadProductionList,
     doInitialLoad,
     filter,
-    productions?.offset,
+    manageProdPaginationUpdate,
   ]);
 
   return {
