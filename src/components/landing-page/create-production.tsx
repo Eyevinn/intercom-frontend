@@ -122,25 +122,27 @@ export const CreateProduction = () => {
     }
   }, [createdProductionId, dispatch, reset]);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleCopyProdUrlsToClipboard = (input: any) => {
+  useEffect(() => {
+    let timeout: number | null = null;
+    if (copiedUrl) {
+      timeout = window.setTimeout(() => {
+        setCopiedUrl(false);
+      }, 1500);
+    }
+    return () => {
+      if (timeout !== null) {
+        window.clearTimeout(timeout);
+      }
+    };
+  }, [copiedUrl]);
+
+  const handleCopyProdUrlsToClipboard = (input: string[]) => {
     if (input !== null) {
       navigator.clipboard
-        .writeText(input)
+        .writeText(input.join("\n"))
         .then(() => {
-          let timeout: number | null = null;
           setCopiedUrl(true);
           console.log("Text copied to clipboard");
-
-          timeout = window.setTimeout(() => {
-            setCopiedUrl(false);
-          }, 1500);
-
-          return () => {
-            if (timeout !== null) {
-              window.clearTimeout(timeout);
-            }
-          };
         })
         .catch((err) => {
           console.error("Failed to copy text: ", err);
@@ -229,12 +231,12 @@ export const CreateProduction = () => {
           </PrimaryButton>
         </ButtonWrapper>
       </FlexContainer>
-      {createdProductionId !== null && production && (
+      {createdProductionId !== null && (
         <>
           <ProductionConfirmation>
             The production ID is: {createdProductionId.toString()}
           </ProductionConfirmation>
-          {!productionFetchError && (
+          {!productionFetchError && production && (
             <CopyToClipboardWrapper>
               <PrimaryButton
                 type="button"
