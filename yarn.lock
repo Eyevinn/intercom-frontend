@@ -636,10 +636,10 @@
   resolved "https://registry.yarnpkg.com/@eslint/js/-/js-8.57.0.tgz#a5417ae8427873f1dd08b70b3574b453e67b5f7f"
   integrity sha512-Ys+3g2TaW7gADOJzPt83SJtCDhMjndcDMFVQ/Tj9iA1BfJzFKD9mAUXT3OenpuPHbI6P/myECxRJrofUsDx/5g==
 
-"@eyevinn/media-event-filter@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@eyevinn/media-event-filter/-/media-event-filter-2.0.0.tgz#f686a3f5728a7c1f69d133eb3ebcf63ac1650d71"
-  integrity sha512-V04G3H1NNFHITQQONsBII0AdwUty9TM5ThqGI3pCamEc4gg6vlzBc4I57Alj8KZsZnIa6CDBCMg/D9d3XH1fCw==
+"@eyevinn/media-event-filter@^3.1.0":
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/@eyevinn/media-event-filter/-/media-event-filter-3.1.0.tgz#06e89fb9c26c01e38cf669da8f205af04c59015b"
+  integrity sha512-Eigy9eXqyOQ29QeA4PCy0Vy7zTE8v1ysfu9jIx4Q4fEONKLMsEUGr1fYfXU6qZ3QvEfiUirTgIU7BS5CnPf3SQ==
 
 "@hookform/error-message@^2.0.1":
   version "2.0.1"
