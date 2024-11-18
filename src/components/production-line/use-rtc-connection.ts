@@ -171,8 +171,6 @@ const establishConnection = ({
       type: "offer",
     });
 
-    console.log("sdpOffer", sdpOffer);
-
     const sdpAnswer = await rtcPeerConnection.createAnswer();
 
     if (!sdpAnswer.sdp) {
@@ -225,9 +223,7 @@ export const useRtcConnection = ({
   joinProductionOptions,
   sessionId,
 }: TRtcConnectionOptions) => {
-  const [rtcPeerConnection] = useState<RTCPeerConnection>(
-    () => new RTCPeerConnection()
-  );
+  const rtcPeerConnectionRef = useRef<RTCPeerConnection | null>(null);
   const [, dispatch] = useGlobalState();
   const [connectionState, setConnectionState] =
     useState<RTCPeerConnectionState | null>(null);
@@ -249,7 +245,8 @@ export const useRtcConnection = ({
       // eslint-disable-next-line no-param-reassign
       el.srcObject = null;
     });
-  }, [audioElementsRef]);
+    setAudioElements([]); // Reset state
+  }, []);
 
   // Teardown
   useEffect(
@@ -276,6 +273,18 @@ export const useRtcConnection = ({
     }
 
     console.log("Setting up RTC Peer Connection");
+
+    // Clean up existing audio elements before reconnecting
+    cleanUpAudio();
+
+    if (
+      !rtcPeerConnectionRef.current ||
+      rtcPeerConnectionRef.current.connectionState === "closed"
+    ) {
+      rtcPeerConnectionRef.current = new RTCPeerConnection();
+    }
+
+    const rtcPeerConnection = rtcPeerConnectionRef.current;
 
     const onConnectionStateChange = () => {
       setConnectionState(rtcPeerConnection.connectionState);
@@ -330,13 +339,22 @@ export const useRtcConnection = ({
     inputAudioStream,
     sessionId,
     joinProductionOptions,
-    rtcPeerConnection,
+    rtcPeerConnectionRef,
+    cleanUpAudio,
     dispatch,
     noStreamError,
   ]);
 
   // Debug hook for logging RTC events TODO remove
   useEffect(() => {
+    if (
+      !rtcPeerConnectionRef.current ||
+      rtcPeerConnectionRef.current.connectionState === "closed"
+    ) {
+      rtcPeerConnectionRef.current = new RTCPeerConnection();
+    }
+    const rtcPeerConnection = rtcPeerConnectionRef.current;
+
     const onIceGathering = () =>
       console.log("ice gathering:", rtcPeerConnection.iceGatheringState);
     const onIceConnection = () =>
@@ -396,7 +414,7 @@ export const useRtcConnection = ({
         onNegotiationNeeded
       );
     };
-  }, [rtcPeerConnection]);
+  }, [rtcPeerConnectionRef]);
 
   return { connectionState, audioElements };
 };
