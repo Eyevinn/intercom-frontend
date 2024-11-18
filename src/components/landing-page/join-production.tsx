@@ -20,6 +20,10 @@ import { uniqBy } from "../../helpers.ts";
 import { FormInputWithLoader } from "./form-input-with-loader.tsx";
 import { useStorage } from "../accessing-local-storage/access-local-storage.ts";
 import { useNavigateToProduction } from "./use-navigate-to-production.ts";
+import { RefreshIcon } from "../../assets/icons/icon.tsx";
+import { useFetchDevices } from "../../use-fetch-devices.ts";
+import { Spinner } from "../loader/loader.tsx";
+import { useDevicePermissions } from "../../use-device-permission.ts";
 
 type FormValues = TJoinProductionOptions;
 
@@ -33,6 +37,24 @@ const FetchErrorMessage = styled.div`
 
 const ButtonWrapper = styled.div`
   margin: 2rem 0 2rem 0;
+`;
+
+const StyledRefreshBtn = styled(PrimaryButton)`
+  padding: 0;
+  margin: 0;
+  width: 4rem;
+  height: 3.5rem;
+  margin-left: 1.5rem;
+
+  &.dummy {
+    background-color: #242424;
+    pointer-events: none;
+  }
+`;
+
+const FormWithBtn = styled.div`
+  display: flex;
+  justify-content: space-between;
 `;
 
 type TProps = {
@@ -53,6 +75,8 @@ export const JoinProduction = ({
   const [joinProductionOptions, setJoinProductionOptions] =
     useState<TJoinProductionOptions | null>(null);
   const { readFromStorage, writeToStorage } = useStorage("username");
+  const [refresh, setRefresh] = useState<number>(0);
+  const [deviceRefresh, setDeviceRefresh] = useState(false);
   const {
     formState: { errors, isValid },
     register,
@@ -71,8 +95,17 @@ export const JoinProduction = ({
       keepErrors: true, // input errors will be retained with value update
     },
   });
+  const { permission } = useDevicePermissions({
+    continueToApp: true,
+  });
 
   const [{ devices, selectedProductionId }, dispatch] = useGlobalState();
+
+  useFetchDevices({
+    dispatch,
+    permission,
+    refresh,
+  });
 
   const {
     error: productionFetchError,
@@ -168,6 +201,20 @@ export const JoinProduction = ({
     console.log("PAYLOAD: ", payload);
   };
 
+  useEffect(() => {
+    let timeout: number | null = null;
+
+    timeout = window.setTimeout(() => {
+      setDeviceRefresh(false);
+    }, 800);
+
+    return () => {
+      if (timeout !== null) {
+        window.clearTimeout(timeout);
+      }
+    };
+  }, [devices]);
+
   const outputDevices = devices
     ? uniqBy(
         devices.filter((d) => d.kind === "audiooutput"),
@@ -181,6 +228,11 @@ export const JoinProduction = ({
         (item) => item.deviceId
       )
     : [];
+
+  const handleReloadDevices = () => {
+    setDeviceRefresh(true);
+    setRefresh((prev) => prev + 1);
+  };
 
   return (
     <FormContainer>
@@ -236,39 +288,59 @@ export const JoinProduction = ({
           />
           <FormLabel>
             <DecorativeLabel>Input</DecorativeLabel>
-            <FormSelect
-              // eslint-disable-next-line
-              {...register(`audioinput`)}
-            >
-              {inputDevices.length > 0 ? (
-                inputDevices.map((device) => (
-                  <option key={device.deviceId} value={device.deviceId}>
-                    {device.label}
-                  </option>
-                ))
-              ) : (
-                <option value="no-device">No device available</option>
-              )}
-            </FormSelect>
+            <FormWithBtn>
+              <FormSelect
+                // eslint-disable-next-line
+                {...register(`audioinput`)}
+              >
+                {inputDevices.length > 0 ? (
+                  inputDevices.map((device) => (
+                    <option key={device.deviceId} value={device.deviceId}>
+                      {device.label}
+                    </option>
+                  ))
+                ) : (
+                  <option value="no-device">No device available</option>
+                )}
+              </FormSelect>
+              <StyledRefreshBtn
+                type="button"
+                className="dummy"
+                disabled
+                onClick={() => handleReloadDevices()}
+              >
+                <RefreshIcon />
+              </StyledRefreshBtn>
+            </FormWithBtn>
           </FormLabel>
           <FormLabel>
             <DecorativeLabel>Output</DecorativeLabel>
-            {outputDevices.length > 0 ? (
-              <FormSelect
-                // eslint-disable-next-line
-                {...register(`audiooutput`)}
+            <FormWithBtn>
+              {outputDevices.length > 0 ? (
+                <FormSelect
+                  // eslint-disable-next-line
+                  {...register(`audiooutput`)}
+                >
+                  {outputDevices.map((device) => (
+                    <option key={device.deviceId} value={device.deviceId}>
+                      {device.label}
+                    </option>
+                  ))}
+                </FormSelect>
+              ) : (
+                <StyledWarningMessage>
+                  Controlled by operating system
+                </StyledWarningMessage>
+              )}
+              <StyledRefreshBtn
+                type="button"
+                title="Refresh devices"
+                onClick={() => handleReloadDevices()}
               >
-                {outputDevices.map((device) => (
-                  <option key={device.deviceId} value={device.deviceId}>
-                    {device.label}
-                  </option>
-                ))}
-              </FormSelect>
-            ) : (
-              <StyledWarningMessage>
-                Controlled by operating system
-              </StyledWarningMessage>
-            )}
+                {!deviceRefresh && <RefreshIcon />}
+                {deviceRefresh && <Spinner className="refresh-devices" />}
+              </StyledRefreshBtn>
+            </FormWithBtn>
           </FormLabel>
           {!preSelected && (
             <FormLabel>
