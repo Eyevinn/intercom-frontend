@@ -1,4 +1,4 @@
-import { Dispatch, useEffect, useState } from "react";
+import { Dispatch, useEffect, useRef, useState } from "react";
 import { TJoinProductionOptions } from "./types.ts";
 import { noop } from "../../helpers.ts";
 import { API } from "../../api/api.ts";
@@ -18,6 +18,7 @@ export const useEstablishSession = ({
 }: TUseGetRtcOfferOptions) => {
   const [sdpOffer, setSdpOffer] = useState<string | null>(null);
   const [sessionId, setSessionId] = useState<string | null>(null);
+  const cleanupCalled = useRef(false);
 
   // Establish audio session
   useEffect(() => {
@@ -58,21 +59,40 @@ export const useEstablishSession = ({
   }, [callId, dispatch, joinProductionOptions]);
 
   // Clean up audio session
-  useEffect(
-    () => () => {
-      if (!joinProductionOptions) return;
+  useEffect(() => {
+    return () => {
+      if (cleanupCalled.current) {
+        return;
+      }
+
+      cleanupCalled.current = true;
+
+      if (!joinProductionOptions) {
+        return;
+      }
 
       if (sessionId) {
-        API.deleteAudioSession({
-          sessionId,
-        }).catch(console.error);
+        API.deleteAudioSession({ sessionId })
+          .then((r) => {
+            console.log(`delete_${sessionId}:`, r);
+            cleanupCalled.current = false;
+            setSessionId(null);
+          })
+          .catch((e) => {
+            console.log("Error:", e);
+            // Reset the flag after an error
+            cleanupCalled.current = false;
+          });
+      } else {
+        // Reset the flag if no sessionId
+        cleanupCalled.current = false;
       }
-    },
-    [sessionId, joinProductionOptions]
-  );
+    };
+  }, [sessionId, joinProductionOptions]);
 
   return {
     sdpOffer,
     sessionId,
+    setSessionId,
   };
 };

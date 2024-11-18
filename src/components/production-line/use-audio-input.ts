@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { noop } from "../../helpers";
 import { TJoinProductionOptions } from "./types.ts";
 
@@ -10,7 +10,7 @@ export type TUseAudioInputValues = MediaStream | "no-device" | null;
 
 type TUseAudioInput = (
   options: TGetMediaDevicesOptions
-) => TUseAudioInputValues;
+) => [TUseAudioInputValues, () => void];
 
 // A hook for fetching the user selected audio input as a MediaStream
 export const useAudioInput: TUseAudioInput = ({ inputId }) => {
@@ -49,5 +49,10 @@ export const useAudioInput: TUseAudioInput = ({ inputId }) => {
     };
   }, [inputId]);
 
-  return audioInput;
+  // Reset function to set audioInput to null
+  const reset = useCallback(() => {
+    setAudioInput(null);
+  }, []);
+
+  return [audioInput, reset];
 };
