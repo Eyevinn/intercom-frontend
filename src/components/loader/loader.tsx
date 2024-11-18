@@ -22,6 +22,16 @@ const Loading = styled.div`
     left: 30%;
   }
 
+  &.refresh-devices {
+    position: absolute;
+    top: 0.5rem;
+    left: 0.5rem;
+    padding: 0;
+    margin: 0;
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
   &.join-production {
     border: 0.4rem solid rgba(201, 201, 201, 0.1);
     border-top: 0.4rem solid #e2e2e2;
