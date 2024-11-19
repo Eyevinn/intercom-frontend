@@ -24,6 +24,8 @@ import { RefreshIcon } from "../../assets/icons/icon.tsx";
 import { useFetchDevices } from "../../use-fetch-devices.ts";
 import { Spinner } from "../loader/loader.tsx";
 import { useDevicePermissions } from "../../use-device-permission.ts";
+import { Modal } from "../modal/modal.tsx";
+import { isBrowserFirefox, isMobile } from "../../bowser.ts";
 
 type FormValues = TJoinProductionOptions;
 
@@ -77,6 +79,7 @@ export const JoinProduction = ({
   const { readFromStorage, writeToStorage } = useStorage("username");
   const [refresh, setRefresh] = useState<number>(0);
   const [deviceRefresh, setDeviceRefresh] = useState(false);
+  const [firefoxWarningModalOpen, setFirefoxWarningModalOpen] = useState(false);
   const {
     formState: { errors, isValid },
     register,
@@ -230,8 +233,12 @@ export const JoinProduction = ({
     : [];
 
   const handleReloadDevices = () => {
-    setDeviceRefresh(true);
-    setRefresh((prev) => prev + 1);
+    if (isBrowserFirefox && !isMobile) {
+      setFirefoxWarningModalOpen(true);
+    } else {
+      setDeviceRefresh(true);
+      setRefresh((prev) => prev + 1);
+    }
   };
 
   return (
@@ -341,6 +348,17 @@ export const JoinProduction = ({
                 {deviceRefresh && <Spinner className="refresh-devices" />}
               </StyledRefreshBtn>
             </FormWithBtn>
+            {firefoxWarningModalOpen && (
+              <Modal onClose={() => setFirefoxWarningModalOpen(false)}>
+                <DisplayContainerHeader>
+                  Reset permissions
+                </DisplayContainerHeader>
+                <p>
+                  To reload devices Firefox needs the permission to be manually
+                  reset, please remove permission and reload page instead.
+                </p>
+              </Modal>
+            )}
           </FormLabel>
           {!preSelected && (
             <FormLabel>
