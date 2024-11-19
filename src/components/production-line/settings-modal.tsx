@@ -1,6 +1,13 @@
 import styled from "@emotion/styled";
 import React, { useRef } from "react";
-import { PrimaryButton, SecondaryButton } from "../landing-page/form-elements";
+import {
+  PrimaryButton,
+  SecondaryButton,
+  FormLabel,
+  FormInput,
+  FormContainer,
+  DecorativeLabel,
+} from "../landing-page/form-elements";
 
 const ModalOverlay = styled.div`
   position: fixed;
@@ -22,7 +29,7 @@ const ModalContent = styled.div`
   width: 80%;
   max-width: 40rem;
   box-shadow: 0 0.4rem 0.8rem rgba(0, 0, 0, 0.2);
-  text-color: white;
+  color: white;
 `;
 
 const ModalHeader = styled.h2`
@@ -39,32 +46,6 @@ const ModalCloseButton = styled.button`
   right: 1rem;
   cursor: pointer;
   font-size: 1.6rem;
-`;
-
-const Form = styled.form`
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-`;
-
-const FormField = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-`;
-
-const Label = styled.label`
-  font-size: 1.4rem;
-  width: 30%;
-  color: white;
-`;
-
-const Input = styled.input`
-  flex: 1;
-  padding: 0.5rem;
-  border: 0.1rem solid #ccc;
-  border-radius: 0.25rem;
-  font-size: 1.2rem;
 `;
 
 const CancelButton = styled(SecondaryButton)`
@@ -132,10 +113,10 @@ export const SettingsModal = ({
       <ModalContent onClick={stopPropagation}>
         <ModalCloseButton onClick={onClose}>X</ModalCloseButton>
         <ModalHeader>Hotkey settings for line: {lineName}</ModalHeader>
-        <Form>
-          <FormField>
-            <Label>Toggle mute: </Label>
-            <Input
+        <FormContainer>
+          <FormLabel>
+            <DecorativeLabel>Toggle mute: </DecorativeLabel>
+            <FormInput
               id="hotkeyMute"
               ref={(el) => setInputRef(0, el)}
               type="text"
@@ -145,10 +126,10 @@ export const SettingsModal = ({
               maxLength={1}
               onKeyDown={(e) => handleKeyDown(e, 0)}
             />
-          </FormField>
-          <FormField>
-            <Label>Toggle speaker: </Label>
-            <Input
+          </FormLabel>
+          <FormLabel>
+            <DecorativeLabel>Toggle speaker: </DecorativeLabel>
+            <FormInput
               id="hotkeySpeaker"
               ref={(el) => setInputRef(1, el)}
               type="text"
@@ -160,10 +141,10 @@ export const SettingsModal = ({
               maxLength={1}
               onKeyDown={(e) => handleKeyDown(e, 1)}
             />
-          </FormField>
-          <FormField>
-            <Label>Toggle press to speak: </Label>
-            <Input
+          </FormLabel>
+          <FormLabel>
+            <DecorativeLabel>Toggle press to speak: </DecorativeLabel>
+            <FormInput
               id="hotkeyPress"
               ref={(el) => setInputRef(2, el)}
               type="text"
@@ -175,7 +156,7 @@ export const SettingsModal = ({
               maxLength={1}
               onKeyDown={(e) => handleKeyDown(e, 2)}
             />
-          </FormField>
+          </FormLabel>
           <ButtonDiv>
             <CancelButton type="button" onClick={onClose}>
               Cancel
@@ -184,7 +165,7 @@ export const SettingsModal = ({
               Save settings
             </PrimaryButton>
           </ButtonDiv>
-        </Form>
+        </FormContainer>
       </ModalContent>
     </ModalOverlay>
   );
