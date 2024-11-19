@@ -1,5 +1,6 @@
 import styled from "@emotion/styled";
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
+import { ErrorMessage } from "@hookform/error-message";
 import {
   PrimaryButton,
   SecondaryButton,
@@ -7,6 +8,7 @@ import {
   FormInput,
   FormContainer,
   DecorativeLabel,
+  StyledWarningMessage,
 } from "../landing-page/form-elements";
 
 const ModalOverlay = styled.div`
@@ -72,7 +74,6 @@ type TSettingsModalProps = {
   onClose: () => void;
   onSave: () => void;
 };
-
 export const SettingsModal = ({
   hotkeys,
   lineName,
@@ -82,13 +83,52 @@ export const SettingsModal = ({
 }: TSettingsModalProps) => {
   const stopPropagation = (e: React.MouseEvent) => e.stopPropagation();
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const [errors, setErrors] = useState<{ [key: string]: string }>({
+    muteHotkey: "",
+    speakerHotkey: "",
+    pressToTalkHotkey: "",
+  });
 
-  const handleInputChange = (key: string, value: string) => {
+  const validateFields = (key: string, value: string) => {
+    const currentValues = {
+      ...hotkeys,
+      [key]: value,
+    };
+
+    const duplicates = Object.entries(currentValues).reduce(
+      (acc, [field, val]) => {
+        if (val && value && val === value && field !== key) {
+          acc[key] = "This key is already in use.";
+        }
+        return acc;
+      },
+      {} as { [key: string]: string }
+    );
+
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      muteHotkey:
+        key === "muteHotkey"
+          ? duplicates.muteHotkey || ""
+          : prevErrors.muteHotkey,
+      speakerHotkey:
+        key === "speakerHotkey"
+          ? duplicates.speakerHotkey || ""
+          : prevErrors.speakerHotkey,
+      pressToTalkHotkey:
+        key === "pressToTalkHotkey"
+          ? duplicates.pressToTalkHotkey || ""
+          : prevErrors.pressToTalkHotkey,
+    }));
+  };
+
+  const handleInputChange = (key: keyof typeof hotkeys, value: string) => {
     if (value.length <= 1 && /^[a-zA-Z]?$/.test(value)) {
-      setHotkeys((prev: Hotkeys) => ({
+      setHotkeys((prev) => ({
         ...prev,
         [key]: value,
       }));
+      validateFields(key, value);
     }
   };
 
@@ -99,7 +139,22 @@ export const SettingsModal = ({
       if (nextInput) {
         nextInput.focus();
       } else {
-        onSave();
+        const hasErrors = Object.values(errors).some((error) => error !== "");
+        if (!hasErrors) {
+          onSave();
+        }
+      }
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      const previousInput = inputRefs.current[index - 1];
+      if (previousInput) {
+        previousInput.focus();
+      }
+    } else if (e.key === "ArrowDown") {
+      e.preventDefault();
+      const nextInput = inputRefs.current[index + 1];
+      if (nextInput) {
+        nextInput.focus();
       }
     }
   };
@@ -126,6 +181,13 @@ export const SettingsModal = ({
               maxLength={1}
               onKeyDown={(e) => handleKeyDown(e, 0)}
             />
+            {errors.muteHotkey && (
+              <ErrorMessage
+                errors={{ mutekey: { message: errors.muteHotkey } }}
+                name="mutekey"
+                as={StyledWarningMessage}
+              />
+            )}
           </FormLabel>
           <FormLabel>
             <DecorativeLabel>Toggle speaker: </DecorativeLabel>
@@ -141,6 +203,13 @@ export const SettingsModal = ({
               maxLength={1}
               onKeyDown={(e) => handleKeyDown(e, 1)}
             />
+            {errors.speakerHotkey && (
+              <ErrorMessage
+                errors={{ speakerkey: { message: errors.speakerHotkey } }}
+                name="speakerkey"
+                as={StyledWarningMessage}
+              />
+            )}
           </FormLabel>
           <FormLabel>
             <DecorativeLabel>Toggle press to speak: </DecorativeLabel>
@@ -156,12 +225,27 @@ export const SettingsModal = ({
               maxLength={1}
               onKeyDown={(e) => handleKeyDown(e, 2)}
             />
+            {errors.pressToTalkHotkey && (
+              <ErrorMessage
+                errors={{ presskey: { message: errors.pressToTalkHotkey } }}
+                name="presskey"
+                as={StyledWarningMessage}
+              />
+            )}
           </FormLabel>
           <ButtonDiv>
             <CancelButton type="button" onClick={onClose}>
               Cancel
             </CancelButton>
-            <PrimaryButton type="button" onClick={onSave}>
+            <PrimaryButton
+              type="button"
+              onClick={() => {
+                const hasErrors = Object.values(errors).some(
+                  (error) => error !== ""
+                );
+                if (!hasErrors) onSave();
+              }}
+            >
               Save settings
             </PrimaryButton>
           </ButtonDiv>
