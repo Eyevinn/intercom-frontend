@@ -132,6 +132,13 @@ export const SettingsModal = ({
     }
   };
 
+  const handleSave = () => {
+    const hasErrors = Object.values(errors).some((error) => error !== "");
+    if (!hasErrors) {
+      onSave();
+    }
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent, index: number) => {
     if (e.key === "Enter") {
       e.preventDefault();
@@ -139,10 +146,7 @@ export const SettingsModal = ({
       if (nextInput) {
         nextInput.focus();
       } else {
-        const hasErrors = Object.values(errors).some((error) => error !== "");
-        if (!hasErrors) {
-          onSave();
-        }
+        handleSave();
       }
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
@@ -237,15 +241,7 @@ export const SettingsModal = ({
             <CancelButton type="button" onClick={onClose}>
               Cancel
             </CancelButton>
-            <PrimaryButton
-              type="button"
-              onClick={() => {
-                const hasErrors = Object.values(errors).some(
-                  (error) => error !== ""
-                );
-                if (!hasErrors) onSave();
-              }}
-            >
+            <PrimaryButton type="button" onClick={handleSave}>
               Save settings
             </PrimaryButton>
           </ButtonDiv>
