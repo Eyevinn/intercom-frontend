@@ -3,23 +3,31 @@ import { useHotkeys } from "react-hotkeys-hook";
 type TuseLineHotkeys = {
   muteInput: (mute: boolean) => void;
   isInputMuted: boolean;
+  customKeyMute?: string;
+  customKeyPress?: string;
 };
 
 type TuseSpeakerHotkeys = {
   muteOutput: (mute: boolean) => void;
   isOutputMuted: boolean;
+  customKey?: string;
 };
 
 export const useLineHotkeys = ({
   muteInput,
   isInputMuted,
+  customKeyMute,
+  customKeyPress,
 }: TuseLineHotkeys) => {
-  useHotkeys("m", () => {
+  const muteInputKey = customKeyMute || "m";
+  const mutePressKey = customKeyPress || "t";
+
+  useHotkeys(muteInputKey, () => {
     muteInput(!isInputMuted);
   });
 
   useHotkeys(
-    "t",
+    mutePressKey,
     (e) => {
       if (e.type === "keydown") {
         muteInput(false);
@@ -37,8 +45,11 @@ export const useLineHotkeys = ({
 export const useSpeakerHotkeys = ({
   muteOutput,
   isOutputMuted,
+  customKey,
 }: TuseSpeakerHotkeys) => {
-  useHotkeys("n", () => {
+  const muteOutputKey = customKey || "n";
+
+  useHotkeys(muteOutputKey, () => {
     muteOutput(!isOutputMuted);
   });
 };

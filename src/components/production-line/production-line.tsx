@@ -12,6 +12,7 @@ import {
   MicUnmuted,
   SpeakerOff,
   SpeakerOn,
+  SettingsIcon,
 } from "../../assets/icons/icon.tsx";
 import { Spinner } from "../loader/loader.tsx";
 import { DisplayContainerHeader } from "../landing-page/display-container-header.tsx";
@@ -29,9 +30,17 @@ import { useCheckBadLineData } from "./use-check-bad-line-data.ts";
 import { NavigateToRootButton } from "../navigate-to-root-button/navigate-to-root-button.tsx";
 import { useAudioCue } from "./use-audio-cue.ts";
 import { DisplayWarning } from "../display-box.tsx";
+import { SettingsModal } from "./settings-modal.tsx";
 
 const TempDiv = styled.div`
   padding: 0 0 2rem 0;
+`;
+
+const HotkeyDiv = styled.div`
+  padding: 0 0 2rem 0;
+  flex-direction: row;
+  display: flex;
+  align-items: center;
 `;
 
 const HeaderWrapper = styled.div`
@@ -49,6 +58,15 @@ const ButtonIcon = styled.div`
   display: inline-block;
   vertical-align: middle;
   margin: 0 auto;
+`;
+
+const SettingsBtn = styled.div`
+  padding: 0;
+  margin-left: 1.5rem;
+  width: 3rem;
+  cursor: pointer;
+  color: white;
+  background: transparent;
 `;
 
 const FlexButtonWrapper = styled.div`
@@ -102,6 +120,12 @@ const ConnectionErrorWrapper = styled(FlexContainer)`
   padding-top: 12rem;
 `;
 
+type Hotkeys = {
+  muteHotkey: string;
+  speakerHotkey: string;
+  pressToTalkHotkey: string;
+};
+
 export const ProductionLine: FC = () => {
   const { productionId: paramProductionId, lineId: paramLineId } = useParams();
   const [
@@ -110,6 +134,17 @@ export const ProductionLine: FC = () => {
   ] = useGlobalState();
   const [isInputMuted, setIsInputMuted] = useState(true);
   const [isOutputMuted, setIsOutputMuted] = useState(false);
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+  const [hotkeys, setHotkeys] = useState<Hotkeys>({
+    muteHotkey: "m",
+    speakerHotkey: "n",
+    pressToTalkHotkey: "t",
+  });
+  const [savedHotkeys, setSavedHotkeys] = useState<Hotkeys>({
+    muteHotkey: "m",
+    speakerHotkey: "n",
+    pressToTalkHotkey: "t",
+  });
 
   const inputAudioStream = useAudioInput({
     inputId: joinProductionOptions?.audioinput ?? null,
@@ -141,6 +176,8 @@ export const ProductionLine: FC = () => {
   useLineHotkeys({
     muteInput,
     isInputMuted,
+    customKeyMute: savedHotkeys.muteHotkey,
+    customKeyPress: savedHotkeys.pressToTalkHotkey,
   });
 
   const { sessionId, sdpOffer } = useEstablishSession({
@@ -172,6 +209,7 @@ export const ProductionLine: FC = () => {
   useSpeakerHotkeys({
     muteOutput,
     isOutputMuted,
+    customKey: savedHotkeys.speakerHotkey,
   });
 
   const line = useLinePolling({ joinProductionOptions });
@@ -206,6 +244,15 @@ export const ProductionLine: FC = () => {
     paramProductionId,
     dispatch,
   });
+
+  const handleSettingsClick = () => {
+    setIsSettingsModalOpen(!isSettingsModalOpen);
+  };
+
+  const saveHotkeys = () => {
+    setSavedHotkeys({ ...hotkeys });
+    setIsSettingsModalOpen(false);
+  };
 
   // TODO detect if browser back button is pressed and run exit();
 
@@ -315,18 +362,37 @@ export const ProductionLine: FC = () => {
                 inputAudioStream !== "no-device" &&
                 !isMobile && (
                   <>
-                    <TempDiv>
+                    <HotkeyDiv>
                       <strong>Hotkeys</strong>
+                      <SettingsBtn onClick={handleSettingsClick}>
+                        <SettingsIcon />
+                      </SettingsBtn>
+                    </HotkeyDiv>
+                    <TempDiv>
+                      <strong>{savedHotkeys.muteHotkey.toUpperCase()}:</strong>{" "}
+                      Toggle Input Mute
                     </TempDiv>
                     <TempDiv>
-                      <strong>M:</strong> Toggle Input Mute
+                      <strong>
+                        {savedHotkeys.speakerHotkey.toUpperCase()}:
+                      </strong>{" "}
+                      Toggle Output Mute
                     </TempDiv>
                     <TempDiv>
-                      <strong>N:</strong> Toggle Output Mute
+                      <strong>
+                        {savedHotkeys.pressToTalkHotkey.toUpperCase()}:
+                      </strong>{" "}
+                      Push to Talk
                     </TempDiv>
-                    <TempDiv>
-                      <strong>T:</strong> Push to Talk
-                    </TempDiv>
+                    {isSettingsModalOpen && (
+                      <SettingsModal
+                        hotkeys={hotkeys}
+                        lineName={line?.name}
+                        setHotkeys={setHotkeys}
+                        onSave={saveHotkeys}
+                        onClose={handleSettingsClick}
+                      />
+                    )}
                   </>
                 )}
             </div>
