@@ -30,7 +30,7 @@ import { DisplayContainer, FlexContainer } from "../generic-components.ts";
 import { useHeartbeat } from "./use-heartbeat.ts";
 import { JoinProduction } from "../landing-page/join-production.tsx";
 import { useDeviceLabels } from "./use-device-labels.ts";
-import { isMobile } from "../../bowser.ts";
+import { isBrowserFirefox, isMobile } from "../../bowser.ts";
 import { useLineHotkeys, useSpeakerHotkeys } from "./use-line-hotkeys.ts";
 import { LongPressToTalkButton } from "./long-press-to-talk-button.tsx";
 import { useLinePolling } from "./use-line-polling.ts";
@@ -487,6 +487,13 @@ export const ProductionLine: FC = () => {
                       </StyledWarningMessage>
                     )}
                   </FormLabel>
+                  {isBrowserFirefox && !isMobile && (
+                    <StyledWarningMessage>
+                      If a new device has been added Firefox needs the
+                      permission to be manually reset. If your device is
+                      missing, please remove the permission and reload page.
+                    </StyledWarningMessage>
+                  )}
                   <ButtonWrapper>
                     <PrimaryButton
                       type="submit"
