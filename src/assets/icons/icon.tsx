@@ -8,6 +8,7 @@ import UserSvg from "./user.svg?react";
 import ConfirmSvg from "./done.svg?react";
 import StepLeftSvg from "./chevron_left.svg?react";
 import StepRightSvg from "./navigate_next.svg?react";
+import Settings from "./settings.svg?react";
 
 export const MicMuted = () => <MicMute />;
 
@@ -28,3 +29,5 @@ export const ConfirmIcon = () => <ConfirmSvg />;
 export const StepLeftIcon = () => <StepLeftSvg />;
 
 export const StepRightIcon = () => <StepRightSvg />;
+
+export const SettingsIcon = () => <Settings />;
