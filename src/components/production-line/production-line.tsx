@@ -30,7 +30,7 @@ import { useCheckBadLineData } from "./use-check-bad-line-data.ts";
 import { NavigateToRootButton } from "../navigate-to-root-button/navigate-to-root-button.tsx";
 import { useAudioCue } from "./use-audio-cue.ts";
 import { DisplayWarning } from "../display-box.tsx";
-import { SettingsModal } from "./settings-modal.tsx";
+import { SettingsModal, Hotkeys } from "./settings-modal.tsx";
 
 const TempDiv = styled.div`
   padding: 0 0 2rem 0;
@@ -119,12 +119,6 @@ const ConnectionErrorWrapper = styled(FlexContainer)`
   align-items: center;
   padding-top: 12rem;
 `;
-
-type Hotkeys = {
-  muteHotkey: string;
-  speakerHotkey: string;
-  pressToTalkHotkey: string;
-};
 
 export const ProductionLine: FC = () => {
   const { productionId: paramProductionId, lineId: paramLineId } = useParams();
@@ -369,19 +363,19 @@ export const ProductionLine: FC = () => {
                       </SettingsBtn>
                     </HotkeyDiv>
                     <TempDiv>
-                      <strong>{savedHotkeys.muteHotkey.toUpperCase()}:</strong>{" "}
+                      <strong>{savedHotkeys.muteHotkey.toUpperCase()}: </strong>
                       Toggle Input Mute
                     </TempDiv>
                     <TempDiv>
                       <strong>
-                        {savedHotkeys.speakerHotkey.toUpperCase()}:
-                      </strong>{" "}
+                        {savedHotkeys.speakerHotkey.toUpperCase()}:{" "}
+                      </strong>
                       Toggle Output Mute
                     </TempDiv>
                     <TempDiv>
                       <strong>
-                        {savedHotkeys.pressToTalkHotkey.toUpperCase()}:
-                      </strong>{" "}
+                        {savedHotkeys.pressToTalkHotkey.toUpperCase()}:{" "}
+                      </strong>
                       Push to Talk
                     </TempDiv>
                     {isSettingsModalOpen && (
