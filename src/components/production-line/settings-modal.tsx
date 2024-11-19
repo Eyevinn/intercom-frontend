@@ -78,7 +78,7 @@ const ButtonDiv = styled.div`
   margin-top: 3rem;
 `;
 
-type Hotkeys = {
+export type Hotkeys = {
   muteHotkey: string;
   speakerHotkey: string;
   pressToTalkHotkey: string;
