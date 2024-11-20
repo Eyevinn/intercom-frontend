@@ -42,9 +42,9 @@ import { useAudioCue } from "./use-audio-cue.ts";
 import { DisplayWarning } from "../display-box.tsx";
 import { useFetchDevices } from "../../use-fetch-devices.ts";
 import { TJoinProductionOptions } from "./types.ts";
+import { SettingsModal, Hotkeys } from "./settings-modal.tsx";
 
 type FormValues = TJoinProductionOptions;
-import { SettingsModal, Hotkeys } from "./settings-modal.tsx";
 
 const TempDiv = styled.div`
   padding: 0 0 2rem 0;
@@ -166,7 +166,8 @@ export const ProductionLine: FC = () => {
   });
 
   const [inputAudioStream, resetAudioInput] = useAudioInput({
-    inputId: joinProductionOptions?.audioinput ?? null,
+    audioInputId: joinProductionOptions?.audioinput ?? null,
+    audioOutputId: joinProductionOptions?.audiooutput ?? null,
   });
 
   const muteInput = useCallback(
