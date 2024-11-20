@@ -40,8 +40,6 @@ import { useAudioCue } from "./use-audio-cue.ts";
 import { DisplayWarning } from "../display-box.tsx";
 import { useFetchDevices } from "../../use-fetch-devices.ts";
 import { TJoinProductionOptions } from "./types.ts";
-
-type FormValues = TJoinProductionOptions;
 import { SettingsModal, Hotkeys } from "./settings-modal.tsx";
 import { CallState } from "../../global-state/types.ts";
 import { ExitCallButton } from "./exit-call-button.tsx";
@@ -49,6 +47,8 @@ import { Modal } from "../modal/modal.tsx";
 import { VerifyDecision } from "../verify-decision/verify-decision.tsx";
 import { ModalConfirmationText } from "../modal/modal-confirmation-text.ts";
 import { SymphonyRtcConnectionComponent } from "./symphony-rtc-connection-component.tsx";
+
+type FormValues = TJoinProductionOptions;
 
 const TempDiv = styled.div`
   padding: 0 0 2rem 0;
@@ -192,7 +192,8 @@ export const ProductionLine = ({
   } = callState;
 
   const [inputAudioStream, resetAudioInput] = useAudioInput({
-    inputId: joinProductionOptions?.audioinput ?? null,
+    audioInputId: joinProductionOptions?.audioinput ?? null,
+    audioOutputId: joinProductionOptions?.audiooutput ?? null,
   });
 
   const muteInput = useCallback(
