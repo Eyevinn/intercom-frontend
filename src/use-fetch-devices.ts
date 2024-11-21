@@ -4,9 +4,14 @@ import { TGlobalStateAction } from "./global-state/global-state-actions";
 type TUseFetchDevices = {
   permission: boolean;
   dispatch: Dispatch<TGlobalStateAction>;
+  refresh?: number;
 };
 
-export const useFetchDevices = ({ permission, dispatch }: TUseFetchDevices) => {
+export const useFetchDevices = ({
+  permission,
+  dispatch,
+  refresh,
+}: TUseFetchDevices) => {
   useEffect(() => {
     if (permission) {
       window.navigator.mediaDevices
@@ -26,5 +31,5 @@ export const useFetchDevices = ({ permission, dispatch }: TUseFetchDevices) => {
     }
 
     return () => {};
-  }, [dispatch, permission]);
+  }, [dispatch, permission, refresh]);
 };

@@ -1,11 +1,11 @@
 import styled from "@emotion/styled";
 import { FC, useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import { SubmitHandler, useForm } from "react-hook-form";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { useAudioInput } from "./use-audio-input.ts";
 import { useRtcConnection } from "./use-rtc-connection.ts";
 import { useEstablishSession } from "./use-establish-session.ts";
-import { SecondaryButton } from "../landing-page/form-elements.tsx";
 import { UserList } from "./user-list.tsx";
 import {
   MicMuted,
@@ -14,13 +14,23 @@ import {
   SpeakerOn,
   SettingsIcon,
 } from "../../assets/icons/icon.tsx";
+import {
+  SecondaryButton,
+  DecorativeLabel,
+  FormLabel,
+  FormContainer,
+  FormSelect,
+  PrimaryButton,
+  StyledWarningMessage,
+} from "../landing-page/form-elements.tsx";
+import { uniqBy } from "../../helpers.ts";
 import { Spinner } from "../loader/loader.tsx";
 import { DisplayContainerHeader } from "../landing-page/display-container-header.tsx";
 import { DisplayContainer, FlexContainer } from "../generic-components.ts";
 import { useHeartbeat } from "./use-heartbeat.ts";
 import { JoinProduction } from "../landing-page/join-production.tsx";
 import { useDeviceLabels } from "./use-device-labels.ts";
-import { isMobile } from "../../bowser.ts";
+import { isBrowserFirefox, isMobile } from "../../bowser.ts";
 import { useLineHotkeys, useSpeakerHotkeys } from "./use-line-hotkeys.ts";
 import { LongPressToTalkButton } from "./long-press-to-talk-button.tsx";
 import { useLinePolling } from "./use-line-polling.ts";
@@ -30,7 +40,11 @@ import { useCheckBadLineData } from "./use-check-bad-line-data.ts";
 import { NavigateToRootButton } from "../navigate-to-root-button/navigate-to-root-button.tsx";
 import { useAudioCue } from "./use-audio-cue.ts";
 import { DisplayWarning } from "../display-box.tsx";
+import { useFetchDevices } from "../../use-fetch-devices.ts";
+import { TJoinProductionOptions } from "./types.ts";
 import { SettingsModal, Hotkeys } from "./settings-modal.tsx";
+
+type FormValues = TJoinProductionOptions;
 
 const TempDiv = styled.div`
   padding: 0 0 2rem 0;
@@ -51,6 +65,10 @@ const HeaderWrapper = styled.div`
 
 const SmallText = styled.span`
   font-size: 1.6rem;
+`;
+
+const LargeText = styled.span`
+  word-break: break-all;
 `;
 
 const ButtonIcon = styled.div`
@@ -91,8 +109,8 @@ const LongPressWrapper = styled.div`
   touch-action: none;
 `;
 
-const ButtonWrapper = styled.span`
-  margin: 0 2rem 0 0;
+const ButtonWrapper = styled.div`
+  margin: 0 2rem 2rem 1rem;
 `;
 
 const ListWrapper = styled(DisplayContainer)`
@@ -123,11 +141,18 @@ const ConnectionErrorWrapper = styled(FlexContainer)`
 export const ProductionLine: FC = () => {
   const { productionId: paramProductionId, lineId: paramLineId } = useParams();
   const [
-    { joinProductionOptions, dominantSpeaker, audioLevelAboveThreshold },
+    {
+      joinProductionOptions,
+      dominantSpeaker,
+      audioLevelAboveThreshold,
+      devices,
+    },
     dispatch,
   ] = useGlobalState();
   const [isInputMuted, setIsInputMuted] = useState(true);
   const [isOutputMuted, setIsOutputMuted] = useState(false);
+  const [showDeviceSettings, setShowDeviceSettings] = useState(false);
+  const [refresh, setRefresh] = useState<number>(0);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [hotkeys, setHotkeys] = useState<Hotkeys>({
     muteHotkey: "m",
@@ -140,8 +165,9 @@ export const ProductionLine: FC = () => {
     pressToTalkHotkey: "t",
   });
 
-  const inputAudioStream = useAudioInput({
-    inputId: joinProductionOptions?.audioinput ?? null,
+  const [inputAudioStream, resetAudioInput] = useAudioInput({
+    audioInputId: joinProductionOptions?.audioinput ?? null,
+    audioOutputId: joinProductionOptions?.audiooutput ?? null,
   });
 
   const muteInput = useCallback(
@@ -174,7 +200,13 @@ export const ProductionLine: FC = () => {
     customKeyPress: savedHotkeys.pressToTalkHotkey,
   });
 
-  const { sessionId, sdpOffer } = useEstablishSession({
+  useFetchDevices({
+    dispatch,
+    permission: true,
+    refresh,
+  });
+
+  const { sessionId, sdpOffer, setSessionId } = useEstablishSession({
     joinProductionOptions,
     dispatch,
   });
@@ -226,7 +258,9 @@ export const ProductionLine: FC = () => {
     });
   }, [dispatch, fetchProductionError]);
 
-  const { loading, connectionError } = useIsLoading({ connectionState });
+  const { loading, connectionError } = useIsLoading({
+    connectionState,
+  });
 
   useHeartbeat({ sessionId });
 
@@ -238,6 +272,61 @@ export const ProductionLine: FC = () => {
     paramProductionId,
     dispatch,
   });
+
+  const {
+    formState: { isValid, isDirty },
+    register,
+    handleSubmit,
+  } = useForm<FormValues>({
+    defaultValues: {
+      username: "",
+      productionId: paramProductionId || "",
+      lineId: paramLineId || undefined,
+    },
+    resetOptions: {
+      keepDirtyValues: true, // user-interacted input will be retained
+      keepErrors: true, // input errors will be retained with value update
+    },
+  });
+
+  const outputDevices = devices
+    ? uniqBy(
+        devices.filter((d) => d.kind === "audiooutput"),
+        (item) => item.deviceId
+      )
+    : [];
+
+  const inputDevices = devices
+    ? uniqBy(
+        devices.filter((d) => d.kind === "audioinput"),
+        (item) => item.deviceId
+      )
+    : [];
+
+  const settingsButtonPressed = () => {
+    setRefresh((prev) => prev + 1);
+    setShowDeviceSettings(!showDeviceSettings);
+  };
+
+  // Reset connection and re-connect to production-line
+  const onSubmit: SubmitHandler<FormValues> = async (payload) => {
+    if (joinProductionOptions) {
+      resetAudioInput();
+      muteInput(true);
+      setSessionId(null);
+      dispatch({
+        type: "UPDATE_JOIN_PRODUCTION_OPTIONS",
+        payload: {
+          productionId: payload.productionId,
+          lineId: payload.lineId,
+          username: joinProductionOptions.username,
+          audioinput: payload.audioinput,
+          audiooutput: payload.audiooutput,
+        },
+      });
+      setShowDeviceSettings(false);
+    }
+  };
 
   const handleSettingsClick = () => {
     setIsSettingsModalOpen(!isSettingsModalOpen);
@@ -258,8 +347,10 @@ export const ProductionLine: FC = () => {
         </ButtonWrapper>
         {!loading && production && line && (
           <DisplayContainerHeader>
-            <SmallText>Production:</SmallText> {production.name}{" "}
-            <SmallText>Line:</SmallText> {line.name}
+            <SmallText>Production:</SmallText>
+            <LargeText>{production.name} </LargeText>
+            <SmallText>Line:</SmallText>
+            <LargeText>{line.name}</LargeText>
           </DisplayContainerHeader>
         )}
       </HeaderWrapper>
@@ -350,6 +441,70 @@ export const ProductionLine: FC = () => {
                 <TempDiv>
                   <strong>Audio Output:</strong> {deviceLabels.outputLabel}
                 </TempDiv>
+              )}
+              <FlexButtonWrapper>
+                <PrimaryButton
+                  type="button"
+                  onClick={() => settingsButtonPressed()}
+                >
+                  {!showDeviceSettings ? "Change device" : "Close"}
+                </PrimaryButton>
+              </FlexButtonWrapper>
+              {showDeviceSettings && (
+                <FormContainer>
+                  <FormLabel>
+                    <DecorativeLabel>Input</DecorativeLabel>
+                    <FormSelect
+                      // eslint-disable-next-line
+                      {...register(`audioinput`)}
+                    >
+                      {inputDevices.length > 0 ? (
+                        inputDevices.map((device) => (
+                          <option key={device.deviceId} value={device.deviceId}>
+                            {device.label}
+                          </option>
+                        ))
+                      ) : (
+                        <option value="no-device">No device available</option>
+                      )}
+                    </FormSelect>
+                  </FormLabel>
+                  <FormLabel>
+                    <DecorativeLabel>Output</DecorativeLabel>
+                    {outputDevices.length > 0 ? (
+                      <FormSelect
+                        // eslint-disable-next-line
+                        {...register(`audiooutput`)}
+                      >
+                        {outputDevices.map((device) => (
+                          <option key={device.deviceId} value={device.deviceId}>
+                            {device.label}
+                          </option>
+                        ))}
+                      </FormSelect>
+                    ) : (
+                      <StyledWarningMessage>
+                        Controlled by operating system
+                      </StyledWarningMessage>
+                    )}
+                  </FormLabel>
+                  {isBrowserFirefox && !isMobile && (
+                    <StyledWarningMessage>
+                      If a new device has been added Firefox needs the
+                      permission to be manually reset. If your device is
+                      missing, please remove the permission and reload page.
+                    </StyledWarningMessage>
+                  )}
+                  <ButtonWrapper>
+                    <PrimaryButton
+                      type="submit"
+                      disabled={!isValid || !isDirty}
+                      onClick={handleSubmit(onSubmit)}
+                    >
+                      Save
+                    </PrimaryButton>
+                  </ButtonWrapper>
+                </FormContainer>
               )}
 
               {inputAudioStream &&

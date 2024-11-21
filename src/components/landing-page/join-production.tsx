@@ -18,6 +18,12 @@ import { darkText, errorColour } from "../../css-helpers/defaults.ts";
 import { TJoinProductionOptions } from "../production-line/types.ts";
 import { uniqBy } from "../../helpers.ts";
 import { FormInputWithLoader } from "./form-input-with-loader.tsx";
+import { RefreshIcon } from "../../assets/icons/icon.tsx";
+import { useFetchDevices } from "../../use-fetch-devices.ts";
+import { Spinner } from "../loader/loader.tsx";
+import { useDevicePermissions } from "../../use-device-permission.ts";
+import { Modal } from "../modal/modal.tsx";
+import { isBrowserFirefox, isMobile } from "../../bowser.ts";
 
 type FormValues = TJoinProductionOptions;
 
@@ -33,6 +39,24 @@ const ButtonWrapper = styled.div`
   margin: 2rem 0 2rem 0;
 `;
 
+const StyledRefreshBtn = styled(PrimaryButton)`
+  padding: 0;
+  margin: 0;
+  width: 4rem;
+  height: 3.5rem;
+  margin-left: 1.5rem;
+
+  &.dummy {
+    background-color: #242424;
+    pointer-events: none;
+  }
+`;
+
+const FormWithBtn = styled.div`
+  display: flex;
+  justify-content: space-between;
+`;
+
 type TProps = {
   preSelected?: {
     preSelectedProductionId: string;
@@ -42,6 +66,9 @@ type TProps = {
 
 export const JoinProduction = ({ preSelected }: TProps) => {
   const [joinProductionId, setJoinProductionId] = useState<null | number>(null);
+  const [refresh, setRefresh] = useState<number>(0);
+  const [deviceRefresh, setDeviceRefresh] = useState(false);
+  const [firefoxWarningModalOpen, setFirefoxWarningModalOpen] = useState(false);
   const {
     formState: { errors, isValid },
     register,
@@ -58,8 +85,17 @@ export const JoinProduction = ({ preSelected }: TProps) => {
       keepErrors: true, // input errors will be retained with value update
     },
   });
+  const { permission } = useDevicePermissions({
+    continueToApp: true,
+  });
 
   const [{ devices, selectedProductionId }, dispatch] = useGlobalState();
+
+  useFetchDevices({
+    dispatch,
+    permission,
+    refresh,
+  });
 
   const {
     error: productionFetchError,
@@ -131,6 +167,20 @@ export const JoinProduction = ({ preSelected }: TProps) => {
     console.log(payload);
   };
 
+  useEffect(() => {
+    let timeout: number | null = null;
+
+    timeout = window.setTimeout(() => {
+      setDeviceRefresh(false);
+    }, 800);
+
+    return () => {
+      if (timeout !== null) {
+        window.clearTimeout(timeout);
+      }
+    };
+  }, [devices]);
+
   const outputDevices = devices
     ? uniqBy(
         devices.filter((d) => d.kind === "audiooutput"),
@@ -144,6 +194,15 @@ export const JoinProduction = ({ preSelected }: TProps) => {
         (item) => item.deviceId
       )
     : [];
+
+  const handleReloadDevices = () => {
+    if (isBrowserFirefox && !isMobile) {
+      setFirefoxWarningModalOpen(true);
+    } else {
+      setDeviceRefresh(true);
+      setRefresh((prev) => prev + 1);
+    }
+  };
 
   return (
     <FormContainer>
@@ -199,38 +258,69 @@ export const JoinProduction = ({ preSelected }: TProps) => {
           />
           <FormLabel>
             <DecorativeLabel>Input</DecorativeLabel>
-            <FormSelect
-              // eslint-disable-next-line
-              {...register(`audioinput`)}
-            >
-              {inputDevices.length > 0 ? (
-                inputDevices.map((device) => (
-                  <option key={device.deviceId} value={device.deviceId}>
-                    {device.label}
-                  </option>
-                ))
-              ) : (
-                <option value="no-device">No device available</option>
-              )}
-            </FormSelect>
+            <FormWithBtn>
+              <FormSelect
+                // eslint-disable-next-line
+                {...register(`audioinput`)}
+              >
+                {inputDevices.length > 0 ? (
+                  inputDevices.map((device) => (
+                    <option key={device.deviceId} value={device.deviceId}>
+                      {device.label}
+                    </option>
+                  ))
+                ) : (
+                  <option value="no-device">No device available</option>
+                )}
+              </FormSelect>
+              <StyledRefreshBtn
+                type="button"
+                className="dummy"
+                disabled
+                onClick={() => handleReloadDevices()}
+              >
+                <RefreshIcon />
+              </StyledRefreshBtn>
+            </FormWithBtn>
           </FormLabel>
           <FormLabel>
             <DecorativeLabel>Output</DecorativeLabel>
-            {outputDevices.length > 0 ? (
-              <FormSelect
-                // eslint-disable-next-line
-                {...register(`audiooutput`)}
+            <FormWithBtn>
+              {outputDevices.length > 0 ? (
+                <FormSelect
+                  // eslint-disable-next-line
+                  {...register(`audiooutput`)}
+                >
+                  {outputDevices.map((device) => (
+                    <option key={device.deviceId} value={device.deviceId}>
+                      {device.label}
+                    </option>
+                  ))}
+                </FormSelect>
+              ) : (
+                <StyledWarningMessage>
+                  Controlled by operating system
+                </StyledWarningMessage>
+              )}
+              <StyledRefreshBtn
+                type="button"
+                title="Refresh devices"
+                onClick={() => handleReloadDevices()}
               >
-                {outputDevices.map((device) => (
-                  <option key={device.deviceId} value={device.deviceId}>
-                    {device.label}
-                  </option>
-                ))}
-              </FormSelect>
-            ) : (
-              <StyledWarningMessage>
-                Controlled by operating system
-              </StyledWarningMessage>
+                {!deviceRefresh && <RefreshIcon />}
+                {deviceRefresh && <Spinner className="refresh-devices" />}
+              </StyledRefreshBtn>
+            </FormWithBtn>
+            {firefoxWarningModalOpen && (
+              <Modal onClose={() => setFirefoxWarningModalOpen(false)}>
+                <DisplayContainerHeader>
+                  Reset permissions
+                </DisplayContainerHeader>
+                <p>
+                  To reload devices Firefox needs the permission to be manually
+                  reset, please remove permission and reload page instead.
+                </p>
+              </Modal>
             )}
           </FormLabel>
           {!preSelected && (
