@@ -3,6 +3,7 @@ import { TJoinProductionOptions } from "../components/production-line/types.ts";
 export type TGlobalStateAction =
   | TPublishError
   | TProductionCreated
+  | TApiNotAvailable
   | TProductionListFetched
   | TUpdateDevicesAction
   | TUpdateJoinProductionOptions
@@ -23,6 +24,10 @@ export type TDominantSpeaker = {
 
 export type TProductionCreated = {
   type: "PRODUCTION_UPDATED";
+};
+
+export type TApiNotAvailable = {
+  type: "API_NOT_AVAILABLE";
 };
 
 export type TProductionListFetched = {

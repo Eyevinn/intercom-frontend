@@ -50,6 +50,7 @@ const App = () => {
   const { denied, permission } = useDevicePermissions({ continueToApp });
   const initializedGlobalState = useInitializeGlobalStateReducer();
   const [, dispatch] = initializedGlobalState;
+  const [apiError, setApiError] = useState(false);
 
   useFetchDevices({
     dispatch,
@@ -101,12 +102,22 @@ const App = () => {
                 />
               </DisplayBoxPositioningContainer>
             )}
-            {permission && !denied && (
+            {apiError && (
+              <DisplayBoxPositioningContainer>
+                <DisplayWarning
+                  text="The server is not available. Reload page to try again."
+                  title="Server not available"
+                />
+              </DisplayBoxPositioningContainer>
+            )}
+            {permission && !denied && !apiError && (
               <Routes>
                 <>
                   <Route
                     path="/"
-                    element={<LandingPage />}
+                    element={
+                      <LandingPage setApiError={() => setApiError(true)} />
+                    }
                     errorElement={<ErrorPage />}
                   />
                   <Route

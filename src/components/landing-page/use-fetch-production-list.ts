@@ -45,6 +45,9 @@ export const useFetchProductionList = (filter?: GetProductionListFilter) => {
           setError(null);
         })
         .catch((e) => {
+          dispatch({
+            type: "API_NOT_AVAILABLE",
+          });
           setError(
             e instanceof Error
               ? e
