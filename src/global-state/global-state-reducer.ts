@@ -12,6 +12,7 @@ const initialGlobalState: TGlobalState = {
   dominantSpeaker: null,
   audioLevelAboveThreshold: false,
   selectedProductionId: null,
+  apiError: false,
 };
 
 const globalReducer: Reducer<TGlobalState, TGlobalStateAction> = (
@@ -30,6 +31,11 @@ const globalReducer: Reducer<TGlobalState, TGlobalStateAction> = (
       return {
         ...state,
         reloadProductionList: true,
+      };
+    case "API_NOT_AVAILABLE":
+      return {
+        ...state,
+        apiError: new Error("API not available"),
       };
     case "PRODUCTION_LIST_FETCHED":
       return {

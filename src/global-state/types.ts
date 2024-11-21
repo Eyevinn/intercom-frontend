@@ -13,4 +13,5 @@ export type TGlobalState = {
   dominantSpeaker: string | null;
   audioLevelAboveThreshold: boolean;
   selectedProductionId: string | null;
+  apiError: Error | false;
 };
