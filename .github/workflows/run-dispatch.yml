@@ -1,4 +1,4 @@
-name: Demo Site Deploy
+name: Manual deploy to dev environment
 on: workflow_dispatch
 
 jobs:
@@ -18,17 +18,17 @@ jobs:
       - name: Build
         run: |
           yarn
-          yarn build --mode production
+          yarn build --mode staging
         env:
-          VITE_BACKEND_URL: ${{ secrets.MANAGER_PROD_URL }}
-          VITE_BACKEND_API_VERSION: api/v1
+          VITE_BACKEND_URL: ${{ secrets.MANAGER_DEV_URL }}
+          VITE_BACKEND_API_VERSION: api/v1/
 
-      - name: Sync to Demo bucket
+      - name: Sync to Dev bucket
         uses: jakejarvis/s3-sync-action@v0.5.1
         with:
           args: --follow-symlinks --delete
         env:
-          AWS_S3_BUCKET: "origin-intercom-app"
+          AWS_S3_BUCKET: "origin-intercom-app-dev"
           AWS_ACCESS_KEY_ID: ${{ secrets.S3_AWS_ACCESS_KEY_ID  }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.S3_AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: "eu-north-1"
