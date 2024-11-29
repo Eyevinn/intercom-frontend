@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { FC, useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { useAudioInput } from "./use-audio-input.ts";
@@ -18,7 +18,6 @@ import { Spinner } from "../loader/loader.tsx";
 import { DisplayContainerHeader } from "../landing-page/display-container-header.tsx";
 import { DisplayContainer, FlexContainer } from "../generic-components.ts";
 import { useHeartbeat } from "./use-heartbeat.ts";
-import { JoinProduction } from "../landing-page/join-production.tsx";
 import { useDeviceLabels } from "./use-device-labels.ts";
 import { isMobile } from "../../bowser.ts";
 import { useLineHotkeys, useSpeakerHotkeys } from "./use-line-hotkeys.ts";
@@ -27,10 +26,11 @@ import { useLinePolling } from "./use-line-polling.ts";
 import { useFetchProduction } from "../landing-page/use-fetch-production.ts";
 import { useIsLoading } from "./use-is-loading.ts";
 import { useCheckBadLineData } from "./use-check-bad-line-data.ts";
-import { NavigateToRootButton } from "../navigate-to-root-button/navigate-to-root-button.tsx";
 import { useAudioCue } from "./use-audio-cue.ts";
 import { DisplayWarning } from "../display-box.tsx";
 import { SettingsModal, Hotkeys } from "./settings-modal.tsx";
+import { CallState } from "../../global-state/types.ts";
+import { ExitCallButton } from "./exit-call-button.tsx";
 
 const TempDiv = styled.div`
   padding: 0 0 2rem 0;
@@ -122,12 +122,14 @@ const ConnectionErrorWrapper = styled(FlexContainer)`
   padding-top: 12rem;
 `;
 
-export const ProductionLine: FC = () => {
+type TProductionLine = {
+  id: string;
+  callState: CallState;
+};
+
+export const ProductionLine = ({ id, callState }: TProductionLine) => {
   const { productionId: paramProductionId, lineId: paramLineId } = useParams();
-  const [
-    { joinProductionOptions, dominantSpeaker, audioLevelAboveThreshold },
-    dispatch,
-  ] = useGlobalState();
+  const [, dispatch] = useGlobalState();
   const [isInputMuted, setIsInputMuted] = useState(true);
   const [isOutputMuted, setIsOutputMuted] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
@@ -141,6 +143,9 @@ export const ProductionLine: FC = () => {
     speakerHotkey: "n",
     pressToTalkHotkey: "t",
   });
+  const { joinProductionOptions } = callState;
+  const { dominantSpeaker } = callState;
+  const { audioLevelAboveThreshold } = callState;
 
   const inputAudioStream = useAudioInput({
     inputId: joinProductionOptions?.audioinput ?? null,
@@ -164,10 +169,10 @@ export const ProductionLine: FC = () => {
   const exit = useCallback(() => {
     playExitSound();
     dispatch({
-      type: "UPDATE_JOIN_PRODUCTION_OPTIONS",
-      payload: null,
+      type: "REMOVE_CALL",
+      payload: { id },
     });
-  }, [dispatch, playExitSound]);
+  }, [dispatch, id, playExitSound]);
 
   useLineHotkeys({
     muteInput,
@@ -178,6 +183,7 @@ export const ProductionLine: FC = () => {
 
   const { sessionId, sdpOffer } = useEstablishSession({
     joinProductionOptions,
+    callId: id,
     dispatch,
   });
 
@@ -186,6 +192,7 @@ export const ProductionLine: FC = () => {
     sdpOffer,
     joinProductionOptions,
     sessionId,
+    callId: id,
   });
 
   useEffect(() => {
@@ -208,7 +215,7 @@ export const ProductionLine: FC = () => {
     customKey: savedHotkeys.speakerHotkey,
   });
 
-  const line = useLinePolling({ joinProductionOptions });
+  const line = useLinePolling({ callId: id, joinProductionOptions });
 
   const { production, error: fetchProductionError } = useFetchProduction(
     joinProductionOptions
@@ -221,10 +228,12 @@ export const ProductionLine: FC = () => {
 
     dispatch({
       type: "ERROR",
-      payload:
-        fetchProductionError instanceof Error
-          ? fetchProductionError
-          : new Error("Error fetching production."),
+      payload: {
+        error:
+          fetchProductionError instanceof Error
+            ? fetchProductionError
+            : new Error("Error fetching production."),
+      },
     });
   }, [dispatch, fetchProductionError]);
 
@@ -238,6 +247,7 @@ export const ProductionLine: FC = () => {
     joinProductionOptions,
     paramLineId,
     paramProductionId,
+    callId: id,
     dispatch,
   });
 
@@ -256,7 +266,7 @@ export const ProductionLine: FC = () => {
     <>
       <HeaderWrapper>
         <ButtonWrapper>
-          <NavigateToRootButton resetOnExit={exit} />
+          <ExitCallButton resetOnExit={exit} />
         </ButtonWrapper>
         {!loading && production && line && (
           <DisplayContainerHeader>
@@ -265,19 +275,6 @@ export const ProductionLine: FC = () => {
           </DisplayContainerHeader>
         )}
       </HeaderWrapper>
-
-      {!joinProductionOptions && paramProductionId && paramLineId && (
-        <FlexContainer>
-          <DisplayContainer>
-            <JoinProduction
-              preSelected={{
-                preSelectedProductionId: paramProductionId,
-                preSelectedLineId: paramLineId,
-              }}
-            />
-          </DisplayContainer>
-        </FlexContainer>
-      )}
 
       {joinProductionOptions && connectionState && (
         <FlexContainer>
