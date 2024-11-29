@@ -125,9 +125,14 @@ const ConnectionErrorWrapper = styled(FlexContainer)`
 type TProductionLine = {
   id: string;
   callState: CallState;
+  isSingleCall: boolean;
 };
 
-export const ProductionLine = ({ id, callState }: TProductionLine) => {
+export const ProductionLine = ({
+  id,
+  callState,
+  isSingleCall,
+}: TProductionLine) => {
   const { productionId: paramProductionId, lineId: paramLineId } = useParams();
   const [, dispatch] = useGlobalState();
   const [isInputMuted, setIsInputMuted] = useState(true);
@@ -265,9 +270,11 @@ export const ProductionLine = ({ id, callState }: TProductionLine) => {
   return (
     <>
       <HeaderWrapper>
-        <ButtonWrapper>
-          <ExitCallButton resetOnExit={exit} />
-        </ButtonWrapper>
+        {!isMobile && !isSingleCall && (
+          <ButtonWrapper>
+            <ExitCallButton resetOnExit={exit} />
+          </ButtonWrapper>
+        )}
         {!loading && production && line && (
           <DisplayContainerHeader>
             <SmallText>Production:</SmallText> {production.name}{" "}

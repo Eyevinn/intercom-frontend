@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useGlobalState } from "../../global-state/context-provider";
 import { JoinProduction } from "../landing-page/join-production";
 import { ProductionLine } from "../production-line/production-line";
@@ -49,13 +49,30 @@ export const CallsPage = () => {
   const [addCallActive, setAddCallActive] = useState(false);
   const [{ calls, selectedProductionId }, dispatch] = useGlobalState();
   const { productionId: paramProductionId, lineId: paramLineId } = useParams();
+  const navigate = useNavigate();
+
   const isEmpty = Object.values(calls).length === 0;
+  const isSingleCall = Object.values(calls).length === 1;
 
   useEffect(() => {
     if (selectedProductionId) {
       setProductionId(selectedProductionId);
     }
   }, [selectedProductionId, dispatch]);
+
+  useEffect(() => {
+    if (isEmpty && !paramProductionId && !paramLineId) {
+      navigate("/");
+    }
+  }, [isEmpty, paramProductionId, paramLineId, navigate]);
+
+  useEffect(() => {
+    console.log("productionId", productionId);
+  }, [productionId]);
+
+  useEffect(() => {
+    console.log("addCallActive", addCallActive);
+  }, [addCallActive]);
 
   const runExitAllCalls = async () => {
     setProductionId(null);
@@ -80,7 +97,11 @@ export const CallsPage = () => {
             callId &&
             callState.joinProductionOptions && (
               <CallContainer key={callId}>
-                <ProductionLine id={callId} callState={callState} />
+                <ProductionLine
+                  id={callId}
+                  callState={callState}
+                  isSingleCall={isSingleCall}
+                />
               </CallContainer>
             )
         )}
