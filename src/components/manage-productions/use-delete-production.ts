@@ -32,10 +32,12 @@ export const useDeleteProduction: TUseDeleteProduction = (id) => {
         .catch((err) => {
           dispatch({
             type: "ERROR",
-            payload:
-              err instanceof Error
-                ? err
-                : new Error("Failed to delete production"),
+            payload: {
+              error:
+                err instanceof Error
+                  ? err
+                  : new Error("Failed to delete production"),
+            },
           });
           setError(err);
           setLoading(false);

@@ -3,9 +3,11 @@ import { TGlobalStateAction } from "../../global-state/global-state-actions.ts";
 
 export const startRtcStatInterval = ({
   rtcPeerConnection,
+  callId,
   dispatch,
 }: {
   rtcPeerConnection: RTCPeerConnection;
+  callId: string;
   dispatch: Dispatch<TGlobalStateAction>;
 }) => {
   let ongoingStatsPromise: null | Promise<void | RTCStatsReport> = null;
@@ -67,8 +69,13 @@ export const startRtcStatInterval = ({
       }
 
       dispatch({
-        type: "AUDIO_LEVEL_ABOVE_THRESHOLD",
-        payload: isAudioLevelAboveThreshold,
+        type: "UPDATE_CALL",
+        payload: {
+          id: callId,
+          updates: {
+            audioLevelAboveThreshold: isAudioLevelAboveThreshold,
+          },
+        },
       });
     });
   }, 100);
