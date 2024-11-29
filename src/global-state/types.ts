@@ -19,7 +19,6 @@ export interface CallState {
   mediaStreamInput: MediaStream | null;
   dominantSpeaker: string | null;
   audioLevelAboveThreshold: boolean;
-  selectedProductionId: string | null;
 }
 
 export type TGlobalState = {

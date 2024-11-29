@@ -58,21 +58,13 @@ export const CallsPage = () => {
     if (selectedProductionId) {
       setProductionId(selectedProductionId);
     }
-  }, [selectedProductionId, dispatch]);
+  }, [selectedProductionId]);
 
   useEffect(() => {
     if (isEmpty && !paramProductionId && !paramLineId) {
       navigate("/");
     }
   }, [isEmpty, paramProductionId, paramLineId, navigate]);
-
-  useEffect(() => {
-    console.log("productionId", productionId);
-  }, [productionId]);
-
-  useEffect(() => {
-    console.log("addCallActive", addCallActive);
-  }, [addCallActive]);
 
   const runExitAllCalls = async () => {
     setProductionId(null);

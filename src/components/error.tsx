@@ -37,6 +37,7 @@ export const ErrorBanner: FC = () => {
     if (error.callErrors) {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       Object.entries(error.callErrors).forEach(([_, singleError]) => {
+        // _ is needed to destructure the object
         if (singleError && !displayedMessages.has(singleError.message)) {
           console.error(`Error:`, singleError.message); // Display only unique errors
           displayedMessages.add(singleError.message);

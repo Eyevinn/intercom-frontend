@@ -127,6 +127,11 @@ export const JoinProduction = ({
       window.localStorage?.setItem("username", payload.username);
     }
 
+    dispatch({
+      type: "SELECT_PRODUCTION_ID",
+      payload: payload.productionId,
+    });
+
     const uuid = uuidv4();
 
     dispatch({
@@ -143,7 +148,6 @@ export const JoinProduction = ({
           mediaStreamInput: null,
           dominantSpeaker: null,
           audioLevelAboveThreshold: false,
-          selectedProductionId: null,
         },
       },
     });
