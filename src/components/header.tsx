@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { backgroundColour } from "../css-helpers/defaults.ts";
 import { useGlobalState } from "../global-state/context-provider.tsx";
 import { HeadsetIcon } from "../assets/icons/icon.tsx";
+import { useAudioCue } from "./production-line/use-audio-cue.ts";
 
 const HeaderWrapper = styled.div`
   display: flex;
@@ -25,20 +26,26 @@ const Logo = styled.svg`
 `;
 
 export const Header: FC = () => {
-  const [, dispatch] = useGlobalState();
+  const [{ calls }, dispatch] = useGlobalState();
   const navigate = useNavigate();
   const location = useLocation();
+  const { playExitSound } = useAudioCue();
 
-  const reset = () => {
-    dispatch({
-      type: "UPDATE_JOIN_PRODUCTION_OPTIONS",
-      payload: null,
+  const runExitAllCalls = () => {
+    playExitSound();
+    Object.entries(calls).forEach(([callId]) => {
+      if (callId) {
+        dispatch({
+          type: "REMOVE_CALL",
+          payload: { id: callId },
+        });
+      }
     });
   };
 
   const returnToRoot = () => {
     if (location.pathname.includes("/production")) {
-      reset();
+      runExitAllCalls();
       navigate("/");
     } else {
       navigate("/");
