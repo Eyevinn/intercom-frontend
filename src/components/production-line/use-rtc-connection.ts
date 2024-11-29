@@ -20,6 +20,7 @@ type TRtcConnectionOptions = {
   sdpOffer: string | null;
   joinProductionOptions: TJoinProductionOptions | null;
   sessionId: string | null;
+  callId: string;
 };
 
 type TEstablishConnection = {
@@ -27,6 +28,7 @@ type TEstablishConnection = {
   sdpOffer: string;
   joinProductionOptions: TJoinProductionOptions;
   sessionId: string;
+  callId: string;
   dispatch: Dispatch<TGlobalStateAction>;
   setAudioElements: Dispatch<SetStateAction<HTMLAudioElement[]>>;
   setNoStreamError: (input: boolean) => void;
@@ -50,6 +52,7 @@ const establishConnection = ({
   sdpOffer,
   joinProductionOptions,
   sessionId,
+  callId,
   dispatch,
   setAudioElements,
   setNoStreamError,
@@ -66,9 +69,12 @@ const establishConnection = ({
       audioElement.onerror = () => {
         dispatch({
           type: "ERROR",
-          payload: new Error(
-            `Audio Error: ${audioElement.error?.code} - ${audioElement.error?.message}`
-          ),
+          payload: {
+            callId,
+            error: new Error(
+              `Audio Error: ${audioElement.error?.code} - ${audioElement.error?.message}`
+            ),
+          },
         });
       };
 
@@ -79,8 +85,13 @@ const establishConnection = ({
         audioElement.setSinkId(joinProductionOptions.audiooutput).catch((e) => {
           dispatch({
             type: "ERROR",
-            payload:
-              e instanceof Error ? e : new Error("Error assigning audio sink."),
+            payload: {
+              callId,
+              error:
+                e instanceof Error
+                  ? e
+                  : new Error("Error assigning audio sink."),
+            },
           });
         });
       }
@@ -88,13 +99,19 @@ const establishConnection = ({
       setNoStreamError(true);
       dispatch({
         type: "ERROR",
-        payload: new Error("Stream-error: No MediaStreamTracks avaliable"),
+        payload: {
+          callId,
+          error: new Error("Stream-error: No MediaStreamTracks avaliable"),
+        },
       });
     } else {
       setNoStreamError(true);
       dispatch({
         type: "ERROR",
-        payload: new Error("Stream-error: No MediaStream avaliable"),
+        payload: {
+          callId,
+          error: new Error("Stream-error: No MediaStream avaliable"),
+        },
       });
     }
   };
@@ -128,8 +145,13 @@ const establishConnection = ({
       typeof message.endpoint === "string"
     ) {
       dispatch({
-        type: "DOMINANT_SPEAKER",
-        payload: message.endpoint,
+        type: "UPDATE_CALL",
+        payload: {
+          id: callId,
+          updates: {
+            dominantSpeaker: message.endpoint,
+          },
+        },
       });
     } else {
       console.error("Unexpected data channel message structure");
@@ -171,8 +193,6 @@ const establishConnection = ({
       type: "offer",
     });
 
-    console.log("sdpOffer", sdpOffer);
-
     const sdpAnswer = await rtcPeerConnection.createAnswer();
 
     if (!sdpAnswer.sdp) {
@@ -199,12 +219,16 @@ const establishConnection = ({
 
     dispatch({
       type: "ERROR",
-      payload: e,
+      payload: {
+        callId,
+        error: e,
+      },
     });
   });
 
   const rtcStatIntervalTeardown = startRtcStatInterval({
     rtcPeerConnection,
+    callId,
     dispatch,
   });
 
@@ -224,10 +248,9 @@ export const useRtcConnection = ({
   sdpOffer,
   joinProductionOptions,
   sessionId,
+  callId,
 }: TRtcConnectionOptions) => {
-  const [rtcPeerConnection] = useState<RTCPeerConnection>(
-    () => new RTCPeerConnection()
-  );
+  const rtcPeerConnectionRef = useRef<RTCPeerConnection | null>(null);
   const [, dispatch] = useGlobalState();
   const [connectionState, setConnectionState] =
     useState<RTCPeerConnectionState | null>(null);
@@ -249,7 +272,8 @@ export const useRtcConnection = ({
       // eslint-disable-next-line no-param-reassign
       el.srcObject = null;
     });
-  }, [audioElementsRef]);
+    setAudioElements([]); // Reset state
+  }, []);
 
   // Teardown
   useEffect(
@@ -277,6 +301,18 @@ export const useRtcConnection = ({
 
     console.log("Setting up RTC Peer Connection");
 
+    // Clean up existing audio elements before reconnecting
+    cleanUpAudio();
+
+    if (
+      !rtcPeerConnectionRef.current ||
+      rtcPeerConnectionRef.current.connectionState === "closed"
+    ) {
+      rtcPeerConnectionRef.current = new RTCPeerConnection();
+    }
+
+    const rtcPeerConnection = rtcPeerConnectionRef.current;
+
     const onConnectionStateChange = () => {
       setConnectionState(rtcPeerConnection.connectionState);
     };
@@ -295,8 +331,13 @@ export const useRtcConnection = ({
       });
 
       dispatch({
-        type: "CONNECTED_MEDIASTREAM",
-        payload: inputAudioStream,
+        type: "UPDATE_CALL",
+        payload: {
+          id: callId,
+          updates: {
+            mediaStreamInput: inputAudioStream,
+          },
+        },
       });
     }
 
@@ -305,6 +346,7 @@ export const useRtcConnection = ({
       sdpOffer,
       joinProductionOptions,
       sessionId,
+      callId,
       dispatch,
       setAudioElements,
       setNoStreamError,
@@ -318,11 +360,6 @@ export const useRtcConnection = ({
         onConnectionStateChange
       );
 
-      dispatch({
-        type: "CONNECTED_MEDIASTREAM",
-        payload: null,
-      });
-
       rtcPeerConnection.close();
     };
   }, [
@@ -330,13 +367,23 @@ export const useRtcConnection = ({
     inputAudioStream,
     sessionId,
     joinProductionOptions,
-    rtcPeerConnection,
+    rtcPeerConnectionRef,
+    cleanUpAudio,
     dispatch,
     noStreamError,
+    callId,
   ]);
 
   // Debug hook for logging RTC events TODO remove
   useEffect(() => {
+    if (
+      !rtcPeerConnectionRef.current ||
+      rtcPeerConnectionRef.current.connectionState === "closed"
+    ) {
+      rtcPeerConnectionRef.current = new RTCPeerConnection();
+    }
+    const rtcPeerConnection = rtcPeerConnectionRef.current;
+
     const onIceGathering = () =>
       console.log("ice gathering:", rtcPeerConnection.iceGatheringState);
     const onIceConnection = () =>
@@ -396,7 +443,7 @@ export const useRtcConnection = ({
         onNegotiationNeeded
       );
     };
-  }, [rtcPeerConnection]);
+  }, [rtcPeerConnectionRef]);
 
   return { connectionState, audioElements };
 };
