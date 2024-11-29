@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { FC } from "react";
+import { FC, useEffect, useState } from "react";
 import { errorColour } from "../css-helpers/defaults";
 import { useGlobalState } from "../global-state/context-provider";
 
@@ -29,25 +29,65 @@ const CloseErrorButton = styled.button`
 `;
 
 export const ErrorBanner: FC = () => {
+  const [callError, setCallError] = useState<string[] | null>(null);
   const [{ error }, dispatch] = useGlobalState();
 
+  useEffect(() => {
+    const displayedMessages = new Set<string>();
+    if (error.callErrors) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      Object.entries(error.callErrors).forEach(([_, singleError]) => {
+        if (singleError && !displayedMessages.has(singleError.message)) {
+          console.error(`Error:`, singleError.message); // Display only unique errors
+          displayedMessages.add(singleError.message);
+        }
+      });
+      const uniqueErrors = Array.from(displayedMessages);
+      setCallError(uniqueErrors);
+    }
+  }, [error.callErrors]);
+
+  const resetError = () => {
+    if (error.callErrors) {
+      Object.entries(error.callErrors).forEach(([callId]) => {
+        setCallError(null);
+        dispatch({
+          type: "ERROR",
+          payload: { callId, error: null },
+        });
+      });
+    }
+  };
+
   return (
-    error && (
-      <ErrorDisplay>
-        {`${error.name}: ${error.message}`}{" "}
-        <CloseErrorButton
-          type="button"
-          onClick={() =>
-            dispatch({
-              type: "ERROR",
-              payload: null,
-            })
-          }
-        >
-          close
-        </CloseErrorButton>
-      </ErrorDisplay>
-    )
+    <>
+      {error.globalError && (
+        <ErrorDisplay>
+          {`${error.globalError.name}: ${error.globalError.message}`}{" "}
+          <CloseErrorButton
+            type="button"
+            onClick={() =>
+              dispatch({
+                type: "ERROR",
+                payload: { error: null },
+              })
+            }
+          >
+            close
+          </CloseErrorButton>
+        </ErrorDisplay>
+      )}
+      {callError &&
+        error.callErrors &&
+        callError.map((uniqueErrors) => (
+          <ErrorDisplay key={uniqueErrors}>
+            {uniqueErrors}{" "}
+            <CloseErrorButton type="button" onClick={() => resetError()}>
+              close
+            </CloseErrorButton>
+          </ErrorDisplay>
+        ))}
+    </>
   );
 };
 
