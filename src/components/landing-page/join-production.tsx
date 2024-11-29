@@ -2,6 +2,7 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { ErrorMessage } from "@hookform/error-message";
 import { useEffect, useState } from "react";
 import styled from "@emotion/styled";
+import { v4 as uuidv4 } from "uuid";
 import { DisplayContainerHeader } from "./display-container-header.tsx";
 import {
   DecorativeLabel,
@@ -38,9 +39,13 @@ type TProps = {
     preSelectedProductionId: string;
     preSelectedLineId: string;
   };
+  addAdditionalCallId?: string;
 };
 
-export const JoinProduction = ({ preSelected }: TProps) => {
+export const JoinProduction = ({
+  preSelected,
+  addAdditionalCallId,
+}: TProps) => {
   const [joinProductionId, setJoinProductionId] = useState<null | number>(null);
   const {
     formState: { errors, isValid },
@@ -50,8 +55,10 @@ export const JoinProduction = ({ preSelected }: TProps) => {
     setValue,
   } = useForm<FormValues>({
     defaultValues: {
-      productionId: preSelected?.preSelectedProductionId || "",
+      productionId:
+        preSelected?.preSelectedProductionId || addAdditionalCallId || "",
       lineId: preSelected?.preSelectedLineId || undefined,
+      username: window.localStorage?.getItem("username") || "",
     },
     resetOptions: {
       keepDirtyValues: true, // user-interacted input will be retained
@@ -94,20 +101,21 @@ export const JoinProduction = ({ preSelected }: TProps) => {
     if (cachedUsername) {
       setValue("username", cachedUsername);
     }
-  }, [setValue]);
+
+    if (addAdditionalCallId) {
+      setValue("productionId", addAdditionalCallId);
+    }
+  }, [addAdditionalCallId, setValue]);
 
   // If user selects a production from the productionlist
   useEffect(() => {
-    if (
-      selectedProductionId &&
-      selectedProductionId !== joinProductionId?.toString()
-    ) {
+    if (selectedProductionId) {
       reset({
         productionId: `${selectedProductionId}`,
       });
       setJoinProductionId(parseInt(selectedProductionId, 10));
     }
-  }, [joinProductionId, reset, selectedProductionId]);
+  }, [reset, selectedProductionId]);
 
   const { onChange, onBlur, name, ref } = register("productionId", {
     required: "Production ID is required",
@@ -119,16 +127,28 @@ export const JoinProduction = ({ preSelected }: TProps) => {
       window.localStorage?.setItem("username", payload.username);
     }
 
+    const uuid = uuidv4();
+
     dispatch({
-      type: "UPDATE_JOIN_PRODUCTION_OPTIONS",
-      payload,
-    });
-    dispatch({
-      type: "SELECT_PRODUCTION_ID",
-      payload: null,
+      type: "ADD_CALL",
+      payload: {
+        id: uuid,
+        callState: {
+          id: uuid,
+          peerConnection: null,
+          production: null,
+          reloadProductionList: false,
+          devices: null,
+          joinProductionOptions: payload,
+          mediaStreamInput: null,
+          dominantSpeaker: null,
+          audioLevelAboveThreshold: false,
+          selectedProductionId: null,
+        },
+      },
     });
     // TODO remove
-    console.log(payload);
+    console.log("PAYLOAD: ", payload);
   };
 
   const outputDevices = devices
