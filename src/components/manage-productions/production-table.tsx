@@ -1,0 +1,237 @@
+import styled from "@emotion/styled";
+import { useState } from "react";
+import { ChevronDownIcon, ChevronUpIcon } from "../../assets/icons/icon";
+import { TBasicProductionResponse } from "../../api/api";
+import { LocalError } from "../error";
+import { isMobile } from "../../bowser";
+import { TProduction } from "../production-line/types";
+
+const TableContainer = styled.div`
+  margin-bottom: 1rem;
+  margin-top: 2rem;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  width: ${isMobile ? "100%" : "65rem"};
+  position: relative;
+  min-width: 30rem;
+  margin-left: 2rem;
+`;
+
+const TableHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #32383b;
+  color: #d6d3d1;
+  padding: 1rem;
+  font-size: 2rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: 0.1rem solid #6d6d6d;
+  border-bottom: ${({ isOpen }: { isOpen: boolean }) =>
+    isOpen ? "none" : "0.1rem solid #6d6d6d;"};
+  border-radius: 0.5rem;
+  border-bottom-left-radius: ${({ isOpen }: { isOpen: boolean }) =>
+    isOpen ? "0" : "0.5rem"};
+  border-bottom-right-radius: ${({ isOpen }: { isOpen: boolean }) =>
+    isOpen ? "0" : "0.5rem"};
+`;
+
+const TableIcon = styled.span`
+  font-size: 1.4rem;
+  transform: ${({ isOpen }: { isOpen: boolean }) => (isOpen ? "50rem" : "0")};
+`;
+
+const TableBody = styled.div<{ isOpen: boolean }>`
+  max-height: ${({ isOpen }: { isOpen: boolean }) => (isOpen ? "50rem" : "0")};
+  overflow: scroll;
+  opacity: ${({ isOpen }: { isOpen: boolean }) => (isOpen ? "1" : "0")};
+  border: ${({ isOpen }: { isOpen: boolean }) =>
+    isOpen ? "0.1rem solid #6d6d6d" : "none"};
+  border-bottom-left-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+  border-bottom: none;
+  border-top: none;
+  transition:
+    max-height 0.3s ease,
+    opacity 0.3s ease;
+`;
+
+const Table = styled.table`
+  width: 100%;
+  border-collapse: collapse;
+`;
+
+const TableRow = styled.tr`
+  cursor: pointer;
+
+  ${({ isSelectedProduction }: { isSelectedProduction?: boolean }) =>
+    isSelectedProduction
+      ? `background-color: #4B555A`
+      : `background-color: #32383b;`}
+`;
+
+const TableCell = styled.td`
+  padding: 1.8rem;
+  border: 0.1rem solid #6d6d6d;
+  border-left: none;
+  border-right: none;
+  text-align: left;
+  cursor: pointer;
+`;
+
+const Tooltip = styled.div`
+  position: fixed;
+  background: #32383b;
+  color: #d6d3d1;
+  padding: 1rem;
+  border: 0.1rem solid #6d6d6d;
+  border-radius: 0.5rem;
+  white-space: normal;
+  z-index: 200;
+  width: auto;
+  box-shadow: 0rem 0.4rem 0.8rem rgba(0, 0, 0, 0.15);
+  visibility: ${({ isVisible }: { isVisible: boolean }) =>
+    isVisible ? "visible" : "hidden"};
+  opacity: ${({ isVisible }: { isVisible: boolean }) =>
+    isVisible ? "1" : "0"};
+  transition:
+    opacity 0.2s ease-in-out,
+    visibility 0.2s ease-in-out;
+`;
+
+const TruncatedTableCell = styled.td`
+  padding: 1.8rem;
+  border: 0.1rem solid #6d6d6d;
+  border-left: none;
+  border-right: none;
+  text-align: left;
+  cursor: pointer;
+  position: relative;
+
+  ${({ isOverflowing }: { isOverflowing: boolean }) => `
+    white-space: ${isMobile || !isOverflowing ? "normal" : "nowrap"};
+    overflow: ${isMobile || !isOverflowing ? "visible" : "hidden"};
+    word-wrap: ${isMobile || !isOverflowing ? "break-word" : "normal"};
+    text-overflow: ${isOverflowing && !isMobile ? "ellipsis" : "initial"};
+    max-width: ${isOverflowing && !isMobile ? "20rem" : "none"};
+    position: relative;
+    
+    ${
+      isOverflowing && !isMobile
+        ? `
+      &:hover .tooltip {
+        display: block;
+      }
+    `
+        : ""
+    }
+  `}
+`;
+
+const TableHeaderCell = styled.th`
+  padding: 0.8rem;
+  margin-bottom: 2rem;
+  background-color: #32383b;
+  color: #d6d3d1;
+  text-align: left;
+  font-weight: 700;
+  cursor: pointer;
+  border-top: none;
+`;
+
+type TProductionTableProps = {
+  productions?: TBasicProductionResponse[];
+  setProductionId: (v: string) => void;
+  error: Error | null;
+  isSelectedProduction: TProduction | null;
+  handleMouseEnter: (
+    event: React.MouseEvent<HTMLTableCellElement>,
+    fullText: string
+  ) => void;
+  handleMouseLeave: () => void;
+  tooltipText: string;
+  tooltipPosition: {
+    top: number;
+    left: number;
+    visibility: string;
+    opacity: number;
+  };
+};
+
+export const ProductionTable = ({
+  productions,
+  setProductionId,
+  error,
+  isSelectedProduction,
+  handleMouseEnter,
+  handleMouseLeave,
+  tooltipText,
+  tooltipPosition,
+}: TProductionTableProps) => {
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+
+  const toggleOpen = () => {
+    setIsOpen(!isOpen);
+  };
+
+  return (
+    <>
+      {error && <LocalError error={error} />}
+      {!error && productions && (
+        <TableContainer>
+          <TableHeader isOpen={isOpen} onClick={toggleOpen}>
+            <span>Production List</span>
+            <TableIcon isOpen={isOpen}>
+              {isOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}
+            </TableIcon>
+          </TableHeader>
+          <TableBody isOpen={isOpen}>
+            <Table>
+              <thead>
+                <TableRow isSelectedProduction={false}>
+                  <TableHeaderCell>Production Name</TableHeaderCell>
+                  <TableHeaderCell>ID</TableHeaderCell>
+                </TableRow>
+              </thead>
+              <tbody>
+                {productions?.map((p) => (
+                  <TableRow
+                    isSelectedProduction={
+                      isSelectedProduction?.productionId === p.productionId
+                    }
+                    key={p.productionId}
+                    onClick={() => {
+                      setProductionId(p.productionId);
+                    }}
+                  >
+                    <TruncatedTableCell
+                      isOverflowing={p.name.length > 50}
+                      onMouseEnter={(e) => handleMouseEnter(e, p.name)}
+                      onMouseLeave={handleMouseLeave}
+                    >
+                      {p.name.length > 50 && !isMobile
+                        ? `${p.name.slice(0, 47)}...`
+                        : p.name}
+                    </TruncatedTableCell>
+                    <TableCell>{p.productionId}</TableCell>
+                  </TableRow>
+                ))}
+              </tbody>
+            </Table>
+          </TableBody>
+          <Tooltip
+            isVisible={tooltipPosition.visibility === "visible"}
+            style={{
+              top: `${tooltipPosition.top}px`,
+              left: `${tooltipPosition.left}px`,
+              opacity: tooltipPosition.opacity,
+            }}
+          >
+            {tooltipText}
+          </Tooltip>
+        </TableContainer>
+      )}
+    </>
+  );
+};
