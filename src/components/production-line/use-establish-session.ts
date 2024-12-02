@@ -60,16 +60,23 @@ export const useEstablishSession = ({
 
   // Clean up audio session
   useEffect(() => {
+    console.log("useEstablishSession - sessionId at line58:", sessionId);
     return () => {
       if (cleanupCalled.current) {
+        console.log("useEstablishSession - sessionId at line61:", sessionId);
         return;
       }
 
       cleanupCalled.current = true;
 
       if (!joinProductionOptions) {
+        console.log(
+          "useEstablishSession - no joinProductionOptions:",
+          sessionId
+        );
         return;
       }
+      console.log("useEstablishSession - sessionId at line74:", sessionId);
 
       if (sessionId) {
         API.deleteAudioSession({ sessionId })
