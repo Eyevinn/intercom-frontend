@@ -19,6 +19,7 @@ import { darkText, errorColour } from "../../css-helpers/defaults.ts";
 import { TJoinProductionOptions } from "../production-line/types.ts";
 import { uniqBy } from "../../helpers.ts";
 import { FormInputWithLoader } from "./form-input-with-loader.tsx";
+import { useLocalStorage } from "./use-access-local-storage.ts";
 
 type FormValues = TJoinProductionOptions;
 
@@ -47,6 +48,12 @@ export const JoinProduction = ({
   addAdditionalCallId,
 }: TProps) => {
   const [joinProductionId, setJoinProductionId] = useState<null | number>(null);
+  const [localStorageType, setLocalStorageType] = useState<string | null>(null);
+  const [localStorageData, setLocalStorageData] = useState<string | null>(null);
+  const cachedUsername = useLocalStorage({
+    localStorageType,
+    localStorageData,
+  });
   const {
     formState: { errors, isValid },
     register,
@@ -58,7 +65,7 @@ export const JoinProduction = ({
       productionId:
         preSelected?.preSelectedProductionId || addAdditionalCallId || "",
       lineId: preSelected?.preSelectedLineId || undefined,
-      username: window.localStorage?.getItem("username") || "",
+      username: cachedUsername || "",
     },
     resetOptions: {
       keepDirtyValues: true, // user-interacted input will be retained
@@ -73,6 +80,10 @@ export const JoinProduction = ({
     production,
     loading,
   } = useFetchProduction(joinProductionId);
+
+  useEffect(() => {
+    setLocalStorageType("username");
+  }, []);
 
   // Update selected line id when a new production is fetched
   useEffect(() => {
@@ -96,8 +107,6 @@ export const JoinProduction = ({
 
   // Use local cache
   useEffect(() => {
-    const cachedUsername = window.localStorage?.getItem("username");
-
     if (cachedUsername) {
       setValue("username", cachedUsername);
     }
@@ -105,7 +114,7 @@ export const JoinProduction = ({
     if (addAdditionalCallId) {
       setValue("productionId", addAdditionalCallId);
     }
-  }, [addAdditionalCallId, setValue]);
+  }, [addAdditionalCallId, cachedUsername, setValue]);
 
   // If user selects a production from the productionlist
   useEffect(() => {
@@ -124,7 +133,7 @@ export const JoinProduction = ({
 
   const onSubmit: SubmitHandler<FormValues> = (payload) => {
     if (payload.username) {
-      window.localStorage?.setItem("username", payload.username);
+      setLocalStorageData(payload.username);
     }
 
     dispatch({
