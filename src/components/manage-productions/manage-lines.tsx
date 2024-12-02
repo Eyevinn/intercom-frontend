@@ -155,6 +155,7 @@ export const ManageLines = ({
       setRemoveId(null);
       setVerifyRemove(null);
       setRemoveActive(false);
+      setUpdateLines(null);
       setProductionIdToFetch(parseInt(production.productionId, 10));
     }
   }, [
