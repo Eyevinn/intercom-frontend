@@ -148,7 +148,8 @@ export const ProductionLine = ({
     speakerHotkey: "n",
     pressToTalkHotkey: "t",
   });
-  const { joinProductionOptions, dominantSpeaker, audioLevelAboveThreshold } = callState;
+  const { joinProductionOptions, dominantSpeaker, audioLevelAboveThreshold } =
+    callState;
 
   const inputAudioStream = useAudioInput({
     inputId: joinProductionOptions?.audioinput ?? null,
