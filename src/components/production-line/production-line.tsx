@@ -310,7 +310,12 @@ export const ProductionLine: FC = () => {
 
   // Reset connection and re-connect to production-line
   const onSubmit: SubmitHandler<FormValues> = async (payload) => {
+    console.log(
+      "ProductionLine - joinProductionOptions at line314:",
+      joinProductionOptions
+    );
     if (joinProductionOptions) {
+      console.log("ProductionLine - payload at line318:", payload);
       resetAudioInput();
       muteInput(true);
       setSessionId(null);
