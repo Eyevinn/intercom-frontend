@@ -103,7 +103,7 @@ const FlexContainer = styled.div<MobileLayout>`
 
 const PageContainer = styled.div`
   margin-left: ${isMobile ? "0" : "12rem"};
-  margin-right: ${isMobile ? "0" : "18rem"};
+  margin-right: ${isMobile ? "0" : "12rem"};
 `;
 
 export const ManageProductions = () => {
