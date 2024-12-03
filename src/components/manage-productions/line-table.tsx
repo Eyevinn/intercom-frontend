@@ -126,7 +126,7 @@ const ConfirmButton = styled.div`
   padding: 1rem;
   z-index: 100;
   margin-left: ${isMobile ? "-1rem" : "1rem"};
-  margin-top: ${isMobile ? "3.5rem" : "1rem"};
+  margin-top: ${isMobile ? "3.5rem" : "0"};
   display: flex;
   justify-content: center;
   align-items: center;
@@ -138,7 +138,7 @@ const ConfirmButton = styled.div`
     transform: scale(1.1);
   }
 
-  ${isMobile ? `width: fit-content; right: 0;` : ""}
+  ${isMobile ? `width: fit-content;` : ""}
 `;
 
 type TLineTableProps = {
@@ -185,12 +185,11 @@ export const LineTable = ({
   useEffect(() => {
     if (verifyRemove !== null) {
       const targetRow = rowRefs.current.get(parseInt(verifyRemove, 10));
-
       if (targetRow) {
         const rect = targetRow.getBoundingClientRect();
         setConfirmButtonPosition({
-          top: rect.top + window.scrollY,
-          left: rect.right + 10,
+          top: isMobile ? rect.top : rect.top + window.scrollY,
+          left: isMobile ? rect.left + 20 : rect.right + 10,
         });
       } else {
         setConfirmButtonPosition(null);
@@ -270,26 +269,24 @@ export const LineTable = ({
         {tooltipText}
       </Tooltip>
       {confirmButtonPosition && verifyRemove && (
-        <div
+        <ConfirmButton
+          ref={confirmButtonRef}
           style={{
             position: "fixed",
-            top: `${confirmButtonPosition.top}px`,
-            left: `${confirmButtonPosition.left}px`,
+            top: `${confirmButtonPosition?.top}px`,
+            left: `${confirmButtonPosition?.left}px`,
+            zIndex: 200,
+          }}
+          onClick={(event) => {
+            event.preventDefault();
+            setRemoveId(parseInt(verifyRemove!, 10));
           }}
         >
-          <ConfirmButton
-            ref={confirmButtonRef}
-            onClick={(event) => {
-              event.preventDefault();
-              setRemoveId(parseInt(verifyRemove, 10));
-            }}
-          >
-            Remove {lines?.find((line) => line.id === verifyRemove)?.name}?
-            <ConfirmIconWrapper>
-              <ConfirmIcon />
-            </ConfirmIconWrapper>
-          </ConfirmButton>
-        </div>
+          Remove {lines?.find((line) => line.id === verifyRemove)?.name}?
+          <ConfirmIconWrapper>
+            <ConfirmIcon />
+          </ConfirmIconWrapper>
+        </ConfirmButton>
       )}
     </TableContainer>
   );

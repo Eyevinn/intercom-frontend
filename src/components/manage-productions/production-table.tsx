@@ -14,7 +14,7 @@ const TableContainer = styled.div`
   width: ${isMobile ? "100%" : "65rem"};
   position: relative;
   min-width: 30rem;
-  margin-left: 2rem;
+  margin-left: ${isMobile ? "0" : "2rem"};
 `;
 
 const TableHeader = styled.div`
