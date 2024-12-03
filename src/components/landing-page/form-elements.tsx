@@ -7,10 +7,12 @@ const sharedMargin = `margin: 0 0 2rem`;
 export const FormInput = styled.input`
   width: 100%;
   font-size: 1.6rem;
-  padding: 0.5rem;
+  padding: 0.75rem;
   margin: 0 0 2rem;
-  border: 0.1rem solid #6f6e6e;
+  border: 0.1rem solid #6d6d6d;
   border-radius: 0.5rem;
+  background: #32383b;
+  color: white;
 
   ${sharedMargin};
 
@@ -43,8 +45,10 @@ export const FormSelect = styled.select`
   padding: 0.5rem;
   ${sharedMargin};
 
-  border: 1px solid #6f6e6e;
+  border: 1px solid #6d6d6d;
   border-radius: 0.5rem;
+  background: #32383b;
+  color: white;
 `;
 
 export const FormLabel = styled.label`
@@ -74,9 +78,8 @@ export const StyledWarningMessage = styled.div`
   align-items: center;
 `;
 
-const ActionButton = styled.button`
-  background-color: transparent;
-  background-image: linear-gradient(to bottom, #fff, #f8eedb);
+export const ActionButton = styled.button`
+  background: #1db954;
   border: 0 solid #e5e7eb;
   border-radius: 0.5rem;
   box-sizing: border-box;
@@ -102,7 +105,8 @@ const ActionButton = styled.button`
     0 0.2rem 0.2rem rgba(81, 41, 10, 0.2);
 
   &:disabled {
-    background: #c9c6c0;
+    background: #1db954;
+    opacity: 0.5;
     cursor: not-allowed;
   }
 
@@ -114,18 +118,8 @@ const ActionButton = styled.button`
 
 export const PrimaryButton = styled(ActionButton)`
   &:active:enabled {
-    background-color: #f3f4f6;
-    box-shadow:
-      -0.1rem 0.2rem 0.5rem rgba(81, 41, 10, 0.15),
-      0 0.1rem 0.1rem rgba(81, 41, 10, 0.15);
+    background: #1db954;
     transform: translateY(0.125rem);
-  }
-
-  &:focus {
-    box-shadow:
-      rgba(72, 35, 7, 0.46) 0 0 0 0.4rem,
-      -0.6rem 0.8rem 1rem rgba(81, 41, 10, 0.1),
-      0 0.2rem 0.2rem rgba(81, 41, 10, 0.2);
   }
 
   &:not(:disabled):hover {
@@ -169,7 +163,7 @@ export const SecondaryButton = styled(ActionButton)`
   }
 
   &:before {
-    background-color: rgba(72, 54, 42, 0.32);
+    background: rgba(89, 203, 232, 1);
     content: "";
     display: block;
     height: 100%;
@@ -182,8 +176,7 @@ export const SecondaryButton = styled(ActionButton)`
   }
 
   &:after {
-    background-color: initial;
-    background-image: linear-gradient(to bottom, #fff, #f5ead6);
+    background: rgba(89, 203, 232, 1)
     content: "";
     display: block;
     overflow: hidden;

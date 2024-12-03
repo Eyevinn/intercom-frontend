@@ -5,7 +5,7 @@ import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { useAudioInput } from "./use-audio-input.ts";
 import { useRtcConnection } from "./use-rtc-connection.ts";
 import { useEstablishSession } from "./use-establish-session.ts";
-import { SecondaryButton } from "../landing-page/form-elements.tsx";
+import { ActionButton } from "../landing-page/form-elements.tsx";
 import { UserList } from "./user-list.tsx";
 import {
   MicMuted,
@@ -82,7 +82,9 @@ const FlexButtonWrapper = styled.div`
   }
 `;
 
-const UserControlBtn = styled(SecondaryButton)`
+const UserControlBtn = styled(ActionButton)`
+  background: rgba(50, 56, 59, 1);
+  border: 0.2rem solid #6d6d6d;
   width: 100%;
 `;
 

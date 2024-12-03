@@ -1,16 +1,8 @@
 import styled from "@emotion/styled";
-import { DisplayContainerHeader } from "../landing-page/display-container-header";
-import { PrimaryButton } from "../landing-page/form-elements";
+import { ActionButton } from "../landing-page/form-elements";
 import { Spinner } from "../loader/loader";
-
-const Container = styled.div`
-  max-width: 45rem;
-  min-width: 35rem;
-  padding: 2rem;
-  margin: 0 2rem 2rem 0;
-  border-radius: 1rem;
-  border: 0.2rem solid #434343;
-`;
+import { RemoveButton } from "../remove-button/remove-button";
+import { isMobile } from "../../bowser";
 
 const VerifyBtnWrapper = styled.div`
   margin: 3rem 0 2rem 2rem;
@@ -18,15 +10,24 @@ const VerifyBtnWrapper = styled.div`
 
 const VerifyButtons = styled.div`
   display: flex;
-  padding: 1rem 0 0 0;
+  margin-top: 2rem;
+  gap: 2rem;
 `;
 
-const Button = styled(PrimaryButton)`
-  margin: 0 1rem 0 0;
+const CancelButton = styled(ActionButton)`
+  background: #d6d3d1;
+  color: "#27272a";
 `;
 
 const ButtonWrapper = styled.div`
-  margin: 2rem 0 2rem 0;
+  margin: ${isMobile ? "0 0 1rem" : "2.5rem 0 2rem 0"};
+
+  ${() =>
+    isMobile &&
+    `
+      display: flex;
+      justify-content: flex-end;
+    `}
 `;
 
 type TRemoveProduction = {
@@ -45,11 +46,10 @@ export const RemoveProduction = ({
   reset,
 }: TRemoveProduction) => {
   return (
-    <Container>
-      <DisplayContainerHeader>Remove Production</DisplayContainerHeader>
+    <>
       {!verifyRemove && (
         <ButtonWrapper>
-          <PrimaryButton
+          <RemoveButton
             type="button"
             className={deleteLoader ? "submit" : ""}
             onClick={() => {
@@ -58,14 +58,24 @@ export const RemoveProduction = ({
           >
             Remove
             {deleteLoader && <Spinner className="manage-production" />}
-          </PrimaryButton>
+          </RemoveButton>
         </ButtonWrapper>
       )}
       {verifyRemove && (
         <VerifyBtnWrapper>
           <p>Are you sure?</p>
           <VerifyButtons>
-            <Button
+            <CancelButton
+              type="button"
+              className={deleteLoader ? "submit" : ""}
+              onClick={() => {
+                reset();
+              }}
+            >
+              Cancel
+              {deleteLoader && <Spinner className="manage-production" />}
+            </CancelButton>
+            <RemoveButton
               type="button"
               className={deleteLoader ? "submit" : ""}
               disabled={deleteLoader}
@@ -75,20 +85,10 @@ export const RemoveProduction = ({
             >
               Yes
               {deleteLoader && <Spinner className="manage-production" />}
-            </Button>
-            <Button
-              type="button"
-              className={deleteLoader ? "submit" : ""}
-              onClick={() => {
-                reset();
-              }}
-            >
-              Go back
-              {deleteLoader && <Spinner className="manage-production" />}
-            </Button>
+            </RemoveButton>
           </VerifyButtons>
         </VerifyBtnWrapper>
       )}
-    </Container>
+    </>
   );
 };

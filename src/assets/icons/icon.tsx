@@ -9,6 +9,9 @@ import ConfirmSvg from "./done.svg?react";
 import StepLeftSvg from "./chevron_left.svg?react";
 import StepRightSvg from "./navigate_next.svg?react";
 import Settings from "./settings.svg?react";
+import ChevronDown from "./chevron_down.svg?react";
+import ChevronUp from "./chevron_up.svg?react";
+import Headset from "./headset.svg?react";
 
 export const MicMuted = () => <MicMute />;
 
@@ -31,3 +34,9 @@ export const StepLeftIcon = () => <StepLeftSvg />;
 export const StepRightIcon = () => <StepRightSvg />;
 
 export const SettingsIcon = () => <Settings />;
+
+export const ChevronDownIcon = () => <ChevronDown />;
+
+export const ChevronUpIcon = () => <ChevronUp />;
+
+export const HeadsetIcon = () => <Headset />;

@@ -203,7 +203,10 @@ export const CreateProduction = () => {
                 placeholder="Line Name"
               />
               {index === fields.length - 1 && (
-                <RemoveLineButton removeLine={() => remove(index)} />
+                <RemoveLineButton
+                  isCreatingLine
+                  removeLine={() => remove(index)}
+                />
               )}
             </ListItemWrapper>
           </FormLabel>

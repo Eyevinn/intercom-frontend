@@ -3,12 +3,12 @@ import React, { useRef, useState } from "react";
 import { ErrorMessage } from "@hookform/error-message";
 import {
   PrimaryButton,
-  SecondaryButton,
   FormLabel,
   FormInput,
   FormContainer,
   DecorativeLabel,
   StyledWarningMessage,
+  ActionButton,
 } from "../landing-page/form-elements";
 
 const ModalOverlay = styled.div`
@@ -50,8 +50,8 @@ const ModalCloseButton = styled.button`
   font-size: 1.6rem;
 `;
 
-const CancelButton = styled(SecondaryButton)`
-  background-color: #000000;
+const CancelButton = styled(ActionButton)`
+  background: #d6d3d1;
 `;
 
 const ButtonDiv = styled.div`
