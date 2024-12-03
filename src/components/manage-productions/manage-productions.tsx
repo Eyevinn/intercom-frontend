@@ -118,13 +118,6 @@ export const ManageProductions = () => {
   const [productionIdToFetch, setProductionIdToFetch] = useState<null | number>(
     null
   );
-  const [tooltipPosition, setTooltipPosition] = useState({
-    top: 0,
-    left: 0,
-    visibility: "hidden",
-    opacity: 0,
-  });
-  const [tooltipText, setTooltipText] = useState("");
 
   // Pagination
   const limit = "10";
@@ -160,32 +153,6 @@ export const ManageProductions = () => {
     error: productionDeleteError,
     successfullDelete,
   } = useDeleteProduction(removeId);
-
-  const handleMouseEnter = (
-    event: React.MouseEvent<HTMLTableCellElement>,
-    fullText: string
-  ) => {
-    if (fullText.length <= 50 || isMobile) return;
-
-    const rect = event.currentTarget.getBoundingClientRect();
-    setTooltipText(fullText);
-
-    setTooltipPosition({
-      top: rect.top + 5,
-      left: rect.left + 10,
-      visibility: "visible",
-      opacity: 1,
-    });
-  };
-
-  const handleMouseLeave = () => {
-    setTooltipText("");
-    setTooltipPosition({
-      ...tooltipPosition,
-      visibility: "hidden",
-      opacity: 0,
-    });
-  };
 
   useEffect(() => {
     if (formState.isSubmitSuccessful) {
@@ -289,10 +256,6 @@ export const ManageProductions = () => {
                     setShowDeleteDoneMessage(false);
                   }}
                   isSelectedProduction={cachedProduction}
-                  handleMouseEnter={handleMouseEnter}
-                  handleMouseLeave={handleMouseLeave}
-                  tooltipText={tooltipText}
-                  tooltipPosition={tooltipPosition}
                 />
               )}
               <FormInputWrapper>
@@ -347,10 +310,6 @@ export const ManageProductions = () => {
               <ManageLines
                 production={cachedProduction}
                 setProductionIdToFetch={setProductionIdToFetch}
-                handleMouseEnter={handleMouseEnter}
-                handleMouseLeave={handleMouseLeave}
-                tooltipPosition={tooltipPosition}
-                tooltipText={tooltipText}
               />
             )}
           </SubFlexContainer>
@@ -366,10 +325,6 @@ export const ManageProductions = () => {
                 setShowDeleteDoneMessage(false);
               }}
               isSelectedProduction={cachedProduction}
-              handleMouseEnter={handleMouseEnter}
-              handleMouseLeave={handleMouseLeave}
-              tooltipText={tooltipText}
-              tooltipPosition={tooltipPosition}
             />
           )}
         </FlexContainer>

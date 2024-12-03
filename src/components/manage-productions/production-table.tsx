@@ -80,26 +80,6 @@ const TableCell = styled.td`
   cursor: pointer;
 `;
 
-const Tooltip = styled.div`
-  position: fixed;
-  background: #32383b;
-  color: #d6d3d1;
-  padding: 1rem;
-  border: 0.1rem solid #6d6d6d;
-  border-radius: 0.5rem;
-  white-space: normal;
-  z-index: 200;
-  width: auto;
-  box-shadow: 0rem 0.4rem 0.8rem rgba(0, 0, 0, 0.15);
-  visibility: ${({ isVisible }: { isVisible: boolean }) =>
-    isVisible ? "visible" : "hidden"};
-  opacity: ${({ isVisible }: { isVisible: boolean }) =>
-    isVisible ? "1" : "0"};
-  transition:
-    opacity 0.2s ease-in-out,
-    visibility 0.2s ease-in-out;
-`;
-
 const TruncatedTableCell = styled.td`
   padding: 1.8rem;
   border: 0.1rem solid #6d6d6d;
@@ -116,16 +96,6 @@ const TruncatedTableCell = styled.td`
     text-overflow: ${isOverflowing && !isMobile ? "ellipsis" : "initial"};
     max-width: ${isOverflowing && !isMobile ? "20rem" : "none"};
     position: relative;
-    
-    ${
-      isOverflowing && !isMobile
-        ? `
-      &:hover .tooltip {
-        display: block;
-      }
-    `
-        : ""
-    }
   `}
 `;
 
@@ -145,18 +115,6 @@ type TProductionTableProps = {
   setProductionId: (v: string) => void;
   error: Error | null;
   isSelectedProduction: TProduction | null;
-  handleMouseEnter: (
-    event: React.MouseEvent<HTMLTableCellElement>,
-    fullText: string
-  ) => void;
-  handleMouseLeave: () => void;
-  tooltipText: string;
-  tooltipPosition: {
-    top: number;
-    left: number;
-    visibility: string;
-    opacity: number;
-  };
 };
 
 export const ProductionTable = ({
@@ -164,10 +122,6 @@ export const ProductionTable = ({
   setProductionId,
   error,
   isSelectedProduction,
-  handleMouseEnter,
-  handleMouseLeave,
-  tooltipText,
-  tooltipPosition,
 }: TProductionTableProps) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
@@ -205,11 +159,7 @@ export const ProductionTable = ({
                       setProductionId(p.productionId);
                     }}
                   >
-                    <TruncatedTableCell
-                      isOverflowing={p.name.length > 50}
-                      onMouseEnter={(e) => handleMouseEnter(e, p.name)}
-                      onMouseLeave={handleMouseLeave}
-                    >
+                    <TruncatedTableCell isOverflowing={p.name.length > 50}>
                       {p.name.length > 50 && !isMobile
                         ? `${p.name.slice(0, 47)}...`
                         : p.name}
@@ -220,16 +170,6 @@ export const ProductionTable = ({
               </tbody>
             </Table>
           </TableBody>
-          <Tooltip
-            isVisible={tooltipPosition.visibility === "visible"}
-            style={{
-              top: `${tooltipPosition.top}px`,
-              left: `${tooltipPosition.left}px`,
-              opacity: tooltipPosition.opacity,
-            }}
-          >
-            {tooltipText}
-          </Tooltip>
         </TableContainer>
       )}
     </>

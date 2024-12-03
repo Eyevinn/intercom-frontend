@@ -22,18 +22,6 @@ import { isMobile } from "../../bowser";
 type TManageLines = {
   production: TProduction;
   setProductionIdToFetch: (A: number) => void;
-  handleMouseEnter: (
-    event: React.MouseEvent<HTMLTableCellElement>,
-    fullText: string
-  ) => void;
-  handleMouseLeave: () => void;
-  tooltipText: string;
-  tooltipPosition: {
-    top: number;
-    left: number;
-    visibility: string;
-    opacity: number;
-  };
 };
 
 type FormValues = {
@@ -80,10 +68,6 @@ const ButtonContainer = styled.div`
 export const ManageLines = ({
   production,
   setProductionIdToFetch,
-  handleMouseEnter,
-  handleMouseLeave,
-  tooltipText,
-  tooltipPosition,
 }: TManageLines) => {
   const [removeActive, setRemoveActive] = useState<boolean>(false);
   const [updateLines, setUpdateLines] = useState<FormValues | null>(null);
@@ -180,10 +164,6 @@ export const ManageLines = ({
         verifyRemove={verifyRemove}
         removeLine={setVerifyRemove}
         setRemoveId={setRemoveId}
-        handleMouseEnter={handleMouseEnter}
-        handleMouseLeave={handleMouseLeave}
-        tooltipPosition={tooltipPosition}
-        tooltipText={tooltipText}
       />
       {fields.map((field, index) => (
         <div key={field.id} ref={inputRef}>

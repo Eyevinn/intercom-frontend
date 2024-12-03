@@ -27,14 +27,7 @@ const Table = styled.table`
 `;
 
 const TableRow = styled.tr`
-  &:nth-of-type(even) {
-    background-color: #32383b;
-  }
-
-  &:nth-of-type(odd) {
-    background-color: #32383b;
-  }
-
+  background-color: #32383b;
   cursor: pointer;
 
   ${isMobile ? `position: relative;` : ""}
@@ -63,34 +56,14 @@ const TableHeaderCell = styled.th`
   font-size: 1.8rem;
 `;
 
-const Tooltip = styled.div`
-  position: fixed;
-  background: #32383b;
-  color: #d6d3d1;
-  padding: 1rem;
-  border: 0.1rem solid #6d6d6d;
-  border-radius: 0.5rem;
-  white-space: normal;
-  z-index: 200;
-  width: auto;
-  box-shadow: 0rem 0.4rem 0.8rem rgba(0, 0, 0, 0.15);
-  visibility: ${({ isVisible }: { isVisible: boolean }) =>
-    isVisible ? "visible" : "hidden"};
-  opacity: ${({ isVisible }: { isVisible: boolean }) =>
-    isVisible ? "1" : "0"};
-  transition:
-    opacity 0.2s ease-in-out,
-    visibility 0.2s ease-in-out;
-`;
-
 const TruncatedTableCell = styled.td`
   padding: 1.8rem;
   border: 0.1rem solid #6d6d6d;
   border-left: none;
   border-right: none;
   text-align: left;
-  cursor: pointer;
   position: relative;
+  cursor: pointer;
 
   ${({ isOverflowing }: { isOverflowing: boolean }) => `
     white-space: ${isMobile || !isOverflowing ? "normal" : "nowrap"};
@@ -99,16 +72,6 @@ const TruncatedTableCell = styled.td`
     text-overflow: ${isOverflowing && !isMobile ? "ellipsis" : "initial"};
     max-width: ${isOverflowing && !isMobile ? "20rem" : "none"};
     position: relative;
-    
-    ${
-      isOverflowing && !isMobile
-        ? `
-      &:hover .tooltip {
-        display: block;
-      }
-    `
-        : ""
-    }
   `}
 `;
 
@@ -147,18 +110,6 @@ type TLineTableProps = {
   verifyRemove: null | string;
   removeLine: React.Dispatch<React.SetStateAction<string | null>>;
   setRemoveId: React.Dispatch<React.SetStateAction<number | null>>;
-  handleMouseEnter: (
-    event: React.MouseEvent<HTMLTableCellElement>,
-    fullText: string
-  ) => void;
-  handleMouseLeave: () => void;
-  tooltipText: string;
-  tooltipPosition: {
-    top: number;
-    left: number;
-    visibility: string;
-    opacity: number;
-  };
 };
 
 interface ConfirmButtonPosition {
@@ -172,10 +123,6 @@ export const LineTable = ({
   verifyRemove,
   removeLine,
   setRemoveId,
-  handleMouseEnter,
-  handleMouseLeave,
-  tooltipText,
-  tooltipPosition,
 }: TLineTableProps) => {
   const confirmButtonRef = useRef<HTMLDivElement | null>(null);
   const [confirmButtonPosition, setConfirmButtonPosition] =
@@ -188,7 +135,7 @@ export const LineTable = ({
       if (targetRow) {
         const rect = targetRow.getBoundingClientRect();
         setConfirmButtonPosition({
-          top: isMobile ? rect.top : rect.top - 5,
+          top: isMobile ? rect.top : rect.top + 5,
           left: isMobile ? rect.left + 20 : rect.right + 10,
         });
       } else {
@@ -212,10 +159,6 @@ export const LineTable = ({
     };
   }, [removeLine]);
 
-  // TODO: Remove logs
-  console.log("TOOLTIP POSITION", tooltipPosition);
-  console.log("TOOLTIP TEXT:", tooltipText);
-
   return (
     <TableContainer lines={lines}>
       <TableBody>
@@ -235,11 +178,7 @@ export const LineTable = ({
                   if (el) rowRefs.current.set(parseInt(l.id, 10), el);
                 }}
               >
-                <TruncatedTableCell
-                  isOverflowing={l.name.length > 50}
-                  onMouseEnter={(e) => handleMouseEnter(e, l.name)}
-                  onMouseLeave={handleMouseLeave}
-                >
+                <TruncatedTableCell isOverflowing={l.name.length > 50}>
                   {l.name.length > 50 && !isMobile
                     ? `${l.name.slice(0, 47)}...`
                     : l.name}
@@ -263,15 +202,6 @@ export const LineTable = ({
           </tbody>
         </Table>
       </TableBody>
-      <Tooltip
-        isVisible={tooltipPosition.visibility === "visible"}
-        style={{
-          top: `${tooltipPosition.top}px`,
-          left: `${tooltipPosition.left}px`,
-        }}
-      >
-        {tooltipText}
-      </Tooltip>
       {confirmButtonPosition && verifyRemove && (
         <ConfirmButton
           ref={confirmButtonRef}
