@@ -171,8 +171,8 @@ export const ManageProductions = () => {
     setTooltipText(fullText);
 
     setTooltipPosition({
-      top: rect.top + window.scrollY + rect.height + 5,
-      left: rect.left + window.scrollX,
+      top: rect.top - 10,
+      left: rect.left + 10,
       visibility: "visible",
       opacity: 1,
     });

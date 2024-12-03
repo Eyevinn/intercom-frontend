@@ -10,7 +10,7 @@ const TableContainer = styled.div`
   border: 0.1rem solid #6d6d6d;
   border-radius: 0.5rem;
   overflow-y: scroll;
-  width: ${isMobile ? "100%" : "55rem"};
+  width: ${isMobile ? "100%" : "45rem"};
   max-height: 35rem;
   border-bottom: ${({ lines }: { lines: TLine[] | undefined }) =>
     lines && lines.length === 0 ? "0.1rem solid #6d6d6d" : "none"};
@@ -41,7 +41,7 @@ const TableRow = styled.tr`
 `;
 
 const TableCell = styled.td`
-  padding: 1.8rem;
+  padding: 1.5rem;
   border: 0.1rem solid #6d6d6d;
   border-left: none;
   border-right: none;
