@@ -212,6 +212,10 @@ export const LineTable = ({
     };
   }, [removeLine]);
 
+  // TODO: Remove logs
+  console.log("TOOLTIP POSITION", tooltipPosition);
+  console.log("TOOLTIP TEXT:", tooltipText);
+
   return (
     <TableContainer lines={lines}>
       <TableBody>

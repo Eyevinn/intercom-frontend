@@ -8,7 +8,7 @@ type TLongPressToTalkButton = {
 };
 
 const Button = styled(PrimaryButton)`
-  background: rgba(50, 56, 59, 100);
+  background: rgba(50, 56, 59, 1);
   color: white;
   border: 0.2rem solid #6d6d6d;
   position: relative;

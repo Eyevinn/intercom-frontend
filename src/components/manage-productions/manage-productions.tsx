@@ -94,7 +94,7 @@ const SubFlexContainer = styled.div`
   ${isMobile ? "" : `align-items: flex-start;`}
 `;
 
-const FlexContainer = styled.div<MobileLayout>`
+const FlexContainer = styled.div`
   margin-top: 2rem;
 
   display: flex;
@@ -171,7 +171,7 @@ export const ManageProductions = () => {
     setTooltipText(fullText);
 
     setTooltipPosition({
-      top: rect.top - 10,
+      top: rect.top + 5,
       left: rect.left + 10,
       visibility: "visible",
       opacity: 1,
@@ -274,7 +274,7 @@ export const ManageProductions = () => {
             </strong>
           </DecorativeLabel>
         )}
-        <FlexContainer isMobile={isMobile}>
+        <FlexContainer>
           <SubFlexContainer>
             <SubContainers isMobile={isMobile}>
               {isMobile && (
