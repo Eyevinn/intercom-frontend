@@ -188,7 +188,7 @@ export const LineTable = ({
       if (targetRow) {
         const rect = targetRow.getBoundingClientRect();
         setConfirmButtonPosition({
-          top: isMobile ? rect.top : rect.top - 8,
+          top: isMobile ? rect.top : rect.top - 5,
           left: isMobile ? rect.left + 20 : rect.right + 10,
         });
       } else {

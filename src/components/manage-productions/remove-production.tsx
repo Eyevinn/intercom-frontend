@@ -20,7 +20,7 @@ const CancelButton = styled(ActionButton)`
 `;
 
 const ButtonWrapper = styled.div`
-  margin: ${isMobile ? "0 0 1rem" : "2rem 0 2rem 0"};
+  margin: ${isMobile ? "0 0 1rem" : "2.5rem 0 2rem 0"};
 
   ${() =>
     isMobile &&
