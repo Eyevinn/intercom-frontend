@@ -2,6 +2,7 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { ErrorMessage } from "@hookform/error-message";
 import { useEffect, useState } from "react";
 import styled from "@emotion/styled";
+import { v4 as uuidv4 } from "uuid";
 import { DisplayContainerHeader } from "./display-container-header.tsx";
 import {
   DecorativeLabel,
@@ -18,6 +19,7 @@ import { darkText, errorColour } from "../../css-helpers/defaults.ts";
 import { TJoinProductionOptions } from "../production-line/types.ts";
 import { uniqBy } from "../../helpers.ts";
 import { FormInputWithLoader } from "./form-input-with-loader.tsx";
+import { useLocalStorage } from "./use-access-local-storage.ts";
 
 type FormValues = TJoinProductionOptions;
 
@@ -38,10 +40,20 @@ type TProps = {
     preSelectedProductionId: string;
     preSelectedLineId: string;
   };
+  addAdditionalCallId?: string;
 };
 
-export const JoinProduction = ({ preSelected }: TProps) => {
+export const JoinProduction = ({
+  preSelected,
+  addAdditionalCallId,
+}: TProps) => {
   const [joinProductionId, setJoinProductionId] = useState<null | number>(null);
+  const [localStorageType, setLocalStorageType] = useState<string | null>(null);
+  const [localStorageData, setLocalStorageData] = useState<string | null>(null);
+  const cachedUsername = useLocalStorage({
+    localStorageType,
+    localStorageData,
+  });
   const {
     formState: { errors, isValid },
     register,
@@ -50,8 +62,10 @@ export const JoinProduction = ({ preSelected }: TProps) => {
     setValue,
   } = useForm<FormValues>({
     defaultValues: {
-      productionId: preSelected?.preSelectedProductionId || "",
+      productionId:
+        preSelected?.preSelectedProductionId || addAdditionalCallId || "",
       lineId: preSelected?.preSelectedLineId || undefined,
+      username: cachedUsername || "",
     },
     resetOptions: {
       keepDirtyValues: true, // user-interacted input will be retained
@@ -66,6 +80,10 @@ export const JoinProduction = ({ preSelected }: TProps) => {
     production,
     loading,
   } = useFetchProduction(joinProductionId);
+
+  useEffect(() => {
+    setLocalStorageType("username");
+  }, []);
 
   // Update selected line id when a new production is fetched
   useEffect(() => {
@@ -89,25 +107,24 @@ export const JoinProduction = ({ preSelected }: TProps) => {
 
   // Use local cache
   useEffect(() => {
-    const cachedUsername = window.localStorage?.getItem("username");
-
     if (cachedUsername) {
       setValue("username", cachedUsername);
     }
-  }, [setValue]);
+
+    if (addAdditionalCallId) {
+      setValue("productionId", addAdditionalCallId);
+    }
+  }, [addAdditionalCallId, cachedUsername, setValue]);
 
   // If user selects a production from the productionlist
   useEffect(() => {
-    if (
-      selectedProductionId &&
-      selectedProductionId !== joinProductionId?.toString()
-    ) {
+    if (selectedProductionId) {
       reset({
         productionId: `${selectedProductionId}`,
       });
       setJoinProductionId(parseInt(selectedProductionId, 10));
     }
-  }, [joinProductionId, reset, selectedProductionId]);
+  }, [reset, selectedProductionId]);
 
   const { onChange, onBlur, name, ref } = register("productionId", {
     required: "Production ID is required",
@@ -116,19 +133,35 @@ export const JoinProduction = ({ preSelected }: TProps) => {
 
   const onSubmit: SubmitHandler<FormValues> = (payload) => {
     if (payload.username) {
-      window.localStorage?.setItem("username", payload.username);
+      setLocalStorageData(payload.username);
     }
 
     dispatch({
-      type: "UPDATE_JOIN_PRODUCTION_OPTIONS",
-      payload,
-    });
-    dispatch({
       type: "SELECT_PRODUCTION_ID",
-      payload: null,
+      payload: payload.productionId,
+    });
+
+    const uuid = uuidv4();
+
+    dispatch({
+      type: "ADD_CALL",
+      payload: {
+        id: uuid,
+        callState: {
+          id: uuid,
+          peerConnection: null,
+          production: null,
+          reloadProductionList: false,
+          devices: null,
+          joinProductionOptions: payload,
+          mediaStreamInput: null,
+          dominantSpeaker: null,
+          audioLevelAboveThreshold: false,
+        },
+      },
     });
     // TODO remove
-    console.log(payload);
+    console.log("PAYLOAD: ", payload);
   };
 
   const outputDevices = devices

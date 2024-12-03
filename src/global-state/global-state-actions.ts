@@ -1,4 +1,4 @@
-import { TJoinProductionOptions } from "../components/production-line/types.ts";
+import { CallState } from "./types.ts";
 
 export type TGlobalStateAction =
   | TPublishError
@@ -6,20 +6,14 @@ export type TGlobalStateAction =
   | TApiNotAvailable
   | TProductionListFetched
   | TUpdateDevicesAction
-  | TUpdateJoinProductionOptions
-  | TDominantSpeaker
-  | TAudioLevel
-  | TMediaStream
-  | TSelectProductionId;
+  | TSelectProductionId
+  | TAddCallState
+  | TUpdateCallState
+  | TRemoveCallState;
 
 export type TPublishError = {
   type: "ERROR";
-  payload: Error | null;
-};
-
-export type TDominantSpeaker = {
-  type: "DOMINANT_SPEAKER";
-  payload: string;
+  payload: { callId?: string; error: Error | null };
 };
 
 export type TProductionCreated = {
@@ -39,22 +33,22 @@ export type TUpdateDevicesAction = {
   payload: MediaDeviceInfo[];
 };
 
-export type TUpdateJoinProductionOptions = {
-  type: "UPDATE_JOIN_PRODUCTION_OPTIONS";
-  payload: TJoinProductionOptions | null;
-};
-
-export type TMediaStream = {
-  type: "CONNECTED_MEDIASTREAM";
-  payload: MediaStream | null;
-};
-
-export type TAudioLevel = {
-  type: "AUDIO_LEVEL_ABOVE_THRESHOLD";
-  payload: boolean;
-};
-
 export type TSelectProductionId = {
   type: "SELECT_PRODUCTION_ID";
   payload: string | null;
+};
+
+export type TAddCallState = {
+  type: "ADD_CALL";
+  payload: { id: string; callState: CallState };
+};
+
+export type TUpdateCallState = {
+  type: "UPDATE_CALL";
+  payload: { id: string; updates: Partial<CallState> };
+};
+
+export type TRemoveCallState = {
+  type: "REMOVE_CALL";
+  payload: { id: string };
 };
