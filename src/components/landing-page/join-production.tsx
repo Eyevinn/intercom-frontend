@@ -18,12 +18,10 @@ import { darkText, errorColour } from "../../css-helpers/defaults.ts";
 import { TJoinProductionOptions } from "../production-line/types.ts";
 import { uniqBy } from "../../helpers.ts";
 import { FormInputWithLoader } from "./form-input-with-loader.tsx";
-import { RefreshIcon } from "../../assets/icons/icon.tsx";
 import { useFetchDevices } from "../../use-fetch-devices.ts";
-import { Spinner } from "../loader/loader.tsx";
 import { useDevicePermissions } from "../../use-device-permission.ts";
 import { Modal } from "../modal/modal.tsx";
-import { isBrowserFirefox, isMobile } from "../../bowser.ts";
+import { ReloadDevicesButton } from "../reload-devices-button.tsx/reload-devices-button.tsx";
 
 type FormValues = TJoinProductionOptions;
 
@@ -37,19 +35,6 @@ const FetchErrorMessage = styled.div`
 
 const ButtonWrapper = styled.div`
   margin: 2rem 0 2rem 0;
-`;
-
-const StyledRefreshBtn = styled(PrimaryButton)`
-  padding: 0;
-  margin: 0;
-  width: 4rem;
-  height: 3.5rem;
-  margin-left: 1.5rem;
-
-  &.dummy {
-    background-color: #242424;
-    pointer-events: none;
-  }
 `;
 
 const FormWithBtn = styled.div`
@@ -67,7 +52,6 @@ type TProps = {
 export const JoinProduction = ({ preSelected }: TProps) => {
   const [joinProductionId, setJoinProductionId] = useState<null | number>(null);
   const [refresh, setRefresh] = useState<number>(0);
-  const [deviceRefresh, setDeviceRefresh] = useState(false);
   const [firefoxWarningModalOpen, setFirefoxWarningModalOpen] = useState(false);
   const {
     formState: { errors, isValid },
@@ -167,20 +151,6 @@ export const JoinProduction = ({ preSelected }: TProps) => {
     console.log(payload);
   };
 
-  useEffect(() => {
-    let timeout: number | null = null;
-
-    timeout = window.setTimeout(() => {
-      setDeviceRefresh(false);
-    }, 800);
-
-    return () => {
-      if (timeout !== null) {
-        window.clearTimeout(timeout);
-      }
-    };
-  }, [devices]);
-
   const outputDevices = devices
     ? uniqBy(
         devices.filter((d) => d.kind === "audiooutput"),
@@ -194,15 +164,6 @@ export const JoinProduction = ({ preSelected }: TProps) => {
         (item) => item.deviceId
       )
     : [];
-
-  const handleReloadDevices = () => {
-    if (isBrowserFirefox && !isMobile) {
-      setFirefoxWarningModalOpen(true);
-    } else {
-      setDeviceRefresh(true);
-      setRefresh((prev) => prev + 1);
-    }
-  };
 
   return (
     <FormContainer>
@@ -273,14 +234,11 @@ export const JoinProduction = ({ preSelected }: TProps) => {
                   <option value="no-device">No device available</option>
                 )}
               </FormSelect>
-              <StyledRefreshBtn
-                type="button"
-                className="dummy"
-                disabled
-                onClick={() => handleReloadDevices()}
-              >
-                <RefreshIcon />
-              </StyledRefreshBtn>
+              <ReloadDevicesButton
+                handleReloadDevices={() => setRefresh((prev) => prev + 1)}
+                devices={devices}
+                isDummy
+              />
             </FormWithBtn>
           </FormLabel>
           <FormLabel>
@@ -302,14 +260,13 @@ export const JoinProduction = ({ preSelected }: TProps) => {
                   Controlled by operating system
                 </StyledWarningMessage>
               )}
-              <StyledRefreshBtn
-                type="button"
-                title="Refresh devices"
-                onClick={() => handleReloadDevices()}
-              >
-                {!deviceRefresh && <RefreshIcon />}
-                {deviceRefresh && <Spinner className="refresh-devices" />}
-              </StyledRefreshBtn>
+              <ReloadDevicesButton
+                handleReloadDevices={() => setRefresh((prev) => prev + 1)}
+                setFirefoxWarningModalOpen={() =>
+                  setFirefoxWarningModalOpen(true)
+                }
+                devices={devices}
+              />
             </FormWithBtn>
             {firefoxWarningModalOpen && (
               <Modal onClose={() => setFirefoxWarningModalOpen(false)}>
