@@ -47,6 +47,7 @@ import { Modal } from "../modal/modal.tsx";
 import { VerifyDecision } from "../verify-decision/verify-decision.tsx";
 import { ModalConfirmationText } from "../modal/modal-confirmation-text.ts";
 import { SymphonyRtcConnectionComponent } from "./symphony-rtc-connection-component.tsx";
+import { ReloadDevicesButton } from "../reload-devices-button.tsx/reload-devices-button.tsx";
 
 type FormValues = TJoinProductionOptions;
 
@@ -116,6 +117,8 @@ const LongPressWrapper = styled.div`
 `;
 
 const ButtonWrapper = styled.div`
+  display: flex;
+  justify-content: space-between;
   margin: 0 2rem 2rem 1rem;
 `;
 
@@ -326,7 +329,10 @@ export const ProductionLine = ({
 
   // Reset connection and re-connect to production-line
   const onSubmit: SubmitHandler<FormValues> = async (payload) => {
-    if (joinProductionOptions) {
+    const unchangedPayload =
+      payload.audioinput === joinProductionOptions?.audioinput &&
+      payload.audiooutput === joinProductionOptions?.audiooutput;
+    if (joinProductionOptions && !unchangedPayload) {
       resetAudioInput();
       muteInput(true);
       setSessionId(null);
@@ -477,7 +483,7 @@ export const ProductionLine = ({
                   {!showDeviceSettings ? "Change device" : "Close"}
                 </PrimaryButton>
               </FlexButtonWrapper>
-              {showDeviceSettings && (
+              {showDeviceSettings && devices && (
                 <FormContainer>
                   <FormLabel>
                     <DecorativeLabel>Input</DecorativeLabel>
@@ -530,6 +536,14 @@ export const ProductionLine = ({
                     >
                       Save
                     </PrimaryButton>
+                    {!(isBrowserFirefox && !isMobile) && (
+                      <ReloadDevicesButton
+                        handleReloadDevices={() =>
+                          setRefresh((prev) => prev + 1)
+                        }
+                        devices={devices}
+                      />
+                    )}
                   </ButtonWrapper>
                 </FormContainer>
               )}
