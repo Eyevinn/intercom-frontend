@@ -47,8 +47,7 @@ export const useAudioInput: TUseAudioInput = ({
             // eslint-disable-next-line no-param-reassign
             t.enabled = false;
           });
-          console.log("audioInput-id on start:", stream.id);
-          console.log("audioInput on start:", stream.active);
+
           setAudioInput(stream);
         });
     });
@@ -63,10 +62,7 @@ export const useAudioInput: TUseAudioInput = ({
   // Reset function to set audioInput to null
   const reset = useCallback(() => {
     if (audioInput && audioInput !== "no-device") {
-      console.log("audioInput-id:", audioInput.id);
-      console.log("audioInput before stop:", audioInput.active);
       audioInput.getTracks().forEach((t) => t.stop());
-      console.log("audioInput after stop:", audioInput.active);
     }
     setAudioInput(null);
   }, [audioInput]);
