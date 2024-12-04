@@ -331,7 +331,7 @@ export const ProductionLine = ({
       joinProductionOptions
     );
     if (joinProductionOptions) {
-      console.log("ProductionLine - payload at line318:", payload);
+      console.log("ProductionLine - payload at line322:", payload);
       resetAudioInput();
       muteInput(true);
       setSessionId(null);
