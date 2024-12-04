@@ -345,6 +345,10 @@ export const useRtcConnection = ({
     noStreamError,
   ]);
 
+  const connection = rtcPeerConnectionRef.current
+    ? rtcPeerConnectionRef.current.connectionState
+    : null;
+
   // Debug hook for logging RTC events TODO remove
   useEffect(() => {
     if (
@@ -414,7 +418,7 @@ export const useRtcConnection = ({
         onNegotiationNeeded
       );
     };
-  }, [rtcPeerConnectionRef]);
+  }, [connection]);
 
   return { connectionState, audioElements };
 };

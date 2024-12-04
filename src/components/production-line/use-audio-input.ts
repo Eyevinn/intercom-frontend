@@ -27,26 +27,31 @@ export const useAudioInput: TUseAudioInput = ({
 
     if (audioInputId === "no-device") return setAudioInput("no-device");
 
-    navigator.mediaDevices
-      .getUserMedia({
-        audio: {
-          deviceId: {
-            exact: audioInputId,
+    // First request a generic audio stream to "reset" permissions
+    navigator.mediaDevices.getUserMedia({ audio: true }).then(() => {
+      // Then request the specific audio input the user has selected
+      navigator.mediaDevices
+        .getUserMedia({
+          audio: {
+            deviceId: {
+              exact: audioInputId,
+            },
+            noiseSuppression: true,
           },
-          noiseSuppression: true,
-        },
-      })
-      .then((stream) => {
-        if (aborted) return;
+        })
+        .then((stream) => {
+          if (aborted) return;
 
-        // Default to muted input
-        stream.getTracks().forEach((t) => {
-          // eslint-disable-next-line no-param-reassign
-          t.enabled = false;
+          // Default to muted input
+          stream.getTracks().forEach((t) => {
+            // eslint-disable-next-line no-param-reassign
+            t.enabled = false;
+          });
+          console.log("audioInput-id on start:", stream.id);
+          console.log("audioInput on start:", stream.active);
+          setAudioInput(stream);
         });
-
-        setAudioInput(stream);
-      });
+    });
 
     return () => {
       aborted = true;
@@ -57,8 +62,14 @@ export const useAudioInput: TUseAudioInput = ({
 
   // Reset function to set audioInput to null
   const reset = useCallback(() => {
+    if (audioInput && audioInput !== "no-device") {
+      console.log("audioInput-id:", audioInput.id);
+      console.log("audioInput before stop:", audioInput.active);
+      audioInput.getTracks().forEach((t) => t.stop());
+      console.log("audioInput after stop:", audioInput.active);
+    }
     setAudioInput(null);
-  }, []);
+  }, [audioInput]);
 
   return [audioInput, reset];
 };
