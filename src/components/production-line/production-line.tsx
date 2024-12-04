@@ -326,12 +326,7 @@ export const ProductionLine = ({
 
   // Reset connection and re-connect to production-line
   const onSubmit: SubmitHandler<FormValues> = async (payload) => {
-    console.log(
-      "ProductionLine - joinProductionOptions at line314:",
-      joinProductionOptions
-    );
     if (joinProductionOptions) {
-      console.log("ProductionLine - payload at line322:", payload);
       resetAudioInput();
       muteInput(true);
       setSessionId(null);
