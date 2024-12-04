@@ -43,6 +43,7 @@ import { DisplayWarning } from "../display-box.tsx";
 import { useFetchDevices } from "../../use-fetch-devices.ts";
 import { TJoinProductionOptions } from "./types.ts";
 import { SettingsModal, Hotkeys } from "./settings-modal.tsx";
+import { ReloadDevicesButton } from "../reload-devices-button.tsx/reload-devices-button.tsx";
 
 type FormValues = TJoinProductionOptions;
 
@@ -110,6 +111,8 @@ const LongPressWrapper = styled.div`
 `;
 
 const ButtonWrapper = styled.div`
+  display: flex;
+  justify-content: space-between;
   margin: 0 2rem 2rem 1rem;
 `;
 
@@ -310,7 +313,10 @@ export const ProductionLine: FC = () => {
 
   // Reset connection and re-connect to production-line
   const onSubmit: SubmitHandler<FormValues> = async (payload) => {
-    if (joinProductionOptions) {
+    const unchangedPayload =
+      payload.audioinput === joinProductionOptions?.audioinput &&
+      payload.audiooutput === joinProductionOptions?.audiooutput;
+    if (joinProductionOptions && !unchangedPayload) {
       resetAudioInput();
       muteInput(true);
       setSessionId(null);
@@ -450,7 +456,7 @@ export const ProductionLine: FC = () => {
                   {!showDeviceSettings ? "Change device" : "Close"}
                 </PrimaryButton>
               </FlexButtonWrapper>
-              {showDeviceSettings && (
+              {showDeviceSettings && devices && (
                 <FormContainer>
                   <FormLabel>
                     <DecorativeLabel>Input</DecorativeLabel>
@@ -503,6 +509,14 @@ export const ProductionLine: FC = () => {
                     >
                       Save
                     </PrimaryButton>
+                    {!(isBrowserFirefox && !isMobile) && (
+                      <ReloadDevicesButton
+                        handleReloadDevices={() =>
+                          setRefresh((prev) => prev + 1)
+                        }
+                        devices={devices}
+                      />
+                    )}
                   </ButtonWrapper>
                 </FormContainer>
               )}
