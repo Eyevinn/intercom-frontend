@@ -148,7 +148,6 @@ export const JoinProduction = ({
         id: uuid,
         callState: {
           id: uuid,
-          peerConnection: null,
           production: null,
           reloadProductionList: false,
           devices: null,
