@@ -70,10 +70,6 @@ const globalReducer: Reducer<TGlobalState, TGlobalStateAction> = (
         selectedProductionId: action.payload,
       };
     case "ADD_CALL":
-      if (!action.payload?.id || typeof action.payload?.id !== "string") {
-        console.error("Missing call ID");
-        return state;
-      }
       return {
         ...state,
         calls: {
@@ -82,10 +78,6 @@ const globalReducer: Reducer<TGlobalState, TGlobalStateAction> = (
         },
       };
     case "UPDATE_CALL":
-      if (!action.payload?.id || typeof action.payload?.id !== "string") {
-        console.error("Missing call ID");
-        return state;
-      }
       if (
         action.payload.updates.audioLevelAboveThreshold &&
         state.calls[action.payload.id].audioLevelAboveThreshold ===
@@ -103,10 +95,6 @@ const globalReducer: Reducer<TGlobalState, TGlobalStateAction> = (
         },
       };
     case "REMOVE_CALL": {
-      if (!action.payload?.id || typeof action.payload?.id !== "string") {
-        console.error("Missing call ID");
-        return state;
-      }
       // eslint-disable-next-line @typescript-eslint/naming-convention
       const { [action.payload.id]: _, ...remainingCalls } = state.calls;
 
