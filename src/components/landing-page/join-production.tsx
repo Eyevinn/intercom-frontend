@@ -2,7 +2,6 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { ErrorMessage } from "@hookform/error-message";
 import { useEffect, useState } from "react";
 import styled from "@emotion/styled";
-import { v4 as uuidv4 } from "uuid";
 import { DisplayContainerHeader } from "./display-container-header.tsx";
 import {
   DecorativeLabel,
@@ -141,7 +140,7 @@ export const JoinProduction = ({
       payload: payload.productionId,
     });
 
-    const uuid = uuidv4();
+    const uuid = globalThis.crypto.randomUUID();
 
     dispatch({
       type: "ADD_CALL",
