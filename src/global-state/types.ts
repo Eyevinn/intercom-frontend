@@ -1,4 +1,3 @@
-import { MutableRefObject } from "react";
 import {
   TJoinProductionOptions,
   TProduction,
@@ -11,7 +10,6 @@ export interface ErrorState {
 
 export interface CallState {
   id: string;
-  peerConnection: MutableRefObject<RTCPeerConnection | null> | null;
   production: TProduction | null;
   reloadProductionList: boolean;
   devices: MediaDeviceInfo[] | null;
