@@ -380,13 +380,15 @@ export const useRtcConnection = ({
 
   // Debug hook for logging RTC events TODO remove
   useEffect(() => {
-    if (
-      !rtcPeerConnectionRef.current ||
-      rtcPeerConnectionRef.current.connectionState === "closed"
-    ) {
-      rtcPeerConnectionRef.current = new RTCPeerConnection();
-    }
     const rtcPeerConnection = rtcPeerConnectionRef.current;
+
+    if (!rtcPeerConnection) {
+      return () => {
+        console.log(
+          "Exited debug hook for logging RTC events early, no rtcPeerConnection"
+        );
+      };
+    }
 
     const onIceGathering = () =>
       console.log("ice gathering:", rtcPeerConnection.iceGatheringState);
