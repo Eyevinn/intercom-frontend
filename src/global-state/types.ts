@@ -9,7 +9,6 @@ export interface ErrorState {
 }
 
 export interface CallState {
-  id: string;
   production: TProduction | null;
   reloadProductionList: boolean;
   devices: MediaDeviceInfo[] | null;

@@ -139,7 +139,6 @@ export const JoinProduction = ({
       payload: {
         id: uuid,
         callState: {
-          id: uuid,
           production: null,
           reloadProductionList: false,
           devices: null,
