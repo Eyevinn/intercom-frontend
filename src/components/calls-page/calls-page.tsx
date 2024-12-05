@@ -6,6 +6,10 @@ import { JoinProduction } from "../landing-page/join-production";
 import { ProductionLine } from "../production-line/production-line";
 import { SecondaryButton } from "../landing-page/form-elements";
 import { NavigateToRootButton } from "../navigate-to-root-button/navigate-to-root-button";
+import { DisplayContainerHeader } from "../landing-page/display-container-header";
+import { Modal } from "../modal/modal";
+import { VerifyDecision } from "../verify-decision/verify-decision";
+import { ModalConfirmationText } from "../modal/modal-confirmation-text";
 
 const Container = styled.div`
   display: flex;
@@ -47,6 +51,7 @@ const ButtonWrapper = styled.div`
 export const CallsPage = () => {
   const [productionId, setProductionId] = useState<string | null>(null);
   const [addCallActive, setAddCallActive] = useState(false);
+  const [confirmExitModalOpen, setConfirmExitModalOpen] = useState(false);
   const [{ calls, selectedProductionId }, dispatch] = useGlobalState();
   const { productionId: paramProductionId, lineId: paramLineId } = useParams();
   const navigate = useNavigate();
@@ -68,6 +73,7 @@ export const CallsPage = () => {
 
   const runExitAllCalls = async () => {
     setProductionId(null);
+    navigate("/");
     Object.entries(calls).forEach(([callId]) => {
       if (callId) {
         dispatch({
@@ -81,7 +87,21 @@ export const CallsPage = () => {
   return (
     <Container>
       <ButtonWrapper>
-        <NavigateToRootButton resetOnExit={runExitAllCalls} />
+        <NavigateToRootButton
+          resetOnExitRequest={() => setConfirmExitModalOpen(true)}
+        />
+        {confirmExitModalOpen && (
+          <Modal onClose={() => setConfirmExitModalOpen(false)}>
+            <DisplayContainerHeader>Confirm</DisplayContainerHeader>
+            <ModalConfirmationText>
+              Are you sure you want to leave all calls?
+            </ModalConfirmationText>
+            <VerifyDecision
+              confirm={runExitAllCalls}
+              abort={() => setConfirmExitModalOpen(false)}
+            />
+          </Modal>
+        )}
       </ButtonWrapper>
       <CallsContainer>
         {Object.entries(calls).map(

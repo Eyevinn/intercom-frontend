@@ -31,6 +31,9 @@ import { DisplayWarning } from "../display-box.tsx";
 import { SettingsModal, Hotkeys } from "./settings-modal.tsx";
 import { CallState } from "../../global-state/types.ts";
 import { ExitCallButton } from "./exit-call-button.tsx";
+import { Modal } from "../modal/modal.tsx";
+import { VerifyDecision } from "../verify-decision/verify-decision.tsx";
+import { ModalConfirmationText } from "../modal/modal-confirmation-text.ts";
 
 const TempDiv = styled.div`
   padding: 0 0 2rem 0;
@@ -138,6 +141,7 @@ export const ProductionLine = ({
   const [isInputMuted, setIsInputMuted] = useState(true);
   const [isOutputMuted, setIsOutputMuted] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+  const [confirmExitModalOpen, setConfirmExitModalOpen] = useState(false);
   const [hotkeys, setHotkeys] = useState<Hotkeys>({
     muteHotkey: "m",
     speakerHotkey: "n",
@@ -271,7 +275,19 @@ export const ProductionLine = ({
       <HeaderWrapper>
         {!isMobile && !isSingleCall && (
           <ButtonWrapper>
-            <ExitCallButton resetOnExit={exit} />
+            <ExitCallButton resetOnExit={() => setConfirmExitModalOpen(true)} />
+            {confirmExitModalOpen && (
+              <Modal onClose={() => setConfirmExitModalOpen(false)}>
+                <DisplayContainerHeader>Confirm</DisplayContainerHeader>
+                <ModalConfirmationText>
+                  Are you sure you want to leave the call?
+                </ModalConfirmationText>
+                <VerifyDecision
+                  confirm={exit}
+                  abort={() => setConfirmExitModalOpen(false)}
+                />
+              </Modal>
+            )}
           </ButtonWrapper>
         )}
         {!loading && production && line && (
