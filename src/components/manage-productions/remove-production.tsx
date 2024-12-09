@@ -2,6 +2,7 @@ import styled from "@emotion/styled";
 import { DisplayContainerHeader } from "../landing-page/display-container-header";
 import { PrimaryButton } from "../landing-page/form-elements";
 import { Spinner } from "../loader/loader";
+import { VerifyDecision } from "../verify-decision/verify-decision";
 
 const Container = styled.div`
   max-width: 45rem;
@@ -14,15 +15,6 @@ const Container = styled.div`
 
 const VerifyBtnWrapper = styled.div`
   margin: 3rem 0 2rem 2rem;
-`;
-
-const VerifyButtons = styled.div`
-  display: flex;
-  padding: 1rem 0 0 0;
-`;
-
-const Button = styled(PrimaryButton)`
-  margin: 0 1rem 0 0;
 `;
 
 const ButtonWrapper = styled.div`
@@ -64,29 +56,11 @@ export const RemoveProduction = ({
       {verifyRemove && (
         <VerifyBtnWrapper>
           <p>Are you sure?</p>
-          <VerifyButtons>
-            <Button
-              type="button"
-              className={deleteLoader ? "submit" : ""}
-              disabled={deleteLoader}
-              onClick={() => {
-                handleSubmit();
-              }}
-            >
-              Yes
-              {deleteLoader && <Spinner className="manage-production" />}
-            </Button>
-            <Button
-              type="button"
-              className={deleteLoader ? "submit" : ""}
-              onClick={() => {
-                reset();
-              }}
-            >
-              Go back
-              {deleteLoader && <Spinner className="manage-production" />}
-            </Button>
-          </VerifyButtons>
+          <VerifyDecision
+            loader={deleteLoader}
+            confirm={handleSubmit}
+            abort={reset}
+          />
         </VerifyBtnWrapper>
       )}
     </Container>

@@ -18,6 +18,7 @@ import { darkText, errorColour } from "../../css-helpers/defaults.ts";
 import { TJoinProductionOptions } from "../production-line/types.ts";
 import { uniqBy } from "../../helpers.ts";
 import { FormInputWithLoader } from "./form-input-with-loader.tsx";
+import { useStorage } from "../accessing-local-storage/access-local-storage.ts";
 
 type FormValues = TJoinProductionOptions;
 
@@ -38,10 +39,15 @@ type TProps = {
     preSelectedProductionId: string;
     preSelectedLineId: string;
   };
+  addAdditionalCallId?: string;
 };
 
-export const JoinProduction = ({ preSelected }: TProps) => {
+export const JoinProduction = ({
+  preSelected,
+  addAdditionalCallId,
+}: TProps) => {
   const [joinProductionId, setJoinProductionId] = useState<null | number>(null);
+  const { readFromStorage, writeToStorage } = useStorage("username");
   const {
     formState: { errors, isValid },
     register,
@@ -50,8 +56,10 @@ export const JoinProduction = ({ preSelected }: TProps) => {
     setValue,
   } = useForm<FormValues>({
     defaultValues: {
-      productionId: preSelected?.preSelectedProductionId || "",
+      productionId:
+        preSelected?.preSelectedProductionId || addAdditionalCallId || "",
       lineId: preSelected?.preSelectedLineId || undefined,
+      username: readFromStorage() || "",
     },
     resetOptions: {
       keepDirtyValues: true, // user-interacted input will be retained
@@ -89,25 +97,25 @@ export const JoinProduction = ({ preSelected }: TProps) => {
 
   // Use local cache
   useEffect(() => {
-    const cachedUsername = window.localStorage?.getItem("username");
-
+    const cachedUsername = readFromStorage();
     if (cachedUsername) {
       setValue("username", cachedUsername);
     }
-  }, [setValue]);
+
+    if (addAdditionalCallId) {
+      setValue("productionId", addAdditionalCallId);
+    }
+  }, [addAdditionalCallId, readFromStorage, setValue]);
 
   // If user selects a production from the productionlist
   useEffect(() => {
-    if (
-      selectedProductionId &&
-      selectedProductionId !== joinProductionId?.toString()
-    ) {
+    if (selectedProductionId) {
       reset({
         productionId: `${selectedProductionId}`,
       });
       setJoinProductionId(parseInt(selectedProductionId, 10));
     }
-  }, [joinProductionId, reset, selectedProductionId]);
+  }, [reset, selectedProductionId]);
 
   const { onChange, onBlur, name, ref } = register("productionId", {
     required: "Production ID is required",
@@ -116,19 +124,33 @@ export const JoinProduction = ({ preSelected }: TProps) => {
 
   const onSubmit: SubmitHandler<FormValues> = (payload) => {
     if (payload.username) {
-      window.localStorage?.setItem("username", payload.username);
+      writeToStorage(payload.username);
     }
 
     dispatch({
-      type: "UPDATE_JOIN_PRODUCTION_OPTIONS",
-      payload,
-    });
-    dispatch({
       type: "SELECT_PRODUCTION_ID",
-      payload: null,
+      payload: payload.productionId,
+    });
+
+    const uuid = globalThis.crypto.randomUUID();
+
+    dispatch({
+      type: "ADD_CALL",
+      payload: {
+        id: uuid,
+        callState: {
+          production: null,
+          reloadProductionList: false,
+          devices: null,
+          joinProductionOptions: payload,
+          mediaStreamInput: null,
+          dominantSpeaker: null,
+          audioLevelAboveThreshold: false,
+        },
+      },
     });
     // TODO remove
-    console.log(payload);
+    console.log("PAYLOAD: ", payload);
   };
 
   const outputDevices = devices
