@@ -35,6 +35,7 @@ type TEstablishConnection = {
         audioCtx: AudioContext;
         gainNode: GainNode;
         source: MediaStreamAudioSourceNode;
+        audioElement: HTMLAudioElement;
       }[]
     >
   >;
@@ -57,7 +58,7 @@ const attachInputAudioToPeerConnection = ({
 const establishConnection = ({
   rtcPeerConnection,
   sdpOffer,
-  // joinProductionOptions,
+  joinProductionOptions,
   sessionId,
   dispatch,
   setAudioElements,
@@ -71,16 +72,21 @@ const establishConnection = ({
       const audioCtx = new AudioContext();
       const gainNode = audioCtx.createGain();
       const source = audioCtx.createMediaStreamSource(selectedStream);
+      const audioElement = new Audio();
 
       source.connect(gainNode);
       gainNode.connect(audioCtx.destination);
 
       gainNode.gain.value = 0.5;
 
-      setAudioElements((prevArray) => [
-        { audioCtx, gainNode, source },
-        ...prevArray,
-      ]);
+      audioElement.srcObject = selectedStream;
+      audioElement.controls = false;
+      audioElement.autoplay = true;
+
+      // setAudioElements((prevArray) => [
+      //   { audioCtx, gainNode, source },
+      //   ...prevArray,
+      // ]);
 
       // const audioElement = new Audio();
 
@@ -98,15 +104,20 @@ const establishConnection = ({
       // audioElement.srcObject = selectedStream;
 
       // setAudioElements((prevArray) => [audioElement, ...prevArray]);
-      // if (joinProductionOptions.audiooutput) {
-      //   audioElement.setSinkId(joinProductionOptions.audiooutput).catch((e) => {
-      //     dispatch({
-      //       type: "ERROR",
-      //       payload:
-      //         e instanceof Error ? e : new Error("Error assigning audio sink."),
-      //     });
-      //   });
-      // }
+      if (joinProductionOptions.audiooutput) {
+        audioElement.setSinkId(joinProductionOptions.audiooutput).catch((e) => {
+          dispatch({
+            type: "ERROR",
+            payload:
+              e instanceof Error ? e : new Error("Error assigning audio sink."),
+          });
+        });
+      }
+
+      setAudioElements((prevArray) => [
+        { audioCtx, gainNode, source, audioElement },
+        ...prevArray,
+      ]);
     } else if (selectedStream && selectedStream.getAudioTracks().length === 0) {
       setNoStreamError(true);
       dispatch({
@@ -259,6 +270,7 @@ export const useRtcConnection = ({
       audioCtx: AudioContext;
       gainNode: GainNode;
       source: MediaStreamAudioSourceNode;
+      audioElement: HTMLAudioElement;
     }[]
   >([]);
   const [noStreamError, setNoStreamError] = useState(false);
@@ -267,6 +279,7 @@ export const useRtcConnection = ({
       audioCtx: AudioContext;
       gainNode: GainNode;
       source: MediaStreamAudioSourceNode;
+      audioElement: HTMLAudioElement;
     }[]
   >(audioElements);
   const navigate = useNavigate();
@@ -282,13 +295,17 @@ export const useRtcConnection = ({
   }, [audioElements]);
 
   const cleanUpAudio = useCallback(() => {
-    audioElementsRef.current.forEach(({ audioCtx, source, gainNode }) => {
-      // el.pause();
-      // el.srcObject = null;
-      source.disconnect();
-      gainNode.disconnect();
-      audioCtx.close();
-    });
+    audioElementsRef.current.forEach(
+      ({ audioCtx, source, gainNode, audioElement }) => {
+        // el.pause();
+        // el.srcObject = null;
+        // eslint-disable-next-line no-param-reassign
+        audioElement.srcObject = null;
+        source.disconnect();
+        gainNode.disconnect();
+        audioCtx.close();
+      }
+    );
   }, [audioElementsRef]);
 
   // Teardown
