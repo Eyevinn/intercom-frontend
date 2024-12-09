@@ -14,7 +14,6 @@ import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { TGlobalStateAction } from "../../global-state/global-state-actions.ts";
 import { TUseAudioInputValues } from "./use-audio-input.ts";
 import { startRtcStatInterval } from "./rtc-stat-interval.ts";
-import { useControlVolume } from "./use-control-volume.tsx";
 
 type TRtcConnectionOptions = {
   inputAudioStream: TUseAudioInputValues;
@@ -29,16 +28,7 @@ type TEstablishConnection = {
   joinProductionOptions: TJoinProductionOptions;
   sessionId: string;
   dispatch: Dispatch<TGlobalStateAction>;
-  setAudioElements: Dispatch<
-    SetStateAction<
-      {
-        audioCtx: AudioContext;
-        gainNode: GainNode;
-        source: MediaStreamAudioSourceNode;
-        audioElement: HTMLAudioElement;
-      }[]
-    >
-  >;
+  setAudioElements: Dispatch<SetStateAction<HTMLAudioElement[]>>;
   setNoStreamError: (input: boolean) => void;
 };
 
@@ -69,41 +59,32 @@ const establishConnection = ({
     const selectedStream = streams[0];
 
     if (selectedStream && selectedStream.getAudioTracks().length !== 0) {
-      const audioCtx = new AudioContext();
-      const gainNode = audioCtx.createGain();
-      const source = audioCtx.createMediaStreamSource(selectedStream);
       const audioElement = new Audio();
+      // const audioCtx = new AudioContext();
+      // const gainNode = audioCtx.createGain();
+      // const source = audioCtx.createMediaStreamSource(selectedStream);
 
-      source.connect(gainNode);
-      gainNode.connect(audioCtx.destination);
+      // source.connect(gainNode);
+      // gainNode.connect(audioCtx.destination);
 
-      gainNode.gain.value = 0.5;
+      // gainNode.gain.value = 0.5;
 
       audioElement.srcObject = selectedStream;
+
       audioElement.controls = false;
       audioElement.autoplay = true;
+      audioElement.onerror = () => {
+        dispatch({
+          type: "ERROR",
+          payload: new Error(
+            `Audio Error: ${audioElement.error?.code} - ${audioElement.error?.message}`
+          ),
+        });
+      };
 
-      // setAudioElements((prevArray) => [
-      //   { audioCtx, gainNode, source },
-      //   ...prevArray,
-      // ]);
+      audioElement.srcObject = selectedStream;
 
-      // const audioElement = new Audio();
-
-      // audioElement.controls = false;
-      // audioElement.autoplay = true;
-      // audioElement.onerror = () => {
-      //   dispatch({
-      //     type: "ERROR",
-      //     payload: new Error(
-      //       `Audio Error: ${audioElement.error?.code} - ${audioElement.error?.message}`
-      //     ),
-      //   });
-      // };
-
-      // audioElement.srcObject = selectedStream;
-
-      // setAudioElements((prevArray) => [audioElement, ...prevArray]);
+      setAudioElements((prevArray) => [audioElement, ...prevArray]);
       if (joinProductionOptions.audiooutput) {
         audioElement.setSinkId(joinProductionOptions.audiooutput).catch((e) => {
           dispatch({
@@ -113,11 +94,6 @@ const establishConnection = ({
           });
         });
       }
-
-      setAudioElements((prevArray) => [
-        { audioCtx, gainNode, source, audioElement },
-        ...prevArray,
-      ]);
     } else if (selectedStream && selectedStream.getAudioTracks().length === 0) {
       setNoStreamError(true);
       dispatch({
@@ -265,27 +241,10 @@ export const useRtcConnection = ({
   const [, dispatch] = useGlobalState();
   const [connectionState, setConnectionState] =
     useState<RTCPeerConnectionState | null>(null);
-  const [audioElements, setAudioElements] = useState<
-    {
-      audioCtx: AudioContext;
-      gainNode: GainNode;
-      source: MediaStreamAudioSourceNode;
-      audioElement: HTMLAudioElement;
-    }[]
-  >([]);
+  const [audioElements, setAudioElements] = useState<HTMLAudioElement[]>([]);
   const [noStreamError, setNoStreamError] = useState(false);
-  const audioElementsRef = useRef<
-    {
-      audioCtx: AudioContext;
-      gainNode: GainNode;
-      source: MediaStreamAudioSourceNode;
-      audioElement: HTMLAudioElement;
-    }[]
-  >(audioElements);
+  const audioElementsRef = useRef<HTMLAudioElement[]>(audioElements);
   const navigate = useNavigate();
-  const { setVolume } = useControlVolume({
-    audioElements,
-  });
 
   // Use a ref to make sure we only clean up
   // audio elements once, and not every time
@@ -295,17 +254,11 @@ export const useRtcConnection = ({
   }, [audioElements]);
 
   const cleanUpAudio = useCallback(() => {
-    audioElementsRef.current.forEach(
-      ({ audioCtx, source, gainNode, audioElement }) => {
-        // el.pause();
-        // el.srcObject = null;
-        // eslint-disable-next-line no-param-reassign
-        audioElement.srcObject = null;
-        source.disconnect();
-        gainNode.disconnect();
-        audioCtx.close();
-      }
-    );
+    audioElementsRef.current.forEach((el) => {
+      el.pause();
+      // eslint-disable-next-line no-param-reassign
+      el.srcObject = null;
+    });
   }, [audioElementsRef]);
 
   // Teardown
@@ -455,5 +408,5 @@ export const useRtcConnection = ({
     };
   }, [rtcPeerConnection]);
 
-  return { connectionState, audioElements, setVolume };
+  return { connectionState, audioElements };
 };

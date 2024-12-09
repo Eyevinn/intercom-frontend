@@ -146,6 +146,10 @@ export const ProductionLine: FC = () => {
     inputId: joinProductionOptions?.audioinput ?? null,
   });
 
+  const { setVolume } = useControlVolume({
+    stream: inputAudioStream !== "no-device" ? inputAudioStream : null,
+  });
+
   const muteInput = useCallback(
     (mute: boolean) => {
       if (inputAudioStream && inputAudioStream !== "no-device") {
@@ -188,10 +192,6 @@ export const ProductionLine: FC = () => {
     sessionId,
   });
 
-  const { setVolume } = useControlVolume({
-    audioElements,
-  });
-
   useEffect(() => {
     if (connectionState === "connected") {
       playEnterSound();
@@ -199,9 +199,9 @@ export const ProductionLine: FC = () => {
   }, [connectionState, playEnterSound]);
 
   const muteOutput = useCallback(() => {
-    audioElements.forEach(({ gainNode }) => {
+    audioElements.forEach((singleElement: HTMLAudioElement) => {
       // eslint-disable-next-line no-param-reassign
-      gainNode.gain.value = isOutputMuted ? 1 : 0;
+      singleElement.muted = !isOutputMuted;
     });
     setIsOutputMuted(!isOutputMuted);
   }, [audioElements, isOutputMuted]);
