@@ -14,6 +14,7 @@ import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { TGlobalStateAction } from "../../global-state/global-state-actions.ts";
 import { TUseAudioInputValues } from "./use-audio-input.ts";
 import { startRtcStatInterval } from "./rtc-stat-interval.ts";
+import { useControlVolume } from "./use-control-volume.tsx";
 
 type TRtcConnectionOptions = {
   inputAudioStream: TUseAudioInputValues;
@@ -235,6 +236,12 @@ export const useRtcConnection = ({
   const [noStreamError, setNoStreamError] = useState(false);
   const audioElementsRef = useRef<HTMLAudioElement[]>(audioElements);
   const navigate = useNavigate();
+  const { setVolume, audioContext } = useControlVolume({
+    stream:
+      inputAudioStream && typeof inputAudioStream !== "string"
+        ? inputAudioStream
+        : null,
+  });
 
   // Use a ref to make sure we only clean up
   // audio elements once, and not every time
@@ -398,5 +405,5 @@ export const useRtcConnection = ({
     };
   }, [rtcPeerConnection]);
 
-  return { connectionState, audioElements };
+  return { connectionState, audioElements, setVolume, audioContext };
 };

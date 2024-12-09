@@ -9,6 +9,8 @@ import ConfirmSvg from "./done.svg?react";
 import StepLeftSvg from "./chevron_left.svg?react";
 import StepRightSvg from "./navigate_next.svg?react";
 import Settings from "./settings.svg?react";
+import NoSound from "./no_sound.svg?react";
+import FullSound from "./full_sound.svg?react";
 
 export const MicMuted = () => <MicMute />;
 
@@ -31,3 +33,7 @@ export const StepLeftIcon = () => <StepLeftSvg />;
 export const StepRightIcon = () => <StepRightSvg />;
 
 export const SettingsIcon = () => <Settings />;
+
+export const NoSoundIcon = () => <NoSound />;
+
+export const FullSoundIcon = () => <FullSound />;
