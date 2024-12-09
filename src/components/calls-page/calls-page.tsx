@@ -117,7 +117,7 @@ export const CallsPage = () => {
               </CallContainer>
             )
         )}
-        {!paramProductionId && !paramLineId && (
+        {!isEmpty && (
           <AddCallContainer>
             <ButtonWrapper>
               <SecondaryButton
