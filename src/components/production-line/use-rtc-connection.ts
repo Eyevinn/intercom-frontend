@@ -250,6 +250,7 @@ export const useRtcConnection = ({
   sessionId,
   callId,
 }: TRtcConnectionOptions) => {
+  // TODO rtcPeerConnectionRef-solution depends on how we handle device changes
   const rtcPeerConnectionRef = useRef<RTCPeerConnection | null>(null);
   const [, dispatch] = useGlobalState();
   const [connectionState, setConnectionState] =
@@ -301,9 +302,11 @@ export const useRtcConnection = ({
 
     console.log("Setting up RTC Peer Connection");
 
+    // TODO Solution depends on how we handle device changes
     // Clean up existing audio elements before reconnecting
     cleanUpAudio();
 
+    // TODO Solution depends on how we handle device changes
     if (
       !rtcPeerConnectionRef.current ||
       rtcPeerConnectionRef.current.connectionState === "closed"
@@ -374,15 +377,22 @@ export const useRtcConnection = ({
     callId,
   ]);
 
+  // TODO Solution depends on how we handle device changes
+  const connection = rtcPeerConnectionRef.current
+    ? rtcPeerConnectionRef.current.connectionState
+    : null;
+
   // Debug hook for logging RTC events TODO remove
   useEffect(() => {
-    if (
-      !rtcPeerConnectionRef.current ||
-      rtcPeerConnectionRef.current.connectionState === "closed"
-    ) {
-      rtcPeerConnectionRef.current = new RTCPeerConnection();
-    }
     const rtcPeerConnection = rtcPeerConnectionRef.current;
+
+    if (!rtcPeerConnection) {
+      return () => {
+        console.log(
+          "Exited debug hook for logging RTC events early, no rtcPeerConnection"
+        );
+      };
+    }
 
     const onIceGathering = () =>
       console.log("ice gathering:", rtcPeerConnection.iceGatheringState);
@@ -443,7 +453,7 @@ export const useRtcConnection = ({
         onNegotiationNeeded
       );
     };
-  }, [rtcPeerConnectionRef]);
+  }, [connection]);
 
   return { connectionState, audioElements };
 };
