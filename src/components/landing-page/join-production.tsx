@@ -19,6 +19,7 @@ import { TJoinProductionOptions } from "../production-line/types.ts";
 import { uniqBy } from "../../helpers.ts";
 import { FormInputWithLoader } from "./form-input-with-loader.tsx";
 import { useStorage } from "../accessing-local-storage/access-local-storage.ts";
+import { useNavigateToProduction } from "./use-navigate-to-production.ts";
 
 type FormValues = TJoinProductionOptions;
 
@@ -49,6 +50,8 @@ export const JoinProduction = ({
   closeAddCallView,
 }: TProps) => {
   const [joinProductionId, setJoinProductionId] = useState<null | number>(null);
+  const [joinProductionOptions, setJoinProductionOptions] =
+    useState<TJoinProductionOptions | null>(null);
   const { readFromStorage, writeToStorage } = useStorage("username");
   const {
     formState: { errors, isValid },
@@ -76,6 +79,8 @@ export const JoinProduction = ({
     production,
     loading,
   } = useFetchProduction(joinProductionId);
+
+  useNavigateToProduction(joinProductionOptions);
 
   // Update selected line id when a new production is fetched
   useEffect(() => {
@@ -155,6 +160,7 @@ export const JoinProduction = ({
         },
       },
     });
+    setJoinProductionOptions(payload);
     // TODO remove
     console.log("PAYLOAD: ", payload);
   };
