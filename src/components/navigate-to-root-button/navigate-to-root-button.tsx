@@ -10,9 +10,9 @@ const StyledBackBtn = styled(PrimaryButton)`
 `;
 
 export const NavigateToRootButton = ({
-  resetOnExit,
+  resetOnExitRequest,
 }: {
-  resetOnExit?: () => void;
+  resetOnExitRequest?: () => void;
 }) => {
   const navigate = useNavigate();
 
@@ -20,10 +20,11 @@ export const NavigateToRootButton = ({
     <StyledBackBtn
       type="button"
       onClick={() => {
-        if (resetOnExit) {
-          resetOnExit();
+        if (resetOnExitRequest) {
+          resetOnExitRequest();
+        } else {
+          navigate("/");
         }
-        navigate("/");
       }}
     >
       <BackArrow />
