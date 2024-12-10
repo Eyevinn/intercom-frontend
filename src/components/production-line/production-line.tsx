@@ -27,12 +27,11 @@ import { useLinePolling } from "./use-line-polling.ts";
 import { useFetchProduction } from "../landing-page/use-fetch-production.ts";
 import { useIsLoading } from "./use-is-loading.ts";
 import { useCheckBadLineData } from "./use-check-bad-line-data.ts";
-import { useControlVolume } from "./use-control-volume.tsx";
 import { NavigateToRootButton } from "../navigate-to-root-button/navigate-to-root-button.tsx";
 import { useAudioCue } from "./use-audio-cue.ts";
 import { DisplayWarning } from "../display-box.tsx";
 import { SettingsModal, Hotkeys } from "./settings-modal.tsx";
-import { Slider } from "../slider/slider.tsx";
+import { VolumeSlider } from "../volume-slider/volume-slider.tsx";
 
 const TempDiv = styled.div`
   padding: 0 0 2rem 0;
@@ -135,19 +134,19 @@ export const ProductionLine: FC = () => {
     muteHotkey: "m",
     speakerHotkey: "n",
     pressToTalkHotkey: "t",
+    increaseVolumeHotkey: "u",
+    decreaseVolumeHotkey: "d",
   });
   const [savedHotkeys, setSavedHotkeys] = useState<Hotkeys>({
     muteHotkey: "m",
     speakerHotkey: "n",
     pressToTalkHotkey: "t",
+    increaseVolumeHotkey: "u",
+    decreaseVolumeHotkey: "d",
   });
 
   const inputAudioStream = useAudioInput({
     inputId: joinProductionOptions?.audioinput ?? null,
-  });
-
-  const { setVolume } = useControlVolume({
-    stream: inputAudioStream !== "no-device" ? inputAudioStream : null,
   });
 
   const muteInput = useCallback(
@@ -316,14 +315,11 @@ export const ProductionLine: FC = () => {
               }}
             >
               <DisplayContainerHeader>Controls</DisplayContainerHeader>
-
               <FlexContainer>
-                <Slider
-                  min={0}
-                  max={100}
-                  initialValue={50}
-                  step={5}
-                  setVolume={setVolume}
+                <VolumeSlider
+                  audioElements={audioElements}
+                  increaseVolumeKey={savedHotkeys.increaseVolumeHotkey}
+                  decreaseVolumeKey={savedHotkeys.decreaseVolumeHotkey}
                 />
                 <FlexButtonWrapper>
                   <UserControlBtn type="button" onClick={() => muteOutput()}>
@@ -332,7 +328,6 @@ export const ProductionLine: FC = () => {
                     </ButtonIcon>
                   </UserControlBtn>
                 </FlexButtonWrapper>
-
                 {inputAudioStream && inputAudioStream !== "no-device" && (
                   <FlexButtonWrapper>
                     <UserControlBtn
@@ -390,6 +385,18 @@ export const ProductionLine: FC = () => {
                         {savedHotkeys.pressToTalkHotkey.toUpperCase()}:{" "}
                       </strong>
                       Push to Talk
+                    </TempDiv>
+                    <TempDiv>
+                      <strong>
+                        {savedHotkeys.increaseVolumeHotkey.toUpperCase()}:{" "}
+                      </strong>
+                      Increase Volume
+                    </TempDiv>
+                    <TempDiv>
+                      <strong>
+                        {savedHotkeys.decreaseVolumeHotkey.toUpperCase()}:{" "}
+                      </strong>
+                      Decrease Volume
                     </TempDiv>
                     {isSettingsModalOpen && (
                       <SettingsModal

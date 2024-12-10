@@ -65,6 +65,8 @@ export type Hotkeys = {
   muteHotkey: string;
   speakerHotkey: string;
   pressToTalkHotkey: string;
+  increaseVolumeHotkey: string;
+  decreaseVolumeHotkey: string;
 };
 
 type TSettingsModalProps = {
@@ -74,6 +76,7 @@ type TSettingsModalProps = {
   onClose: () => void;
   onSave: () => void;
 };
+
 export const SettingsModal = ({
   hotkeys,
   lineName,
@@ -87,39 +90,39 @@ export const SettingsModal = ({
     muteHotkey: "",
     speakerHotkey: "",
     pressToTalkHotkey: "",
+    increaseVolumeHotkey: "",
+    decreaseVolumeHotkey: "",
   });
 
-  const validateFields = (key: string, value: string) => {
+  const validateFields = (key: keyof Hotkeys, value: string) => {
     const currentValues = {
       ...hotkeys,
       [key]: value,
     };
 
-    const duplicates = Object.entries(currentValues).reduce(
-      (acc, [field, val]) => {
-        if (val && value && val === value && field !== key) {
-          acc[key] = "This key is already in use.";
+    const newErrors = (
+      Object.keys(currentValues) as Array<keyof Hotkeys>
+    ).reduce(
+      (acc, field) => {
+        const isDuplicate =
+          Object.values(currentValues).filter(
+            (val) => val && val === currentValues[field]
+          ).length > 1;
+
+        if (!currentValues[field] || currentValues[field] === "") {
+          acc[field] = "This field can not be empty.";
+        } else if (isDuplicate) {
+          acc[field] = "This key is already in use.";
+        } else {
+          acc[field] = "";
         }
+
         return acc;
       },
-      {} as { [key: string]: string }
+      {} as { [K in keyof Hotkeys]: string }
     );
 
-    setErrors((prevErrors) => ({
-      ...prevErrors,
-      muteHotkey:
-        key === "muteHotkey"
-          ? duplicates.muteHotkey || ""
-          : prevErrors.muteHotkey,
-      speakerHotkey:
-        key === "speakerHotkey"
-          ? duplicates.speakerHotkey || ""
-          : prevErrors.speakerHotkey,
-      pressToTalkHotkey:
-        key === "pressToTalkHotkey"
-          ? duplicates.pressToTalkHotkey || ""
-          : prevErrors.pressToTalkHotkey,
-    }));
+    setErrors(newErrors);
   };
 
   const handleInputChange = (key: keyof typeof hotkeys, value: string) => {
@@ -134,9 +137,15 @@ export const SettingsModal = ({
 
   const handleSave = () => {
     const hasErrors = Object.values(errors).some((error) => error !== "");
-    if (!hasErrors) {
-      onSave();
+    const hasEmptyFields = Object.values(hotkeys).some(
+      (value) => !value || value === ""
+    );
+
+    if (hasErrors || hasEmptyFields) {
+      return;
     }
+
+    onSave();
   };
 
   const handleKeyDown = (e: React.KeyboardEvent, index: number) => {
@@ -233,6 +242,56 @@ export const SettingsModal = ({
               <ErrorMessage
                 errors={{ presskey: { message: errors.pressToTalkHotkey } }}
                 name="presskey"
+                as={StyledWarningMessage}
+              />
+            )}
+          </FormLabel>
+          <FormLabel>
+            <DecorativeLabel>Increase volume:</DecorativeLabel>
+            <FormInput
+              id="increaseVolume"
+              ref={(el) => setInputRef(3, el)}
+              type="text"
+              value={hotkeys.increaseVolumeHotkey}
+              onChange={(e) =>
+                handleInputChange("increaseVolumeHotkey", e.target.value)
+              }
+              placeholder="Enter hotkey"
+              maxLength={1}
+              onKeyDown={(e) => handleKeyDown(e, 3)}
+            />
+            {errors.increaseVolumeHotkey && (
+              <ErrorMessage
+                errors={{
+                  increasevolumekey: { message: errors.increaseVolumeHotkey },
+                }}
+                name="increasevolumekey"
+                as={StyledWarningMessage}
+              />
+            )}
+          </FormLabel>
+          <FormLabel>
+            <DecorativeLabel>Decrease volume:</DecorativeLabel>
+            <FormInput
+              id="decreaseVolume"
+              ref={(el) => setInputRef(4, el)}
+              type="text"
+              value={hotkeys.decreaseVolumeHotkey}
+              onChange={(e) =>
+                handleInputChange("decreaseVolumeHotkey", e.target.value)
+              }
+              placeholder="Enter hotkey"
+              maxLength={1}
+              onKeyDown={(e) => handleKeyDown(e, 4)}
+            />
+            {errors.decreaseVolumeHotkey && (
+              <ErrorMessage
+                errors={{
+                  decreasevolumehotkey: {
+                    message: errors.decreaseVolumeHotkey,
+                  },
+                }}
+                name="decreasevolumehotkey"
                 as={StyledWarningMessage}
               />
             )}

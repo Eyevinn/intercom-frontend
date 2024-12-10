@@ -60,19 +60,14 @@ const establishConnection = ({
 
     if (selectedStream && selectedStream.getAudioTracks().length !== 0) {
       const audioElement = new Audio();
-      // const audioCtx = new AudioContext();
-      // const gainNode = audioCtx.createGain();
-      // const source = audioCtx.createMediaStreamSource(selectedStream);
-
-      // source.connect(gainNode);
-      // gainNode.connect(audioCtx.destination);
-
-      // gainNode.gain.value = 0.5;
 
       audioElement.srcObject = selectedStream;
 
       audioElement.controls = false;
       audioElement.autoplay = true;
+
+      audioElement.volume = 0.75;
+
       audioElement.onerror = () => {
         dispatch({
           type: "ERROR",
