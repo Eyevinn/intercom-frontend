@@ -37,6 +37,7 @@ export const Header: FC = () => {
   const { playExitSound } = useAudioCue();
 
   const runExitAllCalls = () => {
+    setConfirmExitModalOpen(false);
     navigate("/");
     playExitSound();
     Object.entries(calls).forEach(([callId]) => {
