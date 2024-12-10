@@ -273,7 +273,7 @@ export const ProductionLine = ({
   return (
     <>
       <HeaderWrapper>
-        {!isMobile && !isSingleCall && (
+        {!isSingleCall && (
           <ButtonWrapper>
             <ExitCallButton resetOnExit={() => setConfirmExitModalOpen(true)} />
             {confirmExitModalOpen && (
