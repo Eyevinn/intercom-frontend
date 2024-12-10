@@ -130,17 +130,6 @@ const App = () => {
                     element={<CallsPage />}
                     errorElement={<ErrorPage />}
                   />
-                  {/* <Route
-                    path="/production-calls"
-                    element={<CallsPage />}
-                    errorElement={<ErrorPage />}
-                  >
-                    <Route
-                      path="/production-calls/production/:productionId/line/:lineId"
-                      element={<CallsPage />}
-                      errorElement={<ErrorPage />}
-                    />
-                  </Route> */}
                   <Route path="*" element={<NotFound />} />
                 </>
               </Routes>
