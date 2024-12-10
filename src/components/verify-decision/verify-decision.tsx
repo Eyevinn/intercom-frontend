@@ -34,7 +34,7 @@ export const VerifyDecision = ({ loader, confirm, abort }: TVerifyDecision) => {
         className={loader ? "submit" : ""}
         onClick={() => abort()}
       >
-        Go back
+        No
         {loader && <Spinner className="manage-production" />}
       </Button>
     </VerifyButtons>
