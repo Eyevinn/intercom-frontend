@@ -40,11 +40,13 @@ type TProps = {
     preSelectedLineId: string;
   };
   addAdditionalCallId?: string;
+  closeAddCallView?: () => void;
 };
 
 export const JoinProduction = ({
   preSelected,
   addAdditionalCallId,
+  closeAddCallView,
 }: TProps) => {
   const [joinProductionId, setJoinProductionId] = useState<null | number>(null);
   const { readFromStorage, writeToStorage } = useStorage("username");
@@ -125,6 +127,10 @@ export const JoinProduction = ({
   const onSubmit: SubmitHandler<FormValues> = (payload) => {
     if (payload.username) {
       writeToStorage(payload.username);
+    }
+
+    if (closeAddCallView) {
+      closeAddCallView();
     }
 
     dispatch({
