@@ -128,7 +128,10 @@ export const CallsPage = () => {
               </SecondaryButton>
             </ButtonWrapper>
             {addCallActive && productionId && (
-              <JoinProduction addAdditionalCallId={productionId} />
+              <JoinProduction
+                addAdditionalCallId={productionId}
+                closeAddCallView={() => setAddCallActive(false)}
+              />
             )}
           </AddCallContainer>
         )}
