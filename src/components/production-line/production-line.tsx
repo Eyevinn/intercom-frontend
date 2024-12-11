@@ -74,11 +74,11 @@ const FlexButtonWrapper = styled.div`
   width: 50%;
   padding: 0 1rem 2rem 1rem;
 
-  :first-of-type {
+  &.first {
     padding-left: 0;
   }
 
-  :last-of-type {
+  &.last {
     padding-right: 0;
   }
 `;
@@ -321,7 +321,7 @@ export const ProductionLine: FC = () => {
                   increaseVolumeKey={savedHotkeys.increaseVolumeHotkey}
                   decreaseVolumeKey={savedHotkeys.decreaseVolumeHotkey}
                 />
-                <FlexButtonWrapper>
+                <FlexButtonWrapper className="first">
                   <UserControlBtn type="button" onClick={() => muteOutput()}>
                     <ButtonIcon>
                       {isOutputMuted ? <SpeakerOff /> : <SpeakerOn />}
@@ -329,7 +329,7 @@ export const ProductionLine: FC = () => {
                   </UserControlBtn>
                 </FlexButtonWrapper>
                 {inputAudioStream && inputAudioStream !== "no-device" && (
-                  <FlexButtonWrapper>
+                  <FlexButtonWrapper className="last">
                     <UserControlBtn
                       type="button"
                       onClick={() => muteInput(!isInputMuted)}
