@@ -51,6 +51,7 @@ const initializeAudioContextForElement = (
   audioElement: HTMLAudioElement,
   selectedStream: MediaStream
 ) => {
+  console.log("IS IOS SAFARI", isIosSafari);
   if (isIosSafari && !audioContexts.has(audioElement)) {
     // eslint-disable-next-line
     const audioContext = new ((window as any).AudioContext ||
