@@ -17,6 +17,13 @@ const HeaderWrapper = styled.div`
   cursor: pointer;
 `;
 
+const Logo = styled.svg`
+  width: 2.4rem;
+  height: 2.4rem;
+  margin-right: 1rem;
+  margin-left: 2rem;
+`;
+
 export const Header: FC = () => {
   const [, dispatch] = useGlobalState();
   const navigate = useNavigate();
@@ -37,13 +44,6 @@ export const Header: FC = () => {
       navigate("/");
     }
   };
-
-  const Logo = styled.svg`
-    width: 3rem;
-    height: 3rem;
-    margin-right: 1rem;
-    margin-left: 2rem;
-  `;
 
   return (
     <HeaderWrapper onClick={returnToRoot}>

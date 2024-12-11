@@ -42,14 +42,16 @@ const TableIcon = styled.span`
   transform: ${({ isOpen }: { isOpen: boolean }) => (isOpen ? "50rem" : "0")};
 `;
 
+const IconWrapper = styled.div`
+  width: 2.4rem;
+`;
+
 const TableBody = styled.div<{ isOpen: boolean }>`
-  max-height: ${({ isOpen }: { isOpen: boolean }) => (isOpen ? "50rem" : "0")};
-  overflow: scroll;
-  opacity: ${({ isOpen }: { isOpen: boolean }) => (isOpen ? "1" : "0")};
-  border: ${({ isOpen }: { isOpen: boolean }) =>
-    isOpen ? "0.1rem solid #6d6d6d" : "none"};
-  border-bottom-left-radius: 0.5rem;
-  border-bottom-right-radius: 0.5rem;
+  max-height: ${({ isOpen }) => (isOpen ? "50rem" : "0")};
+  overflow: auto;
+  opacity: ${({ isOpen }) => (isOpen ? "1" : "0")};
+  border: ${({ isOpen }) => (isOpen ? "0.1rem solid #6d6d6d" : "none")};
+  border-radius: 0.5rem;
   border-bottom: none;
   border-top: none;
   transition:
@@ -115,6 +117,7 @@ type TProductionTableProps = {
   setProductionId: (v: string) => void;
   error: Error | null;
   isSelectedProduction: TProduction | null;
+  onScroll: (event: React.UIEvent<HTMLTableSectionElement>) => void;
 };
 
 export const ProductionTable = ({
@@ -122,6 +125,7 @@ export const ProductionTable = ({
   setProductionId,
   error,
   isSelectedProduction,
+  onScroll,
 }: TProductionTableProps) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
@@ -137,10 +141,12 @@ export const ProductionTable = ({
           <TableHeader isOpen={isOpen} onClick={toggleOpen}>
             <span>Production List</span>
             <TableIcon isOpen={isOpen}>
-              {isOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}
+              <IconWrapper>
+                {isOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}
+              </IconWrapper>
             </TableIcon>
           </TableHeader>
-          <TableBody isOpen={isOpen}>
+          <TableBody isOpen={isOpen} onScroll={onScroll}>
             <Table>
               <thead>
                 <TableRow isSelectedProduction={false}>
@@ -151,10 +157,10 @@ export const ProductionTable = ({
               <tbody>
                 {productions?.map((p) => (
                   <TableRow
+                    key={p.productionId}
                     isSelectedProduction={
                       isSelectedProduction?.productionId === p.productionId
                     }
-                    key={p.productionId}
                     onClick={() => {
                       setProductionId(p.productionId);
                     }}

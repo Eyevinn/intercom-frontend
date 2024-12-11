@@ -1,6 +1,6 @@
 import { ErrorMessage } from "@hookform/error-message";
 import { useForm } from "react-hook-form";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "@emotion/styled";
 import { DisplayContainerHeader } from "../landing-page/display-container-header";
 import {
@@ -19,6 +19,7 @@ import { useFetchProductionList } from "../landing-page/use-fetch-production-lis
 import { isMobile } from "../../bowser";
 import { useGlobalState } from "../../global-state/context-provider";
 import { ProductionTable } from "./production-table";
+import { TBasicProductionResponse } from "../../api/api";
 
 type FormValue = {
   productionId: string;
@@ -112,6 +113,10 @@ export const ManageProductions = () => {
   const [verifyRemove, setVerifyRemove] = useState<boolean>(false);
   const [delayOnGuideText, setDelayOnGuideText] = useState<boolean>(false);
   const [removeId, setRemoveId] = useState<null | number>(null);
+  const [productions, setProductions] = useState<TBasicProductionResponse[]>(
+    []
+  );
+  const [offset, setOffset] = useState<number>(0);
   const [cachedProduction, setCachedProduction] = useState<null | TProduction>(
     null
   );
@@ -138,9 +143,11 @@ export const ManageProductions = () => {
     min: 1,
   });
 
-  const { productions, error } = useFetchProductionList({
-    limit,
-  });
+  const { productions: fetchedProductions, error: fetchError } =
+    useFetchProductionList({
+      offset: offset.toString(),
+      limit: limit.toString(),
+    });
 
   const {
     error: productionFetchError,
@@ -153,6 +160,14 @@ export const ManageProductions = () => {
     error: productionDeleteError,
     successfullDelete,
   } = useDeleteProduction(removeId);
+
+  useEffect(() => {
+    if (fetchedProductions) {
+      setProductions((prev) => {
+        return [...prev, ...fetchedProductions.productions];
+      });
+    }
+  }, [fetchedProductions]);
 
   useEffect(() => {
     if (formState.isSubmitSuccessful) {
@@ -220,6 +235,23 @@ export const ManageProductions = () => {
     event.preventDefault();
   };
 
+  const fetchNextProductions = () => {
+    setOffset((prevOffset) => {
+      const newOffset = prevOffset + parseInt(limit, 10);
+      return newOffset;
+    });
+  };
+
+  const handleScroll = (event: React.UIEvent<HTMLTableSectionElement>) => {
+    const bottom =
+      event.currentTarget.scrollHeight - event.currentTarget.scrollTop >=
+      event.currentTarget.clientHeight;
+
+    if (bottom) {
+      fetchNextProductions();
+    }
+  };
+
   return (
     <Container onSubmit={handleFormSubmit}>
       <StyledBackBtnIcon>
@@ -246,8 +278,8 @@ export const ManageProductions = () => {
             <SubContainers isMobile={isMobile}>
               {isMobile && (
                 <ProductionTable
-                  error={error}
-                  productions={productions?.productions}
+                  error={fetchError}
+                  productions={productions}
                   setProductionId={(v: string) => {
                     setProductionIdToFetch(parseInt(v, 10));
                     reset({
@@ -256,6 +288,7 @@ export const ManageProductions = () => {
                     setShowDeleteDoneMessage(false);
                   }}
                   isSelectedProduction={cachedProduction}
+                  onScroll={handleScroll}
                 />
               )}
               <FormInputWrapper>
@@ -315,8 +348,8 @@ export const ManageProductions = () => {
           </SubFlexContainer>
           {!isMobile && (
             <ProductionTable
-              error={error}
-              productions={productions?.productions}
+              error={fetchError}
+              productions={productions}
               setProductionId={(v: string) => {
                 setProductionIdToFetch(parseInt(v, 10));
                 reset({
@@ -325,6 +358,7 @@ export const ManageProductions = () => {
                 setShowDeleteDoneMessage(false);
               }}
               isSelectedProduction={cachedProduction}
+              onScroll={handleScroll}
             />
           )}
         </FlexContainer>
