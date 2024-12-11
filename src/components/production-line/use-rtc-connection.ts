@@ -7,6 +7,7 @@ import {
   useState,
 } from "react";
 import { useNavigate } from "react-router-dom";
+import { IAudioContext } from "standardized-audio-context";
 import { noop } from "../../helpers";
 import { API } from "../../api/api.ts";
 import { TJoinProductionOptions } from "./types.ts";
@@ -14,6 +15,8 @@ import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { TGlobalStateAction } from "../../global-state/global-state-actions.ts";
 import { TUseAudioInputValues } from "./use-audio-input.ts";
 import { startRtcStatInterval } from "./rtc-stat-interval.ts";
+import { isIosSafari } from "../../bowser.ts";
+import { audioContexts } from "../../audioContexts.ts";
 
 type TRtcConnectionOptions = {
   inputAudioStream: TUseAudioInputValues;
@@ -66,7 +69,21 @@ const establishConnection = ({
       audioElement.controls = false;
       audioElement.autoplay = true;
 
-      audioElement.volume = 0.75;
+      if (isIosSafari) {
+        const audioContext = new AudioContext();
+        const gainNode = audioContext.createGain();
+        const source = audioContext.createMediaStreamSource(selectedStream);
+
+        source.connect(gainNode).connect(audioContext.destination);
+        gainNode.gain.value = 0.75;
+
+        audioContexts.set(audioElement, {
+          context: audioContext as unknown as IAudioContext,
+          gainNode,
+        });
+      } else {
+        audioElement.volume = 0.75;
+      }
 
       audioElement.onerror = () => {
         dispatch({
@@ -253,6 +270,15 @@ export const useRtcConnection = ({
       el.pause();
       // eslint-disable-next-line no-param-reassign
       el.srcObject = null;
+
+      if (isIosSafari && audioContexts.has(el)) {
+        const audioContextData = audioContexts.get(el);
+        if (audioContextData) {
+          const { context } = audioContextData;
+          context.close();
+          audioContexts.delete(el);
+        }
+      }
     });
   }, [audioElementsRef]);
 

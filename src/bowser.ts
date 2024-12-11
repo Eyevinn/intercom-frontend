@@ -13,3 +13,5 @@ export const isValidBrowser = browser.satisfies({
   safari: ">=16.4",
   samsung: ">=21",
 });
+
+export const isIosSafari = isMobile && browser.getBrowserName() === "Safari";

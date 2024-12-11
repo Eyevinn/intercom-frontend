@@ -7,8 +7,9 @@ import {
   MinusIcon,
   PlusIcon,
 } from "../../assets/icons/icon";
-import { isMobile } from "../../bowser";
+import { isMobile, isIosSafari } from "../../bowser";
 import { PrimaryButton } from "../landing-page/form-elements";
+import { audioContexts } from "../../audioContexts";
 
 const SliderWrapper = styled.div`
   width: 100%;
@@ -78,8 +79,16 @@ export const VolumeSlider: FC<TVolumeSliderProps> = ({
     setValue(newValue);
 
     audioElements.forEach((audioElement) => {
-      // eslint-disable-next-line no-param-reassign
-      audioElement.volume = newValue;
+      if (isIosSafari && audioContexts.has(audioElement)) {
+        const audioContextData = audioContexts.get(audioElement);
+        if (audioContextData) {
+          const { gainNode } = audioContextData;
+          gainNode.gain.value = newValue;
+        }
+      } else {
+        // eslint-disable-next-line no-param-reassign
+        audioElement.volume = newValue;
+      }
     });
   };
 
