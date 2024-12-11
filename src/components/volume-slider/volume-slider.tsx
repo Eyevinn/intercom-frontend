@@ -80,11 +80,8 @@ export const VolumeSlider: FC<TVolumeSliderProps> = ({
 
     audioElements.forEach((audioElement) => {
       if (isIosSafari && audioContexts.has(audioElement)) {
-        const audioContextData = audioContexts.get(audioElement);
-        if (audioContextData) {
-          const { gainNode } = audioContextData;
-          gainNode.gain.value = newValue;
-        }
+        const { gainNode } = audioContexts.get(audioElement)!;
+        gainNode.gain.value = newValue;
       } else {
         // eslint-disable-next-line no-param-reassign
         audioElement.volume = newValue;
@@ -93,14 +90,18 @@ export const VolumeSlider: FC<TVolumeSliderProps> = ({
   };
 
   const thumbPosition = value * 100;
-
   useHotkeys(increaseVolumeKey || "u", () => {
     const newValue = Math.min(value + 0.05, 1);
     setValue(newValue);
 
     audioElements.forEach((audioElement) => {
-      // eslint-disable-next-line no-param-reassign
-      audioElement.volume = newValue;
+      if (isIosSafari && audioContexts.has(audioElement)) {
+        const { gainNode } = audioContexts.get(audioElement)!;
+        gainNode.gain.value = newValue;
+      } else {
+        // eslint-disable-next-line no-param-reassign
+        audioElement.volume = newValue;
+      }
     });
   });
 
@@ -109,8 +110,13 @@ export const VolumeSlider: FC<TVolumeSliderProps> = ({
     setValue(newValue);
 
     audioElements.forEach((audioElement) => {
-      // eslint-disable-next-line no-param-reassign
-      audioElement.volume = newValue;
+      if (isIosSafari && audioContexts.has(audioElement)) {
+        const { gainNode } = audioContexts.get(audioElement)!;
+        gainNode.gain.value = newValue;
+      } else {
+        // eslint-disable-next-line no-param-reassign
+        audioElement.volume = newValue;
+      }
     });
   });
 

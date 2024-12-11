@@ -7,7 +7,6 @@ import {
   useState,
 } from "react";
 import { useNavigate } from "react-router-dom";
-import { IAudioContext } from "standardized-audio-context";
 import { noop } from "../../helpers";
 import { API } from "../../api/api.ts";
 import { TJoinProductionOptions } from "./types.ts";
@@ -48,6 +47,26 @@ const attachInputAudioToPeerConnection = ({
     .getTracks()
     .forEach((track) => rtcPeerConnection.addTrack(track));
 
+const initializeAudioContextForElement = (
+  audioElement: HTMLAudioElement,
+  selectedStream: MediaStream
+) => {
+  if (isIosSafari && !audioContexts.has(audioElement)) {
+    // eslint-disable-next-line
+    const audioContext = new ((window as any).AudioContext ||
+      // eslint-disable-next-line
+      (window as any).webkitAudioContext)();
+    const gainNode = audioContext.createGain();
+    const source = audioContext.createMediaStreamSource(selectedStream);
+
+    source.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    gainNode.gain.value = 0.75;
+
+    audioContexts.set(audioElement, { context: audioContext, gainNode });
+  }
+};
+
 const establishConnection = ({
   rtcPeerConnection,
   sdpOffer,
@@ -69,21 +88,9 @@ const establishConnection = ({
       audioElement.controls = false;
       audioElement.autoplay = true;
 
-      if (isIosSafari) {
-        const audioContext = new AudioContext();
-        const gainNode = audioContext.createGain();
-        const source = audioContext.createMediaStreamSource(selectedStream);
+      audioElement.volume = 0.75;
 
-        source.connect(gainNode).connect(audioContext.destination);
-        gainNode.gain.value = 0.75;
-
-        audioContexts.set(audioElement, {
-          context: audioContext as unknown as IAudioContext,
-          gainNode,
-        });
-      } else {
-        audioElement.volume = 0.75;
-      }
+      initializeAudioContextForElement(audioElement, selectedStream);
 
       audioElement.onerror = () => {
         dispatch({
