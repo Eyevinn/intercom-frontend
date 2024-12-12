@@ -79,22 +79,6 @@ export const VolumeSlider: FC<TVolumeSliderProps> = ({
     setValue(newValue);
 
     audioElements.forEach((audioElement) => {
-      if (isIosSafari && audioContexts.has(audioElement)) {
-        const { gainNode } = audioContexts.get(audioElement)!;
-        gainNode.gain.value = newValue;
-      } else {
-        // eslint-disable-next-line no-param-reassign
-        audioElement.volume = newValue;
-      }
-    });
-  };
-
-  const thumbPosition = value * 100;
-  useHotkeys(increaseVolumeKey || "u", () => {
-    const newValue = Math.min(value + 0.05, 1);
-    setValue(newValue);
-
-    audioElements.forEach((audioElement) => {
       console.log("IS IOS SAFARI VOL SLIDER: ", isIosSafari);
       console.log(
         "AUDIO CONTEXTS HAS AUDIO ELEMENT: ",
@@ -104,6 +88,24 @@ export const VolumeSlider: FC<TVolumeSliderProps> = ({
         console.log("IS INSIDE IOS SAFARI VOLUME SLIDER");
         const { gainNode } = audioContexts.get(audioElement)!;
         console.log("Setting gain value to:", newValue);
+        gainNode.gain.value = newValue;
+      } else {
+        console.log("SEtting volume to: ", newValue);
+        // eslint-disable-next-line no-param-reassign
+        audioElement.volume = newValue;
+      }
+    });
+  };
+
+  const thumbPosition = value * 100;
+
+  useHotkeys(increaseVolumeKey || "u", () => {
+    const newValue = Math.min(value + 0.05, 1);
+    setValue(newValue);
+
+    audioElements.forEach((audioElement) => {
+      if (isIosSafari && audioContexts.has(audioElement)) {
+        const { gainNode } = audioContexts.get(audioElement)!;
         gainNode.gain.value = newValue;
       } else {
         // eslint-disable-next-line no-param-reassign
