@@ -166,6 +166,7 @@ export const VolumeSlider: FC<TVolumeSliderProps> = ({
       <SliderTrack>
         <SliderThumb position={thumbPosition} />
         <input
+          id="volumeSlider"
           type="range"
           min={0}
           max={1}

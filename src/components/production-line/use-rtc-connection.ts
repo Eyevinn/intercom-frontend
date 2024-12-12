@@ -39,6 +39,38 @@ type TAttachAudioStream = {
   rtcPeerConnection: RTCPeerConnection;
 };
 
+const handleVolumeChange = (event: Event) => {
+  const slider = event.target as HTMLInputElement;
+  const newVolume = parseFloat(slider.value);
+  console.log("Volume slider changed to in initialize: ", newVolume);
+
+  audioContexts.forEach(({ gainNode }) => {
+    // eslint-disable-next-line no-param-reassign
+    gainNode.gain.value = newVolume;
+  });
+};
+
+const initializeAudioContextForElement = (audioElement: HTMLAudioElement) => {
+  const AudioContext =
+    // eslint-disable-next-line
+    window.AudioContext || (window as any).webkitAudioContext;
+  const audioCtx = new AudioContext();
+
+  const track = audioCtx.createMediaElementSource(audioElement);
+
+  if (audioCtx.state === "suspended") {
+    audioCtx.resume();
+  }
+
+  const gainNode = audioCtx.createGain();
+  const volumeControl = document.getElementById(
+    "volumeSlider"
+  ) as HTMLInputElement;
+  volumeControl.addEventListener("input", handleVolumeChange);
+
+  track.connect(gainNode).connect(audioCtx.destination);
+};
+
 const attachInputAudioToPeerConnection = ({
   inputAudioStream,
   rtcPeerConnection,
@@ -46,65 +78,6 @@ const attachInputAudioToPeerConnection = ({
   inputAudioStream
     .getTracks()
     .forEach((track) => rtcPeerConnection.addTrack(track));
-
-const initializeAudioContextForElement = (
-  audioElement: HTMLAudioElement,
-  selectedStream: MediaStream
-) => {
-  console.log("IS IOS SAFARI", isIosSafari);
-  console.log(
-    "audio contexts before if statement",
-    !audioContexts.has(audioElement)
-  );
-  if (isIosSafari && !audioContexts.has(audioElement)) {
-    console.log("INSIDE IF STATEMENT SAFARI APP");
-    // eslint-disable-next-line
-    const audioContext = new ((window as any).AudioContext ||
-      // eslint-disable-next-line
-      (window as any).webkitAudioContext)();
-    const gainNode = audioContext.createGain();
-    const source = audioContext.createMediaStreamSource(selectedStream);
-
-    source.connect(gainNode);
-    gainNode.connect(audioContext.destination);
-    gainNode.gain.value = 0;
-
-    audioContexts.set(audioElement, { context: audioContext, gainNode });
-    console.log("AudioContext map:", audioContexts);
-
-    const ensureRunningState = () => {
-      if (audioContext.state === "suspended") {
-        console.log("AudioContext state is suspended, resuming...");
-        audioContext
-          .resume()
-          .then(() => {
-            console.log(
-              "AudioContext resumed and running: ",
-              audioContext.state
-            );
-          })
-          .catch((error: Error) => {
-            console.error(
-              "Failed to resume audio context for volume change in slider component",
-              error
-            );
-          });
-      }
-    };
-
-    ensureRunningState();
-
-    document.addEventListener(
-      "click",
-      () => {
-        ensureRunningState();
-      },
-      { once: true }
-    );
-
-    console.log("Audio context state: ", audioContext.state);
-  }
-};
 
 const establishConnection = ({
   rtcPeerConnection,
@@ -122,14 +95,14 @@ const establishConnection = ({
     if (selectedStream && selectedStream.getAudioTracks().length !== 0) {
       const audioElement = new Audio();
 
-      if (isIosSafari) {
-        initializeAudioContextForElement(audioElement, selectedStream);
-      }
-
       audioElement.srcObject = selectedStream;
 
       audioElement.controls = false;
       audioElement.autoplay = true;
+
+      if (isIosSafari) {
+        initializeAudioContextForElement(audioElement);
+      }
 
       if (!isIosSafari) {
         audioElement.volume = 0.75;
