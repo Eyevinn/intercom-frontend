@@ -86,9 +86,29 @@ export const VolumeSlider: FC<TVolumeSliderProps> = ({
       );
       if (isIosSafari && audioContexts.has(audioElement)) {
         console.log("IS INSIDE IOS SAFARI VOLUME SLIDER");
-        const { gainNode } = audioContexts.get(audioElement)!;
-        console.log("Setting gain value to:", newValue);
-        gainNode.gain.value = newValue;
+
+        const { context, gainNode } = audioContexts.get(audioElement)!;
+
+        if (context.state === "suspended") {
+          context
+            .resume()
+            .then(() => {
+              console.log(
+                "Audio context resumed for volume change in slider component yay"
+              );
+              console.log("Setting gain value to:", newValue);
+              gainNode.gain.value = newValue;
+            })
+            .catch((error: Error) => {
+              console.error(
+                "Failed to resume audio context for volume change in slider component",
+                error
+              );
+            });
+        } else {
+          console.log("Setting gain value to:", newValue);
+          gainNode.gain.value = newValue;
+        }
       } else {
         console.log("SEtting volume to: ", newValue);
         // eslint-disable-next-line no-param-reassign
@@ -104,13 +124,8 @@ export const VolumeSlider: FC<TVolumeSliderProps> = ({
     setValue(newValue);
 
     audioElements.forEach((audioElement) => {
-      if (isIosSafari && audioContexts.has(audioElement)) {
-        const { gainNode } = audioContexts.get(audioElement)!;
-        gainNode.gain.value = newValue;
-      } else {
-        // eslint-disable-next-line no-param-reassign
-        audioElement.volume = newValue;
-      }
+      // eslint-disable-next-line no-param-reassign
+      audioElement.volume = newValue;
     });
   });
 
@@ -119,15 +134,8 @@ export const VolumeSlider: FC<TVolumeSliderProps> = ({
     setValue(newValue);
 
     audioElements.forEach((audioElement) => {
-      if (isIosSafari && audioContexts.has(audioElement)) {
-        console.log("IS INSIDE IOS SAFARI VOLUME SLIDER");
-        const { gainNode } = audioContexts.get(audioElement)!;
-        console.log("Setting gain value to:", newValue);
-        gainNode.gain.value = newValue;
-      } else {
-        // eslint-disable-next-line no-param-reassign
-        audioElement.volume = newValue;
-      }
+      // eslint-disable-next-line no-param-reassign
+      audioElement.volume = newValue;
     });
   });
 
@@ -137,6 +145,7 @@ export const VolumeSlider: FC<TVolumeSliderProps> = ({
         ? Math.min(value + 0.05, 1)
         : Math.max(value - 0.05, 0);
     setValue(newValue);
+    // TODO: Fix for iOS
   };
 
   return (

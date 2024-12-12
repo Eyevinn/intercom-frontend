@@ -72,11 +72,35 @@ const initializeAudioContextForElement = (
     audioContexts.set(audioElement, { context: audioContext, gainNode });
     console.log("AudioContext map:", audioContexts);
 
-    if (audioContext.state === "suspended") {
-      audioContext.resume().then(() => {
-        console.log("AudioContext resumed on iOS Safari.");
-      });
-    }
+    const ensureRunningState = () => {
+      if (audioContext.state === "suspended") {
+        console.log("AudioContext state is suspended, resuming...");
+        audioContext
+          .resume()
+          .then(() => {
+            console.log(
+              "AudioContext resumed and running: ",
+              audioContext.state
+            );
+          })
+          .catch((error: Error) => {
+            console.error(
+              "Failed to resume audio context for volume change in slider component",
+              error
+            );
+          });
+      }
+    };
+
+    ensureRunningState();
+
+    document.addEventListener(
+      "click",
+      () => {
+        ensureRunningState();
+      },
+      { once: true }
+    );
 
     console.log("Audio context state: ", audioContext.state);
   }
