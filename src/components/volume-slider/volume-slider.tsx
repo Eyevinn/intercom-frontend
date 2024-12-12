@@ -88,6 +88,7 @@ export const VolumeSlider: FC<TVolumeSliderProps> = ({
         console.log("IS INSIDE IOS SAFARI VOLUME SLIDER");
 
         const { context, gainNode } = audioContexts.get(audioElement)!;
+        console.log("STATE OF AUDIO CONTEXT: ", context.state);
 
         if (context.state === "suspended") {
           context
