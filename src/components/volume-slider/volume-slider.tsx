@@ -112,6 +112,7 @@ export const VolumeSlider: FC<TVolumeSliderProps> = ({
     audioElements.forEach((audioElement) => {
       if (isIosSafari && audioContexts.has(audioElement)) {
         const { gainNode } = audioContexts.get(audioElement)!;
+        console.log("Setting gain value to:", newValue);
         gainNode.gain.value = newValue;
       } else {
         // eslint-disable-next-line no-param-reassign

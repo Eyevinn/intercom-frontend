@@ -65,6 +65,15 @@ const initializeAudioContextForElement = (
     gainNode.gain.value = 0.75;
 
     audioContexts.set(audioElement, { context: audioContext, gainNode });
+    console.log("AudioContext map:", audioContexts);
+
+    if (audioContext.state === "suspended") {
+      audioContext.resume().then(() => {
+        console.log("AudioContext resumed on iOS Safari.");
+      });
+    }
+
+    console.log("Audio context state: ", audioContext.state);
   }
 };
 
