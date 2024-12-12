@@ -67,7 +67,7 @@ const initializeAudioContextForElement = (
 
     source.connect(gainNode);
     gainNode.connect(audioContext.destination);
-    gainNode.gain.value = 0.75;
+    gainNode.gain.value = 0;
 
     audioContexts.set(audioElement, { context: audioContext, gainNode });
     console.log("AudioContext map:", audioContexts);
