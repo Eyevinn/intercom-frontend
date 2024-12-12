@@ -122,35 +122,40 @@ const establishConnection = ({
     if (selectedStream && selectedStream.getAudioTracks().length !== 0) {
       const audioElement = new Audio();
 
-      audioElement.srcObject = selectedStream;
+      if (isIosSafari) {
+        initializeAudioContextForElement(audioElement, selectedStream);
+      } else {
+        audioElement.srcObject = selectedStream;
 
-      audioElement.controls = false;
-      audioElement.autoplay = true;
+        audioElement.controls = false;
+        audioElement.autoplay = true;
 
-      audioElement.volume = 0.75;
+        audioElement.volume = 0.75;
 
-      initializeAudioContextForElement(audioElement, selectedStream);
-
-      audioElement.onerror = () => {
-        dispatch({
-          type: "ERROR",
-          payload: new Error(
-            `Audio Error: ${audioElement.error?.code} - ${audioElement.error?.message}`
-          ),
-        });
-      };
-
-      audioElement.srcObject = selectedStream;
-
-      setAudioElements((prevArray) => [audioElement, ...prevArray]);
-      if (joinProductionOptions.audiooutput) {
-        audioElement.setSinkId(joinProductionOptions.audiooutput).catch((e) => {
+        audioElement.onerror = () => {
           dispatch({
             type: "ERROR",
-            payload:
-              e instanceof Error ? e : new Error("Error assigning audio sink."),
+            payload: new Error(
+              `Audio Error: ${audioElement.error?.code} - ${audioElement.error?.message}`
+            ),
           });
-        });
+        };
+
+        audioElement.srcObject = selectedStream;
+        setAudioElements((prevArray) => [audioElement, ...prevArray]);
+        if (joinProductionOptions.audiooutput) {
+          audioElement
+            .setSinkId(joinProductionOptions.audiooutput)
+            .catch((e) => {
+              dispatch({
+                type: "ERROR",
+                payload:
+                  e instanceof Error
+                    ? e
+                    : new Error("Error assigning audio sink."),
+              });
+            });
+        }
       }
     } else if (selectedStream && selectedStream.getAudioTracks().length === 0) {
       setNoStreamError(true);
