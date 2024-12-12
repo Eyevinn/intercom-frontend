@@ -110,7 +110,13 @@ export const VolumeSlider: FC<TVolumeSliderProps> = ({
     setValue(newValue);
 
     audioElements.forEach((audioElement) => {
+      console.log("IS IOS SAFARI VOL SLIDER: ", isIosSafari);
+      console.log(
+        "AUDIO CONTEXTS HAS AUDIO ELEMENT: ",
+        audioContexts.has(audioElement)
+      );
       if (isIosSafari && audioContexts.has(audioElement)) {
+        console.log("IS INSIDE IOS SAFARI VOLUME SLIDER");
         const { gainNode } = audioContexts.get(audioElement)!;
         console.log("Setting gain value to:", newValue);
         gainNode.gain.value = newValue;
