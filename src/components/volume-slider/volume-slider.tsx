@@ -87,31 +87,31 @@ export const VolumeSlider: FC<TVolumeSliderProps> = ({
       if (isIosSafari && audioContexts.has(audioElement)) {
         console.log("IS INSIDE IOS SAFARI VOLUME SLIDER");
 
-        const { context, gainNode } = audioContexts.get(audioElement)!;
-        console.log("STATE OF AUDIO CONTEXT: ", context.state);
+        // const { context, gainNode } = audioContexts.get(audioElement)!;
+        // console.log("STATE OF AUDIO CONTEXT: ", context.state);
 
-        if (context.state === "suspended") {
-          context
-            .resume()
-            .then(() => {
-              console.log(
-                "Audio context resumed for volume change in slider component yay"
-              );
-              console.log("Setting gain value to:", newValue);
-              gainNode.gain.value = newValue;
-              console.log("ACTUAL Gain value set to:", gainNode.gain.value);
-            })
-            .catch((error: Error) => {
-              console.error(
-                "Failed to resume audio context for volume change in slider component",
-                error
-              );
-            });
-        } else {
-          console.log("Setting gain value to:", newValue);
-          gainNode.gain.value = newValue;
-          console.log("ACTUAL Gain value set to:", gainNode.gain.value);
-        }
+        // if (context.state === "suspended") {
+        //   context
+        //     .resume()
+        //     .then(() => {
+        //       console.log(
+        //         "Audio context resumed for volume change in slider component yay"
+        //       );
+        //       console.log("Setting gain value to:", newValue);
+        //       gainNode.gain.value = newValue;
+        //       console.log("ACTUAL Gain value set to:", gainNode.gain.value);
+        //     })
+        //     .catch((error: Error) => {
+        //       console.error(
+        //         "Failed to resume audio context for volume change in slider component",
+        //         error
+        //       );
+        //     });
+        // } else {
+        //   console.log("Setting gain value to:", newValue);
+        //   gainNode.gain.value = newValue;
+        //   console.log("ACTUAL Gain value set to:", gainNode.gain.value);
+        // }
       } else {
         console.log("SEtting volume to: ", newValue);
         // eslint-disable-next-line no-param-reassign

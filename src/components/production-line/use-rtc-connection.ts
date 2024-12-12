@@ -52,6 +52,7 @@ const handleVolumeChange = (event: Event) => {
 
 const initializeAudioContextForElement = (audioElement: HTMLAudioElement) => {
   const AudioContext =
+    // TODO Fixa detta så att det inte blir any, ändra om när det funkar
     // eslint-disable-next-line
     window.AudioContext || (window as any).webkitAudioContext;
   const audioCtx = new AudioContext();
@@ -67,6 +68,8 @@ const initializeAudioContextForElement = (audioElement: HTMLAudioElement) => {
     "volumeSlider"
   ) as HTMLInputElement;
   volumeControl.addEventListener("input", handleVolumeChange);
+
+  console.log("AUDIOCTX DESTINATION: ", audioCtx.destination);
 
   track.connect(gainNode).connect(audioCtx.destination);
 };
@@ -102,10 +105,6 @@ const establishConnection = ({
 
       if (isIosSafari) {
         initializeAudioContextForElement(audioElement);
-      }
-
-      if (!isIosSafari) {
-        audioElement.volume = 0.75;
       }
 
       audioElement.onerror = () => {
