@@ -124,38 +124,37 @@ const establishConnection = ({
 
       if (isIosSafari) {
         initializeAudioContextForElement(audioElement, selectedStream);
-      } else {
-        audioElement.srcObject = selectedStream;
+      }
 
-        audioElement.controls = false;
-        audioElement.autoplay = true;
+      audioElement.srcObject = selectedStream;
 
+      audioElement.controls = false;
+      audioElement.autoplay = true;
+
+      if (!isIosSafari) {
         audioElement.volume = 0.75;
+      }
 
-        audioElement.onerror = () => {
+      audioElement.onerror = () => {
+        dispatch({
+          type: "ERROR",
+          payload: new Error(
+            `Audio Error: ${audioElement.error?.code} - ${audioElement.error?.message}`
+          ),
+        });
+      };
+
+      // audioElement.srcObject = selectedStream;
+
+      setAudioElements((prevArray) => [audioElement, ...prevArray]);
+      if (joinProductionOptions.audiooutput) {
+        audioElement.setSinkId(joinProductionOptions.audiooutput).catch((e) => {
           dispatch({
             type: "ERROR",
-            payload: new Error(
-              `Audio Error: ${audioElement.error?.code} - ${audioElement.error?.message}`
-            ),
+            payload:
+              e instanceof Error ? e : new Error("Error assigning audio sink."),
           });
-        };
-
-        audioElement.srcObject = selectedStream;
-        setAudioElements((prevArray) => [audioElement, ...prevArray]);
-        if (joinProductionOptions.audiooutput) {
-          audioElement
-            .setSinkId(joinProductionOptions.audiooutput)
-            .catch((e) => {
-              dispatch({
-                type: "ERROR",
-                payload:
-                  e instanceof Error
-                    ? e
-                    : new Error("Error assigning audio sink."),
-              });
-            });
-        }
+        });
       }
     } else if (selectedStream && selectedStream.getAudioTracks().length === 0) {
       setNoStreamError(true);
