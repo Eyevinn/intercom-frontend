@@ -99,6 +99,7 @@ export const VolumeSlider: FC<TVolumeSliderProps> = ({
               );
               console.log("Setting gain value to:", newValue);
               gainNode.gain.value = newValue;
+              console.log("ACTUAL Gain value set to:", gainNode.gain.value);
             })
             .catch((error: Error) => {
               console.error(
@@ -109,6 +110,7 @@ export const VolumeSlider: FC<TVolumeSliderProps> = ({
         } else {
           console.log("Setting gain value to:", newValue);
           gainNode.gain.value = newValue;
+          console.log("ACTUAL Gain value set to:", gainNode.gain.value);
         }
       } else {
         console.log("SEtting volume to: ", newValue);
