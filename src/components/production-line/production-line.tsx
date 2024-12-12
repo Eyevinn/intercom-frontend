@@ -1,11 +1,14 @@
 import styled from "@emotion/styled";
-import { FC, useCallback, useEffect, useState } from "react";
+import React, { FC, useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { useAudioInput } from "./use-audio-input.ts";
 import { useRtcConnection } from "./use-rtc-connection.ts";
 import { useEstablishSession } from "./use-establish-session.ts";
-import { SecondaryButton } from "../landing-page/form-elements.tsx";
+import {
+  PrimaryButton,
+  SecondaryButton,
+} from "../landing-page/form-elements.tsx";
 import { UserList } from "./user-list.tsx";
 import {
   MicMuted,
@@ -31,6 +34,7 @@ import { NavigateToRootButton } from "../navigate-to-root-button/navigate-to-roo
 import { useAudioCue } from "./use-audio-cue.ts";
 import { DisplayWarning } from "../display-box.tsx";
 import { SettingsModal, Hotkeys } from "./settings-modal.tsx";
+import VolumeSlider from "./volume-slider.tsx";
 
 const TempDiv = styled.div`
   padding: 0 0 2rem 0;
@@ -139,6 +143,101 @@ export const ProductionLine: FC = () => {
     speakerHotkey: "n",
     pressToTalkHotkey: "t",
   });
+
+  const [volume, setVolume] = useState(0.5);
+  // const [frequency, setFrequency] = useState(440);
+  // const [waveform, setWaveform] = useState<OscillatorType>("sine");
+  const [isPlaying, setIsPlaying] = useState(false);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  // const oscillatorRef = useRef<OscillatorNode | null>(null);
+  const gainNodeRef = useRef<GainNode | null>(null);
+  const audioSourceRef = useRef<AudioBufferSourceNode | null>(null);
+  const audioBufferRef = useRef<AudioBuffer | null>(null);
+
+  useEffect(() => {
+    const fetchAudio = async () => {
+      try {
+        const audioContext = new AudioContext();
+        const response = await fetch(
+          "https://s3-us-west-2.amazonaws.com/s.cdpn.io/858/outfoxing.mp3"
+        );
+        const arrayBuffer = await response.arrayBuffer();
+        const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+
+        audioBufferRef.current = audioBuffer;
+        audioContextRef.current = audioContext;
+
+        // Create a gain node for volume control
+        const gainNode = audioContext.createGain();
+        gainNode.gain.setValueAtTime(volume, audioContext.currentTime);
+        gainNode.connect(audioContext.destination);
+
+        gainNodeRef.current = gainNode;
+      } catch (error) {
+        console.error("Error fetching audio file:", error);
+      }
+    };
+
+    fetchAudio();
+  }, [volume]);
+
+  const startAudio = () => {
+    if (audioContextRef.current && audioBufferRef.current) {
+      const audioSource = audioContextRef.current.createBufferSource();
+      audioSource.buffer = audioBufferRef.current;
+
+      // Connect the source to the gain node
+      audioSource.connect(gainNodeRef.current!);
+
+      audioSource.start();
+      audioSourceRef.current = audioSource;
+      setIsPlaying(true);
+    }
+  };
+
+  const stopAudio = () => {
+    if (audioSourceRef.current) {
+      audioSourceRef.current.stop();
+      audioSourceRef.current = null;
+      setIsPlaying(false);
+    }
+  };
+
+  const handleVolumeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const newVolume = parseFloat(event.target.value);
+    setVolume(newVolume);
+
+    if (gainNodeRef.current) {
+      gainNodeRef.current.gain.setValueAtTime(
+        newVolume,
+        audioContextRef.current!.currentTime
+      );
+    }
+  };
+  // const handleFrequencyChange = (
+  //   event: React.ChangeEvent<HTMLInputElement>
+  // ) => {
+  //   const newFrequency = parseFloat(event.target.value);
+  //   setFrequency(newFrequency);
+
+  //   if (oscillatorRef.current) {
+  //     oscillatorRef.current.frequency.setValueAtTime(
+  //       newFrequency,
+  //       audioContextRef.current!.currentTime
+  //     );
+  //   }
+  // };
+
+  // const handleWaveformChange = (
+  //   event: React.ChangeEvent<HTMLSelectElement>
+  // ) => {
+  //   const newWaveform = event.target.value as OscillatorType;
+  //   setWaveform(newWaveform);
+
+  //   if (oscillatorRef.current) {
+  //     oscillatorRef.current.type = newWaveform;
+  //   }
+  // };
 
   const inputAudioStream = useAudioInput({
     inputId: joinProductionOptions?.audioinput ?? null,
@@ -310,6 +409,20 @@ export const ProductionLine: FC = () => {
               }}
             >
               <DisplayContainerHeader>Controls</DisplayContainerHeader>
+
+              <VolumeSlider
+                label="Volume"
+                value={volume}
+                min={0}
+                max={1}
+                step={0.01}
+                onChange={handleVolumeChange}
+              />
+              {isPlaying ? (
+                <PrimaryButton onClick={stopAudio}>Stop Audio</PrimaryButton>
+              ) : (
+                <PrimaryButton onClick={startAudio}>Play Audio</PrimaryButton>
+              )}
 
               <FlexContainer>
                 <FlexButtonWrapper>
