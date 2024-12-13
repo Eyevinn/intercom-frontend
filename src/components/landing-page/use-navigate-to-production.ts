@@ -11,7 +11,7 @@ export const useNavigateToProduction = (
   useEffect(() => {
     if (joinProductionOptions) {
       navigate(
-        `/production/${joinProductionOptions.productionId}/line/${joinProductionOptions.lineId}`
+        `/production-calls/production/${joinProductionOptions.productionId}/line/${joinProductionOptions.lineId}`
       );
     }
   }, [navigate, joinProductionOptions]);

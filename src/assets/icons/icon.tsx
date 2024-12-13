@@ -13,6 +13,9 @@ import NoSound from "./no_sound.svg?react";
 import FullSound from "./full_sound.svg?react";
 import Minus from "./minus.svg?react";
 import Plus from "./plus.svg?react";
+import ChevronDown from "./chevron_down.svg?react";
+import ChevronUp from "./chevron_up.svg?react";
+import Headset from "./headset.svg?react";
 
 export const MicMuted = () => <MicMute />;
 
@@ -43,3 +46,9 @@ export const FullSoundIcon = () => <FullSound />;
 export const MinusIcon = () => <Minus />;
 
 export const PlusIcon = () => <Plus />;
+
+export const ChevronDownIcon = () => <ChevronDown />;
+
+export const ChevronUpIcon = () => <ChevronUp />;
+
+export const HeadsetIcon = () => <Headset />;

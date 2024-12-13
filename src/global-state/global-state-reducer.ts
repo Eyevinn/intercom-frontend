@@ -4,14 +4,11 @@ import { TGlobalState } from "./types";
 
 const initialGlobalState: TGlobalState = {
   production: null,
-  error: null,
+  error: { callErrors: null, globalError: null },
   reloadProductionList: false,
   devices: null,
-  joinProductionOptions: null,
-  mediaStreamInput: null,
-  dominantSpeaker: null,
-  audioLevelAboveThreshold: false,
   selectedProductionId: null,
+  calls: {},
   apiError: false,
 };
 
@@ -22,11 +19,31 @@ const globalReducer: Reducer<TGlobalState, TGlobalStateAction> = (
   // Simple Debug
   // console.log(action.type, action.payload);
   switch (action.type) {
-    case "ERROR":
+    case "ERROR": {
+      const { callId, error } = action.payload;
+
+      if (callId && error) {
+        // Call-specific error
+        return {
+          ...state,
+          error: {
+            ...state.error,
+            callErrors: {
+              ...state.error.callErrors,
+              [callId]: error,
+            },
+          },
+        };
+      }
+      // Global error
       return {
         ...state,
-        error: action.payload,
+        error: {
+          ...state.error,
+          globalError: error,
+        },
       };
+    }
     case "PRODUCTION_UPDATED":
       return {
         ...state,
@@ -47,34 +64,46 @@ const globalReducer: Reducer<TGlobalState, TGlobalStateAction> = (
         ...state,
         devices: action.payload,
       };
-    case "UPDATE_JOIN_PRODUCTION_OPTIONS":
-      return {
-        ...state,
-        joinProductionOptions: action.payload,
-      };
-    case "CONNECTED_MEDIASTREAM":
-      return {
-        ...state,
-        mediaStreamInput: action.payload,
-      };
-    case "DOMINANT_SPEAKER":
-      return {
-        ...state,
-        dominantSpeaker: action.payload,
-      };
-    case "AUDIO_LEVEL_ABOVE_THRESHOLD":
-      // Don't update state if receiving the same value
-      if (state.audioLevelAboveThreshold === action.payload) return state;
-
-      return {
-        ...state,
-        audioLevelAboveThreshold: action.payload,
-      };
     case "SELECT_PRODUCTION_ID":
       return {
         ...state,
         selectedProductionId: action.payload,
       };
+    case "ADD_CALL":
+      return {
+        ...state,
+        calls: {
+          ...state.calls,
+          [action.payload.id]: action.payload.callState,
+        },
+      };
+    case "UPDATE_CALL":
+      if (
+        action.payload.updates.audioLevelAboveThreshold &&
+        state.calls[action.payload.id].audioLevelAboveThreshold ===
+          action.payload.updates.audioLevelAboveThreshold
+      )
+        return state;
+      return {
+        ...state,
+        calls: {
+          ...state.calls,
+          [action.payload.id]: {
+            ...state.calls[action.payload.id],
+            ...action.payload.updates,
+          },
+        },
+      };
+    case "REMOVE_CALL": {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      const { [action.payload.id]: _, ...remainingCalls } = state.calls;
+
+      return {
+        ...state,
+        calls: remainingCalls,
+        production: null,
+      };
+    }
     default:
       return state;
   }

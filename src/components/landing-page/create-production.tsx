@@ -203,7 +203,10 @@ export const CreateProduction = () => {
                 placeholder="Line Name"
               />
               {index === fields.length - 1 && (
-                <RemoveLineButton removeLine={() => remove(index)} />
+                <RemoveLineButton
+                  isCreatingLine
+                  removeLine={() => remove(index)}
+                />
               )}
             </ListItemWrapper>
           </FormLabel>
@@ -243,7 +246,7 @@ export const CreateProduction = () => {
                 onClick={() =>
                   handleCopyProdUrlsToClipboard(
                     production.lines.map((item) => {
-                      return ` ${item.name}: ${window.location.origin}/production/${production.productionId}/line/${item.id}`;
+                      return ` ${item.name}: ${window.location.origin}/production-calls/production/${production.productionId}/line/${item.id}`;
                     })
                   )
                 }

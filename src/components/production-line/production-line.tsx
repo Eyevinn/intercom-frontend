@@ -1,11 +1,9 @@
 import styled from "@emotion/styled";
-import { FC, useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { useAudioInput } from "./use-audio-input.ts";
-import { useRtcConnection } from "./use-rtc-connection.ts";
-import { useEstablishSession } from "./use-establish-session.ts";
-import { SecondaryButton } from "../landing-page/form-elements.tsx";
+import { ActionButton } from "../landing-page/form-elements.tsx";
 import { UserList } from "./user-list.tsx";
 import {
   MicMuted,
@@ -17,8 +15,6 @@ import {
 import { Spinner } from "../loader/loader.tsx";
 import { DisplayContainerHeader } from "../landing-page/display-container-header.tsx";
 import { DisplayContainer, FlexContainer } from "../generic-components.ts";
-import { useHeartbeat } from "./use-heartbeat.ts";
-import { JoinProduction } from "../landing-page/join-production.tsx";
 import { useDeviceLabels } from "./use-device-labels.ts";
 import { isMobile } from "../../bowser.ts";
 import { useLineHotkeys, useSpeakerHotkeys } from "./use-line-hotkeys.ts";
@@ -27,11 +23,16 @@ import { useLinePolling } from "./use-line-polling.ts";
 import { useFetchProduction } from "../landing-page/use-fetch-production.ts";
 import { useIsLoading } from "./use-is-loading.ts";
 import { useCheckBadLineData } from "./use-check-bad-line-data.ts";
-import { NavigateToRootButton } from "../navigate-to-root-button/navigate-to-root-button.tsx";
 import { useAudioCue } from "./use-audio-cue.ts";
 import { DisplayWarning } from "../display-box.tsx";
 import { SettingsModal, Hotkeys } from "./settings-modal.tsx";
 import { VolumeSlider } from "../volume-slider/volume-slider.tsx";
+import { CallState } from "../../global-state/types.ts";
+import { ExitCallButton } from "./exit-call-button.tsx";
+import { Modal } from "../modal/modal.tsx";
+import { VerifyDecision } from "../verify-decision/verify-decision.tsx";
+import { ModalConfirmationText } from "../modal/modal-confirmation-text.ts";
+import { SymphonyRtcConnectionComponent } from "./symphony-rtc-connection-component.tsx";
 
 const TempDiv = styled.div`
   padding: 0 0 2rem 0;
@@ -83,7 +84,9 @@ const FlexButtonWrapper = styled.div`
   }
 `;
 
-const UserControlBtn = styled(SecondaryButton)`
+const UserControlBtn = styled(ActionButton)`
+  background: rgba(50, 56, 59, 1);
+  border: 0.2rem solid #6d6d6d;
   width: 100%;
 `;
 
@@ -121,15 +124,24 @@ const ConnectionErrorWrapper = styled(FlexContainer)`
   padding-top: 12rem;
 `;
 
-export const ProductionLine: FC = () => {
+type TProductionLine = {
+  id: string;
+  callState: CallState;
+  isSingleCall: boolean;
+};
+
+export const ProductionLine = ({
+  id,
+  callState,
+  isSingleCall,
+}: TProductionLine) => {
   const { productionId: paramProductionId, lineId: paramLineId } = useParams();
-  const [
-    { joinProductionOptions, dominantSpeaker, audioLevelAboveThreshold },
-    dispatch,
-  ] = useGlobalState();
+  const [, dispatch] = useGlobalState();
+  const [connectionActive, setConnectionActive] = useState(true);
   const [isInputMuted, setIsInputMuted] = useState(true);
   const [isOutputMuted, setIsOutputMuted] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+  const [confirmExitModalOpen, setConfirmExitModalOpen] = useState(false);
   const [hotkeys, setHotkeys] = useState<Hotkeys>({
     muteHotkey: "m",
     speakerHotkey: "n",
@@ -144,6 +156,14 @@ export const ProductionLine: FC = () => {
     increaseVolumeHotkey: "u",
     decreaseVolumeHotkey: "d",
   });
+  const {
+    joinProductionOptions,
+    dominantSpeaker,
+    audioLevelAboveThreshold,
+    connectionState,
+    audioElements,
+    sessionId,
+  } = callState;
 
   const inputAudioStream = useAudioInput({
     inputId: joinProductionOptions?.audioinput ?? null,
@@ -165,30 +185,19 @@ export const ProductionLine: FC = () => {
   const { playEnterSound, playExitSound } = useAudioCue();
 
   const exit = useCallback(() => {
+    setConnectionActive(false);
     playExitSound();
     dispatch({
-      type: "UPDATE_JOIN_PRODUCTION_OPTIONS",
-      payload: null,
+      type: "REMOVE_CALL",
+      payload: { id },
     });
-  }, [dispatch, playExitSound]);
+  }, [dispatch, id, playExitSound]);
 
   useLineHotkeys({
     muteInput,
     isInputMuted,
     customKeyMute: savedHotkeys.muteHotkey,
     customKeyPress: savedHotkeys.pressToTalkHotkey,
-  });
-
-  const { sessionId, sdpOffer } = useEstablishSession({
-    joinProductionOptions,
-    dispatch,
-  });
-
-  const { connectionState, audioElements } = useRtcConnection({
-    inputAudioStream,
-    sdpOffer,
-    joinProductionOptions,
-    sessionId,
   });
 
   useEffect(() => {
@@ -198,6 +207,8 @@ export const ProductionLine: FC = () => {
   }, [connectionState, playEnterSound]);
 
   const muteOutput = useCallback(() => {
+    if (!audioElements) return;
+
     audioElements.forEach((singleElement: HTMLAudioElement) => {
       // eslint-disable-next-line no-param-reassign
       singleElement.muted = !isOutputMuted;
@@ -211,7 +222,7 @@ export const ProductionLine: FC = () => {
     customKey: savedHotkeys.speakerHotkey,
   });
 
-  const line = useLinePolling({ joinProductionOptions });
+  const line = useLinePolling({ callId: id, joinProductionOptions });
 
   const { production, error: fetchProductionError } = useFetchProduction(
     joinProductionOptions
@@ -224,16 +235,16 @@ export const ProductionLine: FC = () => {
 
     dispatch({
       type: "ERROR",
-      payload:
-        fetchProductionError instanceof Error
-          ? fetchProductionError
-          : new Error("Error fetching production."),
+      payload: {
+        error:
+          fetchProductionError instanceof Error
+            ? fetchProductionError
+            : new Error("Error fetching production."),
+      },
     });
   }, [dispatch, fetchProductionError]);
 
   const { loading, connectionError } = useIsLoading({ connectionState });
-
-  useHeartbeat({ sessionId });
 
   const deviceLabels = useDeviceLabels({ joinProductionOptions });
 
@@ -241,6 +252,7 @@ export const ProductionLine: FC = () => {
     joinProductionOptions,
     paramLineId,
     paramProductionId,
+    callId: id,
     dispatch,
   });
 
@@ -258,9 +270,24 @@ export const ProductionLine: FC = () => {
   return (
     <>
       <HeaderWrapper>
-        <ButtonWrapper>
-          <NavigateToRootButton resetOnExit={exit} />
-        </ButtonWrapper>
+        {!isSingleCall && (
+          <ButtonWrapper>
+            <ExitCallButton resetOnExit={() => setConfirmExitModalOpen(true)} />
+            {confirmExitModalOpen && (
+              <Modal onClose={() => setConfirmExitModalOpen(false)}>
+                <DisplayContainerHeader>Confirm</DisplayContainerHeader>
+                <ModalConfirmationText>
+                  Are you sure you want to leave the call?
+                </ModalConfirmationText>
+                <VerifyDecision
+                  confirm={exit}
+                  abort={() => setConfirmExitModalOpen(false)}
+                />
+              </Modal>
+            )}
+          </ButtonWrapper>
+        )}
+
         {!loading && production && line && (
           <DisplayContainerHeader>
             <SmallText>Production:</SmallText> {production.name}{" "}
@@ -269,17 +296,13 @@ export const ProductionLine: FC = () => {
         )}
       </HeaderWrapper>
 
-      {!joinProductionOptions && paramProductionId && paramLineId && (
-        <FlexContainer>
-          <DisplayContainer>
-            <JoinProduction
-              preSelected={{
-                preSelectedProductionId: paramProductionId,
-                preSelectedLineId: paramLineId,
-              }}
-            />
-          </DisplayContainer>
-        </FlexContainer>
+      {connectionActive && (
+        <SymphonyRtcConnectionComponent
+          joinProductionOptions={joinProductionOptions}
+          inputAudioStream={inputAudioStream}
+          callId={id}
+          dispatch={dispatch}
+        />
       )}
 
       {joinProductionOptions && connectionState && (
