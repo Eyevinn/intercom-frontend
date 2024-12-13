@@ -16,6 +16,9 @@ export interface CallState {
   mediaStreamInput: MediaStream | null;
   dominantSpeaker: string | null;
   audioLevelAboveThreshold: boolean;
+  connectionState: RTCPeerConnectionState | null;
+  audioElements: HTMLAudioElement[] | null;
+  sessionId: string | null;
 }
 
 export type TGlobalState = {

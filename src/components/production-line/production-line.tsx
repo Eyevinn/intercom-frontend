@@ -3,8 +3,6 @@ import { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { useAudioInput } from "./use-audio-input.ts";
-import { useRtcConnection } from "./use-rtc-connection.ts";
-import { useEstablishSession } from "./use-establish-session.ts";
 import { ActionButton } from "../landing-page/form-elements.tsx";
 import { UserList } from "./user-list.tsx";
 import {
@@ -17,7 +15,6 @@ import {
 import { Spinner } from "../loader/loader.tsx";
 import { DisplayContainerHeader } from "../landing-page/display-container-header.tsx";
 import { DisplayContainer, FlexContainer } from "../generic-components.ts";
-import { useHeartbeat } from "./use-heartbeat.ts";
 import { useDeviceLabels } from "./use-device-labels.ts";
 import { isMobile } from "../../bowser.ts";
 import { useLineHotkeys, useSpeakerHotkeys } from "./use-line-hotkeys.ts";
@@ -34,6 +31,7 @@ import { ExitCallButton } from "./exit-call-button.tsx";
 import { Modal } from "../modal/modal.tsx";
 import { VerifyDecision } from "../verify-decision/verify-decision.tsx";
 import { ModalConfirmationText } from "../modal/modal-confirmation-text.ts";
+import { SymphonyRtcConnectionComponent } from "./symphony-rtc-connection-component.tsx";
 
 const TempDiv = styled.div`
   padding: 0 0 2rem 0;
@@ -138,6 +136,7 @@ export const ProductionLine = ({
 }: TProductionLine) => {
   const { productionId: paramProductionId, lineId: paramLineId } = useParams();
   const [, dispatch] = useGlobalState();
+  const [connectionActive, setConnectionActive] = useState(true);
   const [isInputMuted, setIsInputMuted] = useState(true);
   const [isOutputMuted, setIsOutputMuted] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
@@ -152,8 +151,14 @@ export const ProductionLine = ({
     speakerHotkey: "n",
     pressToTalkHotkey: "t",
   });
-  const { joinProductionOptions, dominantSpeaker, audioLevelAboveThreshold } =
-    callState;
+  const {
+    joinProductionOptions,
+    dominantSpeaker,
+    audioLevelAboveThreshold,
+    connectionState,
+    audioElements,
+    sessionId,
+  } = callState;
 
   const inputAudioStream = useAudioInput({
     inputId: joinProductionOptions?.audioinput ?? null,
@@ -175,6 +180,7 @@ export const ProductionLine = ({
   const { playEnterSound, playExitSound } = useAudioCue();
 
   const exit = useCallback(() => {
+    setConnectionActive(false);
     playExitSound();
     dispatch({
       type: "REMOVE_CALL",
@@ -189,20 +195,6 @@ export const ProductionLine = ({
     customKeyPress: savedHotkeys.pressToTalkHotkey,
   });
 
-  const { sessionId, sdpOffer } = useEstablishSession({
-    joinProductionOptions,
-    callId: id,
-    dispatch,
-  });
-
-  const { connectionState, audioElements } = useRtcConnection({
-    inputAudioStream,
-    sdpOffer,
-    joinProductionOptions,
-    sessionId,
-    callId: id,
-  });
-
   useEffect(() => {
     if (connectionState === "connected") {
       playEnterSound();
@@ -210,6 +202,8 @@ export const ProductionLine = ({
   }, [connectionState, playEnterSound]);
 
   const muteOutput = useCallback(() => {
+    if (!audioElements) return;
+
     audioElements.forEach((singleElement: HTMLAudioElement) => {
       // eslint-disable-next-line no-param-reassign
       singleElement.muted = !isOutputMuted;
@@ -246,8 +240,6 @@ export const ProductionLine = ({
   }, [dispatch, fetchProductionError]);
 
   const { loading, connectionError } = useIsLoading({ connectionState });
-
-  useHeartbeat({ sessionId });
 
   const deviceLabels = useDeviceLabels({ joinProductionOptions });
 
@@ -290,6 +282,7 @@ export const ProductionLine = ({
             )}
           </ButtonWrapper>
         )}
+
         {!loading && production && line && (
           <DisplayContainerHeader>
             <SmallText>Production:</SmallText> {production.name}{" "}
@@ -297,6 +290,15 @@ export const ProductionLine = ({
           </DisplayContainerHeader>
         )}
       </HeaderWrapper>
+
+      {connectionActive && (
+        <SymphonyRtcConnectionComponent
+          joinProductionOptions={joinProductionOptions}
+          inputAudioStream={inputAudioStream}
+          callId={id}
+          dispatch={dispatch}
+        />
+      )}
 
       {joinProductionOptions && connectionState && (
         <FlexContainer>

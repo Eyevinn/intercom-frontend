@@ -157,6 +157,9 @@ export const JoinProduction = ({
           mediaStreamInput: null,
           dominantSpeaker: null,
           audioLevelAboveThreshold: false,
+          connectionState: null,
+          audioElements: null,
+          sessionId: null,
         },
       },
     });
