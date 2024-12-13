@@ -25,7 +25,7 @@ type TLine = {
   participants: TParticipant[];
 };
 
-type TBasicProductionResponse = {
+export type TBasicProductionResponse = {
   name: string;
   productionId: string;
 };
