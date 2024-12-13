@@ -5,10 +5,7 @@ import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { useAudioInput } from "./use-audio-input.ts";
 import { useRtcConnection } from "./use-rtc-connection.ts";
 import { useEstablishSession } from "./use-establish-session.ts";
-import {
-  PrimaryButton,
-  SecondaryButton,
-} from "../landing-page/form-elements.tsx";
+import { SecondaryButton } from "../landing-page/form-elements.tsx";
 import { UserList } from "./user-list.tsx";
 import {
   MicMuted,
@@ -124,6 +121,10 @@ const ConnectionErrorWrapper = styled(FlexContainer)`
   padding-top: 12rem;
 `;
 
+const VolumeSliderWrapper = styled.div`
+  padding: 1rem;
+`;
+
 export const ProductionLine: FC = () => {
   const { productionId: paramProductionId, lineId: paramLineId } = useParams();
   const [
@@ -152,6 +153,37 @@ export const ProductionLine: FC = () => {
   const audioSourceRef = useRef<AudioBufferSourceNode | null>(null);
   const audioBufferRef = useRef<AudioBuffer | null>(null);
   const volumeRef = useRef(volume);
+  const [isAudioReady, setIsAudioReady] = useState(false);
+
+  const startAudio = useCallback(() => {
+    console.log("Starting audio");
+    if (
+      audioContextRef.current &&
+      audioBufferRef.current &&
+      gainNodeRef.current
+    ) {
+      const audioSource = audioContextRef.current.createBufferSource();
+      audioSource.buffer = audioBufferRef.current;
+
+      audioSource.connect(gainNodeRef.current);
+      audioSource.start();
+      console.log("Audio started");
+      audioSourceRef.current = audioSource;
+
+      setIsPlaying(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    console.log("AUDIO CONTEXT", audioContextRef.current);
+    console.log("AUDIO BUFFER", audioBufferRef.current);
+    console.log("GAIN NODE", gainNodeRef.current);
+    console.log("IS PLAYING", isPlaying);
+
+    if (isAudioReady && !isPlaying) {
+      startAudio();
+    }
+  }, [isPlaying, startAudio, isAudioReady]);
 
   useEffect(() => {
     const fetchAudio = async () => {
@@ -174,6 +206,7 @@ export const ProductionLine: FC = () => {
         gainNode.connect(audioContext.destination);
 
         gainNodeRef.current = gainNode;
+        setIsAudioReady(true);
       } catch (error) {
         console.error("Error fetching audio file:", error);
       }
@@ -181,32 +214,6 @@ export const ProductionLine: FC = () => {
 
     fetchAudio();
   }, []);
-
-  const startAudio = () => {
-    if (
-      audioContextRef.current &&
-      audioBufferRef.current &&
-      gainNodeRef.current
-    ) {
-      const audioSource = audioContextRef.current.createBufferSource();
-      audioSource.buffer = audioBufferRef.current;
-
-      // Always connect the source to the gain node
-      audioSource.connect(gainNodeRef.current);
-      audioSource.start();
-      audioSourceRef.current = audioSource;
-
-      setIsPlaying(true);
-    }
-  };
-
-  const stopAudio = () => {
-    if (audioSourceRef.current) {
-      audioSourceRef.current.stop();
-      audioSourceRef.current = null;
-      setIsPlaying(false);
-    }
-  };
 
   const handleVolumeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newVolume = parseFloat(event.target.value);
@@ -391,18 +398,15 @@ export const ProductionLine: FC = () => {
             >
               <DisplayContainerHeader>Controls</DisplayContainerHeader>
 
-              <VolumeSlider
-                value={volume}
-                min={0}
-                max={1}
-                step={0.01}
-                onChange={handleVolumeChange}
-              />
-              {isPlaying ? (
-                <PrimaryButton onClick={stopAudio}>Stop Audio</PrimaryButton>
-              ) : (
-                <PrimaryButton onClick={startAudio}>Play Audio</PrimaryButton>
-              )}
+              <VolumeSliderWrapper>
+                <VolumeSlider
+                  value={volume}
+                  min={0}
+                  max={1}
+                  step={0.01}
+                  onChange={handleVolumeChange}
+                />
+              </VolumeSliderWrapper>
 
               <FlexContainer>
                 <FlexButtonWrapper>
