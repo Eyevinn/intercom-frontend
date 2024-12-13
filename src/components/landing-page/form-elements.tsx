@@ -117,8 +117,8 @@ export const ActionButton = styled.button`
 `;
 
 export const PrimaryButton = styled(ActionButton)`
+  background: rgba(89, 203, 232, 1);
   &:active:enabled {
-    background: #1db954;
     transform: translateY(0.125rem);
   }
 
@@ -157,13 +157,14 @@ export const PrimaryButton = styled(ActionButton)`
 `;
 
 export const SecondaryButton = styled(ActionButton)`
+  // background: #1db954;
+  background: white;
   &:before,
   &:after {
     border-radius: 0.5rem;
   }
 
   &:before {
-    background: rgba(89, 203, 232, 1);
     content: "";
     display: block;
     height: 100%;
@@ -176,7 +177,6 @@ export const SecondaryButton = styled(ActionButton)`
   }
 
   &:after {
-    background: rgba(89, 203, 232, 1)
     content: "";
     display: block;
     overflow: hidden;

@@ -2,6 +2,7 @@ import {
   TJoinProductionOptions,
   TProduction,
 } from "../components/production-line/types.ts";
+import { TUserSettings } from "../components/user-settings/types.ts";
 
 export interface ErrorState {
   globalError?: Error | null;
@@ -23,6 +24,7 @@ export type TGlobalState = {
   calls: {
     [key: string]: CallState;
   };
+  userSettings: TUserSettings | null;
   production: TProduction | null;
   error: ErrorState;
   reloadProductionList: boolean;

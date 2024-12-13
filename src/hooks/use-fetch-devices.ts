@@ -1,5 +1,5 @@
 import { Dispatch, useEffect } from "react";
-import { TGlobalStateAction } from "./global-state/global-state-actions";
+import { TGlobalStateAction } from "../global-state/global-state-actions";
 
 type TUseFetchDevices = {
   permission: boolean;
