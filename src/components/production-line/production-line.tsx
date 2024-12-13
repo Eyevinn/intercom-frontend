@@ -144,15 +144,14 @@ export const ProductionLine: FC = () => {
     pressToTalkHotkey: "t",
   });
 
+  // VOLUME THINGS
   const [volume, setVolume] = useState(0.5);
-  // const [frequency, setFrequency] = useState(440);
-  // const [waveform, setWaveform] = useState<OscillatorType>("sine");
   const [isPlaying, setIsPlaying] = useState(false);
   const audioContextRef = useRef<AudioContext | null>(null);
-  // const oscillatorRef = useRef<OscillatorNode | null>(null);
   const gainNodeRef = useRef<GainNode | null>(null);
   const audioSourceRef = useRef<AudioBufferSourceNode | null>(null);
   const audioBufferRef = useRef<AudioBuffer | null>(null);
+  const volumeRef = useRef(volume);
 
   useEffect(() => {
     const fetchAudio = async () => {
@@ -167,9 +166,11 @@ export const ProductionLine: FC = () => {
         audioBufferRef.current = audioBuffer;
         audioContextRef.current = audioContext;
 
-        // Create a gain node for volume control
         const gainNode = audioContext.createGain();
-        gainNode.gain.setValueAtTime(volume, audioContext.currentTime);
+        gainNode.gain.setValueAtTime(
+          volumeRef.current,
+          audioContext.currentTime
+        ); // Use the ref value here
         gainNode.connect(audioContext.destination);
 
         gainNodeRef.current = gainNode;
@@ -179,18 +180,22 @@ export const ProductionLine: FC = () => {
     };
 
     fetchAudio();
-  }, [volume]);
+  }, []);
 
   const startAudio = () => {
-    if (audioContextRef.current && audioBufferRef.current) {
+    if (
+      audioContextRef.current &&
+      audioBufferRef.current &&
+      gainNodeRef.current
+    ) {
       const audioSource = audioContextRef.current.createBufferSource();
       audioSource.buffer = audioBufferRef.current;
 
-      // Connect the source to the gain node
-      audioSource.connect(gainNodeRef.current!);
-
+      // Always connect the source to the gain node
+      audioSource.connect(gainNodeRef.current);
       audioSource.start();
       audioSourceRef.current = audioSource;
+
       setIsPlaying(true);
     }
   };
@@ -207,37 +212,13 @@ export const ProductionLine: FC = () => {
     const newVolume = parseFloat(event.target.value);
     setVolume(newVolume);
 
-    if (gainNodeRef.current) {
+    if (gainNodeRef.current && audioContextRef.current) {
       gainNodeRef.current.gain.setValueAtTime(
         newVolume,
-        audioContextRef.current!.currentTime
+        audioContextRef.current.currentTime
       );
     }
   };
-  // const handleFrequencyChange = (
-  //   event: React.ChangeEvent<HTMLInputElement>
-  // ) => {
-  //   const newFrequency = parseFloat(event.target.value);
-  //   setFrequency(newFrequency);
-
-  //   if (oscillatorRef.current) {
-  //     oscillatorRef.current.frequency.setValueAtTime(
-  //       newFrequency,
-  //       audioContextRef.current!.currentTime
-  //     );
-  //   }
-  // };
-
-  // const handleWaveformChange = (
-  //   event: React.ChangeEvent<HTMLSelectElement>
-  // ) => {
-  //   const newWaveform = event.target.value as OscillatorType;
-  //   setWaveform(newWaveform);
-
-  //   if (oscillatorRef.current) {
-  //     oscillatorRef.current.type = newWaveform;
-  //   }
-  // };
 
   const inputAudioStream = useAudioInput({
     inputId: joinProductionOptions?.audioinput ?? null,
@@ -411,7 +392,6 @@ export const ProductionLine: FC = () => {
               <DisplayContainerHeader>Controls</DisplayContainerHeader>
 
               <VolumeSlider
-                label="Volume"
                 value={volume}
                 min={0}
                 max={1}

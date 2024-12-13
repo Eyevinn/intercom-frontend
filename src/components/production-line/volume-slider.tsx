@@ -8,17 +8,6 @@ const SliderContainer = styled.div`
   margin: 1rem 0;
 `;
 
-const SliderLabel = styled.span`
-  font-size: 1.2rem;
-  margin-bottom: 0.5rem;
-  &.active {
-    color: #333;
-  }
-  &.inactive {
-    color: #888;
-  }
-`;
-
 const Slider = styled.input`
   -webkit-appearance: none;
   width: 300px;
@@ -26,7 +15,6 @@ const Slider = styled.input`
   background: #ddd;
   border-radius: 5px;
   outline: none;
-  opacity: 0.7;
   transition: opacity 0.2s;
 
   &::-webkit-slider-thumb {
@@ -35,7 +23,7 @@ const Slider = styled.input`
     width: 15px;
     height: 15px;
     border-radius: 50%;
-    background: #333;
+    background: #59cbe8;
     cursor: pointer;
   }
 
@@ -53,7 +41,6 @@ const Slider = styled.input`
 `;
 
 interface SliderProps {
-  label: string;
   value: number;
   min: number;
   max: number;
@@ -62,7 +49,6 @@ interface SliderProps {
 }
 
 const VolumeSlider: React.FC<SliderProps> = ({
-  label,
   value,
   min,
   max,
@@ -71,9 +57,6 @@ const VolumeSlider: React.FC<SliderProps> = ({
 }) => {
   return (
     <SliderContainer>
-      <SliderLabel className="active">
-        {label}: {Math.round(value * 100) / 100}
-      </SliderLabel>
       <Slider
         type="range"
         min={min}
