@@ -246,7 +246,7 @@ export const CreateProduction = () => {
                 onClick={() =>
                   handleCopyProdUrlsToClipboard(
                     production.lines.map((item) => {
-                      return ` ${item.name}: ${window.location.origin}/production/${production.productionId}/line/${item.id}`;
+                      return ` ${item.name}: ${window.location.origin}/production-calls/production/${production.productionId}/line/${item.id}`;
                     })
                   )
                 }

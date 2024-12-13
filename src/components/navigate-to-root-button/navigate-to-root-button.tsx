@@ -12,19 +12,20 @@ const StyledBackBtn = styled.div`
 `;
 
 export const NavigateToRootButton = ({
-  resetOnExit,
+  resetOnExitRequest,
 }: {
-  resetOnExit?: () => void;
+  resetOnExitRequest?: () => void;
 }) => {
   const navigate = useNavigate();
 
   return (
     <StyledBackBtn
       onClick={() => {
-        if (resetOnExit) {
-          resetOnExit();
+        if (resetOnExitRequest) {
+          resetOnExitRequest();
+        } else {
+          navigate("/");
         }
-        navigate("/");
       }}
     >
       <BackArrow />

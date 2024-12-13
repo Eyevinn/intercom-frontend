@@ -6,6 +6,7 @@ type TProps = {
   joinProductionOptions: TJoinProductionOptions | null;
   paramProductionId: string | undefined;
   paramLineId: string | undefined;
+  callId: string;
   dispatch: Dispatch<TGlobalStateAction>;
 };
 
@@ -13,6 +14,7 @@ export const useCheckBadLineData = ({
   joinProductionOptions,
   paramProductionId,
   paramLineId,
+  callId,
   dispatch,
 }: TProps) => {
   useEffect(() => {
@@ -30,9 +32,12 @@ export const useCheckBadLineData = ({
 
         dispatch({
           type: "ERROR",
-          payload: new Error(errorString),
+          payload: {
+            callId,
+            error: new Error(errorString),
+          },
         });
       }
     }
-  }, [paramProductionId, paramLineId, joinProductionOptions, dispatch]);
+  }, [paramProductionId, paramLineId, joinProductionOptions, dispatch, callId]);
 };
