@@ -14,8 +14,6 @@ import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { TGlobalStateAction } from "../../global-state/global-state-actions.ts";
 import { TUseAudioInputValues } from "./use-audio-input.ts";
 import { startRtcStatInterval } from "./rtc-stat-interval.ts";
-import { isIosSafari } from "../../bowser.ts";
-import { audioContexts } from "../../audioContexts.ts";
 
 type TRtcConnectionOptions = {
   inputAudioStream: TUseAudioInputValues;
@@ -37,41 +35,6 @@ type TEstablishConnection = {
 type TAttachAudioStream = {
   inputAudioStream: MediaStream;
   rtcPeerConnection: RTCPeerConnection;
-};
-
-const handleVolumeChange = (event: Event) => {
-  const slider = event.target as HTMLInputElement;
-  const newVolume = parseFloat(slider.value);
-  console.log("Volume slider changed to in initialize: ", newVolume);
-
-  audioContexts.forEach(({ gainNode }) => {
-    // eslint-disable-next-line no-param-reassign
-    gainNode.gain.value = newVolume;
-  });
-};
-
-const initializeAudioContextForElement = (audioElement: HTMLAudioElement) => {
-  const AudioContext =
-    // TODO Fixa detta så att det inte blir any, ändra om när det funkar
-    // eslint-disable-next-line
-    window.AudioContext || (window as any).webkitAudioContext;
-  const audioCtx = new AudioContext();
-
-  const track = audioCtx.createMediaElementSource(audioElement);
-
-  if (audioCtx.state === "suspended") {
-    audioCtx.resume();
-  }
-
-  const gainNode = audioCtx.createGain();
-  const volumeControl = document.getElementById(
-    "volumeSlider"
-  ) as HTMLInputElement;
-  volumeControl.addEventListener("input", handleVolumeChange);
-
-  console.log("AUDIOCTX DESTINATION: ", audioCtx.destination);
-
-  track.connect(gainNode).connect(audioCtx.destination);
 };
 
 const attachInputAudioToPeerConnection = ({
@@ -103,10 +66,6 @@ const establishConnection = ({
       audioElement.controls = false;
       audioElement.autoplay = true;
 
-      if (isIosSafari) {
-        initializeAudioContextForElement(audioElement);
-      }
-
       audioElement.onerror = () => {
         dispatch({
           type: "ERROR",
@@ -116,7 +75,7 @@ const establishConnection = ({
         });
       };
 
-      // audioElement.srcObject = selectedStream;
+      audioElement.srcObject = selectedStream;
 
       setAudioElements((prevArray) => [audioElement, ...prevArray]);
       if (joinProductionOptions.audiooutput) {
@@ -292,15 +251,6 @@ export const useRtcConnection = ({
       el.pause();
       // eslint-disable-next-line no-param-reassign
       el.srcObject = null;
-
-      if (isIosSafari && audioContexts.has(el)) {
-        const audioContextData = audioContexts.get(el);
-        if (audioContextData) {
-          const { context } = audioContextData;
-          context.close();
-          audioContexts.delete(el);
-        }
-      }
     });
   }, [audioElementsRef]);
 
