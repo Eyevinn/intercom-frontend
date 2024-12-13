@@ -1,7 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import styled from "@emotion/styled";
 import { useState } from "react";
-import { ProductionLine } from "./components/production-line/production-line.tsx";
 import { ErrorPage } from "./components/router-error.tsx";
 import { useDevicePermissions } from "./use-device-permission.ts";
 import { LandingPage } from "./components/landing-page/landing-page.tsx";
@@ -19,6 +18,7 @@ import { ManageProductions } from "./components/manage-productions/manage-produc
 import { isValidBrowser } from "./bowser.ts";
 import { DisplayContainerHeader } from "./components/landing-page/display-container-header.tsx";
 import { NavigateToRootButton } from "./components/navigate-to-root-button/navigate-to-root-button.tsx";
+import { CallsPage } from "./components/calls-page/calls-page.tsx";
 
 const DisplayBoxPositioningContainer = styled(FlexContainer)`
   justify-content: center;
@@ -126,8 +126,8 @@ const App = () => {
                     errorElement={<ErrorPage />}
                   />
                   <Route
-                    path="/production/:productionId/line/:lineId"
-                    element={<ProductionLine />}
+                    path="/production-calls/production/:productionId/line/:lineId"
+                    element={<CallsPage />}
                     errorElement={<ErrorPage />}
                   />
                   <Route path="*" element={<NotFound />} />
