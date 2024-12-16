@@ -64,6 +64,7 @@ export const JoinProduction = ({
   const { readFromStorage, writeToStorage } = useStorage("username");
   const [refresh, setRefresh] = useState<number>(0);
   const [firefoxWarningModalOpen, setFirefoxWarningModalOpen] = useState(false);
+
   const {
     formState: { errors, isValid },
     register,
