@@ -1,5 +1,6 @@
 import styled from "@emotion/styled";
 import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { isMobile } from "../../bowser";
 import { TBasicProductionResponse } from "../../api/api";
 import { useGlobalState } from "../../global-state/context-provider";
@@ -10,7 +11,6 @@ import {
   UsersIcon,
 } from "../../assets/icons/icon";
 import { SecondaryButton } from "../landing-page/form-elements";
-import { useNavigate } from "react-router-dom";
 
 const ProductionItemWrapper = styled.div`
   text-align: start;
@@ -102,9 +102,7 @@ const LineBlockTitle = styled.div`
   font-size: 1.5rem;
 `;
 
-const LineBlockParticipants = styled.div`
-  // margin-top: 0.5rem;
-`;
+const LineBlockParticipants = styled.div``;
 
 const LineBlockParticipant = styled.div`
   margin-top: 0.5rem;
@@ -162,8 +160,6 @@ export const ProductionsListItem = ({
         payload: {
           id: uuid,
           callState: {
-            production: null,
-            reloadProductionList: false,
             devices: null,
             joinProductionOptions: payload,
             mediaStreamInput: null,

@@ -157,7 +157,6 @@ export const PrimaryButton = styled(ActionButton)`
 `;
 
 export const SecondaryButton = styled(ActionButton)`
-  // background: #1db954;
   background: white;
   &:before,
   &:after {
