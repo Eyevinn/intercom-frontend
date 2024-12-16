@@ -109,7 +109,7 @@ export const SettingsModal = ({
             (val) => val && val === currentValues[field]
           ).length > 1;
 
-        if (!currentValues[field] || currentValues[field] === "") {
+        if (!currentValues[field]) {
           acc[field] = "This field can not be empty.";
         } else if (isDuplicate) {
           acc[field] = "This key is already in use.";
@@ -137,9 +137,7 @@ export const SettingsModal = ({
 
   const handleSave = () => {
     const hasErrors = Object.values(errors).some((error) => error !== "");
-    const hasEmptyFields = Object.values(hotkeys).some(
-      (value) => !value || value === ""
-    );
+    const hasEmptyFields = Object.values(hotkeys).some((value) => !value);
 
     if (hasErrors || hasEmptyFields) {
       return;
