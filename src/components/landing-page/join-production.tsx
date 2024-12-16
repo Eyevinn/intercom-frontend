@@ -170,8 +170,6 @@ export const JoinProduction = ({
       payload: {
         id: uuid,
         callState: {
-          production: null,
-          reloadProductionList: false,
           devices: null,
           joinProductionOptions: payload,
           mediaStreamInput: null,
