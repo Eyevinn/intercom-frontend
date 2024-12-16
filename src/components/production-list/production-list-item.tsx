@@ -140,17 +140,13 @@ export const ProductionsListItem = ({
 
   const goToProduction = (lineId: string) => {
     // TODO add some visual feedback here if somehow userSettings is not configured
-    if (
-      userSettings?.username &&
-      userSettings?.audioinput &&
-      userSettings?.audiooutput
-    ) {
+    if (userSettings?.username) {
       const payload = {
         productionId: production.productionId,
         lineId,
         username: userSettings.username,
-        audioinput: userSettings.audioinput,
-        audiooutput: userSettings.audiooutput,
+        audioinput: userSettings?.audioinput || "no-device",
+        audiooutput: userSettings?.audiooutput || null,
       };
 
       const uuid = globalThis.crypto.randomUUID();
