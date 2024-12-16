@@ -2,6 +2,7 @@ import styled from "@emotion/styled";
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { SubmitHandler, useForm } from "react-hook-form";
+import { useHotkeys } from "react-hotkeys-hook";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { useAudioInput } from "./use-audio-input.ts";
 import { UserList } from "./user-list.tsx";
@@ -165,6 +166,7 @@ export const ProductionLine = ({
   const [refresh, setRefresh] = useState<number>(0);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [confirmExitModalOpen, setConfirmExitModalOpen] = useState(false);
+  const [value, setValue] = useState(0.75);
   const [hotkeys, setHotkeys] = useState<Hotkeys>({
     muteHotkey: "m",
     speakerHotkey: "n",
@@ -191,6 +193,46 @@ export const ProductionLine = ({
   const [inputAudioStream, resetAudioInput] = useAudioInput({
     audioInputId: joinProductionOptions?.audioinput ?? null,
     audioOutputId: joinProductionOptions?.audiooutput ?? null,
+  });
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = parseFloat(e.target.value);
+    setValue(newValue);
+
+    audioElements?.forEach((audioElement) => {
+      console.log("Setting volume to: ", newValue);
+      // eslint-disable-next-line no-param-reassign
+      audioElement.volume = newValue;
+    });
+  };
+
+  const handleVolumeButtonClick = (type: "increase" | "decrease") => {
+    const newValue =
+      type === "increase"
+        ? Math.min(value + 0.05, 1)
+        : Math.max(value - 0.05, 0);
+    setValue(newValue);
+    // TODO: Fix for iOS
+  };
+
+  useHotkeys(savedHotkeys.increaseVolumeHotkey || "u", () => {
+    const newValue = Math.min(value + 0.05, 1);
+    setValue(newValue);
+
+    audioElements?.forEach((audioElement) => {
+      // eslint-disable-next-line no-param-reassign
+      audioElement.volume = newValue;
+    });
+  });
+
+  useHotkeys(savedHotkeys.decreaseVolumeHotkey || "d", () => {
+    const newValue = Math.max(value - 0.05, 0);
+    setValue(newValue);
+
+    audioElements?.forEach((audioElement) => {
+      // eslint-disable-next-line no-param-reassign
+      audioElement.volume = newValue;
+    });
   });
 
   const muteInput = useCallback(
@@ -229,6 +271,14 @@ export const ProductionLine = ({
     permission: true,
     refresh,
   });
+
+  useEffect(() => {
+    if (value === 0) {
+      setIsOutputMuted(true);
+    } else {
+      setIsOutputMuted(false);
+    }
+  }, [value]);
 
   useEffect(() => {
     if (joinProductionOptions) {
@@ -450,9 +500,9 @@ export const ProductionLine = ({
             >
               <DisplayContainerHeader>Controls</DisplayContainerHeader>
               <VolumeSlider
-                audioElements={audioElements || []}
-                increaseVolumeKey={savedHotkeys.increaseVolumeHotkey}
-                decreaseVolumeKey={savedHotkeys.decreaseVolumeHotkey}
+                value={value}
+                handleInputChange={handleInputChange}
+                handleVolumeButtonClick={handleVolumeButtonClick}
               />
               <FlexContainer>
                 <FlexButtonWrapper className="first">
