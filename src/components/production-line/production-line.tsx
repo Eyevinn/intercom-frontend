@@ -1,11 +1,10 @@
 import styled from "@emotion/styled";
-import React, { FC, useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
+import { SubmitHandler, useForm } from "react-hook-form";
+import { useHotkeys } from "react-hotkeys-hook";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { useAudioInput } from "./use-audio-input.ts";
-import { useRtcConnection } from "./use-rtc-connection.ts";
-import { useEstablishSession } from "./use-establish-session.ts";
-import { SecondaryButton } from "../landing-page/form-elements.tsx";
 import { UserList } from "./user-list.tsx";
 import {
   MicMuted,
@@ -14,24 +13,42 @@ import {
   SpeakerOn,
   SettingsIcon,
 } from "../../assets/icons/icon.tsx";
+import {
+  ActionButton,
+  DecorativeLabel,
+  FormLabel,
+  FormContainer,
+  FormSelect,
+  PrimaryButton,
+  StyledWarningMessage,
+} from "../landing-page/form-elements.tsx";
+import { uniqBy } from "../../helpers.ts";
 import { Spinner } from "../loader/loader.tsx";
 import { DisplayContainerHeader } from "../landing-page/display-container-header.tsx";
 import { DisplayContainer, FlexContainer } from "../generic-components.ts";
-import { useHeartbeat } from "./use-heartbeat.ts";
-import { JoinProduction } from "../landing-page/join-production.tsx";
 import { useDeviceLabels } from "./use-device-labels.ts";
-import { isMobile } from "../../bowser.ts";
+import { isBrowserFirefox, isMobile } from "../../bowser.ts";
 import { useLineHotkeys, useSpeakerHotkeys } from "./use-line-hotkeys.ts";
 import { LongPressToTalkButton } from "./long-press-to-talk-button.tsx";
 import { useLinePolling } from "./use-line-polling.ts";
 import { useFetchProduction } from "../landing-page/use-fetch-production.ts";
 import { useIsLoading } from "./use-is-loading.ts";
 import { useCheckBadLineData } from "./use-check-bad-line-data.ts";
-import { NavigateToRootButton } from "../navigate-to-root-button/navigate-to-root-button.tsx";
 import { useAudioCue } from "./use-audio-cue.ts";
 import { DisplayWarning } from "../display-box.tsx";
+import { TJoinProductionOptions } from "./types.ts";
 import { SettingsModal, Hotkeys } from "./settings-modal.tsx";
+import { CallState } from "../../global-state/types.ts";
+import { ExitCallButton } from "./exit-call-button.tsx";
+import { Modal } from "../modal/modal.tsx";
+import { VerifyDecision } from "../verify-decision/verify-decision.tsx";
+import { ModalConfirmationText } from "../modal/modal-confirmation-text.ts";
+import { SymphonyRtcConnectionComponent } from "./symphony-rtc-connection-component.tsx";
+import { ReloadDevicesButton } from "../reload-devices-button.tsx/reload-devices-button.tsx";
+import { useFetchDevices } from "../../hooks/use-fetch-devices.ts";
 import VolumeSlider from "./volume-slider.tsx";
+
+type FormValues = TJoinProductionOptions;
 
 const TempDiv = styled.div`
   padding: 0 0 2rem 0;
@@ -54,6 +71,10 @@ const SmallText = styled.span`
   font-size: 1.6rem;
 `;
 
+const LargeText = styled.span`
+  word-break: break-all;
+`;
+
 const ButtonIcon = styled.div`
   width: 3rem;
   display: inline-block;
@@ -74,17 +95,23 @@ const FlexButtonWrapper = styled.div`
   width: 50%;
   padding: 0 1rem 2rem 1rem;
 
-  :first-of-type {
+  &.first {
     padding-left: 0;
   }
 
-  :last-of-type {
+  &.last {
     padding-right: 0;
   }
 `;
 
-const UserControlBtn = styled(SecondaryButton)`
+const UserControlBtn = styled(ActionButton)`
+  background: rgba(50, 56, 59, 1);
+  border: 0.2rem solid #6d6d6d;
   width: 100%;
+
+  &:disabled {
+    background: rgba(50, 56, 59, 0.5);
+  }
 `;
 
 const LongPressWrapper = styled.div`
@@ -92,8 +119,10 @@ const LongPressWrapper = styled.div`
   touch-action: none;
 `;
 
-const ButtonWrapper = styled.span`
-  margin: 0 2rem 0 0;
+const ButtonWrapper = styled.div`
+  display: flex;
+  justify-content: space-between;
+  margin: 0 2rem 2rem 1rem;
 `;
 
 const ListWrapper = styled(DisplayContainer)`
@@ -125,110 +154,122 @@ const VolumeSliderWrapper = styled.div`
   padding: 1rem;
 `;
 
-export const ProductionLine: FC = () => {
+type TProductionLine = {
+  id: string;
+  callState: CallState;
+  isSingleCall: boolean;
+};
+
+export const ProductionLine = ({
+  id,
+  callState,
+  isSingleCall,
+}: TProductionLine) => {
   const { productionId: paramProductionId, lineId: paramLineId } = useParams();
-  const [
-    { joinProductionOptions, dominantSpeaker, audioLevelAboveThreshold },
-    dispatch,
-  ] = useGlobalState();
+  const [{ devices }, dispatch] = useGlobalState();
+  const [connectionActive, setConnectionActive] = useState(true);
   const [isInputMuted, setIsInputMuted] = useState(true);
   const [isOutputMuted, setIsOutputMuted] = useState(false);
+  const [showDeviceSettings, setShowDeviceSettings] = useState(false);
+  const [refresh, setRefresh] = useState<number>(0);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+  const [confirmExitModalOpen, setConfirmExitModalOpen] = useState(false);
+  const [value, setValue] = useState(0.75);
   const [hotkeys, setHotkeys] = useState<Hotkeys>({
     muteHotkey: "m",
     speakerHotkey: "n",
     pressToTalkHotkey: "t",
+    increaseVolumeHotkey: "u",
+    decreaseVolumeHotkey: "d",
   });
   const [savedHotkeys, setSavedHotkeys] = useState<Hotkeys>({
     muteHotkey: "m",
     speakerHotkey: "n",
     pressToTalkHotkey: "t",
+    increaseVolumeHotkey: "u",
+    decreaseVolumeHotkey: "d",
   });
+  const {
+    joinProductionOptions,
+    dominantSpeaker,
+    audioLevelAboveThreshold,
+    connectionState,
+    audioElements,
+    sessionId,
+  } = callState;
 
   // VOLUME THINGS
   const [volume, setVolume] = useState(0.5);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const audioContextRef = useRef<AudioContext | null>(null);
+  const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
   const gainNodeRef = useRef<GainNode | null>(null);
-  const audioSourceRef = useRef<AudioBufferSourceNode | null>(null);
-  const audioBufferRef = useRef<AudioBuffer | null>(null);
-  const volumeRef = useRef(volume);
-  const [isAudioReady, setIsAudioReady] = useState(false);
+  // const sourceNodes = useRef<
+  //   Map<HTMLMediaElement, MediaElementAudioSourceNode>
+  // >(new Map());
 
-  const startAudio = useCallback(() => {
-    console.log("Starting audio");
-    if (
-      audioContextRef.current &&
-      audioBufferRef.current &&
-      gainNodeRef.current
-    ) {
-      const audioSource = audioContextRef.current.createBufferSource();
-      audioSource.buffer = audioBufferRef.current;
-
-      audioSource.connect(gainNodeRef.current);
-      audioSource.start();
-      console.log("Audio started");
-      audioSourceRef.current = audioSource;
-
-      setIsPlaying(true);
-    }
-  }, []);
-
+  // TODO Should not use volume here?? shouldn'r rerender on each volume change
   useEffect(() => {
-    console.log("AUDIO CONTEXT", audioContextRef.current);
-    console.log("AUDIO BUFFER", audioBufferRef.current);
-    console.log("GAIN NODE", gainNodeRef.current);
-    console.log("IS PLAYING", isPlaying);
+    const context = new AudioContext();
+    const gainNode = context.createGain();
+    // gainNode.gain.value = volume;
 
-    if (isAudioReady && !isPlaying) {
-      startAudio();
-    }
-  }, [isPlaying, startAudio, isAudioReady]);
+    setAudioContext(context);
+    gainNodeRef.current = gainNode;
 
-  useEffect(() => {
-    const fetchAudio = async () => {
-      try {
-        const audioContext = new AudioContext();
-        const response = await fetch(
-          "https://s3-us-west-2.amazonaws.com/s.cdpn.io/858/outfoxing.mp3"
-        );
-        const arrayBuffer = await response.arrayBuffer();
-        const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-
-        audioBufferRef.current = audioBuffer;
-        audioContextRef.current = audioContext;
-
-        const gainNode = audioContext.createGain();
-        gainNode.gain.setValueAtTime(
-          volumeRef.current,
-          audioContext.currentTime
-        ); // Use the ref value here
-        gainNode.connect(audioContext.destination);
-
-        gainNodeRef.current = gainNode;
-        setIsAudioReady(true);
-      } catch (error) {
-        console.error("Error fetching audio file:", error);
-      }
+    return () => {
+      context.close();
     };
-
-    fetchAudio();
   }, []);
+
+  // const updateAudioVolume = (context: AudioContext, gainNode: GainNode) => {
+  //   if (context.state === "suspended") {
+  //     context.resume();
+  //   }
+
+  //   // eslint-disable-next-line no-param-reassign
+  //   gainNode.gain.value = volume;
+
+  //   audioElements?.forEach((audioElement) => {
+  //     if (!sourceNodes.current.has(audioElement)) {
+  //       const sourceNode = context.createMediaElementSource(audioElement);
+  //       sourceNode.connect(gainNode).connect(context.destination);
+  //       sourceNodes.current.set(audioElement, sourceNode);
+  //     }
+  //   });
+  // };
+
+  useEffect(() => {
+    if (audioContext && gainNodeRef.current && audioElements) {
+      // updateAudioVolume(audioContext, gainNodeRef.current);
+    }
+  }, [audioElements, volume, audioContext]);
 
   const handleVolumeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const newVolume = parseFloat(event.target.value);
-    setVolume(newVolume);
-
-    if (gainNodeRef.current && audioContextRef.current) {
-      gainNodeRef.current.gain.setValueAtTime(
-        newVolume,
-        audioContextRef.current.currentTime
-      );
-    }
+    setVolume(parseFloat(event.target.value));
   };
 
-  const inputAudioStream = useAudioInput({
-    inputId: joinProductionOptions?.audioinput ?? null,
+  const [inputAudioStream, resetAudioInput] = useAudioInput({
+    audioInputId: joinProductionOptions?.audioinput ?? null,
+    audioOutputId: joinProductionOptions?.audiooutput ?? null,
+  });
+
+  useHotkeys(savedHotkeys.increaseVolumeHotkey || "u", () => {
+    const newValue = Math.min(value + 0.05, 1);
+    setValue(newValue);
+
+    audioElements?.forEach((audioElement) => {
+      // eslint-disable-next-line no-param-reassign
+      audioElement.volume = newValue;
+    });
+  });
+
+  useHotkeys(savedHotkeys.decreaseVolumeHotkey || "d", () => {
+    const newValue = Math.max(value - 0.05, 0);
+    setValue(newValue);
+
+    audioElements?.forEach((audioElement) => {
+      // eslint-disable-next-line no-param-reassign
+      audioElement.volume = newValue;
+    });
   });
 
   const muteInput = useCallback(
@@ -247,12 +288,13 @@ export const ProductionLine: FC = () => {
   const { playEnterSound, playExitSound } = useAudioCue();
 
   const exit = useCallback(() => {
+    setConnectionActive(false);
     playExitSound();
     dispatch({
-      type: "UPDATE_JOIN_PRODUCTION_OPTIONS",
-      payload: null,
+      type: "REMOVE_CALL",
+      payload: { id },
     });
-  }, [dispatch, playExitSound]);
+  }, [dispatch, id, playExitSound]);
 
   useLineHotkeys({
     muteInput,
@@ -261,17 +303,25 @@ export const ProductionLine: FC = () => {
     customKeyPress: savedHotkeys.pressToTalkHotkey,
   });
 
-  const { sessionId, sdpOffer } = useEstablishSession({
-    joinProductionOptions,
+  useFetchDevices({
     dispatch,
+    permission: true,
+    refresh,
   });
 
-  const { connectionState, audioElements } = useRtcConnection({
-    inputAudioStream,
-    sdpOffer,
-    joinProductionOptions,
-    sessionId,
-  });
+  useEffect(() => {
+    if (value === 0) {
+      setIsOutputMuted(true);
+    } else {
+      setIsOutputMuted(false);
+    }
+  }, [value]);
+
+  useEffect(() => {
+    if (joinProductionOptions) {
+      setConnectionActive(true);
+    }
+  }, [joinProductionOptions]);
 
   useEffect(() => {
     if (connectionState === "connected") {
@@ -280,6 +330,8 @@ export const ProductionLine: FC = () => {
   }, [connectionState, playEnterSound]);
 
   const muteOutput = useCallback(() => {
+    if (!audioElements) return;
+
     audioElements.forEach((singleElement: HTMLAudioElement) => {
       // eslint-disable-next-line no-param-reassign
       singleElement.muted = !isOutputMuted;
@@ -293,7 +345,7 @@ export const ProductionLine: FC = () => {
     customKey: savedHotkeys.speakerHotkey,
   });
 
-  const line = useLinePolling({ joinProductionOptions });
+  const line = useLinePolling({ callId: id, joinProductionOptions });
 
   const { production, error: fetchProductionError } = useFetchProduction(
     joinProductionOptions
@@ -306,16 +358,16 @@ export const ProductionLine: FC = () => {
 
     dispatch({
       type: "ERROR",
-      payload:
-        fetchProductionError instanceof Error
-          ? fetchProductionError
-          : new Error("Error fetching production."),
+      payload: {
+        error:
+          fetchProductionError instanceof Error
+            ? fetchProductionError
+            : new Error("Error fetching production."),
+      },
     });
   }, [dispatch, fetchProductionError]);
 
   const { loading, connectionError } = useIsLoading({ connectionState });
-
-  useHeartbeat({ sessionId });
 
   const deviceLabels = useDeviceLabels({ joinProductionOptions });
 
@@ -323,8 +375,82 @@ export const ProductionLine: FC = () => {
     joinProductionOptions,
     paramLineId,
     paramProductionId,
+    callId: id,
     dispatch,
   });
+
+  const {
+    formState: { isValid, isDirty },
+    register,
+    handleSubmit,
+  } = useForm<FormValues>({
+    defaultValues: {
+      username: "",
+      productionId: paramProductionId || "",
+      lineId: paramLineId || undefined,
+    },
+    resetOptions: {
+      keepDirtyValues: true, // user-interacted input will be retained
+      keepErrors: true, // input errors will be retained with value update
+    },
+  });
+
+  const outputDevices = devices
+    ? uniqBy(
+        devices.filter((d) => d.kind === "audiooutput"),
+        (item) => item.deviceId
+      )
+    : [];
+
+  const inputDevices = devices
+    ? uniqBy(
+        devices.filter((d) => d.kind === "audioinput"),
+        (item) => item.deviceId
+      )
+    : [];
+
+  const settingsButtonPressed = () => {
+    setRefresh((prev) => prev + 1);
+    setShowDeviceSettings(!showDeviceSettings);
+  };
+
+  // Reset connection and re-connect to production-line
+  const onSubmit: SubmitHandler<FormValues> = async (payload) => {
+    const unchangedPayload =
+      payload.audioinput === joinProductionOptions?.audioinput &&
+      payload.audiooutput === joinProductionOptions?.audiooutput;
+    if (joinProductionOptions && !unchangedPayload) {
+      setConnectionActive(false);
+      resetAudioInput();
+      muteInput(true);
+
+      const newJoinProductionOptions = {
+        ...payload,
+        productionId: joinProductionOptions.productionId,
+        lineId: joinProductionOptions.lineId,
+        username: joinProductionOptions.username,
+      };
+
+      dispatch({
+        type: "UPDATE_CALL",
+        payload: {
+          id,
+          updates: {
+            devices: null,
+            joinProductionOptions: newJoinProductionOptions,
+            mediaStreamInput: null,
+            dominantSpeaker: null,
+            audioLevelAboveThreshold: false,
+            connectionState: null,
+            audioElements: null,
+            sessionId: null,
+          },
+        },
+      });
+
+      setShowDeviceSettings(false);
+    }
+  };
 
   const handleSettingsClick = () => {
     setIsSettingsModalOpen(!isSettingsModalOpen);
@@ -340,28 +466,41 @@ export const ProductionLine: FC = () => {
   return (
     <>
       <HeaderWrapper>
-        <ButtonWrapper>
-          <NavigateToRootButton resetOnExit={exit} />
-        </ButtonWrapper>
+        {!isSingleCall && (
+          <ButtonWrapper>
+            <ExitCallButton resetOnExit={() => setConfirmExitModalOpen(true)} />
+            {confirmExitModalOpen && (
+              <Modal onClose={() => setConfirmExitModalOpen(false)}>
+                <DisplayContainerHeader>Confirm</DisplayContainerHeader>
+                <ModalConfirmationText>
+                  Are you sure you want to leave the call?
+                </ModalConfirmationText>
+                <VerifyDecision
+                  confirm={exit}
+                  abort={() => setConfirmExitModalOpen(false)}
+                />
+              </Modal>
+            )}
+          </ButtonWrapper>
+        )}
+
         {!loading && production && line && (
           <DisplayContainerHeader>
-            <SmallText>Production:</SmallText> {production.name}{" "}
-            <SmallText>Line:</SmallText> {line.name}
+            <SmallText>Production:</SmallText>
+            <LargeText>{production.name} </LargeText>
+            <SmallText>Line:</SmallText>
+            <LargeText>{line.name}</LargeText>
           </DisplayContainerHeader>
         )}
       </HeaderWrapper>
 
-      {!joinProductionOptions && paramProductionId && paramLineId && (
-        <FlexContainer>
-          <DisplayContainer>
-            <JoinProduction
-              preSelected={{
-                preSelectedProductionId: paramProductionId,
-                preSelectedLineId: paramLineId,
-              }}
-            />
-          </DisplayContainer>
-        </FlexContainer>
+      {connectionActive && (
+        <SymphonyRtcConnectionComponent
+          joinProductionOptions={joinProductionOptions}
+          inputAudioStream={inputAudioStream}
+          callId={id}
+          dispatch={dispatch}
+        />
       )}
 
       {joinProductionOptions && connectionState && (
@@ -402,23 +541,25 @@ export const ProductionLine: FC = () => {
                 <VolumeSlider
                   value={volume}
                   min={0}
-                  max={1}
+                  max={2}
                   step={0.01}
                   onChange={handleVolumeChange}
                 />
               </VolumeSliderWrapper>
-
               <FlexContainer>
-                <FlexButtonWrapper>
-                  <UserControlBtn type="button" onClick={() => muteOutput()}>
+                <FlexButtonWrapper className="first">
+                  <UserControlBtn
+                    type="button"
+                    onClick={() => muteOutput()}
+                    disabled={value === 0}
+                  >
                     <ButtonIcon>
                       {isOutputMuted ? <SpeakerOff /> : <SpeakerOn />}
                     </ButtonIcon>
                   </UserControlBtn>
                 </FlexButtonWrapper>
-
                 {inputAudioStream && inputAudioStream !== "no-device" && (
-                  <FlexButtonWrapper>
+                  <FlexButtonWrapper className="last">
                     <UserControlBtn
                       type="button"
                       onClick={() => muteInput(!isInputMuted)}
@@ -448,6 +589,78 @@ export const ProductionLine: FC = () => {
                   <strong>Audio Output:</strong> {deviceLabels.outputLabel}
                 </TempDiv>
               )}
+              <FlexButtonWrapper>
+                <PrimaryButton
+                  type="button"
+                  onClick={() => settingsButtonPressed()}
+                >
+                  {!showDeviceSettings ? "Change device" : "Close"}
+                </PrimaryButton>
+              </FlexButtonWrapper>
+              {showDeviceSettings && devices && (
+                <FormContainer>
+                  <FormLabel>
+                    <DecorativeLabel>Input</DecorativeLabel>
+                    <FormSelect
+                      // eslint-disable-next-line
+                      {...register(`audioinput`)}
+                    >
+                      {inputDevices.length > 0 ? (
+                        inputDevices.map((device) => (
+                          <option key={device.deviceId} value={device.deviceId}>
+                            {device.label}
+                          </option>
+                        ))
+                      ) : (
+                        <option value="no-device">No device available</option>
+                      )}
+                    </FormSelect>
+                  </FormLabel>
+                  <FormLabel>
+                    <DecorativeLabel>Output</DecorativeLabel>
+                    {outputDevices.length > 0 ? (
+                      <FormSelect
+                        // eslint-disable-next-line
+                        {...register(`audiooutput`)}
+                      >
+                        {outputDevices.map((device) => (
+                          <option key={device.deviceId} value={device.deviceId}>
+                            {device.label}
+                          </option>
+                        ))}
+                      </FormSelect>
+                    ) : (
+                      <StyledWarningMessage>
+                        Controlled by operating system
+                      </StyledWarningMessage>
+                    )}
+                  </FormLabel>
+                  {isBrowserFirefox && !isMobile && (
+                    <StyledWarningMessage>
+                      If a new device has been added Firefox needs the
+                      permission to be manually reset. If your device is
+                      missing, please remove the permission and reload page.
+                    </StyledWarningMessage>
+                  )}
+                  <ButtonWrapper>
+                    <PrimaryButton
+                      type="submit"
+                      disabled={!isValid || !isDirty}
+                      onClick={handleSubmit(onSubmit)}
+                    >
+                      Save
+                    </PrimaryButton>
+                    {!(isBrowserFirefox && !isMobile) && (
+                      <ReloadDevicesButton
+                        handleReloadDevices={() =>
+                          setRefresh((prev) => prev + 1)
+                        }
+                        devices={devices}
+                      />
+                    )}
+                  </ButtonWrapper>
+                </FormContainer>
+              )}
 
               {inputAudioStream &&
                 inputAudioStream !== "no-device" &&
@@ -474,6 +687,18 @@ export const ProductionLine: FC = () => {
                         {savedHotkeys.pressToTalkHotkey.toUpperCase()}:{" "}
                       </strong>
                       Push to Talk
+                    </TempDiv>
+                    <TempDiv>
+                      <strong>
+                        {savedHotkeys.increaseVolumeHotkey.toUpperCase()}:{" "}
+                      </strong>
+                      Increase Volume
+                    </TempDiv>
+                    <TempDiv>
+                      <strong>
+                        {savedHotkeys.decreaseVolumeHotkey.toUpperCase()}:{" "}
+                      </strong>
+                      Decrease Volume
                     </TempDiv>
                     {isSettingsModalOpen && (
                       <SettingsModal

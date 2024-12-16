@@ -3,12 +3,10 @@ import { RemoveIcon } from "../../assets/icons/icon.tsx";
 
 const RemoveLineBtn = styled.button`
   cursor: pointer;
-  position: absolute;
-  top: -0.7rem;
-  right: -0.5rem;
-  padding: 1rem;
   background: transparent;
   border: transparent;
+  position: ${({ isCreatingLine }: { isCreatingLine?: boolean }) =>
+    isCreatingLine ? "absolute" : "relative"};
 `;
 
 const ButtonIcon = styled.div`
@@ -17,11 +15,17 @@ const ButtonIcon = styled.div`
 
 export const RemoveLineButton = ({
   removeLine,
+  isCreatingLine,
 }: {
   removeLine: () => void;
+  isCreatingLine?: boolean;
 }) => {
   return (
-    <RemoveLineBtn type="button" onClick={() => removeLine()}>
+    <RemoveLineBtn
+      isCreatingLine={isCreatingLine}
+      type="button"
+      onClick={() => removeLine()}
+    >
       <ButtonIcon>
         <RemoveIcon />
       </ButtonIcon>

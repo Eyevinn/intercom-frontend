@@ -6,12 +6,14 @@ import { TGlobalStateAction } from "../../global-state/global-state-actions.ts";
 
 type TUseGetRtcOfferOptions = {
   joinProductionOptions: TJoinProductionOptions | null;
+  callId: string;
   dispatch: Dispatch<TGlobalStateAction>;
 };
 
 // A hook for fetching the web rtc sdp offer from the backend
 export const useEstablishSession = ({
   joinProductionOptions,
+  callId,
   dispatch,
 }: TUseGetRtcOfferOptions) => {
   const [sdpOffer, setSdpOffer] = useState<string | null>(null);
@@ -40,23 +42,25 @@ export const useEstablishSession = ({
       .catch((e) => {
         dispatch({
           type: "ERROR",
-          payload:
-            e instanceof Error
-              ? e
-              : new Error("Failed to establish audio session."),
+          payload: {
+            callId,
+            error:
+              e instanceof Error
+                ? e
+                : new Error("Failed to establish audio session."),
+          },
         });
       });
 
     return () => {
       aborted = true;
     };
-  }, [dispatch, joinProductionOptions]);
+  }, [callId, dispatch, joinProductionOptions]);
 
   // Clean up audio session
   useEffect(
     () => () => {
       if (!joinProductionOptions) return;
-
       if (sessionId) {
         API.deleteAudioSession({
           sessionId,

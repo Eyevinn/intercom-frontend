@@ -8,7 +8,20 @@ import UserSvg from "./user.svg?react";
 import ConfirmSvg from "./done.svg?react";
 import StepLeftSvg from "./chevron_left.svg?react";
 import StepRightSvg from "./navigate_next.svg?react";
+import RefreshSvg from "./refresh.svg?react";
 import Settings from "./settings.svg?react";
+import NoSound from "./no_sound.svg?react";
+import FullSound from "./full_sound.svg?react";
+import Minus from "./minus.svg?react";
+import Plus from "./plus.svg?react";
+import Headset from "./headset.svg?react";
+import UserSettings from "./user_settings.svg?react";
+import ChevronDown from "./chevron_down.svg?react";
+import ChevronUp from "./chevron_up.svg?react";
+import Person from "./person.svg?react";
+import Users from "./users.svg?react";
+import Add from "./add.svg?react";
+import Edit from "./edit.svg?react";
 
 export const MicMuted = () => <MicMute />;
 
@@ -30,4 +43,30 @@ export const StepLeftIcon = () => <StepLeftSvg />;
 
 export const StepRightIcon = () => <StepRightSvg />;
 
+export const RefreshIcon = () => <RefreshSvg />;
+
 export const SettingsIcon = () => <Settings />;
+
+export const NoSoundIcon = () => <NoSound />;
+
+export const FullSoundIcon = () => <FullSound />;
+
+export const MinusIcon = () => <Minus />;
+
+export const PlusIcon = () => <Plus />;
+
+export const UserSettingsIcon = () => <UserSettings />;
+
+export const ChevronDownIcon = () => <ChevronDown />;
+
+export const ChevronUpIcon = () => <ChevronUp />;
+
+export const HeadsetIcon = () => <Headset />;
+
+export const PersonIcon = () => <Person />;
+
+export const UsersIcon = () => <Users />;
+
+export const AddIcon = () => <Add />;
+
+export const EditIcon = () => <Edit />;

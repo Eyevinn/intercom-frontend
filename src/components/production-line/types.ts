@@ -1,3 +1,4 @@
+// TODO split user settings from join production options
 export type TJoinProductionOptions = {
   productionId: string;
   lineId: string;

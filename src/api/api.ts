@@ -25,9 +25,10 @@ type TLine = {
   participants: TParticipant[];
 };
 
-type TBasicProductionResponse = {
+export type TBasicProductionResponse = {
   name: string;
   productionId: string;
+  lines?: TLine[];
 };
 
 type TFetchProductionResponse = TBasicProductionResponse & {

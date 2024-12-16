@@ -1,11 +1,10 @@
 import { ErrorMessage } from "@hookform/error-message";
 import { useForm } from "react-hook-form";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "@emotion/styled";
 import { DisplayContainerHeader } from "../landing-page/display-container-header";
 import {
   DecorativeLabel,
-  PrimaryButton,
   StyledWarningMessage,
 } from "../landing-page/form-elements";
 import { useFetchProduction } from "../landing-page/use-fetch-production";
@@ -19,8 +18,8 @@ import { TProduction } from "../production-line/types";
 import { useFetchProductionList } from "../landing-page/use-fetch-production-list";
 import { isMobile } from "../../bowser";
 import { useGlobalState } from "../../global-state/context-provider";
-import { useRefreshAnimation } from "../landing-page/use-refresh-animation";
-import { PaginatedList } from "./paginated-list";
+import { ProductionTable } from "./production-table";
+import { TBasicProductionResponse } from "../../api/api";
 
 type FormValue = {
   productionId: string;
@@ -30,25 +29,38 @@ type MobileLayout = {
   isMobile: boolean;
 };
 
-const ShowListBtn = styled(PrimaryButton)`
-  margin-bottom: 2rem;
+const FormInputWrapper = styled.div`
+  max-width: 55rem;
+  flex: 1;
+  width: 100%;
+  margin-right: 2rem;
 `;
 
-const FormInputWrapper = styled.div`
-  max-width: 45rem;
-  padding-bottom: 1rem;
+const DecorativeLabelWrapper = styled.div<{ isMobile: boolean }>`
+  ${isMobile
+    ? `
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  width: 100%;
+  `
+    : `
+    `}
 `;
 
 const SubContainers = styled.div<MobileLayout>`
   width: 100%;
   display: flex;
-  margin-bottom: 2rem;
 
-  ${() => (isMobile ? `flex-direction: column;` : `flex-direction: row;`)}
+  ${() =>
+    isMobile
+      ? `flex-direction: column;`
+      : `flex-direction: row; gap: 2rem; margin-bottom: 2rem; align-items: center;`}
 `;
 
 const Container = styled.form`
   padding: 1rem 2rem 0 2rem;
+  margin-left: ${isMobile ? "0" : "12rem"};
 `;
 
 const BottomMessagesWrapper = styled.div`
@@ -75,14 +87,36 @@ const StyledBackBtnIcon = styled.div`
   margin: 0 0 3rem 0;
 `;
 
+const SubFlexContainer = styled.div`
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+
+  ${isMobile ? "" : `align-items: flex-start;`}
+`;
+
+const FlexContainer = styled.div`
+  margin-top: 2rem;
+
+  display: flex;
+  ${isMobile ? `flex-direction: column;` : `flex-direction: row;`}
+`;
+
+const PageContainer = styled.div`
+  margin-left: ${isMobile ? "0" : "12rem"};
+  margin-right: ${isMobile ? "0" : "12rem"};
+`;
+
 export const ManageProductions = () => {
   const [showDeleteDoneMessage, setShowDeleteDoneMessage] =
     useState<boolean>(false);
   const [verifyRemove, setVerifyRemove] = useState<boolean>(false);
-  const [showProductionsList, setShowProductionsList] =
-    useState<boolean>(false);
   const [delayOnGuideText, setDelayOnGuideText] = useState<boolean>(false);
   const [removeId, setRemoveId] = useState<null | number>(null);
+  const [productions, setProductions] = useState<TBasicProductionResponse[]>(
+    []
+  );
+  const [offset, setOffset] = useState<number>(0);
   const [cachedProduction, setCachedProduction] = useState<null | TProduction>(
     null
   );
@@ -91,7 +125,6 @@ export const ManageProductions = () => {
   );
 
   // Pagination
-  const [offset, setOffset] = useState("0");
   const limit = "10";
 
   const [, dispatch] = useGlobalState();
@@ -110,14 +143,11 @@ export const ManageProductions = () => {
     min: 1,
   });
 
-  const { productions, doInitialLoad, error } = useFetchProductionList({
-    limit,
-    offset,
-  });
-
-  const showRefreshing = useRefreshAnimation({
-    doInitialLoad,
-  });
+  const { productions: fetchedProductions, error: fetchError } =
+    useFetchProductionList({
+      offset: offset.toString(),
+      limit: limit.toString(),
+    });
 
   const {
     error: productionFetchError,
@@ -130,6 +160,14 @@ export const ManageProductions = () => {
     error: productionDeleteError,
     successfullDelete,
   } = useDeleteProduction(removeId);
+
+  useEffect(() => {
+    if (fetchedProductions) {
+      setProductions((prev) => {
+        return [...prev, ...fetchedProductions.productions];
+      });
+    }
+  }, [fetchedProductions]);
 
   useEffect(() => {
     if (formState.isSubmitSuccessful) {
@@ -154,7 +192,6 @@ export const ManageProductions = () => {
     if (production) {
       setCachedProduction(production);
       setProductionIdToFetch(null);
-      setShowProductionsList(false);
     }
   }, [production]);
 
@@ -198,113 +235,147 @@ export const ManageProductions = () => {
     event.preventDefault();
   };
 
+  const fetchNextProductions = () => {
+    setOffset((prevOffset) => {
+      const newOffset = prevOffset + parseInt(limit, 10);
+      return newOffset;
+    });
+  };
+
+  const handleScroll = (event: React.UIEvent<HTMLTableSectionElement>) => {
+    const bottom =
+      event.currentTarget.scrollHeight - event.currentTarget.scrollTop >=
+      event.currentTarget.clientHeight;
+
+    if (bottom) {
+      fetchNextProductions();
+    }
+  };
+
   return (
     <Container onSubmit={handleFormSubmit}>
       <StyledBackBtnIcon>
         <NavigateToRootButton />
       </StyledBackBtnIcon>
-      <DisplayContainerHeader>Manage Productions</DisplayContainerHeader>
-      <FormInputWrapper>
-        <FormInputWithLoader
-          onChange={(ev) => {
-            onChange(ev);
-            const pid = parseInt(ev.target.value, 10);
-            const confirmedPid = Number.isNaN(pid) ? null : pid;
-
-            setProductionIdToFetch(confirmedPid);
-            setShowDeleteDoneMessage(false);
-          }}
-          label="Production ID"
-          placeholder="Production ID"
-          name={name}
-          inputRef={ref}
-          onBlur={onBlur}
-          type="number"
-          loading={fetchLoader}
-        />
-        {delayOnGuideText && (
-          <StyledWarningMessage>
-            Please enter a production id
-          </StyledWarningMessage>
-        )}
-        {productionFetchError && (
-          <FetchErrorMessage>
-            The production ID could not be fetched. {productionFetchError.name}{" "}
-            {productionFetchError.message}.
-          </FetchErrorMessage>
-        )}
-      </FormInputWrapper>
-      <ErrorMessage
-        errors={errors}
-        name="productionId"
-        as={StyledWarningMessage}
-      />
-      {cachedProduction && (
-        <ShowListBtn
-          type="button"
-          onClick={() => {
-            setShowProductionsList(!showProductionsList);
-          }}
-        >
-          {showProductionsList ? "Hide" : "Show"} Productions List
-        </ShowListBtn>
-      )}
-      {(!cachedProduction || showProductionsList) && (
-        <PaginatedList
-          setProductionPage={(input) => setOffset(input)}
-          showRefreshing={showRefreshing}
-          productions={productions}
-          error={error}
-          manageProduction={(v: string) => {
-            setProductionIdToFetch(parseInt(v, 10));
-            reset({
-              productionId: `${v}`,
-            });
-            setShowProductionsList(false);
-            setShowDeleteDoneMessage(false);
-          }}
-        />
-      )}
-      {cachedProduction && (
-        <>
+      <PageContainer>
+        <DisplayContainerHeader>Manage Productions</DisplayContainerHeader>
+        {cachedProduction && (
           <DecorativeLabel>
-            <strong>Production name: {cachedProduction.name}</strong>
+            <strong>
+              Production name:{" "}
+              {isMobile ? (
+                <DecorativeLabelWrapper isMobile={isMobile}>
+                  <span>{cachedProduction.name}</span>
+                </DecorativeLabelWrapper>
+              ) : (
+                <span>{cachedProduction.name}</span>
+              )}
+            </strong>
           </DecorativeLabel>
-          <SubContainers isMobile={isMobile}>
-            <ManageLines
-              production={cachedProduction}
-              setProductionIdToFetch={setProductionIdToFetch}
-            />
-            <RemoveProduction
-              deleteLoader={deleteLoader}
-              handleSubmit={() => handleCustomSubmit()}
-              verifyRemove={verifyRemove}
-              setVerifyRemove={(input) => setVerifyRemove(input)}
-              reset={() => {
-                setVerifyRemove(false);
-                setRemoveId(null);
-                setCachedProduction(null);
+        )}
+        <FlexContainer>
+          <SubFlexContainer>
+            <SubContainers isMobile={isMobile}>
+              {isMobile && (
+                <ProductionTable
+                  error={fetchError}
+                  productions={productions}
+                  setProductionId={(v: string) => {
+                    setProductionIdToFetch(parseInt(v, 10));
+                    reset({
+                      productionId: `${v}`,
+                    });
+                    setShowDeleteDoneMessage(false);
+                  }}
+                  isSelectedProduction={cachedProduction}
+                  onScroll={handleScroll}
+                />
+              )}
+              <FormInputWrapper>
+                <FormInputWithLoader
+                  onChange={(ev) => {
+                    onChange(ev);
+                    const pid = parseInt(ev.target.value, 10);
+                    const confirmedPid = Number.isNaN(pid) ? null : pid;
+
+                    setProductionIdToFetch(confirmedPid);
+                    setShowDeleteDoneMessage(false);
+                  }}
+                  label="Production ID"
+                  placeholder="Production ID"
+                  name={name}
+                  inputRef={ref}
+                  onBlur={onBlur}
+                  type="number"
+                  loading={fetchLoader}
+                />
+                {delayOnGuideText && (
+                  <StyledWarningMessage>
+                    Please enter a production id
+                  </StyledWarningMessage>
+                )}
+                {productionFetchError && (
+                  <FetchErrorMessage>
+                    The production ID could not be fetched.{" "}
+                    {productionFetchError.name} {productionFetchError.message}.
+                  </FetchErrorMessage>
+                )}
+                <ErrorMessage
+                  errors={errors}
+                  name="productionId"
+                  as={StyledWarningMessage}
+                />
+              </FormInputWrapper>
+              {cachedProduction && (
+                <RemoveProduction
+                  deleteLoader={deleteLoader}
+                  handleSubmit={() => handleCustomSubmit()}
+                  verifyRemove={verifyRemove}
+                  setVerifyRemove={(input) => setVerifyRemove(input)}
+                  reset={() => {
+                    setVerifyRemove(false);
+                    setRemoveId(null);
+                  }}
+                />
+              )}
+            </SubContainers>
+            {cachedProduction && (
+              <ManageLines
+                production={cachedProduction}
+                setProductionIdToFetch={setProductionIdToFetch}
+              />
+            )}
+          </SubFlexContainer>
+          {!isMobile && (
+            <ProductionTable
+              error={fetchError}
+              productions={productions}
+              setProductionId={(v: string) => {
+                setProductionIdToFetch(parseInt(v, 10));
                 reset({
-                  productionId: "",
+                  productionId: `${v}`,
                 });
+                setShowDeleteDoneMessage(false);
               }}
+              isSelectedProduction={cachedProduction}
+              onScroll={handleScroll}
             />
-          </SubContainers>
-        </>
-      )}
-      <BottomMessagesWrapper>
-        {productionDeleteError && (
-          <FetchErrorMessage>
-            The production ID could not be deleted. {productionDeleteError.name}{" "}
-            {productionDeleteError.message}.
-          </FetchErrorMessage>
-        )}
-        {showDeleteDoneMessage && (
-          <RemoveConfirmation>
-            The production {production?.name} has been removed
-          </RemoveConfirmation>
-        )}
-      </BottomMessagesWrapper>
+          )}
+        </FlexContainer>
+        <BottomMessagesWrapper>
+          {productionDeleteError && (
+            <FetchErrorMessage>
+              The production ID could not be deleted.{" "}
+              {productionDeleteError.name} {productionDeleteError.message}.
+            </FetchErrorMessage>
+          )}
+          {showDeleteDoneMessage && (
+            <RemoveConfirmation>
+              The production {production?.name} has been removed
+            </RemoveConfirmation>
+          )}
+        </BottomMessagesWrapper>
+      </PageContainer>
     </Container>
   );
 };

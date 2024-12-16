@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 import { useEffect, useState } from "react";
-import { ProductionsList } from "../productions-list";
+import { ProductionsList } from "../production-list/productions-list";
 import { LoaderDots } from "../loader/loader";
 import { TListProductionsResponse } from "../../api/api";
 import { StepLeftIcon, StepRightIcon } from "../../assets/icons/icon";
@@ -49,7 +49,6 @@ type TPaginatedList = {
   showRefreshing: boolean;
   productions: TListProductionsResponse | undefined;
   error: Error | null;
-  manageProduction: (v: string) => void;
 };
 
 export const PaginatedList = ({
@@ -57,7 +56,6 @@ export const PaginatedList = ({
   showRefreshing,
   productions,
   error,
-  manageProduction,
 }: TPaginatedList) => {
   const [pagesArray, setPagesArray] = useState<number[]>();
   const totalPages = productions
@@ -98,7 +96,6 @@ export const PaginatedList = ({
             <ProductionsList
               productions={productions.productions}
               error={error}
-              setProductionId={(v: string) => manageProduction(v)}
             />
           </ListWrapper>
           {totalPages > 1 && (
