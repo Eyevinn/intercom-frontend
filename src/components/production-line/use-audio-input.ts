@@ -1,53 +1,71 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { noop } from "../../helpers";
 import { TJoinProductionOptions } from "./types.ts";
 
 type TGetMediaDevicesOptions = {
-  inputId: TJoinProductionOptions["audioinput"] | null;
+  audioInputId: TJoinProductionOptions["audioinput"] | null;
+  audioOutputId: TJoinProductionOptions["audiooutput"] | null;
 };
 
 export type TUseAudioInputValues = MediaStream | "no-device" | null;
 
 type TUseAudioInput = (
   options: TGetMediaDevicesOptions
-) => TUseAudioInputValues;
+) => [TUseAudioInputValues, () => void];
 
 // A hook for fetching the user selected audio input as a MediaStream
-export const useAudioInput: TUseAudioInput = ({ inputId }) => {
+export const useAudioInput: TUseAudioInput = ({
+  audioInputId,
+  audioOutputId,
+}) => {
   const [audioInput, setAudioInput] = useState<TUseAudioInputValues>(null);
 
   useEffect(() => {
     let aborted = false;
 
-    if (!inputId) return noop;
+    if (!audioInputId) return noop;
 
-    if (inputId === "no-device") return setAudioInput("no-device");
+    if (audioInputId === "no-device") return setAudioInput("no-device");
 
-    navigator.mediaDevices
-      .getUserMedia({
-        audio: {
-          deviceId: {
-            exact: inputId,
+    // First request a generic audio stream to "reset" permissions
+    navigator.mediaDevices.getUserMedia({ audio: true }).then(() => {
+      // Then request the specific audio input the user has selected
+      navigator.mediaDevices
+        .getUserMedia({
+          audio: {
+            deviceId: {
+              exact: audioInputId,
+            },
+            noiseSuppression: true,
           },
-          noiseSuppression: true,
-        },
-      })
-      .then((stream) => {
-        if (aborted) return;
+        })
+        .then((stream) => {
+          if (aborted) return;
 
-        // Default to muted input
-        stream.getTracks().forEach((t) => {
-          // eslint-disable-next-line no-param-reassign
-          t.enabled = false;
+          // Default to muted input
+          stream.getTracks().forEach((t) => {
+            // eslint-disable-next-line no-param-reassign
+            t.enabled = false;
+          });
+
+          setAudioInput(stream);
         });
-
-        setAudioInput(stream);
-      });
+    });
 
     return () => {
       aborted = true;
     };
-  }, [inputId]);
+    // audioOutputId is needed as a dependency to trigger restart of
+    // useEffect if only output has been updated during line-call
+  }, [audioInputId, audioOutputId]);
 
-  return audioInput;
+  // Reset function to set audioInput to null
+  const reset = useCallback(() => {
+    if (audioInput && audioInput !== "no-device") {
+      audioInput.getTracks().forEach((t) => t.stop());
+    }
+    setAudioInput(null);
+  }, [audioInput]);
+
+  return [audioInput, reset];
 };

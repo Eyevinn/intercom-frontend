@@ -61,7 +61,6 @@ export const useEstablishSession = ({
   useEffect(
     () => () => {
       if (!joinProductionOptions) return;
-
       if (sessionId) {
         API.deleteAudioSession({
           sessionId,
