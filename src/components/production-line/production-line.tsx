@@ -338,12 +338,12 @@ export const ProductionLine = ({
               }}
             >
               <DisplayContainerHeader>Controls</DisplayContainerHeader>
+              <VolumeSlider
+                audioElements={audioElements || []}
+                increaseVolumeKey={savedHotkeys.increaseVolumeHotkey}
+                decreaseVolumeKey={savedHotkeys.decreaseVolumeHotkey}
+              />
               <FlexContainer>
-                <VolumeSlider
-                  audioElements={audioElements}
-                  increaseVolumeKey={savedHotkeys.increaseVolumeHotkey}
-                  decreaseVolumeKey={savedHotkeys.decreaseVolumeHotkey}
-                />
                 <FlexButtonWrapper className="first">
                   <UserControlBtn type="button" onClick={() => muteOutput()}>
                     <ButtonIcon>

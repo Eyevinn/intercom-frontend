@@ -15,12 +15,14 @@ const SliderWrapper = styled.div`
   margin: 2rem 0;
   display: flex;
   flex-direction: row;
+  align-items: center;
   position: relative;
 `;
 
 const VolumeContainer = styled.div`
   display: flex;
   flex-direction: column;
+  align-items: center;
 `;
 
 const IconWrapper = styled.div`
@@ -35,9 +37,7 @@ const SliderTrack = styled.div`
   background-color: #e0e0e0;
   border-radius: 0.2rem;
   position: relative;
-  margin-top: 2.5rem;
 `;
-// TODO: Remove margin-top and solve in a better way
 
 const SliderThumb = styled.div<{ position: number }>`
   width: 1.5rem;
@@ -58,6 +58,12 @@ const VolumeButton = styled(PrimaryButton)`
   padding: 1.5rem;
   cursor: pointer;
   margin-top: 1rem;
+`;
+
+const VolumeButtonContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
 `;
 
 type TVolumeSliderProps = {
@@ -121,11 +127,6 @@ export const VolumeSlider: FC<TVolumeSliderProps> = ({
         <IconWrapper>
           <NoSoundIcon />
         </IconWrapper>
-        {isMobile && (
-          <VolumeButton onClick={() => handleVolumeButtonClick("decrease")}>
-            <MinusIcon />
-          </VolumeButton>
-        )}
       </VolumeContainer>
       <SliderTrack>
         <SliderThumb position={thumbPosition} />
@@ -151,12 +152,17 @@ export const VolumeSlider: FC<TVolumeSliderProps> = ({
         <IconWrapper>
           <FullSoundIcon />
         </IconWrapper>
-        {isMobile && (
+      </VolumeContainer>
+      {isMobile && (
+        <VolumeButtonContainer>
+          <VolumeButton onClick={() => handleVolumeButtonClick("decrease")}>
+            <MinusIcon />
+          </VolumeButton>
           <VolumeButton onClick={() => handleVolumeButtonClick("increase")}>
             <PlusIcon />
           </VolumeButton>
-        )}
-      </VolumeContainer>
+        </VolumeButtonContainer>
+      )}
     </SliderWrapper>
   );
 };

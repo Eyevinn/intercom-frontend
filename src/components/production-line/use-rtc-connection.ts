@@ -65,10 +65,8 @@ const establishConnection = ({
       const audioElement = new Audio();
 
       audioElement.srcObject = selectedStream;
-
       audioElement.controls = false;
       audioElement.autoplay = true;
-
       audioElement.onerror = () => {
         dispatch({
           type: "ERROR",
