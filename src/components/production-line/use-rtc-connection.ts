@@ -357,6 +357,7 @@ export const useRtcConnection = ({
     sessionId,
     joinProductionOptions,
     rtcPeerConnection,
+    cleanUpAudio,
     dispatch,
     noStreamError,
     callId,

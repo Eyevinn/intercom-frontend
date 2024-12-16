@@ -20,6 +20,10 @@ import { uniqBy } from "../../helpers.ts";
 import { FormInputWithLoader } from "./form-input-with-loader.tsx";
 import { useStorage } from "../accessing-local-storage/access-local-storage.ts";
 import { useNavigateToProduction } from "./use-navigate-to-production.ts";
+import { useFetchDevices } from "../../use-fetch-devices.ts";
+import { useDevicePermissions } from "../../use-device-permission.ts";
+import { Modal } from "../modal/modal.tsx";
+import { ReloadDevicesButton } from "../reload-devices-button.tsx/reload-devices-button.tsx";
 
 type FormValues = TJoinProductionOptions;
 
@@ -33,6 +37,11 @@ const FetchErrorMessage = styled.div`
 
 const ButtonWrapper = styled.div`
   margin: 2rem 0 2rem 0;
+`;
+
+const FormWithBtn = styled.div`
+  display: flex;
+  justify-content: space-between;
 `;
 
 type TProps = {
@@ -53,6 +62,9 @@ export const JoinProduction = ({
   const [joinProductionOptions, setJoinProductionOptions] =
     useState<TJoinProductionOptions | null>(null);
   const { readFromStorage, writeToStorage } = useStorage("username");
+  const [refresh, setRefresh] = useState<number>(0);
+  const [firefoxWarningModalOpen, setFirefoxWarningModalOpen] = useState(false);
+
   const {
     formState: { errors, isValid },
     register,
@@ -71,8 +83,17 @@ export const JoinProduction = ({
       keepErrors: true, // input errors will be retained with value update
     },
   });
+  const { permission } = useDevicePermissions({
+    continueToApp: true,
+  });
 
   const [{ devices, selectedProductionId }, dispatch] = useGlobalState();
+
+  useFetchDevices({
+    dispatch,
+    permission,
+    refresh,
+  });
 
   const {
     error: productionFetchError,
@@ -150,8 +171,6 @@ export const JoinProduction = ({
       payload: {
         id: uuid,
         callState: {
-          production: null,
-          reloadProductionList: false,
           devices: null,
           joinProductionOptions: payload,
           mediaStreamInput: null,
@@ -236,38 +255,65 @@ export const JoinProduction = ({
           />
           <FormLabel>
             <DecorativeLabel>Input</DecorativeLabel>
-            <FormSelect
-              // eslint-disable-next-line
-              {...register(`audioinput`)}
-            >
-              {inputDevices.length > 0 ? (
-                inputDevices.map((device) => (
-                  <option key={device.deviceId} value={device.deviceId}>
-                    {device.label}
-                  </option>
-                ))
-              ) : (
-                <option value="no-device">No device available</option>
-              )}
-            </FormSelect>
+            <FormWithBtn>
+              <FormSelect
+                // eslint-disable-next-line
+                {...register(`audioinput`)}
+              >
+                {inputDevices.length > 0 ? (
+                  inputDevices.map((device) => (
+                    <option key={device.deviceId} value={device.deviceId}>
+                      {device.label}
+                    </option>
+                  ))
+                ) : (
+                  <option value="no-device">No device available</option>
+                )}
+              </FormSelect>
+              <ReloadDevicesButton
+                handleReloadDevices={() => setRefresh((prev) => prev + 1)}
+                devices={devices}
+                isDummy
+              />
+            </FormWithBtn>
           </FormLabel>
           <FormLabel>
             <DecorativeLabel>Output</DecorativeLabel>
-            {outputDevices.length > 0 ? (
-              <FormSelect
-                // eslint-disable-next-line
-                {...register(`audiooutput`)}
-              >
-                {outputDevices.map((device) => (
-                  <option key={device.deviceId} value={device.deviceId}>
-                    {device.label}
-                  </option>
-                ))}
-              </FormSelect>
-            ) : (
-              <StyledWarningMessage>
-                Controlled by operating system
-              </StyledWarningMessage>
+            <FormWithBtn>
+              {outputDevices.length > 0 ? (
+                <FormSelect
+                  // eslint-disable-next-line
+                  {...register(`audiooutput`)}
+                >
+                  {outputDevices.map((device) => (
+                    <option key={device.deviceId} value={device.deviceId}>
+                      {device.label}
+                    </option>
+                  ))}
+                </FormSelect>
+              ) : (
+                <StyledWarningMessage>
+                  Controlled by operating system
+                </StyledWarningMessage>
+              )}
+              <ReloadDevicesButton
+                handleReloadDevices={() => setRefresh((prev) => prev + 1)}
+                setFirefoxWarningModalOpen={() =>
+                  setFirefoxWarningModalOpen(true)
+                }
+                devices={devices}
+              />
+            </FormWithBtn>
+            {firefoxWarningModalOpen && (
+              <Modal onClose={() => setFirefoxWarningModalOpen(false)}>
+                <DisplayContainerHeader>
+                  Reset permissions
+                </DisplayContainerHeader>
+                <p>
+                  To reload devices Firefox needs the permission to be manually
+                  reset, please remove permission and reload page instead.
+                </p>
+              </Modal>
             )}
           </FormLabel>
           {!preSelected && (

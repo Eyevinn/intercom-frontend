@@ -9,8 +9,6 @@ export interface ErrorState {
 }
 
 export interface CallState {
-  production: TProduction | null;
-  reloadProductionList: boolean;
   devices: MediaDeviceInfo[] | null;
   joinProductionOptions: TJoinProductionOptions | null;
   mediaStreamInput: MediaStream | null;
