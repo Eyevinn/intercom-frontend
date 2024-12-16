@@ -6,6 +6,8 @@ const StyledBackBtn = styled(PrimaryButton)`
   padding: 0;
   margin: 0;
   width: 4rem;
+  background: #32383b;
+  border: 0.2rem solid #6d6d6d;
 `;
 
 export const ExitCallButton = ({
