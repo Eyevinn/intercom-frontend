@@ -8,13 +8,13 @@ import {
   PlusIcon,
 } from "../../assets/icons/icon";
 import { isMobile } from "../../bowser";
-import { PrimaryButton } from "../landing-page/form-elements";
+import { ActionButton } from "../landing-page/form-elements";
 
 const SliderWrapper = styled.div`
   width: 100%;
   margin: 2rem 0;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   align-items: center;
   position: relative;
 `;
@@ -51,19 +51,29 @@ const SliderThumb = styled.div<{ position: number }>`
   cursor: pointer;
 `;
 
-const VolumeButton = styled(PrimaryButton)`
+const VolumeButton = styled(ActionButton)`
+  background-color: #32383b;
   width: 7rem;
   align-items: center;
   height: 4.5rem;
   padding: 1.5rem;
   cursor: pointer;
   margin-top: 1rem;
+  border: 0.2rem solid #6d6d6d;
 `;
 
 const VolumeButtonContainer = styled.div`
   display: flex;
   flex-direction: row;
   justify-content: space-between;
+  width: 100%;
+`;
+
+const VolumeWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  align-items: center;
 `;
 
 type TVolumeSliderProps = {
@@ -123,36 +133,38 @@ export const VolumeSlider: FC<TVolumeSliderProps> = ({
 
   return (
     <SliderWrapper>
-      <VolumeContainer>
-        <IconWrapper>
-          <NoSoundIcon />
-        </IconWrapper>
-      </VolumeContainer>
-      <SliderTrack>
-        <SliderThumb position={thumbPosition} />
-        <input
-          id="volumeSlider"
-          type="range"
-          min={0}
-          max={1}
-          step={0.05}
-          value={value}
-          onChange={handleInputChange}
-          style={{
-            width: "100%",
-            position: "absolute",
-            top: 0,
-            height: "0.4rem",
-            opacity: 0,
-            pointerEvents: "all",
-          }}
-        />
-      </SliderTrack>
-      <VolumeContainer>
-        <IconWrapper>
-          <FullSoundIcon />
-        </IconWrapper>
-      </VolumeContainer>
+      <VolumeWrapper>
+        <VolumeContainer>
+          <IconWrapper>
+            <NoSoundIcon />
+          </IconWrapper>
+        </VolumeContainer>
+        <SliderTrack>
+          <SliderThumb position={thumbPosition} />
+          <input
+            id="volumeSlider"
+            type="range"
+            min={0}
+            max={1}
+            step={0.05}
+            value={value}
+            onChange={handleInputChange}
+            style={{
+              width: "100%",
+              position: "absolute",
+              top: 0,
+              height: "0.4rem",
+              opacity: 0,
+              pointerEvents: "all",
+            }}
+          />
+        </SliderTrack>
+        <VolumeContainer>
+          <IconWrapper>
+            <FullSoundIcon />
+          </IconWrapper>
+        </VolumeContainer>
+      </VolumeWrapper>
       {isMobile && (
         <VolumeButtonContainer>
           <VolumeButton onClick={() => handleVolumeButtonClick("decrease")}>
