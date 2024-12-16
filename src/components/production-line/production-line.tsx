@@ -4,8 +4,6 @@ import { useParams } from "react-router-dom";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { useAudioInput } from "./use-audio-input.ts";
-import { useRtcConnection } from "./use-rtc-connection.ts";
-import { useEstablishSession } from "./use-establish-session.ts";
 import { UserList } from "./user-list.tsx";
 import {
   MicMuted,
@@ -16,7 +14,6 @@ import {
 } from "../../assets/icons/icon.tsx";
 import {
   ActionButton,
-  SecondaryButton,
   DecorativeLabel,
   FormLabel,
   FormContainer,
@@ -159,15 +156,7 @@ export const ProductionLine = ({
   isSingleCall,
 }: TProductionLine) => {
   const { productionId: paramProductionId, lineId: paramLineId } = useParams();
-  const [
-    {
-      joinProductionOptions,
-      dominantSpeaker,
-      audioLevelAboveThreshold,
-      devices,
-    },
-    dispatch,
-  ] = useGlobalState();
+  const [{ devices }, dispatch] = useGlobalState();
   const [connectionActive, setConnectionActive] = useState(true);
   const [isInputMuted, setIsInputMuted] = useState(true);
   const [isOutputMuted, setIsOutputMuted] = useState(false);
@@ -235,6 +224,12 @@ export const ProductionLine = ({
     permission: true,
     refresh,
   });
+
+  useEffect(() => {
+    if (joinProductionOptions) {
+      setConnectionActive(true);
+    }
+  }, [joinProductionOptions]);
 
   useEffect(() => {
     if (connectionState === "connected") {
@@ -333,19 +328,34 @@ export const ProductionLine = ({
       payload.audioinput === joinProductionOptions?.audioinput &&
       payload.audiooutput === joinProductionOptions?.audiooutput;
     if (joinProductionOptions && !unchangedPayload) {
+      setConnectionActive(false);
       resetAudioInput();
       muteInput(true);
-      setSessionId(null);
+
+      const newJoinProductionOptions = {
+        ...payload,
+        productionId: joinProductionOptions.productionId,
+        lineId: joinProductionOptions.lineId,
+        username: joinProductionOptions.username,
+      };
+
       dispatch({
-        type: "UPDATE_JOIN_PRODUCTION_OPTIONS",
+        type: "UPDATE_CALL",
         payload: {
-          productionId: payload.productionId,
-          lineId: payload.lineId,
-          username: joinProductionOptions.username,
-          audioinput: payload.audioinput,
-          audiooutput: payload.audiooutput,
+          id,
+          updates: {
+            devices: null,
+            joinProductionOptions: newJoinProductionOptions,
+            mediaStreamInput: null,
+            dominantSpeaker: null,
+            audioLevelAboveThreshold: false,
+            connectionState: null,
+            audioElements: null,
+            sessionId: null,
+          },
         },
       });
+
       setShowDeviceSettings(false);
     }
   };
