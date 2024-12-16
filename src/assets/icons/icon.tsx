@@ -10,6 +10,10 @@ import StepLeftSvg from "./chevron_left.svg?react";
 import StepRightSvg from "./navigate_next.svg?react";
 import RefreshSvg from "./refresh.svg?react";
 import Settings from "./settings.svg?react";
+import NoSound from "./no_sound.svg?react";
+import FullSound from "./full_sound.svg?react";
+import Minus from "./minus.svg?react";
+import Plus from "./plus.svg?react";
 import ChevronDown from "./chevron_down.svg?react";
 import ChevronUp from "./chevron_up.svg?react";
 import Headset from "./headset.svg?react";
@@ -37,6 +41,14 @@ export const StepRightIcon = () => <StepRightSvg />;
 export const RefreshIcon = () => <RefreshSvg />;
 
 export const SettingsIcon = () => <Settings />;
+
+export const NoSoundIcon = () => <NoSound />;
+
+export const FullSoundIcon = () => <FullSound />;
+
+export const MinusIcon = () => <Minus />;
+
+export const PlusIcon = () => <Plus />;
 
 export const ChevronDownIcon = () => <ChevronDown />;
 

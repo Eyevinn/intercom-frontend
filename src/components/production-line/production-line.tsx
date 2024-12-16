@@ -38,6 +38,7 @@ import { DisplayWarning } from "../display-box.tsx";
 import { useFetchDevices } from "../../use-fetch-devices.ts";
 import { TJoinProductionOptions } from "./types.ts";
 import { SettingsModal, Hotkeys } from "./settings-modal.tsx";
+import { VolumeSlider } from "../volume-slider/volume-slider.tsx";
 import { CallState } from "../../global-state/types.ts";
 import { ExitCallButton } from "./exit-call-button.tsx";
 import { Modal } from "../modal/modal.tsx";
@@ -93,11 +94,11 @@ const FlexButtonWrapper = styled.div`
   width: 50%;
   padding: 0 1rem 2rem 1rem;
 
-  :first-of-type {
+  &.first {
     padding-left: 0;
   }
 
-  :last-of-type {
+  &.last {
     padding-right: 0;
   }
 `;
@@ -168,11 +169,15 @@ export const ProductionLine = ({
     muteHotkey: "m",
     speakerHotkey: "n",
     pressToTalkHotkey: "t",
+    increaseVolumeHotkey: "u",
+    decreaseVolumeHotkey: "d",
   });
   const [savedHotkeys, setSavedHotkeys] = useState<Hotkeys>({
     muteHotkey: "m",
     speakerHotkey: "n",
     pressToTalkHotkey: "t",
+    increaseVolumeHotkey: "u",
+    decreaseVolumeHotkey: "d",
   });
   const {
     joinProductionOptions,
@@ -444,18 +449,21 @@ export const ProductionLine = ({
               }}
             >
               <DisplayContainerHeader>Controls</DisplayContainerHeader>
-
+              <VolumeSlider
+                audioElements={audioElements || []}
+                increaseVolumeKey={savedHotkeys.increaseVolumeHotkey}
+                decreaseVolumeKey={savedHotkeys.decreaseVolumeHotkey}
+              />
               <FlexContainer>
-                <FlexButtonWrapper>
+                <FlexButtonWrapper className="first">
                   <UserControlBtn type="button" onClick={() => muteOutput()}>
                     <ButtonIcon>
                       {isOutputMuted ? <SpeakerOff /> : <SpeakerOn />}
                     </ButtonIcon>
                   </UserControlBtn>
                 </FlexButtonWrapper>
-
                 {inputAudioStream && inputAudioStream !== "no-device" && (
-                  <FlexButtonWrapper>
+                  <FlexButtonWrapper className="last">
                     <UserControlBtn
                       type="button"
                       onClick={() => muteInput(!isInputMuted)}
@@ -583,6 +591,18 @@ export const ProductionLine = ({
                         {savedHotkeys.pressToTalkHotkey.toUpperCase()}:{" "}
                       </strong>
                       Push to Talk
+                    </TempDiv>
+                    <TempDiv>
+                      <strong>
+                        {savedHotkeys.increaseVolumeHotkey.toUpperCase()}:{" "}
+                      </strong>
+                      Increase Volume
+                    </TempDiv>
+                    <TempDiv>
+                      <strong>
+                        {savedHotkeys.decreaseVolumeHotkey.toUpperCase()}:{" "}
+                      </strong>
+                      Decrease Volume
                     </TempDiv>
                     {isSettingsModalOpen && (
                       <SettingsModal
