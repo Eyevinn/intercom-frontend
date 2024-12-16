@@ -20,10 +20,10 @@ import { uniqBy } from "../../helpers.ts";
 import { FormInputWithLoader } from "./form-input-with-loader.tsx";
 import { useStorage } from "../accessing-local-storage/access-local-storage.ts";
 import { useNavigateToProduction } from "./use-navigate-to-production.ts";
-import { useFetchDevices } from "../../use-fetch-devices.ts";
-import { useDevicePermissions } from "../../use-device-permission.ts";
 import { Modal } from "../modal/modal.tsx";
 import { ReloadDevicesButton } from "../reload-devices-button.tsx/reload-devices-button.tsx";
+import { useDevicePermissions } from "../../hooks/use-device-permission.ts";
+import { useFetchDevices } from "../../hooks/use-fetch-devices.ts";
 
 type FormValues = TJoinProductionOptions;
 

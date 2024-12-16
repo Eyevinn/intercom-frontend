@@ -28,6 +28,7 @@ type TLine = {
 export type TBasicProductionResponse = {
   name: string;
   productionId: string;
+  lines?: TLine[];
 };
 
 type TFetchProductionResponse = TBasicProductionResponse & {

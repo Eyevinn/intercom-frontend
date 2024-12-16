@@ -1,10 +1,12 @@
 import { CallState } from "./types.ts";
+import { TUserSettings } from "../components/user-settings/types.ts";
 
 export type TGlobalStateAction =
   | TPublishError
   | TProductionCreated
   | TApiNotAvailable
   | TProductionListFetched
+  | TUpdateUserSettings
   | TUpdateDevicesAction
   | TSelectProductionId
   | TAddCallState
@@ -51,4 +53,9 @@ export type TUpdateCallState = {
 export type TRemoveCallState = {
   type: "REMOVE_CALL";
   payload: { id: string };
+};
+
+export type TUpdateUserSettings = {
+  type: "UPDATE_USER_SETTINGS";
+  payload: TUserSettings | null;
 };

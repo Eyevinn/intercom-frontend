@@ -2,29 +2,41 @@ import { SubmitHandler, useFieldArray, useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
 import styled from "@emotion/styled";
 import { ErrorMessage } from "@hookform/error-message";
-import { DisplayContainerHeader } from "./display-container-header.tsx";
+import { DisplayContainerHeader } from "../landing-page/display-container-header.tsx";
 import {
   DecorativeLabel,
-  FormContainer,
   FormInput,
   FormLabel,
   StyledWarningMessage,
   PrimaryButton,
   SecondaryButton,
-} from "./form-elements.tsx";
+} from "../landing-page/form-elements.tsx";
 import { API } from "../../api/api.ts";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { Spinner } from "../loader/loader.tsx";
 import { FlexContainer } from "../generic-components.ts";
 import { RemoveLineButton } from "../remove-line-button/remove-line-button.tsx";
-import { useFetchProduction } from "./use-fetch-production.ts";
+import { useFetchProduction } from "../landing-page/use-fetch-production.ts";
 import { darkText, errorColour } from "../../css-helpers/defaults.ts";
+import { NavigateToRootButton } from "../navigate-to-root-button/navigate-to-root-button.tsx";
+import { ResponsiveFormContainer } from "../user-settings/user-settings.tsx";
+import { isMobile } from "../../bowser.ts";
 
 type FormValues = {
   productionName: string;
   defaultLine: string;
   lines: { name: string }[];
 };
+
+const HeaderWrapper = styled.div`
+  display: flex;
+  margin-bottom: 2rem;
+  align-items: center;
+  h2 {
+    margin: 0;
+    margin-left: 1rem;
+  }
+`;
 
 const ListItemWrapper = styled.div`
   position: relative;
@@ -151,8 +163,11 @@ export const CreateProduction = () => {
   };
 
   return (
-    <FormContainer>
-      <DisplayContainerHeader>Create Production</DisplayContainerHeader>
+    <ResponsiveFormContainer className={isMobile ? "" : "desktop"}>
+      <HeaderWrapper>
+        <NavigateToRootButton />
+        <DisplayContainerHeader>Create Production</DisplayContainerHeader>
+      </HeaderWrapper>
       <FormLabel>
         <DecorativeLabel>Production Name</DecorativeLabel>
         <FormInput
@@ -265,6 +280,6 @@ export const CreateProduction = () => {
           )}
         </>
       )}
-    </FormContainer>
+    </ResponsiveFormContainer>
   );
 };

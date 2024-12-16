@@ -101,7 +101,7 @@ const Dots = styled.span`
 
 type TSpinner = { className: string };
 
-type TLoaderDots = { className: string; text: string };
+type TLoaderDots = { className: string; text?: string };
 
 export const Spinner: FC<TSpinner> = ({ className }: TSpinner) => {
   return <Loading className={className} />;
@@ -125,7 +125,7 @@ export const LoaderDots: FC<TLoaderDots> = ({
 
   return (
     <div>
-      <Text className={className}>{text}</Text>
+      {text && <Text className={className}>{text}</Text>}
       <Dots className={className}>{dots}</Dots>
     </div>
   );
