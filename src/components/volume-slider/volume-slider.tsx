@@ -1,6 +1,5 @@
 import styled from "@emotion/styled";
-import { FC, useState } from "react";
-import { useHotkeys } from "react-hotkeys-hook";
+import { FC } from "react";
 import {
   NoSoundIcon,
   FullSoundIcon,
@@ -77,59 +76,17 @@ const VolumeWrapper = styled.div`
 `;
 
 type TVolumeSliderProps = {
-  audioElements: HTMLAudioElement[];
-  increaseVolumeKey?: string;
-  decreaseVolumeKey?: string;
+  value: number;
+  handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleVolumeButtonClick: (type: "increase" | "decrease") => void;
 };
 
 export const VolumeSlider: FC<TVolumeSliderProps> = ({
-  audioElements,
-  increaseVolumeKey,
-  decreaseVolumeKey,
+  handleInputChange,
+  value,
+  handleVolumeButtonClick,
 }) => {
-  const [value, setValue] = useState(0.75);
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = parseFloat(e.target.value);
-    setValue(newValue);
-
-    audioElements.forEach((audioElement) => {
-      console.log("Setting volume to: ", newValue);
-      // eslint-disable-next-line no-param-reassign
-      audioElement.volume = newValue;
-    });
-  };
-
   const thumbPosition = value * 100;
-
-  useHotkeys(increaseVolumeKey || "u", () => {
-    const newValue = Math.min(value + 0.05, 1);
-    setValue(newValue);
-
-    audioElements.forEach((audioElement) => {
-      // eslint-disable-next-line no-param-reassign
-      audioElement.volume = newValue;
-    });
-  });
-
-  useHotkeys(decreaseVolumeKey || "d", () => {
-    const newValue = Math.max(value - 0.05, 0);
-    setValue(newValue);
-
-    audioElements.forEach((audioElement) => {
-      // eslint-disable-next-line no-param-reassign
-      audioElement.volume = newValue;
-    });
-  });
-
-  const handleVolumeButtonClick = (type: "increase" | "decrease") => {
-    const newValue =
-      type === "increase"
-        ? Math.min(value + 0.05, 1)
-        : Math.max(value - 0.05, 0);
-    setValue(newValue);
-    // TODO: Fix for iOS
-  };
 
   return (
     <SliderWrapper>
