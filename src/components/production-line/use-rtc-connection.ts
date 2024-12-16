@@ -64,7 +64,6 @@ const establishConnection = ({
     if (selectedStream && selectedStream.getAudioTracks().length !== 0) {
       const audioElement = new Audio();
 
-      audioElement.srcObject = selectedStream;
       audioElement.controls = false;
       audioElement.autoplay = true;
       audioElement.onerror = () => {
