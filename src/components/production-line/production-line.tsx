@@ -194,6 +194,31 @@ export const ProductionLine = ({
     sessionId,
   } = callState;
 
+  const {
+    formState: { isValid, isDirty },
+    register,
+    handleSubmit,
+    watch,
+  } = useForm<FormValues>({
+    defaultValues: {
+      username: "",
+      productionId: paramProductionId || "",
+      lineId: paramLineId || undefined,
+    },
+    resetOptions: {
+      keepDirtyValues: true, // user-interacted input will be retained
+      keepErrors: true, // input errors will be retained with value update
+    },
+  });
+
+  // Watch all form values
+  const watchedValues = watch();
+  const audioInputTheSame =
+    joinProductionOptions?.audioinput === watchedValues.audioinput;
+  const audioOutputTheSame =
+    joinProductionOptions?.audiooutput === watchedValues.audiooutput;
+  const audioNotChanged = audioInputTheSame && audioOutputTheSame;
+
   const [inputAudioStream, resetAudioInput] = useAudioInput({
     audioInputId: joinProductionOptions?.audioinput ?? null,
     audioOutputId: joinProductionOptions?.audiooutput ?? null,
@@ -346,22 +371,6 @@ export const ProductionLine = ({
     dispatch,
   });
 
-  const {
-    formState: { isValid, isDirty },
-    register,
-    handleSubmit,
-  } = useForm<FormValues>({
-    defaultValues: {
-      username: "",
-      productionId: paramProductionId || "",
-      lineId: paramLineId || undefined,
-    },
-    resetOptions: {
-      keepDirtyValues: true, // user-interacted input will be retained
-      keepErrors: true, // input errors will be retained with value update
-    },
-  });
-
   const outputDevices = devices
     ? uniqBy(
         devices.filter((d) => d.kind === "audiooutput"),
@@ -383,10 +392,7 @@ export const ProductionLine = ({
 
   // Reset connection and re-connect to production-line
   const onSubmit: SubmitHandler<FormValues> = async (payload) => {
-    const unchangedPayload =
-      payload.audioinput === joinProductionOptions?.audioinput &&
-      payload.audiooutput === joinProductionOptions?.audiooutput;
-    if (joinProductionOptions && !unchangedPayload) {
+    if (joinProductionOptions && !audioNotChanged) {
       setConnectionActive(false);
       resetAudioInput();
       muteInput(true);
@@ -607,7 +613,7 @@ export const ProductionLine = ({
                   <ButtonWrapper>
                     <PrimaryButton
                       type="submit"
-                      disabled={!isValid || !isDirty}
+                      disabled={audioNotChanged || !isValid || !isDirty}
                       onClick={handleSubmit(onSubmit)}
                     >
                       Save
