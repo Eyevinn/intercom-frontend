@@ -35,7 +35,6 @@ import { useIsLoading } from "./use-is-loading.ts";
 import { useCheckBadLineData } from "./use-check-bad-line-data.ts";
 import { useAudioCue } from "./use-audio-cue.ts";
 import { DisplayWarning } from "../display-box.tsx";
-import { useFetchDevices } from "../../use-fetch-devices.ts";
 import { TJoinProductionOptions } from "./types.ts";
 import { SettingsModal, Hotkeys } from "./settings-modal.tsx";
 import { VolumeSlider } from "../volume-slider/volume-slider.tsx";
@@ -46,6 +45,7 @@ import { VerifyDecision } from "../verify-decision/verify-decision.tsx";
 import { ModalConfirmationText } from "../modal/modal-confirmation-text.ts";
 import { SymphonyRtcConnectionComponent } from "./symphony-rtc-connection-component.tsx";
 import { ReloadDevicesButton } from "../reload-devices-button.tsx/reload-devices-button.tsx";
+import { useFetchDevices } from "../../hooks/use-fetch-devices.ts";
 
 type FormValues = TJoinProductionOptions;
 

@@ -7,6 +7,7 @@ const initialGlobalState: TGlobalState = {
   error: { callErrors: null, globalError: null },
   reloadProductionList: false,
   devices: null,
+  userSettings: null,
   selectedProductionId: null,
   calls: {},
   apiError: false,
@@ -104,6 +105,11 @@ const globalReducer: Reducer<TGlobalState, TGlobalStateAction> = (
         production: null,
       };
     }
+    case "UPDATE_USER_SETTINGS":
+      return {
+        ...state,
+        userSettings: action.payload,
+      };
     default:
       return state;
   }

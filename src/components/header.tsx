@@ -26,7 +26,7 @@ const Logo = styled.svg`
   width: 2.4rem;
   height: 2.4rem;
   margin-right: 1rem;
-  margin-left: 2rem;
+  margin-left: 1rem;
 `;
 
 export const Header: FC = () => {
@@ -51,7 +51,7 @@ export const Header: FC = () => {
   };
 
   const returnToRoot = () => {
-    if (location.pathname.includes("/production")) {
+    if (location.pathname.includes("/line")) {
       setConfirmExitModalOpen(true);
     } else {
       navigate("/");

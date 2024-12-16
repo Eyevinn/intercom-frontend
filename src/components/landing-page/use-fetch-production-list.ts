@@ -5,6 +5,7 @@ import { API, TListProductionsResponse } from "../../api/api.ts";
 export type GetProductionListFilter = {
   limit?: string;
   offset?: string;
+  extended?: string;
 };
 
 export const useFetchProductionList = (filter?: GetProductionListFilter) => {
@@ -18,9 +19,9 @@ export const useFetchProductionList = (filter?: GetProductionListFilter) => {
   const manageProdPaginationUpdate =
     filter?.offset !== productions?.offset.toString();
 
+  // TODO improve performance: this makes the call 3 times
   useEffect(() => {
     let aborted = false;
-
     if (
       reloadProductionList ||
       intervalLoad ||
@@ -29,7 +30,6 @@ export const useFetchProductionList = (filter?: GetProductionListFilter) => {
       (filter?.offset ? manageProdPaginationUpdate : false)
     ) {
       const searchParams = new URLSearchParams(filter).toString();
-
       API.listProductions({ searchParams })
         .then((result) => {
           if (aborted) return;
