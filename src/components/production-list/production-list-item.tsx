@@ -164,6 +164,7 @@ export const ProductionsListItem = ({
             connectionState: null,
             audioElements: null,
             sessionId: null,
+            gainNodeRef: null,
           },
         },
       });

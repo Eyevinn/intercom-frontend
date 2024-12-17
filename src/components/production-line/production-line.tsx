@@ -192,6 +192,7 @@ export const ProductionLine = ({
     connectionState,
     audioElements,
     sessionId,
+    gainNodeRef,
   } = callState;
 
   const [inputAudioStream, resetAudioInput] = useAudioInput({
@@ -200,14 +201,21 @@ export const ProductionLine = ({
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = parseFloat(e.target.value);
-    setValue(newValue);
+    // const newValue = parseFloat(e.target.value);
+    // setValue(newValue);
+    // // changeSpeakerVolume(newValue);
 
-    audioElements?.forEach((audioElement) => {
-      console.log("Setting volume to: ", newValue);
-      // eslint-disable-next-line no-param-reassign
-      audioElement.volume = newValue;
-    });
+    // audioElements?.forEach((audioElement) => {
+    //   console.log("Setting volume to: ", newValue);
+    //   // eslint-disable-next-line no-param-reassign
+    //   audioElement.volume = newValue;
+    // });
+    const volume = parseFloat(e.target.value);
+    setValue(volume);
+    if (gainNodeRef && gainNodeRef.current) {
+      gainNodeRef.current.gain.value = volume; // Directly control the gain node
+      console.log("Speaker volume set to:", volume);
+    }
   };
 
   const handleVolumeButtonClick = (type: "increase" | "decrease") => {

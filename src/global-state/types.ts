@@ -1,3 +1,4 @@
+import { MutableRefObject } from "react";
 import {
   TJoinProductionOptions,
   TProduction,
@@ -18,6 +19,7 @@ export interface CallState {
   connectionState: RTCPeerConnectionState | null;
   audioElements: HTMLAudioElement[] | null;
   sessionId: string | null;
+  gainNodeRef: MutableRefObject<GainNode | null> | null;
 }
 
 export type TGlobalState = {

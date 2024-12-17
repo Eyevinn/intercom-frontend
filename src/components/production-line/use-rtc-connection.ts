@@ -29,6 +29,8 @@ type TEstablishConnection = {
   joinProductionOptions: TJoinProductionOptions;
   sessionId: string;
   callId: string;
+  audioContextRef: React.MutableRefObject<AudioContext | null>;
+  gainNodeRef: React.MutableRefObject<GainNode | null>;
   dispatch: Dispatch<TGlobalStateAction>;
   setAudioElements: Dispatch<SetStateAction<HTMLAudioElement[]>>;
   setNoStreamError: (input: boolean) => void;
@@ -53,6 +55,8 @@ const establishConnection = ({
   joinProductionOptions,
   sessionId,
   callId,
+  audioContextRef,
+  gainNodeRef,
   dispatch,
   setAudioElements,
   setNoStreamError,
@@ -62,58 +66,148 @@ const establishConnection = ({
     const selectedStream = streams[0];
 
     if (selectedStream && selectedStream.getAudioTracks().length !== 0) {
-      const audioElement = new Audio();
+      // const audioElement = new Audio();
+      const audioContext = audioContextRef.current;
+      const gainNode = gainNodeRef.current;
 
-      audioElement.controls = false;
-      audioElement.autoplay = true;
-      audioElement.onerror = () => {
-        dispatch({
-          type: "ERROR",
-          payload: {
-            callId,
-            error: new Error(
-              `Audio Error: ${audioElement.error?.code} - ${audioElement.error?.message}`
-            ),
-          },
-        });
-      };
+      if (audioContext && gainNode) {
+        // Create MediaStreamSource and connect to GainNode
+        const source = audioContext.createMediaStreamSource(selectedStream);
+        source.connect(gainNode);
+        gainNode.connect(audioContext.destination);
 
-      audioElement.srcObject = selectedStream;
-
-      setAudioElements((prevArray) => [audioElement, ...prevArray]);
-      if (joinProductionOptions.audiooutput) {
-        audioElement.setSinkId(joinProductionOptions.audiooutput).catch((e) => {
+        // Set up the audio element for compatibility
+        const audioElement = new Audio();
+        audioElement.srcObject = selectedStream;
+        audioElement.controls = false;
+        audioElement.autoplay = true;
+        audioElement.muted = true;
+        audioElement.onerror = () => {
           dispatch({
             type: "ERROR",
             payload: {
               callId,
-              error:
-                e instanceof Error
-                  ? e
-                  : new Error("Error assigning audio sink."),
+              error: new Error(
+                `Audio Error: ${audioElement.error?.code} - ${audioElement.error?.message}`
+              ),
             },
           });
+        };
+
+        // audioElement.srcObject = selectedStream;
+
+        setAudioElements((prevArray) => [audioElement, ...prevArray]);
+        if (joinProductionOptions.audiooutput) {
+          audioElement
+            .setSinkId(joinProductionOptions.audiooutput)
+            .catch((e) => {
+              dispatch({
+                type: "ERROR",
+                payload: {
+                  callId,
+                  error:
+                    e instanceof Error
+                      ? e
+                      : new Error("Error assigning audio sink."),
+                },
+              });
+            });
+          dispatch({
+            type: "UPDATE_CALL",
+            payload: {
+              id: callId,
+              updates: {
+                gainNodeRef,
+              },
+            },
+          });
+        }
+      } else if (
+        selectedStream &&
+        selectedStream.getAudioTracks().length === 0
+      ) {
+        dispatch({
+          type: "UPDATE_CALL",
+          payload: {
+            id: callId,
+            updates: {
+              gainNodeRef,
+            },
+          },
+        });
+        setNoStreamError(true);
+        dispatch({
+          type: "ERROR",
+          payload: {
+            callId,
+            error: new Error("Stream-error: No MediaStreamTracks avaliable"),
+          },
+        });
+      } else {
+        setNoStreamError(true);
+        dispatch({
+          type: "ERROR",
+          payload: {
+            callId,
+            error: new Error("Stream-error: No MediaStream avaliable"),
+          },
         });
       }
-    } else if (selectedStream && selectedStream.getAudioTracks().length === 0) {
-      setNoStreamError(true);
-      dispatch({
-        type: "ERROR",
-        payload: {
-          callId,
-          error: new Error("Stream-error: No MediaStreamTracks avaliable"),
-        },
-      });
-    } else {
-      setNoStreamError(true);
-      dispatch({
-        type: "ERROR",
-        payload: {
-          callId,
-          error: new Error("Stream-error: No MediaStream avaliable"),
-        },
-      });
     }
+    // return {
+    //   gainNodeRef, // Expose the GainNode ref for direct control
+    // };
+
+    // audioElement.controls = false;
+    // audioElement.autoplay = true;
+    // audioElement.onerror = () => {
+    //   dispatch({
+    //     type: "ERROR",
+    //     payload: {
+    //       callId,
+    //       error: new Error(
+    //         `Audio Error: ${audioElement.error?.code} - ${audioElement.error?.message}`
+    //       ),
+    //     },
+    //   });
+    // };
+
+    // audioElement.srcObject = selectedStream;
+
+    // setAudioElements((prevArray) => [audioElement, ...prevArray]);
+    //   if (joinProductionOptions.audiooutput) {
+    //     audioElement.setSinkId(joinProductionOptions.audiooutput).catch((e) => {
+    //       dispatch({
+    //         type: "ERROR",
+    //         payload: {
+    //           callId,
+    //           error:
+    //             e instanceof Error
+    //               ? e
+    //               : new Error("Error assigning audio sink."),
+    //         },
+    //       });
+    //     });
+    //   }
+    // } else if (selectedStream && selectedStream.getAudioTracks().length === 0) {
+    //   setNoStreamError(true);
+    //   dispatch({
+    //     type: "ERROR",
+    //     payload: {
+    //       callId,
+    //       error: new Error("Stream-error: No MediaStreamTracks avaliable"),
+    //     },
+    //   });
+    // } else {
+    //   setNoStreamError(true);
+    //   dispatch({
+    //     type: "ERROR",
+    //     payload: {
+    //       callId,
+    //       error: new Error("Stream-error: No MediaStream avaliable"),
+    //     },
+    //   });
+    // }
   };
 
   // Listen to incoming audio streams and attach them to a HTMLAudioElement
@@ -253,6 +347,8 @@ export const useRtcConnection = ({
   const [rtcPeerConnection] = useState<RTCPeerConnection>(
     () => new RTCPeerConnection()
   );
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const gainNodeRef = useRef<GainNode | null>(null);
   const [, dispatch] = useGlobalState();
   const [connectionState, setConnectionState] =
     useState<RTCPeerConnectionState | null>(null);
@@ -260,6 +356,14 @@ export const useRtcConnection = ({
   const [noStreamError, setNoStreamError] = useState(false);
   const audioElementsRef = useRef<HTMLAudioElement[]>(audioElements);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Initialize AudioContext and GainNode when the hook is mounted
+    if (!audioContextRef.current) {
+      audioContextRef.current = new window.AudioContext();
+      gainNodeRef.current = audioContextRef.current.createGain();
+    }
+  }, []);
 
   // Use a ref to make sure we only clean up
   // audio elements once, and not every time
@@ -336,6 +440,8 @@ export const useRtcConnection = ({
       joinProductionOptions,
       sessionId,
       callId,
+      audioContextRef,
+      gainNodeRef,
       dispatch,
       setAudioElements,
       setNoStreamError,
@@ -426,5 +532,8 @@ export const useRtcConnection = ({
     };
   }, [rtcPeerConnection]);
 
-  return { connectionState, audioElements };
+  return {
+    connectionState,
+    audioElements,
+  };
 };
