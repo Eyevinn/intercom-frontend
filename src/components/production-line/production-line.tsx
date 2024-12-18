@@ -201,6 +201,14 @@ export const ProductionLine = ({
     audioOutputId: joinProductionOptions?.audiooutput ?? null,
   });
 
+  useEffect(() => {
+    console.log("audioContext:", audioContext);
+  }, [audioContext]);
+
+  useEffect(() => {
+    console.log("gainNode:", gainNode);
+  }, [gainNode]);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     // const newValue = parseFloat(e.target.value);
     // setValue(newValue);

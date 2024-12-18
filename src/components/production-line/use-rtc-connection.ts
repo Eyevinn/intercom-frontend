@@ -94,12 +94,24 @@ const establishConnection = ({
           });
         };
 
-        console.log("gainNode", gainNode);
-        console.log("audioContext", audioContext.state);
+        // console.log("gainNode", gainNode);
+        // console.log("audioContext", audioContext.state);
         // audioElement.srcObject = selectedStream;
 
         setAudioElements((prevArray) => [audioElement, ...prevArray]);
         if (joinProductionOptions.audiooutput) {
+          // console.log("gainNode", gainNode);
+          // console.log("audioContext", audioContext.state);
+          // dispatch({
+          //   type: "UPDATE_CALL",
+          //   payload: {
+          //     id: callId,
+          //     updates: {
+          //       gainNode,
+          //       audioContext,
+          //     },
+          //   },
+          // });
           audioElement
             .setSinkId(joinProductionOptions.audiooutput)
             .catch((e) => {
@@ -114,31 +126,23 @@ const establishConnection = ({
                 },
               });
             });
-          dispatch({
-            type: "UPDATE_CALL",
-            payload: {
-              id: callId,
-              updates: {
-                gainNode,
-                audioContext,
-              },
-            },
-          });
         }
       } else if (
         selectedStream &&
         selectedStream.getAudioTracks().length === 0
       ) {
-        dispatch({
-          type: "UPDATE_CALL",
-          payload: {
-            id: callId,
-            updates: {
-              gainNode,
-              audioContext,
-            },
-          },
-        });
+        // console.log("gainNode", gainNode);
+        // console.log("audioContext", audioContext?.state);
+        // dispatch({
+        //   type: "UPDATE_CALL",
+        //   payload: {
+        //     id: callId,
+        //     updates: {
+        //       gainNode,
+        //       audioContext,
+        //     },
+        //   },
+        // });
         setNoStreamError(true);
         dispatch({
           type: "ERROR",
@@ -158,6 +162,18 @@ const establishConnection = ({
         });
       }
     }
+    console.log("gainNode", gainNodeRef.current);
+    console.log("audioContext", audioContextRef.current?.state);
+    dispatch({
+      type: "UPDATE_CALL",
+      payload: {
+        id: callId,
+        updates: {
+          gainNode: gainNodeRef.current,
+          audioContext: audioContextRef.current,
+        },
+      },
+    });
     // return {
     //   gainNodeRef, // Expose the GainNode ref for direct control
     // };
