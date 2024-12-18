@@ -196,8 +196,6 @@ export const ProductionLine = ({
     audioContext,
   } = callState;
 
-  const mixedAudioElement = new Audio();
-
   const [inputAudioStream, resetAudioInput] = useAudioInput({
     audioInputId: joinProductionOptions?.audioinput ?? null,
     audioOutputId: joinProductionOptions?.audiooutput ?? null,
@@ -205,24 +203,11 @@ export const ProductionLine = ({
 
   useEffect(() => {
     console.log("audioContext:", audioContext);
-    console.log("gainNode:", gainNode);
-    if (!audioContext || !gainNode) return;
-    const destination = audioContext.createMediaStreamDestination();
-    gainNode.connect(destination);
-
-    mixedAudioElement.srcObject = destination.stream;
-    mixedAudioElement.play();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [audioContext, gainNode]);
+  }, [audioContext]);
 
   useEffect(() => {
-    if (audioElements) {
-      audioElements.forEach((audioElement) => {
-        // eslint-disable-next-line no-param-reassign
-        audioElement.muted = true;
-      });
-    }
-  }, [audioElements]);
+    console.log("gainNode:", gainNode);
+  }, [gainNode]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     // const newValue = parseFloat(e.target.value);
