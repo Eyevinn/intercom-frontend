@@ -136,14 +136,12 @@ export const CallsPage = () => {
           </AddCallContainer>
         )}
         {isEmpty && paramProductionId && paramLineId && (
-          <CallContainer>
-            <JoinProduction
-              preSelected={{
-                preSelectedProductionId: paramProductionId,
-                preSelectedLineId: paramLineId,
-              }}
-            />
-          </CallContainer>
+          <JoinProduction
+            preSelected={{
+              preSelectedProductionId: paramProductionId,
+              preSelectedLineId: paramLineId,
+            }}
+          />
         )}
       </CallsContainer>
     </Container>
