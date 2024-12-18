@@ -179,7 +179,8 @@ export const JoinProduction = ({
           connectionState: null,
           audioElements: null,
           sessionId: null,
-          gainNodeRef: null,
+          gainNode: null,
+          audioContext: null,
         },
       },
     });

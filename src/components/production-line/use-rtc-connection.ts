@@ -94,6 +94,8 @@ const establishConnection = ({
           });
         };
 
+        console.log("gainNode", gainNode);
+        console.log("audioContext", audioContext.state);
         // audioElement.srcObject = selectedStream;
 
         setAudioElements((prevArray) => [audioElement, ...prevArray]);
@@ -117,7 +119,8 @@ const establishConnection = ({
             payload: {
               id: callId,
               updates: {
-                gainNodeRef,
+                gainNode,
+                audioContext,
               },
             },
           });
@@ -131,7 +134,8 @@ const establishConnection = ({
           payload: {
             id: callId,
             updates: {
-              gainNodeRef,
+              gainNode,
+              audioContext,
             },
           },
         });

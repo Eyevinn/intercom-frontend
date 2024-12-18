@@ -192,7 +192,8 @@ export const ProductionLine = ({
     connectionState,
     audioElements,
     sessionId,
-    gainNodeRef,
+    gainNode,
+    audioContext,
   } = callState;
 
   const [inputAudioStream, resetAudioInput] = useAudioInput({
@@ -211,9 +212,11 @@ export const ProductionLine = ({
     //   audioElement.volume = newValue;
     // });
     const volume = parseFloat(e.target.value);
+    console.log("gainNode:", gainNode);
+    console.log("audioContext:", audioContext);
     setValue(volume);
-    if (gainNodeRef && gainNodeRef.current) {
-      gainNodeRef.current.gain.value = volume; // Directly control the gain node
+    if (gainNode && gainNode) {
+      gainNode.gain.value = volume; // Directly control the gain node
       console.log("Speaker volume set to:", volume);
     }
   };
