@@ -503,13 +503,12 @@ export const ProductionLine = ({
               }}
             >
               <DisplayContainerHeader>Controls</DisplayContainerHeader>
-              {!isMobile && (
-                <VolumeSlider
-                  value={value}
-                  handleInputChange={handleInputChange}
-                  handleVolumeButtonClick={handleVolumeButtonClick}
-                />
-              )}
+              <VolumeSlider
+                value={value}
+                handleInputChange={handleInputChange}
+                handleVolumeButtonClick={handleVolumeButtonClick}
+              />
+
               <FlexContainer>
                 <FlexButtonWrapper className="first">
                   <UserControlBtn
