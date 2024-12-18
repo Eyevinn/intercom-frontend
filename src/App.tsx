@@ -51,7 +51,7 @@ const App = () => {
   const continueToApp = isValidBrowser || unsupportedContinue;
   const { denied, permission } = useDevicePermissions({ continueToApp });
   const initializedGlobalState = useInitializeGlobalStateReducer();
-  const [, dispatch] = initializedGlobalState;
+  const [{ devices }, dispatch] = initializedGlobalState;
   const [apiError, setApiError] = useState(false);
 
   useFetchDevices({
@@ -59,7 +59,7 @@ const App = () => {
     permission,
   });
 
-  useLocalUserSettings({ dispatch });
+  useLocalUserSettings({ devices, dispatch });
 
   return (
     <GlobalStateContext.Provider value={initializedGlobalState}>

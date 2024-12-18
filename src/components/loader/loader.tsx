@@ -2,8 +2,8 @@ import styled from "@emotion/styled";
 import { FC, useEffect, useState } from "react";
 
 const Loading = styled.div`
-  border: 0.4rem solid rgba(0, 0, 0, 0.1);
-  border-top: 0.4rem solid #333;
+  border: 0.3rem solid rgba(0, 0, 0, 0.1);
+  border-top: 0.3rem solid #333;
   border-radius: 50%;
   width: 3rem;
   height: 3rem;
@@ -20,16 +20,6 @@ const Loading = styled.div`
     position: absolute;
     top: 0.5rem;
     left: 30%;
-  }
-
-  &.refresh-devices {
-    position: absolute;
-    top: 0.5rem;
-    left: 0.5rem;
-    padding: 0;
-    margin: 0;
-    width: 2.5rem;
-    height: 2.5rem;
   }
 
   &.join-production {

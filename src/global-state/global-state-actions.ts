@@ -1,4 +1,4 @@
-import { CallState } from "./types.ts";
+import { CallState, DevicesState } from "./types.ts";
 import { TUserSettings } from "../components/user-settings/types.ts";
 
 export type TGlobalStateAction =
@@ -32,7 +32,7 @@ export type TProductionListFetched = {
 
 export type TUpdateDevicesAction = {
   type: "DEVICES_UPDATED";
-  payload: MediaDeviceInfo[];
+  payload: DevicesState;
 };
 
 export type TSelectProductionId = {

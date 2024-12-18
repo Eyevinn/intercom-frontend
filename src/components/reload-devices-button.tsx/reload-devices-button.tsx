@@ -4,15 +4,18 @@ import { RefreshIcon } from "../../assets/icons/icon";
 import { PrimaryButton } from "../landing-page/form-elements";
 import { Spinner } from "../loader/loader";
 import { isBrowserFirefox, isMobile } from "../../bowser";
+import { DevicesState } from "../../global-state/types";
 
 const StyledRefreshBtn = styled(PrimaryButton)`
-  padding: 0;
-  margin: 0;
-  width: 3.5rem;
-  height: 3.5rem;
-  margin-left: 1.5rem;
-  flex-shrink: 0; /* Prevent shrinking */
-  flex-basis: auto; /* Prevent shrinking */
+  margin-right: 1.5rem;
+  display: flex;
+  align-items: center;
+
+  svg,
+  .refresh-devices {
+    width: 2rem;
+    height: 2rem;
+  }
 
   &.dummy {
     background-color: #242424;
@@ -28,7 +31,7 @@ export const ReloadDevicesButton = ({
 }: {
   handleReloadDevices: () => void;
   setFirefoxWarningModalOpen?: () => void;
-  devices: MediaDeviceInfo[];
+  devices: DevicesState;
   isDummy?: boolean;
 }) => {
   const [deviceRefresh, setDeviceRefresh] = useState(false);
@@ -64,6 +67,7 @@ export const ReloadDevicesButton = ({
       disabled={isDummy}
       onClick={() => reloadDevices()}
     >
+      <div>Refresh Devices</div>
       {!deviceRefresh && <RefreshIcon />}
       {deviceRefresh && <Spinner className="refresh-devices" />}
     </StyledRefreshBtn>
