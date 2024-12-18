@@ -81,7 +81,7 @@ const establishConnection = ({
         audioElement.srcObject = selectedStream;
         audioElement.controls = false;
         audioElement.autoplay = true;
-        audioElement.muted = true;
+        // audioElement.muted = true;
         audioElement.onerror = () => {
           dispatch({
             type: "ERROR",
@@ -94,9 +94,9 @@ const establishConnection = ({
           });
         };
 
-        // console.log("gainNode", gainNode);
-        // console.log("audioContext", audioContext.state);
-        // audioElement.srcObject = selectedStream;
+        // // console.log("gainNode", gainNode);
+        // // console.log("audioContext", audioContext.state);
+        // // audioElement.srcObject = selectedStream;
 
         setAudioElements((prevArray) => [audioElement, ...prevArray]);
         if (joinProductionOptions.audiooutput) {
