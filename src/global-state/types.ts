@@ -19,7 +19,6 @@ export interface CallState {
   audioElements: HTMLAudioElement[] | null;
   sessionId: string | null;
   gainNode: GainNode | null;
-  audioContext: AudioContext | null;
 }
 
 export type TGlobalState = {

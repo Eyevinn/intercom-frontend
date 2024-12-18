@@ -94,24 +94,8 @@ const establishConnection = ({
           });
         };
 
-        // console.log("gainNode", gainNode);
-        // console.log("audioContext", audioContext.state);
-        // audioElement.srcObject = selectedStream;
-
         setAudioElements((prevArray) => [audioElement, ...prevArray]);
         if (joinProductionOptions.audiooutput) {
-          // console.log("gainNode", gainNode);
-          // console.log("audioContext", audioContext.state);
-          // dispatch({
-          //   type: "UPDATE_CALL",
-          //   payload: {
-          //     id: callId,
-          //     updates: {
-          //       gainNode,
-          //       audioContext,
-          //     },
-          //   },
-          // });
           audioElement
             .setSinkId(joinProductionOptions.audiooutput)
             .catch((e) => {
@@ -131,18 +115,6 @@ const establishConnection = ({
         selectedStream &&
         selectedStream.getAudioTracks().length === 0
       ) {
-        // console.log("gainNode", gainNode);
-        // console.log("audioContext", audioContext?.state);
-        // dispatch({
-        //   type: "UPDATE_CALL",
-        //   payload: {
-        //     id: callId,
-        //     updates: {
-        //       gainNode,
-        //       audioContext,
-        //     },
-        //   },
-        // });
         setNoStreamError(true);
         dispatch({
           type: "ERROR",
@@ -162,72 +134,15 @@ const establishConnection = ({
         });
       }
     }
-    console.log("gainNode", gainNodeRef.current);
-    console.log("audioContext", audioContextRef.current?.state);
     dispatch({
       type: "UPDATE_CALL",
       payload: {
         id: callId,
         updates: {
           gainNode: gainNodeRef.current,
-          audioContext: audioContextRef.current,
         },
       },
     });
-    // return {
-    //   gainNodeRef, // Expose the GainNode ref for direct control
-    // };
-
-    // audioElement.controls = false;
-    // audioElement.autoplay = true;
-    // audioElement.onerror = () => {
-    //   dispatch({
-    //     type: "ERROR",
-    //     payload: {
-    //       callId,
-    //       error: new Error(
-    //         `Audio Error: ${audioElement.error?.code} - ${audioElement.error?.message}`
-    //       ),
-    //     },
-    //   });
-    // };
-
-    // audioElement.srcObject = selectedStream;
-
-    // setAudioElements((prevArray) => [audioElement, ...prevArray]);
-    //   if (joinProductionOptions.audiooutput) {
-    //     audioElement.setSinkId(joinProductionOptions.audiooutput).catch((e) => {
-    //       dispatch({
-    //         type: "ERROR",
-    //         payload: {
-    //           callId,
-    //           error:
-    //             e instanceof Error
-    //               ? e
-    //               : new Error("Error assigning audio sink."),
-    //         },
-    //       });
-    //     });
-    //   }
-    // } else if (selectedStream && selectedStream.getAudioTracks().length === 0) {
-    //   setNoStreamError(true);
-    //   dispatch({
-    //     type: "ERROR",
-    //     payload: {
-    //       callId,
-    //       error: new Error("Stream-error: No MediaStreamTracks avaliable"),
-    //     },
-    //   });
-    // } else {
-    //   setNoStreamError(true);
-    //   dispatch({
-    //     type: "ERROR",
-    //     payload: {
-    //       callId,
-    //       error: new Error("Stream-error: No MediaStream avaliable"),
-    //     },
-    //   });
-    // }
   };
 
   // Listen to incoming audio streams and attach them to a HTMLAudioElement

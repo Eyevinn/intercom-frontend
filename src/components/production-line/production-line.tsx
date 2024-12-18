@@ -193,7 +193,6 @@ export const ProductionLine = ({
     audioElements,
     sessionId,
     gainNode,
-    audioContext,
   } = callState;
 
   const [inputAudioStream, resetAudioInput] = useAudioInput({
@@ -202,30 +201,19 @@ export const ProductionLine = ({
   });
 
   useEffect(() => {
-    console.log("audioContext:", audioContext);
-  }, [audioContext]);
-
-  useEffect(() => {
-    console.log("gainNode:", gainNode);
-  }, [gainNode]);
+    if (audioElements) {
+      audioElements.forEach((audioElement) => {
+        // eslint-disable-next-line no-param-reassign
+        audioElement.muted = true;
+      });
+    }
+  }, [audioElements]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // const newValue = parseFloat(e.target.value);
-    // setValue(newValue);
-    // // changeSpeakerVolume(newValue);
-
-    // audioElements?.forEach((audioElement) => {
-    //   console.log("Setting volume to: ", newValue);
-    //   // eslint-disable-next-line no-param-reassign
-    //   audioElement.volume = newValue;
-    // });
     const volume = parseFloat(e.target.value);
-    console.log("gainNode:", gainNode);
-    console.log("audioContext:", audioContext);
     setValue(volume);
-    if (gainNode && gainNode) {
-      gainNode.gain.value = volume; // Directly control the gain node
-      console.log("Speaker volume set to:", volume);
+    if (gainNode) {
+      gainNode.gain.value = volume;
     }
   };
 
@@ -235,27 +223,25 @@ export const ProductionLine = ({
         ? Math.min(value + 0.05, 1)
         : Math.max(value - 0.05, 0);
     setValue(newValue);
-    // TODO: Fix for iOS
+    if (gainNode) {
+      gainNode.gain.value = newValue;
+    }
   };
 
   useHotkeys(savedHotkeys.increaseVolumeHotkey || "u", () => {
     const newValue = Math.min(value + 0.05, 1);
     setValue(newValue);
-
-    audioElements?.forEach((audioElement) => {
-      // eslint-disable-next-line no-param-reassign
-      audioElement.volume = newValue;
-    });
+    if (gainNode) {
+      gainNode.gain.value = newValue;
+    }
   });
 
   useHotkeys(savedHotkeys.decreaseVolumeHotkey || "d", () => {
     const newValue = Math.max(value - 0.05, 0);
     setValue(newValue);
-
-    audioElements?.forEach((audioElement) => {
-      // eslint-disable-next-line no-param-reassign
-      audioElement.volume = newValue;
-    });
+    if (gainNode) {
+      gainNode.gain.value = newValue;
+    }
   });
 
   const muteInput = useCallback(
@@ -318,12 +304,11 @@ export const ProductionLine = ({
   const muteOutput = useCallback(() => {
     if (!audioElements) return;
 
-    audioElements.forEach((singleElement: HTMLAudioElement) => {
-      // eslint-disable-next-line no-param-reassign
-      singleElement.muted = !isOutputMuted;
-    });
+    if (gainNode) {
+      gainNode.gain.value = isOutputMuted ? value : 0;
+    }
     setIsOutputMuted(!isOutputMuted);
-  }, [audioElements, isOutputMuted]);
+  }, [audioElements, isOutputMuted, gainNode, value]);
 
   useSpeakerHotkeys({
     muteOutput,

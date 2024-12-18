@@ -180,7 +180,6 @@ export const JoinProduction = ({
           audioElements: null,
           sessionId: null,
           gainNode: null,
-          audioContext: null,
         },
       },
     });
