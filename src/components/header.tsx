@@ -35,23 +35,28 @@ export const Header: FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { playExitSound } = useAudioCue();
+  const isEmpty = Object.values(calls).length === 0;
 
   const runExitAllCalls = () => {
     setConfirmExitModalOpen(false);
     navigate("/");
     playExitSound();
-    Object.entries(calls).forEach(([callId]) => {
-      if (callId) {
-        dispatch({
-          type: "REMOVE_CALL",
-          payload: { id: callId },
-        });
-      }
-    });
+    if (!isEmpty) {
+      Object.entries(calls).forEach(([callId]) => {
+        if (callId) {
+          dispatch({
+            type: "REMOVE_CALL",
+            payload: { id: callId },
+          });
+        }
+      });
+    }
   };
 
   const returnToRoot = () => {
-    if (location.pathname.includes("/line")) {
+    if (location.pathname.includes("/line") && isEmpty) {
+      runExitAllCalls();
+    } else if (location.pathname.includes("/line")) {
       setConfirmExitModalOpen(true);
     } else {
       navigate("/");
