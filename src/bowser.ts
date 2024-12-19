@@ -1,8 +1,8 @@
 import Bowser from "bowser";
 
-export const deviceInfo = Bowser.parse(window.navigator.userAgent);
-export const browser = Bowser.getParser(window.navigator.userAgent);
-export const browserName = browser.getBrowserName();
+const deviceInfo = Bowser.parse(window.navigator.userAgent);
+const browser = Bowser.getParser(window.navigator.userAgent);
+const browserName = browser.getBrowserName();
 
 // platform type, can be either "desktop", "tablet" or "mobile"
 export const isMobile = deviceInfo.platform.type === "mobile";
@@ -19,8 +19,8 @@ export const isValidBrowser = browser.satisfies({
 
 export const isBrowserFirefox = browserName.toLowerCase() === "firefox";
 
-// Helper function to detect iPad specifically
-export const isIpad = (): boolean => {
+// Used because isTablet does not detect iPad as iPads have platform desktop and browser Safari
+const detectIpad = (): boolean => {
   const ua = window.navigator.userAgent.toLowerCase();
   const platform = window.navigator.platform.toLowerCase();
   const maxTouchPoints = navigator.maxTouchPoints || 0;
@@ -30,6 +30,7 @@ export const isIpad = (): boolean => {
     ua.includes("ipad") ||
     (maxTouchPoints > 1 && platform.includes("mac") && ua.includes("safari"));
 
-  console.log("Inside isIpad: ", result); // Debug here
   return result;
 };
+
+export const isIpad = detectIpad();

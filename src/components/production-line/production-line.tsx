@@ -311,12 +311,6 @@ export const ProductionLine = ({
   );
 
   useEffect(() => {
-    console.log("Executing useEffect");
-    const ipadCheck = isIpad();
-    console.log("IS IPAD 2: ", ipadCheck);
-  }, []);
-
-  useEffect(() => {
     if (!fetchProductionError) return;
 
     dispatch({
@@ -499,7 +493,7 @@ export const ProductionLine = ({
               }}
             >
               <DisplayContainerHeader>Controls</DisplayContainerHeader>
-              {!isMobile && !isTablet && (
+              {!isMobile && !isTablet && !isIpad && (
                 <VolumeSlider
                   value={value}
                   handleInputChange={handleInputChange}
