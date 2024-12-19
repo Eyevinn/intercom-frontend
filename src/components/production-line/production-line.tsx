@@ -323,7 +323,7 @@ export const ProductionLine = ({
     console.log("DEVICE INFO: ", deviceInfo);
     console.log("BROWSER: ", browser);
     console.log("BROWSER NAME: ", browserName);
-    console.log("IS IPAD: ", isIpad);
+    console.log("IS IPAD: ", isIpad());
   });
 
   useEffect(() => {
