@@ -16,3 +16,21 @@ export const isValidBrowser = browser.satisfies({
 });
 
 export const isBrowserFirefox = browserName.toLowerCase() === "firefox";
+
+// Used because iPads have platform as desktop and browser as Safari
+const detectIpad = (): boolean => {
+  const ua = window.navigator.userAgent.toLowerCase();
+  const platform = window.navigator.platform.toLowerCase();
+  const maxTouchPoints = navigator.maxTouchPoints || 0;
+
+  const result =
+    platform.includes("ipad") ||
+    ua.includes("ipad") ||
+    (maxTouchPoints > 1 && platform.includes("mac") && ua.includes("safari"));
+
+  return result;
+};
+
+const isIpad = detectIpad();
+
+export const isTablet = deviceInfo.platform.type === "tablet" || isIpad;
