@@ -27,7 +27,7 @@ import { Spinner } from "../loader/loader.tsx";
 import { DisplayContainerHeader } from "../landing-page/display-container-header.tsx";
 import { DisplayContainer, FlexContainer } from "../generic-components.ts";
 import { useDeviceLabels } from "./use-device-labels.ts";
-import { isBrowserFirefox, isMobile, isTablet, isIpad } from "../../bowser.ts";
+import { isBrowserFirefox, isMobile, isTablet } from "../../bowser.ts";
 import { useLineHotkeys, useSpeakerHotkeys } from "./use-line-hotkeys.ts";
 import { LongPressToTalkButton } from "./long-press-to-talk-button.tsx";
 import { useLinePolling } from "./use-line-polling.ts";
@@ -493,7 +493,7 @@ export const ProductionLine = ({
               }}
             >
               <DisplayContainerHeader>Controls</DisplayContainerHeader>
-              {!isMobile && !isTablet && !isIpad && (
+              {!isMobile && !isTablet && (
                 <VolumeSlider
                   value={value}
                   handleInputChange={handleInputChange}

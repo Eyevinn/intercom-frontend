@@ -7,8 +7,6 @@ const browserName = browser.getBrowserName();
 // platform type, can be either "desktop", "tablet" or "mobile"
 export const isMobile = deviceInfo.platform.type === "mobile";
 
-export const isTablet = deviceInfo.platform.type === "tablet";
-
 export const isValidBrowser = browser.satisfies({
   chrome: ">=115",
   edge: ">=115",
@@ -19,7 +17,7 @@ export const isValidBrowser = browser.satisfies({
 
 export const isBrowserFirefox = browserName.toLowerCase() === "firefox";
 
-// Used because isTablet does not detect iPad as iPads have platform desktop and browser Safari
+// Used because iPads have platform as desktop and browser as Safari
 const detectIpad = (): boolean => {
   const ua = window.navigator.userAgent.toLowerCase();
   const platform = window.navigator.platform.toLowerCase();
@@ -33,5 +31,6 @@ const detectIpad = (): boolean => {
   return result;
 };
 
-export const isIpad = detectIpad();
-console.log(isIpad);
+const isIpad = detectIpad();
+
+export const isTablet = deviceInfo.platform.type === "tablet" || isIpad;
