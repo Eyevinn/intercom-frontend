@@ -25,10 +25,11 @@ export const isIpad = (): boolean => {
   const platform = window.navigator.platform.toLowerCase();
   const maxTouchPoints = navigator.maxTouchPoints || 0;
 
-  // iPad detection logic
-  return (
+  const result =
     platform.includes("ipad") ||
-    ua.includes("ipad") || // Older iPads
-    (maxTouchPoints > 1 && platform.includes("mac") && ua.includes("safari")) // iPadOS reporting as Mac
-  );
+    ua.includes("ipad") ||
+    (maxTouchPoints > 1 && platform.includes("mac") && ua.includes("safari"));
+
+  console.log("Inside isIpad: ", result); // Debug here
+  return result;
 };
