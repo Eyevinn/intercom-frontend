@@ -311,6 +311,10 @@ export const ProductionLine = ({
   );
 
   useEffect(() => {
+    console.log("IS TABLET: ", isTablet);
+  });
+
+  useEffect(() => {
     if (!fetchProductionError) return;
 
     dispatch({
