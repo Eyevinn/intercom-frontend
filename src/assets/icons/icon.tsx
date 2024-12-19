@@ -12,8 +12,6 @@ import RefreshSvg from "./refresh.svg?react";
 import Settings from "./settings.svg?react";
 import NoSound from "./no_sound.svg?react";
 import FullSound from "./full_sound.svg?react";
-import Minus from "./minus.svg?react";
-import Plus from "./plus.svg?react";
 import Headset from "./headset.svg?react";
 import UserSettings from "./user_settings.svg?react";
 import ChevronDown from "./chevron_down.svg?react";
@@ -50,10 +48,6 @@ export const SettingsIcon = () => <Settings />;
 export const NoSoundIcon = () => <NoSound />;
 
 export const FullSoundIcon = () => <FullSound />;
-
-export const MinusIcon = () => <Minus />;
-
-export const PlusIcon = () => <Plus />;
 
 export const UserSettingsIcon = () => <UserSettings />;
 
