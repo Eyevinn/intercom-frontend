@@ -34,3 +34,4 @@ const detectIpad = (): boolean => {
 };
 
 export const isIpad = detectIpad();
+console.log(isIpad);
