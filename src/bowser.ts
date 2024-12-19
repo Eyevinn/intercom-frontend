@@ -20,5 +20,5 @@ export const isValidBrowser = browser.satisfies({
 export const isBrowserFirefox = browserName.toLowerCase() === "firefox";
 
 export const isIpadOS = () => {
-  return navigator.maxTouchPoints && navigator.maxTouchPoints > 2;
+  return !!navigator.maxTouchPoints && navigator.maxTouchPoints > 2;
 };
