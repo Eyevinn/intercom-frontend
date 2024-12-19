@@ -34,7 +34,7 @@ import {
   deviceInfo,
   browser,
   browserName,
-  isIpadOS,
+  isIpad,
 } from "../../bowser.ts";
 import { useLineHotkeys, useSpeakerHotkeys } from "./use-line-hotkeys.ts";
 import { LongPressToTalkButton } from "./long-press-to-talk-button.tsx";
@@ -323,7 +323,7 @@ export const ProductionLine = ({
     console.log("DEVICE INFO: ", deviceInfo);
     console.log("BROWSER: ", browser);
     console.log("BROWSER NAME: ", browserName);
-    console.log("IS IPAD OS: ", isIpadOS);
+    console.log("IS IPAD: ", isIpad);
   });
 
   useEffect(() => {

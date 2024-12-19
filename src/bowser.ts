@@ -19,6 +19,16 @@ export const isValidBrowser = browser.satisfies({
 
 export const isBrowserFirefox = browserName.toLowerCase() === "firefox";
 
-export const isIpadOS = () => {
-  return !!navigator.maxTouchPoints && navigator.maxTouchPoints > 2;
+// Helper function to detect iPad specifically
+export const isIpad = (): boolean => {
+  const ua = window.navigator.userAgent.toLowerCase();
+  const platform = window.navigator.platform.toLowerCase();
+  const maxTouchPoints = navigator.maxTouchPoints || 0;
+
+  // iPad detection logic
+  return (
+    platform.includes("ipad") ||
+    ua.includes("ipad") || // Older iPads
+    (maxTouchPoints > 1 && platform.includes("mac") && ua.includes("safari")) // iPadOS reporting as Mac
+  );
 };
