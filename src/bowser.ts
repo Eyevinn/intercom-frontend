@@ -1,8 +1,8 @@
 import Bowser from "bowser";
 
-const deviceInfo = Bowser.parse(window.navigator.userAgent);
-const browser = Bowser.getParser(window.navigator.userAgent);
-const browserName = browser.getBrowserName();
+export const deviceInfo = Bowser.parse(window.navigator.userAgent);
+export const browser = Bowser.getParser(window.navigator.userAgent);
+export const browserName = browser.getBrowserName();
 
 // platform type, can be either "desktop", "tablet" or "mobile"
 export const isMobile = deviceInfo.platform.type === "mobile";

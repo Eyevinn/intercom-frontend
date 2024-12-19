@@ -27,7 +27,14 @@ import { Spinner } from "../loader/loader.tsx";
 import { DisplayContainerHeader } from "../landing-page/display-container-header.tsx";
 import { DisplayContainer, FlexContainer } from "../generic-components.ts";
 import { useDeviceLabels } from "./use-device-labels.ts";
-import { isBrowserFirefox, isMobile, isTablet } from "../../bowser.ts";
+import {
+  isBrowserFirefox,
+  isMobile,
+  isTablet,
+  deviceInfo,
+  browser,
+  browserName,
+} from "../../bowser.ts";
 import { useLineHotkeys, useSpeakerHotkeys } from "./use-line-hotkeys.ts";
 import { LongPressToTalkButton } from "./long-press-to-talk-button.tsx";
 import { useLinePolling } from "./use-line-polling.ts";
@@ -312,6 +319,9 @@ export const ProductionLine = ({
 
   useEffect(() => {
     console.log("IS TABLET: ", isTablet);
+    console.log("DEVICE INFO: ", deviceInfo);
+    console.log("BROWSER: ", browser);
+    console.log("BROWSER NAME: ", browserName);
   });
 
   useEffect(() => {
