@@ -263,13 +263,6 @@ export const ProductionLine = ({
 
   const { playEnterSound, playExitSound } = useAudioCue();
 
-  useEffect(() => {
-    console.log("IS MOBILE: ", isMobile);
-    console.log("IS TABLET: ", isTablet);
-    console.log("IS IOS MOBILE: ", isIOSMobile);
-    console.log("IS IPAD: ", isIpad);
-  });
-
   const exit = useCallback(() => {
     setConnectionActive(false);
     playExitSound();
@@ -291,10 +284,6 @@ export const ProductionLine = ({
     permission: true,
     refresh,
   });
-
-  useEffect(() => {
-    console.log("IS OUTPUT MUTED: ", isOutputMuted);
-  }, [isOutputMuted]);
 
   useEffect(() => {
     if (joinProductionOptions) {
@@ -529,7 +518,11 @@ export const ProductionLine = ({
                     disabled={value === 0}
                   >
                     <ButtonIcon>
-                      {isOutputMuted ? <SpeakerOff /> : <SpeakerOn />}
+                      {isOutputMuted || value === 0 ? (
+                        <SpeakerOff />
+                      ) : (
+                        <SpeakerOn />
+                      )}
                     </ButtonIcon>
                   </UserControlBtn>
                 </FlexButtonWrapper>
