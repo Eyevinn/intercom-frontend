@@ -215,7 +215,6 @@ export const ProductionLine = ({
     });
 
     if (newValue > 0 && isOutputMuted) {
-      // Unmute the speaker if the slider is moved while muted.
       setIsOutputMuted(false);
       audioElements?.forEach((audioElement) => {
         // eslint-disable-next-line no-param-reassign
