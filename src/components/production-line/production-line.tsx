@@ -177,19 +177,9 @@ export const ProductionLine = ({
     setValue(newValue);
 
     audioElements?.forEach((audioElement) => {
-      console.log("Setting volume to: ", newValue);
       // eslint-disable-next-line no-param-reassign
       audioElement.volume = newValue;
     });
-  };
-
-  const handleVolumeButtonClick = (type: "increase" | "decrease") => {
-    const newValue =
-      type === "increase"
-        ? Math.min(value + 0.05, 1)
-        : Math.max(value - 0.05, 0);
-    setValue(newValue);
-    // TODO: Fix for iOS
   };
 
   useHotkeys(savedHotkeys?.increaseVolumeHotkey || "u", () => {
@@ -477,11 +467,12 @@ export const ProductionLine = ({
               }}
             >
               <DisplayContainerHeader>Controls</DisplayContainerHeader>
-              <VolumeSlider
-                value={value}
-                handleInputChange={handleInputChange}
-                handleVolumeButtonClick={handleVolumeButtonClick}
-              />
+              {!isMobile && (
+                <VolumeSlider
+                  value={value}
+                  handleInputChange={handleInputChange}
+                />
+              )}
               <FlexContainer>
                 <FlexButtonWrapper className="first">
                   <UserControlBtn

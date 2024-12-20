@@ -1,13 +1,6 @@
 import styled from "@emotion/styled";
 import { FC } from "react";
-import {
-  NoSoundIcon,
-  FullSoundIcon,
-  MinusIcon,
-  PlusIcon,
-} from "../../assets/icons/icon";
-import { isMobile } from "../../bowser";
-import { ActionButton } from "../landing-page/form-elements";
+import { NoSoundIcon, FullSoundIcon } from "../../assets/icons/icon";
 
 const SliderWrapper = styled.div`
   width: 100%;
@@ -50,24 +43,6 @@ const SliderThumb = styled.div<{ position: number }>`
   cursor: pointer;
 `;
 
-const VolumeButton = styled(ActionButton)`
-  background-color: #32383b;
-  width: 7rem;
-  align-items: center;
-  height: 4.5rem;
-  padding: 1.5rem;
-  cursor: pointer;
-  margin-top: 1rem;
-  border: 0.2rem solid #6d6d6d;
-`;
-
-const VolumeButtonContainer = styled.div`
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  width: 100%;
-`;
-
 const VolumeWrapper = styled.div`
   display: flex;
   flex-direction: row;
@@ -78,13 +53,11 @@ const VolumeWrapper = styled.div`
 type TVolumeSliderProps = {
   value: number;
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleVolumeButtonClick: (type: "increase" | "decrease") => void;
 };
 
 export const VolumeSlider: FC<TVolumeSliderProps> = ({
   handleInputChange,
   value,
-  handleVolumeButtonClick,
 }) => {
   const thumbPosition = value * 100;
 
@@ -122,16 +95,6 @@ export const VolumeSlider: FC<TVolumeSliderProps> = ({
           </IconWrapper>
         </VolumeContainer>
       </VolumeWrapper>
-      {isMobile && (
-        <VolumeButtonContainer>
-          <VolumeButton onClick={() => handleVolumeButtonClick("decrease")}>
-            <MinusIcon />
-          </VolumeButton>
-          <VolumeButton onClick={() => handleVolumeButtonClick("increase")}>
-            <PlusIcon />
-          </VolumeButton>
-        </VolumeButtonContainer>
-      )}
     </SliderWrapper>
   );
 };
