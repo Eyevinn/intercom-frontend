@@ -22,6 +22,8 @@ import Person from "./person.svg?react";
 import Users from "./users.svg?react";
 import Add from "./add.svg?react";
 import Edit from "./edit.svg?react";
+import MegaphoneOff from "./campaign_off.svg?react";
+import MegaphoneOn from "./campaign_on.svg?react";
 
 export const MicMuted = () => <MicMute />;
 
@@ -70,3 +72,7 @@ export const UsersIcon = () => <Users />;
 export const AddIcon = () => <Add />;
 
 export const EditIcon = () => <Edit />;
+
+export const MegaphoneOffIcon = () => <MegaphoneOff />;
+
+export const MegaphoneOnIcon = () => <MegaphoneOn />;
