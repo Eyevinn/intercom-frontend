@@ -233,6 +233,10 @@ export const ProductionLine = ({
       // eslint-disable-next-line no-param-reassign
       audioElement.volume = newValue;
     });
+
+    if (newValue > 0 && isOutputMuted) {
+      setIsOutputMuted(false);
+    }
   });
 
   const muteInput = useCallback(
