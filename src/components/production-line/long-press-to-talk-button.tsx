@@ -90,7 +90,7 @@ export const LongPressToTalkButton = ({
           width: "100%",
         }}
       >
-        Press to Talk
+        Push to Talk
       </span>
     </Button>
   );
