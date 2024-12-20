@@ -286,10 +286,12 @@ export const ProductionLine = ({
   useEffect(() => {
     if (value === 0) {
       setIsOutputMuted(true);
-    } else {
-      setIsOutputMuted(false);
     }
   }, [value]);
+
+  useEffect(() => {
+    console.log("IS OUTPUT MUTED: ", isOutputMuted);
+  }, [isOutputMuted]);
 
   useEffect(() => {
     if (joinProductionOptions) {
