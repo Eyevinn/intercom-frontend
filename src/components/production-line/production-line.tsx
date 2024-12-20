@@ -27,7 +27,13 @@ import { Spinner } from "../loader/loader.tsx";
 import { DisplayContainerHeader } from "../landing-page/display-container-header.tsx";
 import { DisplayContainer, FlexContainer } from "../generic-components.ts";
 import { useDeviceLabels } from "./use-device-labels.ts";
-import { isBrowserFirefox, isMobile, isTablet } from "../../bowser.ts";
+import {
+  isBrowserFirefox,
+  isMobile,
+  isIOSMobile,
+  isIpad,
+  isTablet,
+} from "../../bowser.ts";
 import { useLineHotkeys, useSpeakerHotkeys } from "./use-line-hotkeys.ts";
 import { LongPressToTalkButton } from "./long-press-to-talk-button.tsx";
 import { useLinePolling } from "./use-line-polling.ts";
@@ -243,6 +249,13 @@ export const ProductionLine = ({
   );
 
   const { playEnterSound, playExitSound } = useAudioCue();
+
+  useEffect(() => {
+    console.log("IS MOBILE: ", isMobile);
+    console.log("IS TABLET: ", isTablet);
+    console.log("IS IOS MOBILE: ", isIOSMobile);
+    console.log("IS IPAD: ", isIpad);
+  });
 
   const exit = useCallback(() => {
     setConnectionActive(false);
@@ -493,7 +506,7 @@ export const ProductionLine = ({
               }}
             >
               <DisplayContainerHeader>Controls</DisplayContainerHeader>
-              {!isMobile && !isTablet && (
+              {!isIOSMobile && !isIpad && (
                 <VolumeSlider
                   value={value}
                   handleInputChange={handleInputChange}
@@ -617,7 +630,8 @@ export const ProductionLine = ({
 
               {inputAudioStream &&
                 inputAudioStream !== "no-device" &&
-                !isMobile && (
+                !isMobile &&
+                !isTablet && (
                   <>
                     <HotkeyDiv>
                       <strong>Hotkeys</strong>
