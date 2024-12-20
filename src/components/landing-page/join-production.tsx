@@ -49,12 +49,14 @@ type TProps = {
     preSelectedProductionId: string;
     preSelectedLineId: string;
   };
+  customGlobalMute: string;
   addAdditionalCallId?: string;
   closeAddCallView?: () => void;
 };
 
 export const JoinProduction = ({
   preSelected,
+  customGlobalMute,
   addAdditionalCallId,
   closeAddCallView,
 }: TProps) => {
@@ -179,6 +181,14 @@ export const JoinProduction = ({
           connectionState: null,
           audioElements: null,
           sessionId: null,
+          hotkeys: {
+            muteHotkey: "m",
+            speakerHotkey: "n",
+            pushToTalkHotkey: "t",
+            increaseVolumeHotkey: "u",
+            decreaseVolumeHotkey: "d",
+            globalMuteHotkey: customGlobalMute,
+          },
         },
       },
     });
