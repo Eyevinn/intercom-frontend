@@ -213,6 +213,15 @@ export const ProductionLine = ({
       // eslint-disable-next-line no-param-reassign
       audioElement.volume = newValue;
     });
+
+    if (newValue > 0 && isOutputMuted) {
+      // Unmute the speaker if the slider is moved while muted.
+      setIsOutputMuted(false);
+      audioElements?.forEach((audioElement) => {
+        // eslint-disable-next-line no-param-reassign
+        audioElement.muted = false;
+      });
+    }
   };
 
   useHotkeys(savedHotkeys.increaseVolumeHotkey || "u", () => {
@@ -282,12 +291,6 @@ export const ProductionLine = ({
     permission: true,
     refresh,
   });
-
-  useEffect(() => {
-    if (value === 0) {
-      setIsOutputMuted(true);
-    }
-  }, [value]);
 
   useEffect(() => {
     console.log("IS OUTPUT MUTED: ", isOutputMuted);
