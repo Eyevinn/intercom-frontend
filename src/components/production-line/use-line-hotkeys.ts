@@ -13,6 +13,12 @@ type TuseSpeakerHotkeys = {
   customKey?: string;
 };
 
+type TuseGlobalHotkeys = {
+  muteInput: (mute: boolean) => void;
+  isInputMuted: boolean;
+  customKey?: string;
+};
+
 export const useLineHotkeys = ({
   muteInput,
   isInputMuted,
@@ -51,5 +57,17 @@ export const useSpeakerHotkeys = ({
 
   useHotkeys(muteOutputKey, () => {
     muteOutput(!isOutputMuted);
+  });
+};
+
+export const useGlobalHotkeys = ({
+  muteInput,
+  isInputMuted,
+  customKey,
+}: TuseGlobalHotkeys) => {
+  const muteInputKey = customKey || "p";
+
+  useHotkeys(muteInputKey, () => {
+    muteInput(!isInputMuted);
   });
 };

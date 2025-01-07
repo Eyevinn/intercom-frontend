@@ -9,6 +9,15 @@ export type TJoinProductionOptions = {
   audiooutput: string | null;
 };
 
+export type Hotkeys = {
+  muteHotkey: string;
+  speakerHotkey: string;
+  pushToTalkHotkey: string;
+  increaseVolumeHotkey: string;
+  decreaseVolumeHotkey: string;
+  globalMuteHotkey: string;
+};
+
 export type TParticipant = {
   name: string;
   sessionId: string;

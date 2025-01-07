@@ -11,7 +11,6 @@ import {
   MicUnmuted,
   SpeakerOff,
   SpeakerOn,
-  SettingsIcon,
 } from "../../assets/icons/icon.tsx";
 import {
   ActionButton,
@@ -43,7 +42,6 @@ import { useCheckBadLineData } from "./use-check-bad-line-data.ts";
 import { useAudioCue } from "./use-audio-cue.ts";
 import { DisplayWarning } from "../display-box.tsx";
 import { TJoinProductionOptions } from "./types.ts";
-import { SettingsModal, Hotkeys } from "./settings-modal.tsx";
 import { VolumeSlider } from "../volume-slider/volume-slider.tsx";
 import { CallState } from "../../global-state/types.ts";
 import { ExitCallButton } from "./exit-call-button.tsx";
@@ -53,18 +51,12 @@ import { ModalConfirmationText } from "../modal/modal-confirmation-text.ts";
 import { SymphonyRtcConnectionComponent } from "./symphony-rtc-connection-component.tsx";
 import { ReloadDevicesButton } from "../reload-devices-button.tsx/reload-devices-button.tsx";
 import { useFetchDevices } from "../../hooks/use-fetch-devices.ts";
+import { HotkeysComponent } from "./hotkeys-component.tsx";
 
 type FormValues = TJoinProductionOptions;
 
 const TempDiv = styled.div`
   padding: 0 0 2rem 0;
-`;
-
-const HotkeyDiv = styled.div`
-  padding: 0 0 2rem 0;
-  flex-direction: row;
-  display: flex;
-  align-items: center;
 `;
 
 const HeaderWrapper = styled.div`
@@ -86,15 +78,6 @@ const ButtonIcon = styled.div`
   display: inline-block;
   vertical-align: middle;
   margin: 0 auto;
-`;
-
-const SettingsBtn = styled.div`
-  padding: 0;
-  margin-left: 1.5rem;
-  width: 3rem;
-  cursor: pointer;
-  color: white;
-  background: transparent;
 `;
 
 const FlexButtonWrapper = styled.div`
@@ -160,12 +143,16 @@ type TProductionLine = {
   id: string;
   callState: CallState;
   isSingleCall: boolean;
+  customGlobalMute: string;
+  masterInputMute: boolean;
 };
 
 export const ProductionLine = ({
   id,
   callState,
   isSingleCall,
+  customGlobalMute,
+  masterInputMute,
 }: TProductionLine) => {
   const { productionId: paramProductionId, lineId: paramLineId } = useParams();
   const [{ devices }, dispatch] = useGlobalState();
@@ -174,23 +161,8 @@ export const ProductionLine = ({
   const [isOutputMuted, setIsOutputMuted] = useState(false);
   const [showDeviceSettings, setShowDeviceSettings] = useState(false);
   const [refresh, setRefresh] = useState<number>(0);
-  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [confirmExitModalOpen, setConfirmExitModalOpen] = useState(false);
   const [value, setValue] = useState(0.75);
-  const [hotkeys, setHotkeys] = useState<Hotkeys>({
-    muteHotkey: "m",
-    speakerHotkey: "n",
-    pressToTalkHotkey: "t",
-    increaseVolumeHotkey: "u",
-    decreaseVolumeHotkey: "d",
-  });
-  const [savedHotkeys, setSavedHotkeys] = useState<Hotkeys>({
-    muteHotkey: "m",
-    speakerHotkey: "n",
-    pressToTalkHotkey: "t",
-    increaseVolumeHotkey: "u",
-    decreaseVolumeHotkey: "d",
-  });
   const {
     joinProductionOptions,
     dominantSpeaker,
@@ -198,6 +170,7 @@ export const ProductionLine = ({
     connectionState,
     audioElements,
     sessionId,
+    hotkeys: savedHotkeys,
   } = callState;
 
   const {
@@ -248,7 +221,7 @@ export const ProductionLine = ({
     }
   };
 
-  useHotkeys(savedHotkeys.increaseVolumeHotkey || "u", () => {
+  useHotkeys(savedHotkeys?.increaseVolumeHotkey || "u", () => {
     const newValue = Math.min(value + 0.05, 1);
     setValue(newValue);
 
@@ -258,7 +231,7 @@ export const ProductionLine = ({
     });
   });
 
-  useHotkeys(savedHotkeys.decreaseVolumeHotkey || "d", () => {
+  useHotkeys(savedHotkeys?.decreaseVolumeHotkey || "d", () => {
     const newValue = Math.max(value - 0.05, 0);
     setValue(newValue);
 
@@ -299,8 +272,8 @@ export const ProductionLine = ({
   useLineHotkeys({
     muteInput,
     isInputMuted,
-    customKeyMute: savedHotkeys.muteHotkey,
-    customKeyPress: savedHotkeys.pressToTalkHotkey,
+    customKeyMute: savedHotkeys?.muteHotkey || "m",
+    customKeyPress: savedHotkeys?.pushToTalkHotkey || "t",
   });
 
   useFetchDevices({
@@ -314,6 +287,16 @@ export const ProductionLine = ({
       setConnectionActive(true);
     }
   }, [joinProductionOptions]);
+
+  useEffect(() => {
+    if (inputAudioStream && inputAudioStream !== "no-device") {
+      inputAudioStream.getTracks().forEach((t) => {
+        // eslint-disable-next-line no-param-reassign
+        t.enabled = !masterInputMute;
+      });
+      setIsInputMuted(masterInputMute);
+    }
+  }, [inputAudioStream, masterInputMute]);
 
   useEffect(() => {
     if (connectionState === "connected") {
@@ -334,7 +317,7 @@ export const ProductionLine = ({
   useSpeakerHotkeys({
     muteOutput,
     isOutputMuted,
-    customKey: savedHotkeys.speakerHotkey,
+    customKey: savedHotkeys?.speakerHotkey || "n",
   });
 
   const line = useLinePolling({ callId: id, joinProductionOptions });
@@ -423,15 +406,6 @@ export const ProductionLine = ({
 
       setShowDeviceSettings(false);
     }
-  };
-
-  const handleSettingsClick = () => {
-    setIsSettingsModalOpen(!isSettingsModalOpen);
-  };
-
-  const saveHotkeys = () => {
-    setSavedHotkeys({ ...hotkeys });
-    setIsSettingsModalOpen(false);
   };
 
   // TODO detect if browser back button is pressed and run exit();
@@ -639,51 +613,12 @@ export const ProductionLine = ({
                 inputAudioStream !== "no-device" &&
                 !isMobile &&
                 !isTablet && (
-                  <>
-                    <HotkeyDiv>
-                      <strong>Hotkeys</strong>
-                      <SettingsBtn onClick={handleSettingsClick}>
-                        <SettingsIcon />
-                      </SettingsBtn>
-                    </HotkeyDiv>
-                    <TempDiv>
-                      <strong>{savedHotkeys.muteHotkey.toUpperCase()}: </strong>
-                      Toggle Input Mute
-                    </TempDiv>
-                    <TempDiv>
-                      <strong>
-                        {savedHotkeys.speakerHotkey.toUpperCase()}:{" "}
-                      </strong>
-                      Toggle Output Mute
-                    </TempDiv>
-                    <TempDiv>
-                      <strong>
-                        {savedHotkeys.pressToTalkHotkey.toUpperCase()}:{" "}
-                      </strong>
-                      Push to Talk
-                    </TempDiv>
-                    <TempDiv>
-                      <strong>
-                        {savedHotkeys.increaseVolumeHotkey.toUpperCase()}:{" "}
-                      </strong>
-                      Increase Volume
-                    </TempDiv>
-                    <TempDiv>
-                      <strong>
-                        {savedHotkeys.decreaseVolumeHotkey.toUpperCase()}:{" "}
-                      </strong>
-                      Decrease Volume
-                    </TempDiv>
-                    {isSettingsModalOpen && (
-                      <SettingsModal
-                        hotkeys={hotkeys}
-                        lineName={line?.name}
-                        setHotkeys={setHotkeys}
-                        onSave={saveHotkeys}
-                        onClose={handleSettingsClick}
-                      />
-                    )}
-                  </>
+                  <HotkeysComponent
+                    callId={id}
+                    savedHotkeys={savedHotkeys}
+                    customGlobalMute={customGlobalMute}
+                    line={line}
+                  />
                 )}
             </div>
           </ListWrapper>

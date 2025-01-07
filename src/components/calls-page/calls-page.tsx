@@ -4,12 +4,14 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useGlobalState } from "../../global-state/context-provider";
 import { JoinProduction } from "../landing-page/join-production";
 import { ProductionLine } from "../production-line/production-line";
-import { SecondaryButton } from "../landing-page/form-elements";
+import { PrimaryButton, SecondaryButton } from "../landing-page/form-elements";
 import { NavigateToRootButton } from "../navigate-to-root-button/navigate-to-root-button";
 import { DisplayContainerHeader } from "../landing-page/display-container-header";
 import { Modal } from "../modal/modal";
 import { VerifyDecision } from "../verify-decision/verify-decision";
 import { ModalConfirmationText } from "../modal/modal-confirmation-text";
+import { MegaphoneOffIcon, MegaphoneOnIcon } from "../../assets/icons/icon";
+import { useGlobalHotkeys } from "../production-line/use-line-hotkeys";
 
 const Container = styled.div`
   display: flex;
@@ -42,16 +44,28 @@ const AddCallContainer = styled.div`
 `;
 
 const ButtonWrapper = styled.div`
+  display: flex;
   margin: 0 1rem 1rem 0;
   :last-of-type {
     margin: 0 0 4rem;
   }
 `;
 
+const MuteAllCallsBtn = styled(PrimaryButton)`
+  background: rgba(50, 56, 59, 1);
+  border: 0.2rem solid #6d6d6d;
+  padding: 0.5rem;
+  margin: 0 0 0 1rem;
+  width: 4rem;
+  height: 4rem;
+`;
+
 export const CallsPage = () => {
   const [productionId, setProductionId] = useState<string | null>(null);
   const [addCallActive, setAddCallActive] = useState(false);
   const [confirmExitModalOpen, setConfirmExitModalOpen] = useState(false);
+  const [isMasterInputMuted, setIsMasterInputMuted] = useState(true);
+  const [customGlobalMute, setCustomGlobalMute] = useState("p");
   const [{ calls, selectedProductionId }, dispatch] = useGlobalState();
   const { productionId: paramProductionId, lineId: paramLineId } = useParams();
   const navigate = useNavigate();
@@ -66,10 +80,29 @@ export const CallsPage = () => {
   }, [selectedProductionId]);
 
   useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    Object.entries(calls).forEach(([_, callState]) => {
+      if (
+        callState.hotkeys?.globalMuteHotkey &&
+        callState.hotkeys.globalMuteHotkey !== customGlobalMute
+      ) {
+        setCustomGlobalMute(callState.hotkeys.globalMuteHotkey);
+      }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [calls]);
+
+  useEffect(() => {
     if (isEmpty && !paramProductionId && !paramLineId) {
       navigate("/");
     }
   }, [isEmpty, paramProductionId, paramLineId, navigate]);
+
+  useGlobalHotkeys({
+    muteInput: setIsMasterInputMuted,
+    isInputMuted: isMasterInputMuted,
+    customKey: customGlobalMute || "p",
+  });
 
   const runExitAllCalls = async () => {
     setProductionId(null);
@@ -110,6 +143,14 @@ export const CallsPage = () => {
             />
           </Modal>
         )}
+        {!isEmpty && (
+          <MuteAllCallsBtn
+            type="button"
+            onClick={() => setIsMasterInputMuted(!isMasterInputMuted)}
+          >
+            {isMasterInputMuted ? <MegaphoneOffIcon /> : <MegaphoneOnIcon />}
+          </MuteAllCallsBtn>
+        )}
       </ButtonWrapper>
       <CallsContainer>
         {Object.entries(calls).map(
@@ -121,6 +162,8 @@ export const CallsPage = () => {
                   id={callId}
                   callState={callState}
                   isSingleCall={isSingleCall}
+                  customGlobalMute={customGlobalMute}
+                  masterInputMute={isMasterInputMuted}
                 />
               </CallContainer>
             )
@@ -137,6 +180,7 @@ export const CallsPage = () => {
             </ButtonWrapper>
             {addCallActive && productionId && (
               <JoinProduction
+                customGlobalMute={customGlobalMute}
                 addAdditionalCallId={productionId}
                 closeAddCallView={() => setAddCallActive(false)}
               />
@@ -150,6 +194,7 @@ export const CallsPage = () => {
                 preSelectedProductionId: paramProductionId,
                 preSelectedLineId: paramLineId,
               }}
+              customGlobalMute={customGlobalMute}
             />
           </CallContainer>
         )}

@@ -9,6 +9,7 @@ const StyledBackBtn = styled.div`
   padding: 0;
   margin: 0;
   width: 4rem;
+  height: 4rem;
 `;
 
 export const NavigateToRootButton = ({

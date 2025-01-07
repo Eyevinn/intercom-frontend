@@ -164,6 +164,14 @@ export const ProductionsListItem = ({
             connectionState: null,
             audioElements: null,
             sessionId: null,
+            hotkeys: {
+              muteHotkey: "m",
+              speakerHotkey: "n",
+              pushToTalkHotkey: "t",
+              increaseVolumeHotkey: "u",
+              decreaseVolumeHotkey: "d",
+              globalMuteHotkey: "p",
+            },
           },
         },
       });
