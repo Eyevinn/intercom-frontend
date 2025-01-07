@@ -52,6 +52,8 @@ const ButtonWrapper = styled.div`
 `;
 
 const MuteAllCallsBtn = styled(PrimaryButton)`
+  background: rgba(50, 56, 59, 1);
+  border: 0.2rem solid #6d6d6d;
   padding: 0.5rem;
   margin: 0 0 0 1rem;
   width: 4rem;
