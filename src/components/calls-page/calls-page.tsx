@@ -107,21 +107,29 @@ export const CallsPage = () => {
   const runExitAllCalls = async () => {
     setProductionId(null);
     navigate("/");
-    Object.entries(calls).forEach(([callId]) => {
-      if (callId) {
-        dispatch({
-          type: "REMOVE_CALL",
-          payload: { id: callId },
-        });
-      }
-    });
+    if (!isEmpty) {
+      Object.entries(calls).forEach(([callId]) => {
+        if (callId) {
+          dispatch({
+            type: "REMOVE_CALL",
+            payload: { id: callId },
+          });
+        }
+      });
+    }
   };
 
   return (
     <Container>
       <ButtonWrapper>
         <NavigateToRootButton
-          resetOnExitRequest={() => setConfirmExitModalOpen(true)}
+          resetOnExitRequest={() => {
+            if (isEmpty) {
+              runExitAllCalls();
+            } else {
+              setConfirmExitModalOpen(true);
+            }
+          }}
         />
         {confirmExitModalOpen && (
           <Modal onClose={() => setConfirmExitModalOpen(false)}>
