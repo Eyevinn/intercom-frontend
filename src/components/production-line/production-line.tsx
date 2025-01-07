@@ -27,7 +27,13 @@ import { Spinner } from "../loader/loader.tsx";
 import { DisplayContainerHeader } from "../landing-page/display-container-header.tsx";
 import { DisplayContainer, FlexContainer } from "../generic-components.ts";
 import { useDeviceLabels } from "./use-device-labels.ts";
-import { isBrowserFirefox, isMobile } from "../../bowser.ts";
+import {
+  isBrowserFirefox,
+  isMobile,
+  isIOSMobile,
+  isIpad,
+  isTablet,
+} from "../../bowser.ts";
 import { useLineHotkeys, useSpeakerHotkeys } from "./use-line-hotkeys.ts";
 import { LongPressToTalkButton } from "./long-press-to-talk-button.tsx";
 import { useLinePolling } from "./use-line-polling.ts";
@@ -232,6 +238,14 @@ export const ProductionLine = ({
       // eslint-disable-next-line no-param-reassign
       audioElement.volume = newValue;
     });
+
+    if (newValue > 0 && isOutputMuted) {
+      setIsOutputMuted(false);
+      audioElements?.forEach((audioElement) => {
+        // eslint-disable-next-line no-param-reassign
+        audioElement.muted = false;
+      });
+    }
   };
 
   useHotkeys(savedHotkeys.increaseVolumeHotkey || "u", () => {
@@ -252,6 +266,10 @@ export const ProductionLine = ({
       // eslint-disable-next-line no-param-reassign
       audioElement.volume = newValue;
     });
+
+    if (newValue > 0 && isOutputMuted) {
+      setIsOutputMuted(false);
+    }
   });
 
   const muteInput = useCallback(
@@ -290,14 +308,6 @@ export const ProductionLine = ({
     permission: true,
     refresh,
   });
-
-  useEffect(() => {
-    if (value === 0) {
-      setIsOutputMuted(true);
-    } else {
-      setIsOutputMuted(false);
-    }
-  }, [value]);
 
   useEffect(() => {
     if (joinProductionOptions) {
@@ -499,7 +509,7 @@ export const ProductionLine = ({
               }}
             >
               <DisplayContainerHeader>Controls</DisplayContainerHeader>
-              {!isMobile && (
+              {!isIOSMobile && !isIpad && (
                 <VolumeSlider
                   value={value}
                   handleInputChange={handleInputChange}
@@ -513,7 +523,11 @@ export const ProductionLine = ({
                     disabled={value === 0}
                   >
                     <ButtonIcon>
-                      {isOutputMuted ? <SpeakerOff /> : <SpeakerOn />}
+                      {isOutputMuted || value === 0 ? (
+                        <SpeakerOff />
+                      ) : (
+                        <SpeakerOn />
+                      )}
                     </ButtonIcon>
                   </UserControlBtn>
                 </FlexButtonWrapper>
@@ -623,7 +637,8 @@ export const ProductionLine = ({
 
               {inputAudioStream &&
                 inputAudioStream !== "no-device" &&
-                !isMobile && (
+                !isMobile &&
+                !isTablet && (
                   <>
                     <HotkeyDiv>
                       <strong>Hotkeys</strong>
