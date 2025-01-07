@@ -611,13 +611,13 @@ export const ProductionLine = ({
                     </StyledWarningMessage>
                   )}
                   <ButtonWrapper>
-                    <PrimaryButton
+                    <ActionButton
                       type="submit"
                       disabled={audioNotChanged || !isValid || !isDirty}
                       onClick={handleSubmit(onSubmit)}
                     >
                       Save
-                    </PrimaryButton>
+                    </ActionButton>
                     {!(isBrowserFirefox && !isMobile) && (
                       <ReloadDevicesButton
                         handleReloadDevices={() =>
