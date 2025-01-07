@@ -1,4 +1,5 @@
 import {
+  Hotkeys,
   TJoinProductionOptions,
   TProduction,
 } from "../components/production-line/types.ts";
@@ -18,6 +19,7 @@ export interface CallState {
   connectionState: RTCPeerConnectionState | null;
   audioElements: HTMLAudioElement[] | null;
   sessionId: string | null;
+  hotkeys: Hotkeys;
 }
 
 export type TGlobalState = {

@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { ErrorMessage } from "@hookform/error-message";
 import {
   PrimaryButton,
@@ -10,6 +10,10 @@ import {
   StyledWarningMessage,
   ActionButton,
 } from "../landing-page/form-elements";
+// eslint-disable-next-line import/no-cycle
+import { useUpdateGlobalHotkey } from "./use-update-global-hotkey";
+import { useCheckForDuplicateHotkey } from "./use-check-for-duplicate-hotkey";
+import { Hotkeys } from "./types";
 
 const ModalOverlay = styled.div`
   position: fixed;
@@ -61,38 +65,62 @@ const ButtonDiv = styled.div`
   margin-top: 3rem;
 `;
 
-export type Hotkeys = {
-  muteHotkey: string;
-  speakerHotkey: string;
-  pressToTalkHotkey: string;
-  increaseVolumeHotkey: string;
-  decreaseVolumeHotkey: string;
-};
-
 type TSettingsModalProps = {
-  hotkeys: Hotkeys;
+  isOpen: boolean;
+  callId: string;
+  savedHotkeys: Hotkeys;
+  customGlobalMute: string;
   lineName?: string;
-  setHotkeys: React.Dispatch<React.SetStateAction<Hotkeys>>;
   onClose: () => void;
   onSave: () => void;
 };
 
 export const SettingsModal = ({
-  hotkeys,
+  isOpen,
+  callId,
+  savedHotkeys,
+  customGlobalMute,
   lineName,
-  setHotkeys,
   onClose,
   onSave,
 }: TSettingsModalProps) => {
   const stopPropagation = (e: React.MouseEvent) => e.stopPropagation();
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const [hotkeys, setHotkeys] = useState<Hotkeys>({
+    muteHotkey: "m",
+    speakerHotkey: "n",
+    pushToTalkHotkey: "t",
+    increaseVolumeHotkey: "u",
+    decreaseVolumeHotkey: "d",
+    globalMuteHotkey: customGlobalMute,
+  });
   const [errors, setErrors] = useState<{ [key: string]: string }>({
     muteHotkey: "",
     speakerHotkey: "",
-    pressToTalkHotkey: "",
+    pushToTalkHotkey: "",
     increaseVolumeHotkey: "",
     decreaseVolumeHotkey: "",
+    globalMuteHotkey: "",
   });
+  const [warning, setWarning] = useState<{ [key: string]: string }>({
+    muteHotkey: "",
+    speakerHotkey: "",
+    pushToTalkHotkey: "",
+    increaseVolumeHotkey: "",
+    decreaseVolumeHotkey: "",
+    globalMuteHotkey: "",
+  });
+
+  const [updateGlobalHotkey] = useUpdateGlobalHotkey();
+  const globalStateDuplicates = useCheckForDuplicateHotkey({ callId, hotkeys });
+
+  useEffect(() => {
+    if (isOpen) {
+      setHotkeys({
+        ...savedHotkeys,
+      });
+    }
+  }, [savedHotkeys, isOpen]);
 
   const validateFields = (key: keyof Hotkeys, value: string) => {
     const currentValues = {
@@ -122,7 +150,30 @@ export const SettingsModal = ({
       {} as { [K in keyof Hotkeys]: string }
     );
 
+    const newWarning = (
+      Object.keys(currentValues) as Array<keyof Hotkeys>
+    ).reduce(
+      (acc, field) => {
+        const isGlobalStateDuplicate = globalStateDuplicates?.includes(
+          currentValues[field]
+        );
+        const isGlobalMute =
+          field === "globalMuteHotkey" &&
+          customGlobalMute === currentValues[field];
+
+        if (isGlobalStateDuplicate && !isGlobalMute) {
+          acc[field] = "This key is used in another connected line.";
+        } else {
+          acc[field] = "";
+        }
+
+        return acc;
+      },
+      {} as { [K in keyof Hotkeys]: string }
+    );
+
     setErrors(newErrors);
+    setWarning(newWarning);
   };
 
   const handleInputChange = (key: keyof typeof hotkeys, value: string) => {
@@ -142,7 +193,7 @@ export const SettingsModal = ({
     if (hasErrors || hasEmptyFields) {
       return;
     }
-
+    updateGlobalHotkey({ callId, hotkeys });
     onSave();
   };
 
@@ -196,6 +247,13 @@ export const SettingsModal = ({
               <ErrorMessage
                 errors={{ mutekey: { message: errors.muteHotkey } }}
                 name="mutekey"
+                as={<StyledWarningMessage className="error-message" />}
+              />
+            )}
+            {!errors.muteHotkey && warning.muteHotkey && (
+              <ErrorMessage
+                errors={{ mutekey: { message: warning.muteHotkey } }}
+                name="mutekey"
                 as={StyledWarningMessage}
               />
             )}
@@ -218,28 +276,42 @@ export const SettingsModal = ({
               <ErrorMessage
                 errors={{ speakerkey: { message: errors.speakerHotkey } }}
                 name="speakerkey"
+                as={<StyledWarningMessage className="error-message" />}
+              />
+            )}
+            {!errors.speakerHotkey && warning.speakerHotkey && (
+              <ErrorMessage
+                errors={{ speakerkey: { message: warning.speakerHotkey } }}
+                name="speakerkey"
                 as={StyledWarningMessage}
               />
             )}
           </FormLabel>
           <FormLabel>
-            <DecorativeLabel>Toggle press to speak: </DecorativeLabel>
+            <DecorativeLabel>Toggle push to talk: </DecorativeLabel>
             <FormInput
-              id="hotkeyPress"
+              id="hotkeyPushToTalk"
               ref={(el) => setInputRef(2, el)}
               type="text"
-              value={hotkeys.pressToTalkHotkey}
+              value={hotkeys.pushToTalkHotkey}
               onChange={(e) =>
-                handleInputChange("pressToTalkHotkey", e.target.value)
+                handleInputChange("pushToTalkHotkey", e.target.value)
               }
               placeholder="Enter hotkey"
               maxLength={1}
               onKeyDown={(e) => handleKeyDown(e, 2)}
             />
-            {errors.pressToTalkHotkey && (
+            {errors.pushToTalkHotkey && (
               <ErrorMessage
-                errors={{ presskey: { message: errors.pressToTalkHotkey } }}
-                name="presskey"
+                errors={{ longpresskey: { message: errors.pushToTalkHotkey } }}
+                name="longpresskey"
+                as={<StyledWarningMessage className="error-message" />}
+              />
+            )}
+            {!errors.pushToTalkHotkey && warning.pushToTalkHotkey && (
+              <ErrorMessage
+                errors={{ longpresskey: { message: warning.pushToTalkHotkey } }}
+                name="longpresskey"
                 as={StyledWarningMessage}
               />
             )}
@@ -262,6 +334,15 @@ export const SettingsModal = ({
               <ErrorMessage
                 errors={{
                   increasevolumekey: { message: errors.increaseVolumeHotkey },
+                }}
+                name="increasevolumekey"
+                as={<StyledWarningMessage className="error-message" />}
+              />
+            )}
+            {!errors.increaseVolumeHotkey && warning.increaseVolumeHotkey && (
+              <ErrorMessage
+                errors={{
+                  increasevolumekey: { message: warning.increaseVolumeHotkey },
                 }}
                 name="increasevolumekey"
                 as={StyledWarningMessage}
@@ -290,6 +371,50 @@ export const SettingsModal = ({
                   },
                 }}
                 name="decreasevolumehotkey"
+                as={<StyledWarningMessage className="error-message" />}
+              />
+            )}
+            {!errors.decreaseVolumeHotkey && warning.decreaseVolumeHotkey && (
+              <ErrorMessage
+                errors={{
+                  decreasevolumehotkey: {
+                    message: warning.decreaseVolumeHotkey,
+                  },
+                }}
+                name="decreasevolumehotkey"
+                as={StyledWarningMessage}
+              />
+            )}
+          </FormLabel>
+          <FormLabel>
+            <DecorativeLabel>Toggle mute all microphones: </DecorativeLabel>
+            <FormInput
+              id="globalMuteMicrophones"
+              ref={(el) => setInputRef(3, el)}
+              type="text"
+              value={hotkeys.globalMuteHotkey}
+              onChange={(e) =>
+                handleInputChange("globalMuteHotkey", e.target.value)
+              }
+              placeholder="Enter hotkey"
+              maxLength={1}
+              onKeyDown={(e) => handleKeyDown(e, 3)}
+            />
+            {errors.globalMuteHotkey && (
+              <ErrorMessage
+                errors={{
+                  globalMuteHotkey: { message: errors.globalMuteHotkey },
+                }}
+                name="globalMuteHotkey"
+                as={<StyledWarningMessage className="error-message" />}
+              />
+            )}
+            {!errors.globalMuteHotkey && warning.globalMuteHotkey && (
+              <ErrorMessage
+                errors={{
+                  globalMuteHotkey: { message: warning.globalMuteHotkey },
+                }}
+                name="globalMuteHotkey"
                 as={StyledWarningMessage}
               />
             )}

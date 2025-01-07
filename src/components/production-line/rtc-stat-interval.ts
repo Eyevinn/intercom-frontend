@@ -11,6 +11,7 @@ export const startRtcStatInterval = ({
   dispatch: Dispatch<TGlobalStateAction>;
 }) => {
   let ongoingStatsPromise: null | Promise<void | RTCStatsReport> = null;
+  let previousState = false;
 
   const statsInterval = window.setInterval(() => {
     // Do not request new stats if previously requested has not yet resolved
@@ -67,16 +68,19 @@ export const startRtcStatInterval = ({
           }
         });
       }
+      if (previousState !== isAudioLevelAboveThreshold) {
+        previousState = isAudioLevelAboveThreshold;
 
-      dispatch({
-        type: "UPDATE_CALL",
-        payload: {
-          id: callId,
-          updates: {
-            audioLevelAboveThreshold: isAudioLevelAboveThreshold,
+        dispatch({
+          type: "UPDATE_CALL",
+          payload: {
+            id: callId,
+            updates: {
+              audioLevelAboveThreshold: isAudioLevelAboveThreshold,
+            },
           },
-        },
-      });
+        });
+      }
     });
   }, 100);
 
