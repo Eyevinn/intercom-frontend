@@ -1,9 +1,8 @@
-import { FC } from "react";
+import { FC, useEffect } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { ErrorMessage } from "@hookform/error-message";
 import styled from "@emotion/styled";
 import { useGlobalState } from "../../global-state/context-provider";
-import { uniqBy } from "../../helpers";
 import { TUserSettings } from "./types";
 import {
   DecorativeLabel,
@@ -16,8 +15,8 @@ import {
 } from "../landing-page/form-elements";
 import { DisplayContainerHeader } from "../landing-page/display-container-header";
 import { isMobile } from "../../bowser";
-
-type FormValues = TUserSettings;
+import { ReloadDevicesButton } from "../reload-devices-button.tsx/reload-devices-button";
+import { useStorage } from "../accessing-local-storage/access-local-storage";
 
 export const ResponsiveFormContainer = styled(FormContainer)`
   padding: 0 2rem;
@@ -29,7 +28,7 @@ export const ResponsiveFormContainer = styled(FormContainer)`
   }
 `;
 
-const ButtonWrapper = styled.div`
+export const ButtonWrapper = styled.div`
   margin: 2rem 0 2rem 0;
   display: flex;
   justify-content: flex-end;
@@ -42,14 +41,16 @@ interface UserSettingsProps {
 
 export const UserSettings: FC<UserSettingsProps> = (props) => {
   const { buttonText, onSave } = props;
-
   const [{ devices, userSettings }, dispatch] = useGlobalState();
+  const { writeToStorage } = useStorage();
 
   const {
     formState: { errors },
     register,
+    getValues,
+    setValue,
     handleSubmit,
-  } = useForm<FormValues>({
+  } = useForm<TUserSettings>({
     defaultValues: {
       username: userSettings?.username,
       audioinput: userSettings?.audioinput,
@@ -61,17 +62,34 @@ export const UserSettings: FC<UserSettingsProps> = (props) => {
     },
   });
 
-  const onSubmit: SubmitHandler<FormValues> = (payload) => {
+  useEffect(() => {
+    if (!devices.input?.length) {
+      setValue("audioinput", "no-device");
+    } else if (
+      !devices.input?.find(
+        (device) => device.deviceId === getValues("audioinput")
+      )
+    )
+      setValue("audioinput", "default");
+    if (
+      !devices.output?.find(
+        (device) => device.deviceId === getValues("audiooutput")
+      )
+    )
+      setValue("audiooutput", "default");
+  }, [devices, getValues, setValue]);
+
+  const onSubmit: SubmitHandler<TUserSettings> = (payload) => {
     if (payload.username) {
-      window.localStorage?.setItem("username", payload.username);
+      writeToStorage("username", payload.username);
     }
 
     if (payload.audioinput) {
-      window.localStorage?.setItem("audioinput", payload.audioinput);
+      writeToStorage("audioinput", payload.audioinput);
     }
 
     if (payload.audiooutput) {
-      window.localStorage?.setItem("audiooutput", payload.audiooutput);
+      writeToStorage("audiooutput", payload.audiooutput);
     }
 
     dispatch({
@@ -80,20 +98,6 @@ export const UserSettings: FC<UserSettingsProps> = (props) => {
     });
     if (onSave) onSave();
   };
-
-  const outputDevices = devices
-    ? uniqBy(
-        devices.filter((d) => d.kind === "audiooutput"),
-        (item) => item.deviceId
-      )
-    : [];
-
-  const inputDevices = devices
-    ? uniqBy(
-        devices.filter((d) => d.kind === "audioinput"),
-        (item) => item.deviceId
-      )
-    : [];
 
   return (
     <ResponsiveFormContainer className={isMobile ? "" : "desktop"}>
@@ -122,8 +126,8 @@ export const UserSettings: FC<UserSettingsProps> = (props) => {
               // eslint-disable-next-line
               {...register(`audioinput`)}
             >
-              {inputDevices.length > 0 ? (
-                inputDevices.map((device) => (
+              {devices.input && devices.input.length > 0 ? (
+                devices.input.map((device) => (
                   <option key={device.deviceId} value={device.deviceId}>
                     {device.label}
                   </option>
@@ -135,12 +139,12 @@ export const UserSettings: FC<UserSettingsProps> = (props) => {
           </FormLabel>
           <FormLabel>
             <DecorativeLabel>Output</DecorativeLabel>
-            {outputDevices.length > 0 ? (
+            {devices.output && devices.output.length > 0 ? (
               <FormSelect
                 // eslint-disable-next-line
                 {...register(`audiooutput`)}
               >
-                {outputDevices.map((device) => (
+                {devices.output.map((device) => (
                   <option key={device.deviceId} value={device.deviceId}>
                     {device.label}
                   </option>
@@ -153,6 +157,7 @@ export const UserSettings: FC<UserSettingsProps> = (props) => {
             )}
           </FormLabel>
           <ButtonWrapper>
+            <ReloadDevicesButton />
             <PrimaryButton type="submit" onClick={handleSubmit(onSubmit)}>
               {buttonText || "Save"}
             </PrimaryButton>

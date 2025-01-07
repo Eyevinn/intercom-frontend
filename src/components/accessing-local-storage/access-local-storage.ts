@@ -1,8 +1,9 @@
-import { useCallback } from "react";
 import { createStorage, StorageType } from "@martinstark/storage-ts";
 
 type Schema = {
   username: string;
+  audioinput?: string;
+  audiooutput?: string;
 };
 
 // Create a store of the desired type. If it is not available,
@@ -13,17 +14,19 @@ const store = createStorage<Schema>({
   silent: true,
 });
 
-export function useStorage<Key extends keyof Schema>(key: Key) {
-  const readFromStorage = useCallback((): Schema[Key] | null => {
+export function useStorage() {
+  type Key = keyof Schema;
+  const readFromStorage = (key: keyof Schema): Schema[Key] | null => {
     return store.read(key);
-  }, [key]);
+  };
 
-  const writeToStorage = useCallback(
-    (value: Schema[Key]): void => {
-      store.write(key, value);
-    },
-    [key]
-  );
+  const writeToStorage = (key: keyof Schema, value: Schema[Key]): void => {
+    store.write(key, value);
+  };
 
-  return { readFromStorage, writeToStorage };
+  const clearStorage = (key: keyof Schema) => {
+    store.delete(key);
+  };
+
+  return { readFromStorage, writeToStorage, clearStorage };
 }

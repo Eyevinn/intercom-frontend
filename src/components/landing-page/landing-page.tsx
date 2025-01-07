@@ -3,9 +3,10 @@ import { ProductionsListContainer } from "./productions-list-container.tsx";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { UserSettings } from "../user-settings/user-settings.tsx";
 import { UserSettingsButton } from "./user-settings-button.tsx";
+import { TUserSettings } from "../user-settings/types.ts";
 
 export const LandingPage = ({ setApiError }: { setApiError: () => void }) => {
-  const [{ apiError }] = useGlobalState();
+  const [{ apiError, userSettings }] = useGlobalState();
   const [showSettings, setShowSettings] = useState<boolean>(false);
 
   useEffect(() => {
@@ -14,9 +15,15 @@ export const LandingPage = ({ setApiError }: { setApiError: () => void }) => {
     }
   }, [apiError, setApiError]);
 
+  if (!userSettings) return <div />;
+
+  const isUserSettingsComplete = (settings: TUserSettings) => {
+    return settings.username && (settings.audioinput || settings.audiooutput);
+  };
+
   return (
     <div>
-      {((showSettings || !window.localStorage?.getItem("username")) && (
+      {((showSettings || !isUserSettingsComplete(userSettings)) && (
         <UserSettings
           buttonText={showSettings ? "Save" : "Next"}
           onSave={() => setShowSettings(false)}

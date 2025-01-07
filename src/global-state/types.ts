@@ -10,8 +10,12 @@ export interface ErrorState {
   callErrors?: Record<string, Error> | null;
 }
 
+export interface DevicesState {
+  input: MediaDeviceInfo[] | null;
+  output: MediaDeviceInfo[] | null;
+}
+
 export interface CallState {
-  devices: MediaDeviceInfo[] | null;
   joinProductionOptions: TJoinProductionOptions | null;
   mediaStreamInput: MediaStream | null;
   dominantSpeaker: string | null;
@@ -30,7 +34,7 @@ export type TGlobalState = {
   production: TProduction | null;
   error: ErrorState;
   reloadProductionList: boolean;
-  devices: MediaDeviceInfo[] | null;
+  devices: DevicesState;
   selectedProductionId: string | null;
   apiError: Error | false;
 };

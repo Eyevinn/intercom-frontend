@@ -1,6 +1,7 @@
 import styled from "@emotion/styled";
 import { FC } from "react";
 import { UserSettingsIcon } from "../../assets/icons/icon";
+import { useStorage } from "../accessing-local-storage/access-local-storage";
 
 const UserSettingsWrapper = styled.div`
   position: absolute;
@@ -26,10 +27,11 @@ interface UserSettingsButtonProps {
 
 export const UserSettingsButton: FC<UserSettingsButtonProps> = (props) => {
   const { onClick } = props;
+  const { readFromStorage } = useStorage();
 
   return (
     <UserSettingsWrapper onClick={onClick}>
-      <Username>{window.localStorage?.getItem("username") || "Guest"}</Username>
+      <Username>{readFromStorage("username") || "Guest"}</Username>
       <UserSettingsIcon />
     </UserSettingsWrapper>
   );

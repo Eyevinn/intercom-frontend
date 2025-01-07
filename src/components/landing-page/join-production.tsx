@@ -6,7 +6,6 @@ import { DisplayContainerHeader } from "./display-container-header.tsx";
 import {
   DecorativeLabel,
   FormLabel,
-  FormContainer,
   FormInput,
   FormSelect,
   PrimaryButton,
@@ -16,14 +15,15 @@ import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { useFetchProduction } from "./use-fetch-production.ts";
 import { darkText, errorColour } from "../../css-helpers/defaults.ts";
 import { TJoinProductionOptions } from "../production-line/types.ts";
-import { uniqBy } from "../../helpers.ts";
 import { FormInputWithLoader } from "./form-input-with-loader.tsx";
 import { useStorage } from "../accessing-local-storage/access-local-storage.ts";
 import { useNavigateToProduction } from "./use-navigate-to-production.ts";
-import { Modal } from "../modal/modal.tsx";
 import { ReloadDevicesButton } from "../reload-devices-button.tsx/reload-devices-button.tsx";
-import { useDevicePermissions } from "../../hooks/use-device-permission.ts";
-import { useFetchDevices } from "../../hooks/use-fetch-devices.ts";
+import {
+  ButtonWrapper,
+  ResponsiveFormContainer,
+} from "../user-settings/user-settings.tsx";
+import { isMobile } from "../../bowser.ts";
 
 type FormValues = TJoinProductionOptions;
 
@@ -33,15 +33,6 @@ const FetchErrorMessage = styled.div`
   padding: 0.5rem;
   margin: 0 0 2rem;
   border-radius: 0.5rem;
-`;
-
-const ButtonWrapper = styled.div`
-  margin: 2rem 0 2rem 0;
-`;
-
-const FormWithBtn = styled.div`
-  display: flex;
-  justify-content: space-between;
 `;
 
 type TProps = {
@@ -63,9 +54,7 @@ export const JoinProduction = ({
   const [joinProductionId, setJoinProductionId] = useState<null | number>(null);
   const [joinProductionOptions, setJoinProductionOptions] =
     useState<TJoinProductionOptions | null>(null);
-  const { readFromStorage, writeToStorage } = useStorage("username");
-  const [refresh, setRefresh] = useState<number>(0);
-  const [firefoxWarningModalOpen, setFirefoxWarningModalOpen] = useState(false);
+  const { readFromStorage, writeToStorage } = useStorage();
 
   const {
     formState: { errors, isValid },
@@ -78,24 +67,15 @@ export const JoinProduction = ({
       productionId:
         preSelected?.preSelectedProductionId || addAdditionalCallId || "",
       lineId: preSelected?.preSelectedLineId || undefined,
-      username: readFromStorage() || "",
+      username: readFromStorage("username") || "",
     },
     resetOptions: {
       keepDirtyValues: true, // user-interacted input will be retained
       keepErrors: true, // input errors will be retained with value update
     },
   });
-  const { permission } = useDevicePermissions({
-    continueToApp: true,
-  });
 
   const [{ devices, selectedProductionId }, dispatch] = useGlobalState();
-
-  useFetchDevices({
-    dispatch,
-    permission,
-    refresh,
-  });
 
   const {
     error: productionFetchError,
@@ -127,7 +107,7 @@ export const JoinProduction = ({
 
   // Use local cache
   useEffect(() => {
-    const cachedUsername = readFromStorage();
+    const cachedUsername = readFromStorage("username");
     if (cachedUsername) {
       setValue("username", cachedUsername);
     }
@@ -154,7 +134,7 @@ export const JoinProduction = ({
 
   const onSubmit: SubmitHandler<FormValues> = (payload) => {
     if (payload.username) {
-      writeToStorage(payload.username);
+      writeToStorage("username", payload.username);
     }
 
     if (closeAddCallView) {
@@ -173,7 +153,6 @@ export const JoinProduction = ({
       payload: {
         id: uuid,
         callState: {
-          devices: null,
           joinProductionOptions: payload,
           mediaStreamInput: null,
           dominantSpeaker: null,
@@ -197,22 +176,8 @@ export const JoinProduction = ({
     console.log("PAYLOAD: ", payload);
   };
 
-  const outputDevices = devices
-    ? uniqBy(
-        devices.filter((d) => d.kind === "audiooutput"),
-        (item) => item.deviceId
-      )
-    : [];
-
-  const inputDevices = devices
-    ? uniqBy(
-        devices.filter((d) => d.kind === "audioinput"),
-        (item) => item.deviceId
-      )
-    : [];
-
   return (
-    <FormContainer>
+    <ResponsiveFormContainer className={isMobile ? "" : "desktop"}>
       <DisplayContainerHeader>Join Production</DisplayContainerHeader>
       {devices && (
         <>
@@ -265,65 +230,38 @@ export const JoinProduction = ({
           />
           <FormLabel>
             <DecorativeLabel>Input</DecorativeLabel>
-            <FormWithBtn>
-              <FormSelect
-                // eslint-disable-next-line
-                {...register(`audioinput`)}
-              >
-                {inputDevices.length > 0 ? (
-                  inputDevices.map((device) => (
-                    <option key={device.deviceId} value={device.deviceId}>
-                      {device.label}
-                    </option>
-                  ))
-                ) : (
-                  <option value="no-device">No device available</option>
-                )}
-              </FormSelect>
-              <ReloadDevicesButton
-                handleReloadDevices={() => setRefresh((prev) => prev + 1)}
-                devices={devices}
-                isDummy
-              />
-            </FormWithBtn>
+            <FormSelect
+              // eslint-disable-next-line
+              {...register(`audioinput`)}
+            >
+              {devices.input && devices.input.length > 0 ? (
+                devices.input.map((device) => (
+                  <option key={device.deviceId} value={device.deviceId}>
+                    {device.label}
+                  </option>
+                ))
+              ) : (
+                <option value="no-device">No device available</option>
+              )}
+            </FormSelect>
           </FormLabel>
           <FormLabel>
             <DecorativeLabel>Output</DecorativeLabel>
-            <FormWithBtn>
-              {outputDevices.length > 0 ? (
-                <FormSelect
-                  // eslint-disable-next-line
-                  {...register(`audiooutput`)}
-                >
-                  {outputDevices.map((device) => (
-                    <option key={device.deviceId} value={device.deviceId}>
-                      {device.label}
-                    </option>
-                  ))}
-                </FormSelect>
-              ) : (
-                <StyledWarningMessage>
-                  Controlled by operating system
-                </StyledWarningMessage>
-              )}
-              <ReloadDevicesButton
-                handleReloadDevices={() => setRefresh((prev) => prev + 1)}
-                setFirefoxWarningModalOpen={() =>
-                  setFirefoxWarningModalOpen(true)
-                }
-                devices={devices}
-              />
-            </FormWithBtn>
-            {firefoxWarningModalOpen && (
-              <Modal onClose={() => setFirefoxWarningModalOpen(false)}>
-                <DisplayContainerHeader>
-                  Reset permissions
-                </DisplayContainerHeader>
-                <p>
-                  To reload devices Firefox needs the permission to be manually
-                  reset, please remove permission and reload page instead.
-                </p>
-              </Modal>
+            {devices.output && devices.output.length > 0 ? (
+              <FormSelect
+                // eslint-disable-next-line
+                {...register(`audiooutput`)}
+              >
+                {devices.output.map((device) => (
+                  <option key={device.deviceId} value={device.deviceId}>
+                    {device.label}
+                  </option>
+                ))}
+              </FormSelect>
+            ) : (
+              <StyledWarningMessage>
+                Controlled by operating system
+              </StyledWarningMessage>
             )}
           </FormLabel>
           {!preSelected && (
@@ -355,6 +293,7 @@ export const JoinProduction = ({
             </FormLabel>
           )}
           <ButtonWrapper>
+            <ReloadDevicesButton />
             <PrimaryButton
               type="submit"
               disabled={!isValid}
@@ -365,6 +304,6 @@ export const JoinProduction = ({
           </ButtonWrapper>
         </>
       )}
-    </FormContainer>
+    </ResponsiveFormContainer>
   );
 };
