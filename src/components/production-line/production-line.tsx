@@ -63,6 +63,7 @@ const HeaderWrapper = styled.div`
   padding: 2rem;
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
 `;
 
 const SmallText = styled.span`
@@ -111,6 +112,7 @@ const LongPressWrapper = styled.div`
 const ButtonWrapper = styled.div`
   display: flex;
   justify-content: space-between;
+  align-items: center;
   margin: 0 2rem 2rem 1rem;
 `;
 
@@ -142,6 +144,7 @@ const ConnectionErrorWrapper = styled(FlexContainer)`
 const IconWrapper = styled.div`
   width: 5rem;
   height: 5rem;
+  margin-left: 2rem;
 `;
 
 type TProductionLine = {
@@ -457,6 +460,11 @@ export const ProductionLine = ({
         {!isSingleCall && (
           <ButtonWrapper>
             <ExitCallButton resetOnExit={() => setConfirmExitModalOpen(true)} />
+            {line?.programOutputLine && (
+              <IconWrapper>
+                <TVIcon />
+              </IconWrapper>
+            )}
             {confirmExitModalOpen && (
               <Modal onClose={() => setConfirmExitModalOpen(false)}>
                 <DisplayContainerHeader>Confirm</DisplayContainerHeader>
@@ -470,12 +478,6 @@ export const ProductionLine = ({
               </Modal>
             )}
           </ButtonWrapper>
-        )}
-
-        {line?.programOutputLine && (
-          <IconWrapper>
-            <TVIcon />
-          </IconWrapper>
         )}
 
         {!loading && production && line && (
