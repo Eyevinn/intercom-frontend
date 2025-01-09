@@ -85,11 +85,6 @@ export const CallsPage = () => {
     setShouldReduceVolume(reduceVolume);
   }, [calls]);
 
-  // TODO: Delete
-  useEffect(() => {
-    console.log("SHOULD REDUCE VOLUME: ", shouldReduceVolume);
-  }, [shouldReduceVolume]);
-
   useEffect(() => {
     if (selectedProductionId) {
       setProductionId(selectedProductionId);

@@ -158,8 +158,6 @@ export const JoinProduction = ({
       (line) => line.id === payload.lineId
     );
 
-    console.log("SELECTED LINE: ", selectedLine);
-
     const options: TJoinProductionOptions = {
       ...payload,
       lineUsedForProgramOutput: selectedLine?.programOutputLine || false,
@@ -205,8 +203,6 @@ export const JoinProduction = ({
       },
     });
     setJoinProductionOptions(options);
-
-    console.log("PAYLOAD: ", options);
   };
 
   return (

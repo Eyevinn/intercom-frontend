@@ -216,27 +216,10 @@ export const ProductionLine = ({
         if (audioElement.volume !== 0.75) {
           // eslint-disable-next-line no-param-reassign
           audioElement.volume = 0.75;
-          console.log(`ProductionLine - Initialized volume to 0.75`);
         }
       });
     }
   }, [audioElements]);
-
-  // const newVolume = parseFloat(e.target.value);
-
-  // if (callState.joinProductionOptions?.lineUsedForProgramOutput) {
-  //   // Update the local state or parent-provided state
-  //   if (setVolume) {
-  //     setVolume(newVolume); // Update parent state via callback
-  //   }
-  // } else {
-  //   setValue(newVolume); // Update local state
-  // }
-
-  // // Update the audio elements if needed
-  // callState.audioElements?.forEach((audioElement) => {
-  //   audioElement.volume = newVolume; // Sync audio elements
-  // });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = parseFloat(e.target.value);
@@ -365,7 +348,7 @@ export const ProductionLine = ({
   useEffect(() => {
     let volumeReductionTimeout: NodeJS.Timeout;
     let volumeIncreaseTimeout: NodeJS.Timeout;
-    const volumeChangeFactor = 0.1;
+    const volumeChangeFactor = 0.7;
 
     if (shouldReduceVolume && line?.programOutputLine && !hasReduced) {
       volumeReductionTimeout = setTimeout(() => {
@@ -400,15 +383,6 @@ export const ProductionLine = ({
       clearTimeout(volumeIncreaseTimeout);
     };
   }, [shouldReduceVolume, hasReduced, line?.programOutputLine, audioElements]);
-
-  useEffect(() => {
-    console.log("VOLUME OF LINE: ", line?.name, value);
-    if (line?.programOutputLine) {
-      audioElements?.forEach((audioElement) => {
-        console.log("ACTUAL AUDIO ELEMENT VOLUME: ", audioElement.volume);
-      });
-    }
-  }, [line, value, audioElements]);
 
   useEffect(() => {
     if (!fetchProductionError) return;
@@ -474,14 +448,6 @@ export const ProductionLine = ({
       setShowDeviceSettings(false);
     }
   };
-
-  useEffect(() => {
-    console.log(
-      "IS PROGRAM USER: ",
-      line?.name,
-      joinProductionOptions?.isProgramUser
-    );
-  }, [joinProductionOptions, line]);
 
   // TODO detect if browser back button is pressed and run exit();
 

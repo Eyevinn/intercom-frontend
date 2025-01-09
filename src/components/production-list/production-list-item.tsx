@@ -161,8 +161,6 @@ export const ProductionsListItem = ({
 
       const uuid = globalThis.crypto.randomUUID();
 
-      console.log("isProgramUser", isProgramUser);
-
       dispatch({
         type: "ADD_CALL",
         payload: {
