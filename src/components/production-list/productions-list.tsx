@@ -13,16 +13,25 @@ const ListWrapper = styled.div`
 type TProductionsList = {
   productions: TBasicProductionResponse[];
   error: Error | null;
+  managementMode?: boolean;
 };
 
-export const ProductionsList = ({ productions, error }: TProductionsList) => {
+export const ProductionsList = ({
+  productions,
+  error,
+  managementMode = false,
+}: TProductionsList) => {
   return (
     <ListWrapper>
       {error && <LocalError error={error} />}
       {!error &&
         productions &&
         productions.map((p) => (
-          <ProductionsListItem key={p.productionId} production={p} />
+          <ProductionsListItem
+            key={p.productionId}
+            production={p}
+            managementMode={managementMode}
+          />
         ))}
     </ListWrapper>
   );

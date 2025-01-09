@@ -101,7 +101,7 @@ export const ManageLines = ({
   setProductionIdToFetch,
 }: TManageLines) => {
   const [removeActive, setRemoveActive] = useState<boolean>(false);
-  const [updateLines, setUpdateLines] = useState<FormValues | null>(null);
+  const [updateLines, setUpdateLines] = useState<string>("");
   const [verifyRemove, setVerifyRemove] = useState<null | string>(null);
   const [creatingLineError, setCreatingLineError] = useState<boolean>(false);
   const [removeId, setRemoveId] = useState<null | number>(null);
@@ -157,13 +157,10 @@ export const ManageLines = ({
     };
   }, []);
 
-  const onSubmit: SubmitHandler<FormValues> = useCallback(
-    (value) => {
-      if (fetchInProgress) return;
-      setUpdateLines(value);
-    },
-    [fetchInProgress]
-  );
+  const onSubmit: SubmitHandler<FormValues> = useCallback(() => {
+    if (fetchInProgress) return;
+    setUpdateLines("");
+  }, [fetchInProgress]);
 
   // Reset form values when created production id changes
   useEffect(() => {
@@ -173,9 +170,9 @@ export const ManageLines = ({
       });
       setRemoveId(null);
       setVerifyRemove(null);
-      setUpdateLines(null);
+      setUpdateLines("");
       setRemoveActive(false);
-      setUpdateLines(null);
+      setUpdateLines("");
       setProductionIdToFetch(parseInt(production.productionId, 10));
     }
   }, [
