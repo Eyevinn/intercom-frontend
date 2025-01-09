@@ -1,31 +1,20 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ErrorMessage } from "@hookform/error-message";
-import { useForm } from "react-hook-form";
 import { TBasicProductionResponse } from "../../api/api";
 import { useGlobalState } from "../../global-state/context-provider";
 import {
   ChevronDownIcon,
   ChevronUpIcon,
   PersonIcon,
-  RemoveIcon,
   UsersIcon,
 } from "../../assets/icons/icon";
 import {
-  FormInput,
-  FormLabel,
   SecondaryButton,
   StyledWarningMessage,
 } from "../landing-page/form-elements";
-import { useAddProductionLine } from "../manage-productions/use-add-production-line";
-import { ListItemWrapper } from "../create-production/create-production";
 import { Spinner } from "../loader/loader";
 import { useRemoveProductionLine } from "../manage-productions/use-remove-production-line";
-import { useDeleteProduction } from "../manage-productions/use-delete-production";
 import {
-  AddLineHeader,
-  AddLineSectionForm,
-  CreateLineButton,
   DeleteButton,
   HeaderIcon,
   HeaderTexts,
@@ -36,15 +25,14 @@ import {
   LineBlockParticipants,
   LineBlockTexts,
   LineBlockTitle,
-  ManageButtons,
   ParticipantCount,
   PersonText,
   ProductionItemWrapper,
   ProductionLines,
   ProductionName,
-  RemoveIconWrapper,
   SpinnerWrapper,
 } from "./production-list-components";
+import { ManageProductionButtons } from "./manage-production-buttons";
 
 type ProductionsListItemProps = {
   production: TBasicProductionResponse;
@@ -59,28 +47,7 @@ export const ProductionsListItem = ({
   const navigate = useNavigate();
 
   const [open, setOpen] = useState<boolean>(false);
-  const [addLineOpen, setAddLineOpen] = useState<boolean>(false);
   const [lineRemoveId, setLineRemoveId] = useState<string>("");
-  const [removeProductionId, setRemoveProductionId] = useState<string>("");
-  const [lineName, setLineName] = useState<string>("");
-
-  const {
-    formState: { errors },
-    register,
-    handleSubmit,
-    setValue,
-  } = useForm<{ lineName: string }>({
-    resetOptions: {
-      keepDirtyValues: true, // user-interacted input will be retained
-      keepErrors: true, // input errors will be retained with value update
-    },
-  });
-
-  const {
-    loading: createLineLoading,
-    successfullCreate: successfullCreateLine,
-    error: lineCreateError,
-  } = useAddProductionLine(parseInt(production.productionId, 10), lineName);
 
   const {
     loading: deleteLineLoading,
@@ -91,32 +58,14 @@ export const ProductionsListItem = ({
     parseInt(lineRemoveId, 10)
   );
 
-  const {
-    loading: deleteProductionLoading,
-    successfullDelete: successfullDeleteProduction,
-    error: productionDeleteError,
-  } = useDeleteProduction(parseInt(removeProductionId, 10));
-
   useEffect(() => {
-    if (successfullDeleteLine || successfullDeleteProduction) {
+    if (successfullDeleteLine) {
       dispatch({
         type: "PRODUCTION_UPDATED",
       });
     }
     setLineRemoveId("");
-    setRemoveProductionId("");
-  }, [successfullDeleteLine, successfullDeleteProduction, dispatch]);
-
-  useEffect(() => {
-    if (successfullCreateLine) {
-      dispatch({
-        type: "PRODUCTION_UPDATED",
-      });
-      setValue("lineName", "");
-      setLineName("");
-      setAddLineOpen(false);
-    }
-  }, [successfullCreateLine, setValue, dispatch]);
+  }, [successfullDeleteLine, dispatch]);
 
   const totalParticipants = useMemo(() => {
     return (
@@ -171,10 +120,6 @@ export const ProductionsListItem = ({
     }
   };
 
-  const onSubmit = (values: { lineName: string }) => {
-    if (values.lineName) setLineName(values.lineName);
-  };
-
   return (
     <ProductionItemWrapper>
       <HeaderWrapper onClick={() => setOpen(!open)}>
@@ -227,81 +172,16 @@ export const ProductionsListItem = ({
               )}
             </Lineblock>
           ))}
-          {productionDeleteError && (
-            <StyledWarningMessage className="error-message production-list">
-              {productionDeleteError.message}
-            </StyledWarningMessage>
-          )}
           {lineDeleteError && (
             <StyledWarningMessage className="error-message production-list">
               {lineDeleteError.message}
             </StyledWarningMessage>
           )}
           {managementMode && (
-            <>
-              <ManageButtons>
-                {!addLineOpen && (
-                  <SecondaryButton
-                    style={{ marginRight: "1rem" }}
-                    type="button"
-                    onClick={() => setAddLineOpen(!addLineOpen)}
-                  >
-                    Add Line
-                  </SecondaryButton>
-                )}
-                <DeleteButton
-                  type="button"
-                  disabled={totalParticipants > 0}
-                  onClick={() => setRemoveProductionId(production.productionId)}
-                >
-                  Remove Production
-                  {deleteProductionLoading && (
-                    <SpinnerWrapper>
-                      <Spinner className="production-list" />
-                    </SpinnerWrapper>
-                  )}
-                </DeleteButton>
-              </ManageButtons>
-              {addLineOpen && (
-                <AddLineSectionForm>
-                  <FormLabel>
-                    <AddLineHeader>
-                      <span>Line Name</span>
-                      <RemoveIconWrapper onClick={() => setAddLineOpen(false)}>
-                        <RemoveIcon />
-                      </RemoveIconWrapper>
-                    </AddLineHeader>
-                    <ListItemWrapper>
-                      <FormInput
-                        // eslint-disable-next-line
-                        {...register(`lineName`, {
-                          required: "Line name is required",
-                          minLength: 1,
-                        })}
-                      />
-                    </ListItemWrapper>
-                  </FormLabel>
-                  <ErrorMessage
-                    errors={errors}
-                    name="lineName"
-                    as={StyledWarningMessage}
-                  />
-                  {lineCreateError && (
-                    <StyledWarningMessage className="error-message">
-                      {lineCreateError.message}
-                    </StyledWarningMessage>
-                  )}
-                  <CreateLineButton onClick={handleSubmit(onSubmit)}>
-                    Create
-                    {createLineLoading && (
-                      <SpinnerWrapper>
-                        <Spinner className="production-list" />
-                      </SpinnerWrapper>
-                    )}
-                  </CreateLineButton>
-                </AddLineSectionForm>
-              )}
-            </>
+            <ManageProductionButtons
+              productionId={production.productionId}
+              isDeleteProductionDisabled={totalParticipants > 0}
+            />
           )}
         </InnerDiv>
       </ProductionLines>
