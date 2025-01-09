@@ -104,7 +104,7 @@ export const CreateProduction = () => {
       productionName: "",
       defaultLine: "",
       defaultLineProgramOutput: false,
-      lines: [{ name: "", programOutputLine: false }],
+      lines: [],
     },
   });
 

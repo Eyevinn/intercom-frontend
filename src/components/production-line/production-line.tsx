@@ -365,7 +365,7 @@ export const ProductionLine = ({
   useEffect(() => {
     let volumeReductionTimeout: NodeJS.Timeout;
     let volumeIncreaseTimeout: NodeJS.Timeout;
-    const volumeChangeFactor = 0.8;
+    const volumeChangeFactor = 0.1;
 
     if (shouldReduceVolume && line?.programOutputLine && !hasReduced) {
       volumeReductionTimeout = setTimeout(() => {
