@@ -1,134 +1,122 @@
-import styled from "@emotion/styled";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { isMobile } from "../../bowser";
+import { ErrorMessage } from "@hookform/error-message";
+import { useForm } from "react-hook-form";
 import { TBasicProductionResponse } from "../../api/api";
 import { useGlobalState } from "../../global-state/context-provider";
 import {
   ChevronDownIcon,
   ChevronUpIcon,
   PersonIcon,
+  RemoveIcon,
   UsersIcon,
 } from "../../assets/icons/icon";
-import { SecondaryButton } from "../landing-page/form-elements";
-
-const ProductionItemWrapper = styled.div`
-  text-align: start;
-  color: #ffffff;
-  background-color: transparent;
-  flex: 0 0 calc(25% - 2rem);
-  ${() => (isMobile ? `flex-grow: 1;` : `flex-grow: 0;`)}
-  justify-content: start;
-  min-width: 20rem;
-  border: 1px solid #424242;
-  border-radius: 0.5rem;
-  margin: 0 2rem 2rem 0;
-  cursor: pointer;
-`;
-
-const ProductionName = styled.div`
-  font-size: 1.4rem;
-  font-weight: bold;
-  margin-right: 1rem;
-  word-break: break-word;
-`;
-
-const ParticipantCount = styled.div`
-  font-size: 1.5rem;
-  color: #9e9e9e;
-`;
-
-const HeaderWrapper = styled.div`
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  padding: 2rem;
-`;
-
-const HeaderTexts = styled.div`
-  display: flex;
-  align-items: center;
-  svg {
-    height: 1.5rem;
-    width: 1.5rem;
-    margin-right: 0.5rem;
-  }
-  &.active {
-    svg {
-      fill: #73d16d;
-    }
-  }
-`;
-
-const HeaderIcon = styled.div`
-  display: flex;
-  align-items: center;
-  height: 2rem;
-  width: 2rem;
-`;
-
-const ProductionLines = styled.div`
-  display: grid;
-  padding: 0 2rem;
-  grid-template-rows: 0fr;
-  transition: grid-template-rows 0.3s ease-out;
-
-  &.expanded {
-    grid-template-rows: 1fr;
-    padding-bottom: 2rem;
-  }
-`;
-
-const InnerDiv = styled.div`
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-`;
-
-const Lineblock = styled.div`
-  margin-top: 1rem;
-  background-color: #4d4d4d;
-  border-radius: 1rem;
-  padding: 1rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-`;
-
-const LineBlockTexts = styled.div``;
-
-const LineBlockTitle = styled.div`
-  font-weight: bold;
-  font-size: 1.5rem;
-`;
-
-const LineBlockParticipants = styled.div``;
-
-const LineBlockParticipant = styled.div`
-  margin-top: 0.5rem;
-  display: flex;
-  align-items: center;
-
-  svg {
-    height: 2rem;
-    width: 2rem;
-  }
-`;
-
-const PersonText = styled.div`
-  margin-left: 0.5rem;
-`;
+import {
+  FormInput,
+  FormLabel,
+  SecondaryButton,
+  StyledWarningMessage,
+} from "../landing-page/form-elements";
+import { useAddProductionLine } from "../manage-productions/use-add-production-line";
+import { ListItemWrapper } from "../create-production/create-production";
+import { Spinner } from "../loader/loader";
+import { useRemoveProductionLine } from "../manage-productions/use-remove-production-line";
+import { useDeleteProduction } from "../manage-productions/use-delete-production";
+import {
+  AddLineHeader,
+  AddLineSectionForm,
+  CreateLineButton,
+  DeleteButton,
+  HeaderIcon,
+  HeaderTexts,
+  HeaderWrapper,
+  InnerDiv,
+  Lineblock,
+  LineBlockParticipant,
+  LineBlockParticipants,
+  LineBlockTexts,
+  LineBlockTitle,
+  ManageButtons,
+  ParticipantCount,
+  PersonText,
+  ProductionItemWrapper,
+  ProductionLines,
+  ProductionName,
+  RemoveIconWrapper,
+  SpinnerWrapper,
+} from "./production-list-components";
 
 type ProductionsListItemProps = {
   production: TBasicProductionResponse;
+  managementMode?: boolean;
 };
 
 export const ProductionsListItem = ({
   production,
+  managementMode = false,
 }: ProductionsListItemProps) => {
   const [{ userSettings }, dispatch] = useGlobalState();
-  const [open, setOpen] = useState<boolean>(false);
   const navigate = useNavigate();
+
+  const [open, setOpen] = useState<boolean>(false);
+  const [addLineOpen, setAddLineOpen] = useState<boolean>(false);
+  const [lineRemoveId, setLineRemoveId] = useState<string>("");
+  const [removeProductionId, setRemoveProductionId] = useState<string>("");
+  const [lineName, setLineName] = useState<string>("");
+
+  const {
+    formState: { errors },
+    register,
+    handleSubmit,
+    setValue,
+  } = useForm<{ lineName: string }>({
+    resetOptions: {
+      keepDirtyValues: true, // user-interacted input will be retained
+      keepErrors: true, // input errors will be retained with value update
+    },
+  });
+
+  const {
+    loading: createLineLoading,
+    successfullCreate: successfullCreateLine,
+    error: lineCreateError,
+  } = useAddProductionLine(parseInt(production.productionId, 10), lineName);
+
+  const {
+    loading: deleteLineLoading,
+    successfullDelete: successfullDeleteLine,
+    error: lineDeleteError,
+  } = useRemoveProductionLine(
+    parseInt(production.productionId, 10),
+    parseInt(lineRemoveId, 10)
+  );
+
+  const {
+    loading: deleteProductionLoading,
+    successfullDelete: successfullDeleteProduction,
+    error: productionDeleteError,
+  } = useDeleteProduction(parseInt(removeProductionId, 10));
+
+  useEffect(() => {
+    if (successfullDeleteLine || successfullDeleteProduction) {
+      dispatch({
+        type: "PRODUCTION_UPDATED",
+      });
+    }
+    setLineRemoveId("");
+    setRemoveProductionId("");
+  }, [successfullDeleteLine, successfullDeleteProduction, dispatch]);
+
+  useEffect(() => {
+    if (successfullCreateLine) {
+      dispatch({
+        type: "PRODUCTION_UPDATED",
+      });
+      setValue("lineName", "");
+      setLineName("");
+      setAddLineOpen(false);
+    }
+  }, [successfullCreateLine, setValue, dispatch]);
 
   const totalParticipants = useMemo(() => {
     return (
@@ -183,6 +171,10 @@ export const ProductionsListItem = ({
     }
   };
 
+  const onSubmit = (values: { lineName: string }) => {
+    if (values.lineName) setLineName(values.lineName);
+  };
+
   return (
     <ProductionItemWrapper>
       <HeaderWrapper onClick={() => setOpen(!open)}>
@@ -198,7 +190,7 @@ export const ProductionsListItem = ({
       <ProductionLines className={open ? "expanded" : ""}>
         <InnerDiv>
           {production.lines?.map((l) => (
-            <Lineblock key={`line-${l.smbConferenceId}`}>
+            <Lineblock key={`line-${l.id}-${l.name}`}>
               <LineBlockTexts>
                 <LineBlockTitle>{l.name}</LineBlockTitle>
                 <LineBlockParticipants>
@@ -212,14 +204,105 @@ export const ProductionsListItem = ({
                   ))}
                 </LineBlockParticipants>
               </LineBlockTexts>
-              <SecondaryButton
-                type="button"
-                onClick={() => goToProduction(l.id)}
-              >
-                Join
-              </SecondaryButton>
+              {managementMode ? (
+                <DeleteButton
+                  type="button"
+                  disabled={!!l.participants.length}
+                  onClick={() => setLineRemoveId(l.id)}
+                >
+                  Delete
+                  {deleteLineLoading && (
+                    <SpinnerWrapper>
+                      <Spinner className="production-list" />
+                    </SpinnerWrapper>
+                  )}
+                </DeleteButton>
+              ) : (
+                <SecondaryButton
+                  type="button"
+                  onClick={() => goToProduction(l.id)}
+                >
+                  Join
+                </SecondaryButton>
+              )}
             </Lineblock>
           ))}
+          {productionDeleteError && (
+            <StyledWarningMessage className="error-message production-list">
+              {productionDeleteError.message}
+            </StyledWarningMessage>
+          )}
+          {lineDeleteError && (
+            <StyledWarningMessage className="error-message production-list">
+              {lineDeleteError.message}
+            </StyledWarningMessage>
+          )}
+          {managementMode && (
+            <>
+              <ManageButtons>
+                {!addLineOpen && (
+                  <SecondaryButton
+                    style={{ marginRight: "1rem" }}
+                    type="button"
+                    onClick={() => setAddLineOpen(!addLineOpen)}
+                  >
+                    Add Line
+                  </SecondaryButton>
+                )}
+                <DeleteButton
+                  type="button"
+                  disabled={totalParticipants > 0}
+                  onClick={() => setRemoveProductionId(production.productionId)}
+                >
+                  Remove Production
+                  {deleteProductionLoading && (
+                    <SpinnerWrapper>
+                      <Spinner className="production-list" />
+                    </SpinnerWrapper>
+                  )}
+                </DeleteButton>
+              </ManageButtons>
+              {addLineOpen && (
+                <AddLineSectionForm>
+                  <FormLabel>
+                    <AddLineHeader>
+                      <span>Line Name</span>
+                      <RemoveIconWrapper onClick={() => setAddLineOpen(false)}>
+                        <RemoveIcon />
+                      </RemoveIconWrapper>
+                    </AddLineHeader>
+                    <ListItemWrapper>
+                      <FormInput
+                        // eslint-disable-next-line
+                        {...register(`lineName`, {
+                          required: "Line name is required",
+                          minLength: 1,
+                        })}
+                      />
+                    </ListItemWrapper>
+                  </FormLabel>
+                  <ErrorMessage
+                    errors={errors}
+                    name="lineName"
+                    as={StyledWarningMessage}
+                  />
+                  {lineCreateError && (
+                    <StyledWarningMessage className="error-message">
+                      {lineCreateError.message}
+                    </StyledWarningMessage>
+                  )}
+                  <CreateLineButton onClick={handleSubmit(onSubmit)}>
+                    Create
+                    {createLineLoading && (
+                      <SpinnerWrapper>
+                        <Spinner className="production-list" />
+                      </SpinnerWrapper>
+                    )}
+                  </CreateLineButton>
+                </AddLineSectionForm>
+              )}
+            </>
+          )}
         </InnerDiv>
       </ProductionLines>
     </ProductionItemWrapper>

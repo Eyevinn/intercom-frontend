@@ -3,9 +3,7 @@ import { API } from "../../api/api";
 
 type TUseAddProductionLine = (
   productionId: number | null,
-  lineNames: {
-    lines: { name: string }[];
-  } | null
+  lineName: string
 ) => {
   loading: boolean;
   successfullCreate: boolean;
@@ -14,7 +12,7 @@ type TUseAddProductionLine = (
 
 export const useAddProductionLine: TUseAddProductionLine = (
   productionId,
-  lineNames
+  lineName
 ) => {
   const [successfullCreate, setSuccessfullCreate] = useState(false);
   const [loading, setLoading] = useState<boolean>(false);
@@ -25,8 +23,8 @@ export const useAddProductionLine: TUseAddProductionLine = (
     setError(null);
     setSuccessfullCreate(false);
     setLoading(true);
-    if (productionId && lineNames) {
-      API.addProductionLine(productionId, lineNames.lines[0].name)
+    if (productionId && lineName) {
+      API.addProductionLine(productionId, lineName)
         .then(() => {
           if (aborted) return;
 
@@ -45,7 +43,7 @@ export const useAddProductionLine: TUseAddProductionLine = (
     return () => {
       aborted = true;
     };
-  }, [lineNames, productionId]);
+  }, [lineName, productionId]);
 
   return {
     loading,

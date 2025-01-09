@@ -38,7 +38,7 @@ const HeaderWrapper = styled.div`
   }
 `;
 
-const ListItemWrapper = styled.div`
+export const ListItemWrapper = styled.div`
   position: relative;
 `;
 
