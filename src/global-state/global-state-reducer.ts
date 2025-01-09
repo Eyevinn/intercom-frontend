@@ -6,7 +6,10 @@ const initialGlobalState: TGlobalState = {
   production: null,
   error: { callErrors: null, globalError: null },
   reloadProductionList: false,
-  devices: null,
+  devices: {
+    input: null,
+    output: null,
+  },
   userSettings: null,
   selectedProductionId: null,
   calls: {},

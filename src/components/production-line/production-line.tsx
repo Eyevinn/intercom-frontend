@@ -21,7 +21,6 @@ import {
   PrimaryButton,
   StyledWarningMessage,
 } from "../landing-page/form-elements.tsx";
-import { uniqBy } from "../../helpers.ts";
 import { Spinner } from "../loader/loader.tsx";
 import { DisplayContainerHeader } from "../landing-page/display-container-header.tsx";
 import { DisplayContainer, FlexContainer } from "../generic-components.ts";
@@ -160,7 +159,6 @@ export const ProductionLine = ({
   const [isInputMuted, setIsInputMuted] = useState(true);
   const [isOutputMuted, setIsOutputMuted] = useState(false);
   const [showDeviceSettings, setShowDeviceSettings] = useState(false);
-  const [refresh, setRefresh] = useState<number>(0);
   const [confirmExitModalOpen, setConfirmExitModalOpen] = useState(false);
   const [value, setValue] = useState(0.75);
   const {
@@ -276,10 +274,9 @@ export const ProductionLine = ({
     customKeyPress: savedHotkeys?.pushToTalkHotkey || "t",
   });
 
-  useFetchDevices({
+  const [refresh] = useFetchDevices({
     dispatch,
     permission: true,
-    refresh,
   });
 
   useEffect(() => {
@@ -354,22 +351,8 @@ export const ProductionLine = ({
     dispatch,
   });
 
-  const outputDevices = devices
-    ? uniqBy(
-        devices.filter((d) => d.kind === "audiooutput"),
-        (item) => item.deviceId
-      )
-    : [];
-
-  const inputDevices = devices
-    ? uniqBy(
-        devices.filter((d) => d.kind === "audioinput"),
-        (item) => item.deviceId
-      )
-    : [];
-
   const settingsButtonPressed = () => {
-    setRefresh((prev) => prev + 1);
+    refresh();
     setShowDeviceSettings(!showDeviceSettings);
   };
 
@@ -392,7 +375,6 @@ export const ProductionLine = ({
         payload: {
           id,
           updates: {
-            devices: null,
             joinProductionOptions: newJoinProductionOptions,
             mediaStreamInput: null,
             dominantSpeaker: null,
@@ -552,8 +534,8 @@ export const ProductionLine = ({
                       // eslint-disable-next-line
                       {...register(`audioinput`)}
                     >
-                      {inputDevices.length > 0 ? (
-                        inputDevices.map((device) => (
+                      {devices.input && devices.input.length > 0 ? (
+                        devices.input.map((device) => (
                           <option key={device.deviceId} value={device.deviceId}>
                             {device.label}
                           </option>
@@ -565,12 +547,12 @@ export const ProductionLine = ({
                   </FormLabel>
                   <FormLabel>
                     <DecorativeLabel>Output</DecorativeLabel>
-                    {outputDevices.length > 0 ? (
+                    {devices.output && devices.output.length > 0 ? (
                       <FormSelect
                         // eslint-disable-next-line
                         {...register(`audiooutput`)}
                       >
-                        {outputDevices.map((device) => (
+                        {devices.output.map((device) => (
                           <option key={device.deviceId} value={device.deviceId}>
                             {device.label}
                           </option>
@@ -598,12 +580,7 @@ export const ProductionLine = ({
                       Save
                     </ActionButton>
                     {!(isBrowserFirefox && !isMobile) && (
-                      <ReloadDevicesButton
-                        handleReloadDevices={() =>
-                          setRefresh((prev) => prev + 1)
-                        }
-                        devices={devices}
-                      />
+                      <ReloadDevicesButton />
                     )}
                   </ButtonWrapper>
                 </FormContainer>
