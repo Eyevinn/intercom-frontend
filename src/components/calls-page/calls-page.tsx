@@ -188,15 +188,13 @@ export const CallsPage = () => {
           </AddCallContainer>
         )}
         {isEmpty && paramProductionId && paramLineId && (
-          <CallContainer>
-            <JoinProduction
-              preSelected={{
-                preSelectedProductionId: paramProductionId,
-                preSelectedLineId: paramLineId,
-              }}
-              customGlobalMute={customGlobalMute}
-            />
-          </CallContainer>
+          <JoinProduction
+            preSelected={{
+              preSelectedProductionId: paramProductionId,
+              preSelectedLineId: paramLineId,
+            }}
+            customGlobalMute={customGlobalMute}
+          />
         )}
       </CallsContainer>
     </Container>

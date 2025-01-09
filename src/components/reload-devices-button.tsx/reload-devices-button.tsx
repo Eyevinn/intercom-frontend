@@ -4,15 +4,22 @@ import { RefreshIcon } from "../../assets/icons/icon";
 import { PrimaryButton } from "../landing-page/form-elements";
 import { Spinner } from "../loader/loader";
 import { isBrowserFirefox, isMobile } from "../../bowser";
+import { useGlobalState } from "../../global-state/context-provider";
+import { useFetchDevices } from "../../hooks/use-fetch-devices";
+import { useDevicePermissions } from "../../hooks/use-device-permission";
+import { Modal } from "../modal/modal";
+import { DisplayContainerHeader } from "../landing-page/display-container-header";
 
 const StyledRefreshBtn = styled(PrimaryButton)`
-  padding: 0;
-  margin: 0;
-  width: 3.5rem;
-  height: 3.5rem;
-  margin-left: 1.5rem;
-  flex-shrink: 0; /* Prevent shrinking */
-  flex-basis: auto; /* Prevent shrinking */
+  margin-right: 1.5rem;
+  display: flex;
+  align-items: center;
+
+  svg,
+  .refresh-devices {
+    width: 2rem;
+    height: 2rem;
+  }
 
   &.dummy {
     background-color: #242424;
@@ -20,18 +27,19 @@ const StyledRefreshBtn = styled(PrimaryButton)`
   }
 `;
 
-export const ReloadDevicesButton = ({
-  handleReloadDevices,
-  setFirefoxWarningModalOpen,
-  devices,
-  isDummy,
-}: {
-  handleReloadDevices: () => void;
-  setFirefoxWarningModalOpen?: () => void;
-  devices: MediaDeviceInfo[];
-  isDummy?: boolean;
-}) => {
+export const ReloadDevicesButton = () => {
+  const [{ devices }, dispatch] = useGlobalState();
   const [deviceRefresh, setDeviceRefresh] = useState(false);
+  const [firefoxWarningModalOpen, setFirefoxWarningModalOpen] = useState(false);
+
+  const { permission } = useDevicePermissions({
+    continueToApp: true,
+  });
+
+  const [refresh] = useFetchDevices({
+    dispatch,
+    permission,
+  });
 
   useEffect(() => {
     let timeout: number | null = null;
@@ -48,24 +56,34 @@ export const ReloadDevicesButton = ({
   }, [devices]);
 
   const reloadDevices = () => {
-    if (isBrowserFirefox && !isMobile && setFirefoxWarningModalOpen) {
-      setFirefoxWarningModalOpen();
+    if (isBrowserFirefox && !isMobile) {
+      setFirefoxWarningModalOpen(true);
     } else {
       setDeviceRefresh(true);
-      handleReloadDevices();
+      refresh();
     }
   };
 
   return (
-    <StyledRefreshBtn
-      type="button"
-      title={isDummy ? "" : "Refresh devices"}
-      className={isDummy ? "dummy" : ""}
-      disabled={isDummy}
-      onClick={() => reloadDevices()}
-    >
-      {!deviceRefresh && <RefreshIcon />}
-      {deviceRefresh && <Spinner className="refresh-devices" />}
-    </StyledRefreshBtn>
+    <>
+      <StyledRefreshBtn
+        type="button"
+        title="Refresh devices"
+        onClick={() => reloadDevices()}
+      >
+        <div>Refresh Devices</div>
+        {!deviceRefresh && <RefreshIcon />}
+        {deviceRefresh && <Spinner className="refresh-devices" />}
+      </StyledRefreshBtn>
+      {firefoxWarningModalOpen && (
+        <Modal onClose={() => setFirefoxWarningModalOpen(false)}>
+          <DisplayContainerHeader>Reset permissions</DisplayContainerHeader>
+          <p>
+            To reload devices Firefox needs the permission to be manually reset,
+            please remove permission and reload page instead.
+          </p>
+        </Modal>
+      )}
+    </>
   );
 };

@@ -4,9 +4,9 @@ export type TJoinProductionOptions = {
   lineId: string;
   username: string;
   // Not all devices have input available
-  audioinput: string | "no-device";
+  audioinput?: string;
   // Not all devices allow choosing output
-  audiooutput: string | null;
+  audiooutput?: string;
 };
 
 export type Hotkeys = {
