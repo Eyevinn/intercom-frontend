@@ -2,7 +2,7 @@ import styled from "@emotion/styled";
 import { useState } from "react";
 import { SettingsModal } from "./settings-modal";
 import { SettingsIcon } from "../../assets/icons/icon";
-import { Hotkeys, TLine } from "./types";
+import { Hotkeys, TJoinProductionOptions, TLine } from "./types";
 
 const TempDiv = styled.div`
   padding: 0 0 2rem 0;
@@ -29,6 +29,7 @@ type HotkeysComponentProps = {
   savedHotkeys: Hotkeys;
   customGlobalMute: string;
   line: TLine | null;
+  joinProductionOptions: TJoinProductionOptions;
 };
 
 export const HotkeysComponent = ({
@@ -36,6 +37,7 @@ export const HotkeysComponent = ({
   savedHotkeys,
   customGlobalMute,
   line,
+  joinProductionOptions,
 }: HotkeysComponentProps) => {
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
 
@@ -51,28 +53,42 @@ export const HotkeysComponent = ({
           <SettingsIcon />
         </SettingsBtn>
       </HotkeyDiv>
-      <TempDiv>
-        <strong>{(savedHotkeys?.muteHotkey || "").toUpperCase()}: </strong>
-        Toggle Input Mute
-      </TempDiv>
-      <TempDiv>
-        <strong>{(savedHotkeys?.speakerHotkey || "").toUpperCase()}: </strong>
-        Toggle Output Mute
-      </TempDiv>
-      <TempDiv>
-        <strong>
-          {(savedHotkeys?.pushToTalkHotkey || "").toUpperCase()}:{" "}
-        </strong>
-        Push to Talk
-      </TempDiv>
-      <TempDiv>
-        <strong>{savedHotkeys?.increaseVolumeHotkey.toUpperCase()}: </strong>
-        Increase Volume
-      </TempDiv>
-      <TempDiv>
-        <strong>{savedHotkeys?.decreaseVolumeHotkey.toUpperCase()}: </strong>
-        Decrease Volume
-      </TempDiv>
+      {(line?.programOutputLine
+        ? joinProductionOptions?.isProgramUser
+        : !joinProductionOptions.isProgramUser) && (
+        <TempDiv>
+          <strong>{(savedHotkeys?.muteHotkey || "").toUpperCase()}: </strong>
+          Toggle Input Mute
+        </TempDiv>
+      )}
+      {!(line?.programOutputLine && joinProductionOptions.isProgramUser) && (
+        <>
+          <TempDiv>
+            <strong>
+              {(savedHotkeys?.speakerHotkey || "").toUpperCase()}:{" "}
+            </strong>
+            Toggle Output Mute
+          </TempDiv>
+          <TempDiv>
+            <strong>
+              {(savedHotkeys?.pushToTalkHotkey || "").toUpperCase()}:{" "}
+            </strong>
+            Push to Talk
+          </TempDiv>
+          <TempDiv>
+            <strong>
+              {savedHotkeys?.increaseVolumeHotkey.toUpperCase()}:{" "}
+            </strong>
+            Increase Volume
+          </TempDiv>
+          <TempDiv>
+            <strong>
+              {savedHotkeys?.decreaseVolumeHotkey.toUpperCase()}:{" "}
+            </strong>
+            Decrease Volume
+          </TempDiv>
+        </>
+      )}
       <TempDiv>
         <strong>
           {(savedHotkeys?.globalMuteHotkey || "").toUpperCase()}:{" "}

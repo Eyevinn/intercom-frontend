@@ -1,4 +1,9 @@
-import { SubmitHandler, useFieldArray, useForm } from "react-hook-form";
+import {
+  Controller,
+  SubmitHandler,
+  useFieldArray,
+  useForm,
+} from "react-hook-form";
 import { useEffect, useState } from "react";
 import styled from "@emotion/styled";
 import { ErrorMessage } from "@hookform/error-message";
@@ -21,11 +26,13 @@ import { darkText, errorColour } from "../../css-helpers/defaults.ts";
 import { NavigateToRootButton } from "../navigate-to-root-button/navigate-to-root-button.tsx";
 import { ResponsiveFormContainer } from "../user-settings/user-settings.tsx";
 import { isMobile } from "../../bowser.ts";
+import { Checkbox } from "../checkbox/checkbox.tsx";
 
 type FormValues = {
   productionName: string;
   defaultLine: string;
-  lines: { name: string }[];
+  defaultLineProgramOutput: boolean;
+  lines: { name: string; programOutputLine?: boolean }[];
 };
 
 const HeaderWrapper = styled.div`
@@ -75,6 +82,10 @@ const FetchErrorMessage = styled.div`
   margin: 1rem 0;
 `;
 
+const CheckboxWrapper = styled.div`
+  margin-bottom: 3rem;
+`;
+
 export const CreateProduction = () => {
   const [, dispatch] = useGlobalState();
   const [createdProductionId, setCreatedProductionId] = useState<string | null>(
@@ -88,7 +99,15 @@ export const CreateProduction = () => {
     register,
     handleSubmit,
     reset,
-  } = useForm<FormValues>();
+  } = useForm<FormValues>({
+    defaultValues: {
+      productionName: "",
+      defaultLine: "",
+      defaultLineProgramOutput: false,
+      lines: [{ name: "", programOutputLine: false }],
+    },
+  });
+
   const { fields, append, remove } = useFieldArray({
     control,
     name: "lines",
@@ -105,7 +124,13 @@ export const CreateProduction = () => {
     setLoading(true);
     API.createProduction({
       name: value.productionName,
-      lines: [{ name: value.defaultLine }, ...value.lines],
+      lines: [
+        {
+          name: value.defaultLine,
+          programOutputLine: value.defaultLineProgramOutput,
+        },
+        ...value.lines,
+      ],
     })
       .then((v) => {
         setCreatedProductionId(v.productionId);
@@ -196,6 +221,21 @@ export const CreateProduction = () => {
           autoComplete="off"
           placeholder="Line Name"
         />
+        <Controller
+          name="defaultLineProgramOutput"
+          control={control}
+          render={({ field }) => (
+            <CheckboxWrapper>
+              <Checkbox
+                label="This line will be used for a program output"
+                checked={field.value}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  field.onChange(e.target.checked)
+                }
+              />
+            </CheckboxWrapper>
+          )}
+        />
       </FormLabel>
       <ErrorMessage
         errors={errors}
@@ -216,6 +256,21 @@ export const CreateProduction = () => {
                 className={index === fields.length - 1 ? "additional-line" : ""}
                 autoComplete="off"
                 placeholder="Line Name"
+              />
+              <Controller
+                name={`lines.${index}.programOutputLine`}
+                control={control}
+                render={({ field: controllerField }) => (
+                  <CheckboxWrapper>
+                    <Checkbox
+                      label="This line will be used for a program output"
+                      checked={controllerField.value}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        controllerField.onChange(e.target.checked)
+                      }
+                    />
+                  </CheckboxWrapper>
+                )}
               />
               {index === fields.length - 1 && (
                 <RemoveLineButton

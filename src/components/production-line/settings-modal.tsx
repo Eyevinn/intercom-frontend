@@ -10,7 +10,6 @@ import {
   StyledWarningMessage,
   ActionButton,
 } from "../landing-page/form-elements";
-// eslint-disable-next-line import/no-cycle
 import { useUpdateGlobalHotkey } from "./use-update-global-hotkey";
 import { useCheckForDuplicateHotkey } from "./use-check-for-duplicate-hotkey";
 import { Hotkeys } from "./types";

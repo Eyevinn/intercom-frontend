@@ -24,6 +24,7 @@ import {
   ResponsiveFormContainer,
 } from "../user-settings/user-settings.tsx";
 import { isMobile } from "../../bowser.ts";
+import { Checkbox } from "../checkbox/checkbox.tsx";
 
 type FormValues = TJoinProductionOptions;
 
@@ -33,6 +34,10 @@ const FetchErrorMessage = styled.div`
   padding: 0.5rem;
   margin: 0 0 2rem;
   border-radius: 0.5rem;
+`;
+
+const CheckboxWrapper = styled.div`
+  margin-bottom: 3rem;
 `;
 
 type TProps = {
@@ -54,6 +59,9 @@ export const JoinProduction = ({
   const [joinProductionId, setJoinProductionId] = useState<null | number>(null);
   const [joinProductionOptions, setJoinProductionOptions] =
     useState<TJoinProductionOptions | null>(null);
+  const [isProgramUser, setIsProgramUser] = useState(false);
+  const [isProgramOutputLine, setIsProgramOutputLine] = useState(false);
+
   const { readFromStorage, writeToStorage } = useStorage();
 
   const {
@@ -62,12 +70,14 @@ export const JoinProduction = ({
     handleSubmit,
     reset,
     setValue,
+    watch,
   } = useForm<FormValues>({
     defaultValues: {
       productionId:
         preSelected?.preSelectedProductionId || addAdditionalCallId || "",
       lineId: preSelected?.preSelectedLineId || undefined,
       username: readFromStorage("username") || "",
+      lineUsedForProgramOutput: false,
     },
     resetOptions: {
       keepDirtyValues: true, // user-interacted input will be retained
@@ -84,6 +94,17 @@ export const JoinProduction = ({
   } = useFetchProduction(joinProductionId);
 
   useNavigateToProduction(joinProductionOptions);
+
+  useEffect(() => {
+    const selectedLineId = watch("lineId"); // Extract the watched value into a variable
+    if (production) {
+      const selectedLine = production.lines.find(
+        (line) => line.id.toString() === selectedLineId
+      );
+      setIsProgramOutputLine(!!selectedLine?.programOutputLine);
+    }
+    // eslint-disable-next-line
+  }, [production, watch("lineId")]);
 
   // Update selected line id when a new production is fetched
   useEffect(() => {
@@ -133,6 +154,18 @@ export const JoinProduction = ({
   });
 
   const onSubmit: SubmitHandler<FormValues> = (payload) => {
+    const selectedLine = production?.lines.find(
+      (line) => line.id === payload.lineId
+    );
+
+    console.log("SELECTED LINE: ", selectedLine);
+
+    const options: TJoinProductionOptions = {
+      ...payload,
+      lineUsedForProgramOutput: selectedLine?.programOutputLine || false,
+      isProgramUser,
+    };
+
     if (payload.username) {
       writeToStorage("username", payload.username);
     }
@@ -153,7 +186,7 @@ export const JoinProduction = ({
       payload: {
         id: uuid,
         callState: {
-          joinProductionOptions: payload,
+          joinProductionOptions: options,
           mediaStreamInput: null,
           dominantSpeaker: null,
           audioLevelAboveThreshold: false,
@@ -171,9 +204,9 @@ export const JoinProduction = ({
         },
       },
     });
-    setJoinProductionOptions(payload);
-    // TODO remove
-    console.log("PAYLOAD: ", payload);
+    setJoinProductionOptions(options);
+
+    console.log("PAYLOAD: ", options);
   };
 
   return (
@@ -273,6 +306,12 @@ export const JoinProduction = ({
                 {...register(`lineId`, {
                   required: "Line id is required",
                   minLength: 1,
+                  onChange: (e) => {
+                    const selectedLine = production?.lines.find(
+                      (line) => line.id.toString() === e.target.value
+                    );
+                    setIsProgramOutputLine(!!selectedLine?.programOutputLine);
+                  },
                 })}
                 style={{
                   display: production ? "block" : "none",
@@ -291,6 +330,14 @@ export const JoinProduction = ({
                 </StyledWarningMessage>
               )}
             </FormLabel>
+          )}
+          {isProgramOutputLine && (
+            <CheckboxWrapper>
+              <Checkbox
+                label="This user will be used for a program output"
+                onChange={(e) => setIsProgramUser(e.target.checked)}
+              />
+            </CheckboxWrapper>
           )}
           <ButtonWrapper>
             <ReloadDevicesButton />
