@@ -34,7 +34,7 @@ export const ProgramOutputModal = ({
       <ContentWrapper>
         <p>
           This is a line for program output. Do you wish to join the line as a
-          as the program output?
+          as the program output or as a listener?
         </p>
         <CheckboxWrapper>
           <Checkbox
