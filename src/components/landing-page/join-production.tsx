@@ -181,6 +181,8 @@ export const JoinProduction = ({
           connectionState: null,
           audioElements: null,
           sessionId: null,
+          dataChannel: null,
+          isRemotelyMuted: false,
           hotkeys: {
             muteHotkey: "m",
             speakerHotkey: "n",

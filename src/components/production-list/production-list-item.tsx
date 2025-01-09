@@ -164,6 +164,8 @@ export const ProductionsListItem = ({
             connectionState: null,
             audioElements: null,
             sessionId: null,
+            dataChannel: null,
+            isRemotelyMuted: false,
             hotkeys: {
               muteHotkey: "m",
               speakerHotkey: "n",
