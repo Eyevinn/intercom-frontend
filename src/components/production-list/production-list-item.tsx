@@ -225,7 +225,6 @@ export const ProductionsListItem = ({
               </LineBlockTexts>
               <SecondaryButton
                 type="button"
-                // onClick={() => goToProduction(l.id)}
                 onClick={() => {
                   if (l.programOutputLine) {
                     setModalLineId(l.id);

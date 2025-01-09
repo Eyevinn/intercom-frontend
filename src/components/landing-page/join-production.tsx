@@ -38,6 +38,7 @@ const FetchErrorMessage = styled.div`
 
 const CheckboxWrapper = styled.div`
   margin-bottom: 3rem;
+  margin-top: 1rem;
 `;
 
 type TProps = {
@@ -96,7 +97,7 @@ export const JoinProduction = ({
   useNavigateToProduction(joinProductionOptions);
 
   useEffect(() => {
-    const selectedLineId = watch("lineId"); // Extract the watched value into a variable
+    const selectedLineId = watch("lineId");
     if (production) {
       const selectedLine = production.lines.find(
         (line) => line.id.toString() === selectedLineId
@@ -328,12 +329,18 @@ export const JoinProduction = ({
             </FormLabel>
           )}
           {isProgramOutputLine && (
-            <CheckboxWrapper>
-              <Checkbox
-                label="This user will be used for a program output"
-                onChange={(e) => setIsProgramUser(e.target.checked)}
-              />
-            </CheckboxWrapper>
+            <>
+              <p>
+                Do you want to join this call as the program output or as a
+                listener?
+              </p>
+              <CheckboxWrapper>
+                <Checkbox
+                  label="Join as program output"
+                  onChange={(e) => setIsProgramUser(e.target.checked)}
+                />
+              </CheckboxWrapper>
+            </>
           )}
           <ButtonWrapper>
             <ReloadDevicesButton />

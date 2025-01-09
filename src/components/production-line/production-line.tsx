@@ -226,7 +226,7 @@ export const ProductionLine = ({
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = parseFloat(e.target.value);
-    setValue(newValue); // Update local state
+    setValue(newValue);
 
     audioElements?.forEach((audioElement) => {
       // eslint-disable-next-line no-param-reassign
