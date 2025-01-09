@@ -138,7 +138,7 @@ export const UserList = ({
                 </IsTalkingIndicator>
                 {p.name} {p.isActive ? "" : "(inactive)"}
               </User>
-              {!isYou && (
+              {!isYou && p.isActive && (
                 <MuteParticipantButton
                   onClick={() => {
                     setUserId(p.endpointId);
