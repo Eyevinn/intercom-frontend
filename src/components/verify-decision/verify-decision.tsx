@@ -11,8 +11,15 @@ type TVerifyDecision = {
 
 const VerifyButtons = styled.div`
   display: flex;
+  justify-content: flex-end;
   margin-top: 2rem;
-  gap: 2rem;
+  gap: 1rem;
+
+  button {
+    width: 9rem;
+    display: flex;
+    justify-content: space-around;
+  }
 `;
 
 const CancelButton = styled(ActionButton)`
