@@ -102,6 +102,8 @@ export const HotkeysComponent = ({
           savedHotkeys={savedHotkeys}
           customGlobalMute={customGlobalMute}
           lineName={line?.name}
+          programOutPutLine={line?.programOutputLine}
+          isProgramUser={joinProductionOptions.isProgramUser}
           onSave={() => setIsSettingsModalOpen(false)}
           onClose={handleSettingsClick}
         />
