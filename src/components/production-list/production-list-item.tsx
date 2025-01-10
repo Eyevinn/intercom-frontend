@@ -140,7 +140,7 @@ export const ProductionsListItem = ({
               <LineBlockTexts>
                 <LineBlockTitle>{l.name}</LineBlockTitle>
                 <LineBlockParticipants>
-                  {l.participants.map((participant) => (
+                  {l.participants.slice(0, 4).map((participant) => (
                     <LineBlockParticipant
                       key={`participant-${participant.sessionId}`}
                     >
@@ -148,6 +148,12 @@ export const ProductionsListItem = ({
                       <PersonText>{participant.name}</PersonText>
                     </LineBlockParticipant>
                   ))}
+                  {l.participants.length > 4 && (
+                    <LineBlockParticipant>
+                      <UsersIcon />
+                      <PersonText>{`+${l.participants.length - 4} other user${l.participants.length - 4 > 1 ? "s" : ""}`}</PersonText>
+                    </LineBlockParticipant>
+                  )}
                 </LineBlockParticipants>
               </LineBlockTexts>
               {managementMode ? (
