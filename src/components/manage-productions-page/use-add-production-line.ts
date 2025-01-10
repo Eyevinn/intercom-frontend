@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { API } from "../../api/api";
 
 type TUseAddProductionLine = (
-  productionId: number | null,
+  productionId: string | null,
   lineName: string
 ) => {
   loading: boolean;

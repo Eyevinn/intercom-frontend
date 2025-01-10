@@ -13,7 +13,7 @@ import {
   StyledWarningMessage,
 } from "../landing-page/form-elements";
 import { Spinner } from "../loader/loader";
-import { useRemoveProductionLine } from "../manage-productions/use-remove-production-line";
+import { useRemoveProductionLine } from "../manage-productions-page/use-remove-production-line";
 import {
   DeleteButton,
   HeaderIcon,
@@ -33,6 +33,8 @@ import {
   SpinnerWrapper,
 } from "./production-list-components";
 import { ManageProductionButtons } from "./manage-production-buttons";
+import { ConfirmationModal } from "../verify-decision/confirmation-modal";
+import { TLine } from "../production-line/types";
 
 type ProductionsListItemProps = {
   production: TBasicProductionResponse;
@@ -47,16 +49,14 @@ export const ProductionsListItem = ({
   const navigate = useNavigate();
 
   const [open, setOpen] = useState<boolean>(false);
+  const [selectedLine, setSelectedLine] = useState<TLine | null>();
   const [lineRemoveId, setLineRemoveId] = useState<string>("");
 
   const {
     loading: deleteLineLoading,
     successfullDelete: successfullDeleteLine,
     error: lineDeleteError,
-  } = useRemoveProductionLine(
-    parseInt(production.productionId, 10),
-    parseInt(lineRemoveId, 10)
-  );
+  } = useRemoveProductionLine(production.productionId, lineRemoveId);
 
   useEffect(() => {
     if (successfullDeleteLine) {
@@ -65,6 +65,7 @@ export const ProductionsListItem = ({
       });
     }
     setLineRemoveId("");
+    setSelectedLine(null);
   }, [successfullDeleteLine, dispatch]);
 
   const totalParticipants = useMemo(() => {
@@ -153,7 +154,7 @@ export const ProductionsListItem = ({
                 <DeleteButton
                   type="button"
                   disabled={!!l.participants.length}
-                  onClick={() => setLineRemoveId(l.id)}
+                  onClick={() => setSelectedLine(l)}
                 >
                   Delete
                   {deleteLineLoading && (
@@ -179,12 +180,20 @@ export const ProductionsListItem = ({
           )}
           {managementMode && (
             <ManageProductionButtons
-              productionId={production.productionId}
+              production={production}
               isDeleteProductionDisabled={totalParticipants > 0}
             />
           )}
         </InnerDiv>
       </ProductionLines>
+      {selectedLine && (
+        <ConfirmationModal
+          title="Delete Line"
+          description={`You are about to delete the line: ${selectedLine.name}. Are you sure?`}
+          onCancel={() => setSelectedLine(null)}
+          onConfirm={() => setLineRemoveId(selectedLine.id)}
+        />
+      )}
     </ProductionItemWrapper>
   );
 };

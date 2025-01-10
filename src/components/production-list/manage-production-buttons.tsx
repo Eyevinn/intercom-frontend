@@ -19,22 +19,26 @@ import {
   RemoveIconWrapper,
   SpinnerWrapper,
 } from "./production-list-components";
-import { useAddProductionLine } from "../manage-productions/use-add-production-line";
-import { useDeleteProduction } from "../manage-productions/use-delete-production";
+import { useAddProductionLine } from "../manage-productions-page/use-add-production-line";
+import { useDeleteProduction } from "../manage-productions-page/use-delete-production";
 import { useGlobalState } from "../../global-state/context-provider";
+import { ConfirmationModal } from "../verify-decision/confirmation-modal";
+import { TBasicProductionResponse } from "../../api/api";
 
 interface ManageProductionButtonsProps {
-  productionId: string;
+  production: TBasicProductionResponse;
   isDeleteProductionDisabled: boolean;
 }
 
 export const ManageProductionButtons: FC<ManageProductionButtonsProps> = (
   props
 ) => {
-  const { productionId, isDeleteProductionDisabled } = props;
+  const { production, isDeleteProductionDisabled } = props;
 
   const [, dispatch] = useGlobalState();
   const [removeProductionId, setRemoveProductionId] = useState<string>("");
+  const [displayConfirmationModal, setDisplayConfirmationModal] =
+    useState<boolean>(false);
   const [lineName, setLineName] = useState<string>("");
   const [addLineOpen, setAddLineOpen] = useState<boolean>(false);
 
@@ -54,13 +58,13 @@ export const ManageProductionButtons: FC<ManageProductionButtonsProps> = (
     loading: createLineLoading,
     successfullCreate: successfullCreateLine,
     error: lineCreateError,
-  } = useAddProductionLine(parseInt(productionId, 10), lineName);
+  } = useAddProductionLine(production.productionId, lineName);
 
   const {
     loading: deleteProductionLoading,
     successfullDelete: successfullDeleteProduction,
     error: productionDeleteError,
-  } = useDeleteProduction(parseInt(removeProductionId, 10));
+  } = useDeleteProduction(removeProductionId);
 
   useEffect(() => {
     if (successfullDeleteProduction) {
@@ -106,7 +110,7 @@ export const ManageProductionButtons: FC<ManageProductionButtonsProps> = (
         <DeleteButton
           type="button"
           disabled={isDeleteProductionDisabled}
-          onClick={() => setRemoveProductionId(productionId)}
+          onClick={() => setDisplayConfirmationModal(true)}
         >
           Remove Production
           {deleteProductionLoading && (
@@ -154,6 +158,14 @@ export const ManageProductionButtons: FC<ManageProductionButtonsProps> = (
             )}
           </CreateLineButton>
         </AddLineSectionForm>
+      )}
+      {displayConfirmationModal && (
+        <ConfirmationModal
+          title="Delete Production"
+          description={`You are about to delete the production: ${production.name}. Are you sure?`}
+          onCancel={() => setDisplayConfirmationModal(false)}
+          onConfirm={() => setRemoveProductionId(production.productionId)}
+        />
       )}
     </>
   );

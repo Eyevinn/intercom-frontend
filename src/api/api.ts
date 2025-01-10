@@ -105,7 +105,7 @@ export const API = {
         },
       })
     ),
-  deleteProduction: (id: number): Promise<string> =>
+  deleteProduction: (id: string): Promise<string> =>
     handleFetchRequest<string>(
       fetch(`${API_URL}production/${id}`, {
         method: "DELETE",
@@ -132,7 +132,7 @@ export const API = {
         },
       })
     ),
-  addProductionLine: (productionId: number, name: string): Promise<TLine> =>
+  addProductionLine: (productionId: string, name: string): Promise<TLine> =>
     handleFetchRequest<TLine>(
       fetch(`${API_URL}production/${productionId}/line`, {
         method: "POST",
@@ -146,8 +146,8 @@ export const API = {
       })
     ),
   deleteProductionLine: (
-    productionId: number,
-    lineId: number
+    productionId: string,
+    lineId: string
   ): Promise<string> =>
     handleFetchRequest<string>(
       fetch(`${API_URL}production/${productionId}/line/${lineId}`, {

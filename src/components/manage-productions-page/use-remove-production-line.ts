@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import { API } from "../../api/api";
 
 type TUseDeleteProductionLine = (
-  productionId: number | null,
-  lineId: number | null
+  productionId: string | null,
+  lineId: string | null
 ) => {
   loading: boolean;
   successfullDelete: boolean;

@@ -8,6 +8,7 @@ import { ProductionsList } from "../production-list/productions-list.tsx";
 import { PageHeader } from "../page-layout/page-header.tsx";
 import { AddIcon, EditIcon } from "../../assets/icons/icon.tsx";
 import { PrimaryButton } from "./form-elements.tsx";
+import { isMobile } from "../../bowser.ts";
 
 const HeaderButton = styled(PrimaryButton)`
   margin-left: 1rem;
@@ -67,18 +68,20 @@ export const ProductionsListContainer = () => {
   return (
     <>
       <PageHeader title="Productions" loading={showRefreshing}>
-        <>
-          {!!productions?.productions.length && (
-            <HeaderButton onClick={goToManage}>
-              <HeaderButtonText>Manage</HeaderButtonText>
-              <EditIcon />
+        {!isMobile && (
+          <>
+            {!!productions?.productions.length && (
+              <HeaderButton onClick={goToManage}>
+                <HeaderButtonText>Manage</HeaderButtonText>
+                <EditIcon />
+              </HeaderButton>
+            )}
+            <HeaderButton onClick={goToCreate}>
+              <HeaderButtonText>Create</HeaderButtonText>
+              <AddIcon />
             </HeaderButton>
-          )}
-          <HeaderButton onClick={goToCreate}>
-            <HeaderButtonText>Create</HeaderButtonText>
-            <AddIcon />
-          </HeaderButton>
-        </>
+          </>
+        )}
       </PageHeader>
       {!!productions?.productions.length && (
         <ProductionsList productions={productions.productions} error={error} />
