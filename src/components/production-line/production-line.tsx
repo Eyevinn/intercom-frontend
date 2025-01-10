@@ -349,6 +349,22 @@ export const ProductionLine = ({
   );
 
   useEffect(() => {
+    if (line?.programOutputLine && joinProductionOptions?.isProgramUser) {
+      muteOutput();
+    } else if (
+      line?.programOutputLine &&
+      !joinProductionOptions?.isProgramUser
+    ) {
+      muteInput(true);
+    }
+  }, [
+    line?.programOutputLine,
+    joinProductionOptions?.isProgramUser,
+    muteInput,
+    muteOutput,
+  ]);
+
+  useEffect(() => {
     let volumeReductionTimeout: NodeJS.Timeout;
     let volumeIncreaseTimeout: NodeJS.Timeout;
     const volumeChangeFactor = 0.2;
@@ -588,17 +604,23 @@ export const ProductionLine = ({
                   </LongPressWrapper>
                 )}
 
-              {deviceLabels?.inputLabel && (
-                <TempDiv>
-                  <strong>Audio Input:</strong> {deviceLabels.inputLabel}
-                </TempDiv>
-              )}
+              {deviceLabels?.inputLabel &&
+                (line?.programOutputLine
+                  ? joinProductionOptions.isProgramUser
+                  : !joinProductionOptions.isProgramUser) && (
+                  <TempDiv>
+                    <strong>Audio Input:</strong> {deviceLabels.inputLabel}
+                  </TempDiv>
+                )}
 
-              {deviceLabels?.outputLabel && (
-                <TempDiv>
-                  <strong>Audio Output:</strong> {deviceLabels.outputLabel}
-                </TempDiv>
-              )}
+              {deviceLabels?.outputLabel &&
+                !(
+                  line?.programOutputLine && joinProductionOptions.isProgramUser
+                ) && (
+                  <TempDiv>
+                    <strong>Audio Output:</strong> {deviceLabels.outputLabel}
+                  </TempDiv>
+                )}
               <FlexButtonWrapper>
                 <PrimaryButton
                   type="button"
@@ -609,42 +631,57 @@ export const ProductionLine = ({
               </FlexButtonWrapper>
               {showDeviceSettings && devices && (
                 <FormContainer>
-                  <FormLabel>
-                    <DecorativeLabel>Input</DecorativeLabel>
-                    <FormSelect
-                      // eslint-disable-next-line
-                      {...register(`audioinput`)}
-                    >
-                      {devices.input && devices.input.length > 0 ? (
-                        devices.input.map((device) => (
-                          <option key={device.deviceId} value={device.deviceId}>
-                            {device.label}
-                          </option>
-                        ))
-                      ) : (
-                        <option value="no-device">No device available</option>
-                      )}
-                    </FormSelect>
-                  </FormLabel>
-                  <FormLabel>
-                    <DecorativeLabel>Output</DecorativeLabel>
-                    {devices.output && devices.output.length > 0 ? (
+                  {(line?.programOutputLine
+                    ? joinProductionOptions.isProgramUser
+                    : !joinProductionOptions.isProgramUser) && (
+                    <FormLabel>
+                      <DecorativeLabel>Input</DecorativeLabel>
                       <FormSelect
                         // eslint-disable-next-line
-                        {...register(`audiooutput`)}
+                        {...register(`audioinput`)}
                       >
-                        {devices.output.map((device) => (
-                          <option key={device.deviceId} value={device.deviceId}>
-                            {device.label}
-                          </option>
-                        ))}
+                        {devices.input && devices.input.length > 0 ? (
+                          devices.input.map((device) => (
+                            <option
+                              key={device.deviceId}
+                              value={device.deviceId}
+                            >
+                              {device.label}
+                            </option>
+                          ))
+                        ) : (
+                          <option value="no-device">No device available</option>
+                        )}
                       </FormSelect>
-                    ) : (
-                      <StyledWarningMessage>
-                        Controlled by operating system
-                      </StyledWarningMessage>
-                    )}
-                  </FormLabel>
+                    </FormLabel>
+                  )}
+                  {!(
+                    line?.programOutputLine &&
+                    joinProductionOptions.isProgramUser
+                  ) && (
+                    <FormLabel>
+                      <DecorativeLabel>Output</DecorativeLabel>
+                      {devices.output && devices.output.length > 0 ? (
+                        <FormSelect
+                          // eslint-disable-next-line
+                          {...register(`audiooutput`)}
+                        >
+                          {devices.output.map((device) => (
+                            <option
+                              key={device.deviceId}
+                              value={device.deviceId}
+                            >
+                              {device.label}
+                            </option>
+                          ))}
+                        </FormSelect>
+                      ) : (
+                        <StyledWarningMessage>
+                          Controlled by operating system
+                        </StyledWarningMessage>
+                      )}
+                    </FormLabel>
+                  )}
                   {isBrowserFirefox && !isMobile && (
                     <StyledWarningMessage>
                       If a new device has been added Firefox needs the
