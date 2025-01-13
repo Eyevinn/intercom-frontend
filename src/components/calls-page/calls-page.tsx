@@ -176,7 +176,7 @@ export const CallsPage = () => {
         {!isEmpty && (
           <MuteAllCallsBtn
             type="button"
-            className={isMasterInputMuted ? "mute" : ""}
+            className={!isMasterInputMuted ? "mute" : ""}
             onClick={() => setIsMasterInputMuted(!isMasterInputMuted)}
           >
             <MuteAllCallsBtnText>
