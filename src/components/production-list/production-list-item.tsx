@@ -7,7 +7,7 @@ import { useGlobalState } from "../../global-state/context-provider";
 import {
   ChevronDownIcon,
   ChevronUpIcon,
-  PersonIcon,
+  UserIcon,
   UsersIcon,
 } from "../../assets/icons/icon";
 import { SecondaryButton } from "../landing-page/form-elements";
@@ -61,11 +61,10 @@ const HeaderTexts = styled.div`
   }
 `;
 
-const HeaderIcon = styled.div`
-  display: flex;
-  align-items: center;
+const HeaderIcon = styled.svg`
   height: 2rem;
   width: 2rem;
+  fill: #d6d3d1;
 `;
 
 const ProductionLines = styled.div`
@@ -173,6 +172,8 @@ export const ProductionsListItem = ({
             connectionState: null,
             audioElements: null,
             sessionId: null,
+            dataChannel: null,
+            isRemotelyMuted: false,
             hotkeys: {
               muteHotkey: "m",
               speakerHotkey: "n",
@@ -217,7 +218,7 @@ export const ProductionsListItem = ({
                     <LineBlockParticipant
                       key={`participant-${participant.sessionId}`}
                     >
-                      <PersonIcon />
+                      <UserIcon />
                       <PersonText>{participant.name}</PersonText>
                     </LineBlockParticipant>
                   ))}

@@ -1,7 +1,7 @@
 import styled from "@emotion/styled";
 import { DisplayContainerHeader } from "../landing-page/display-container-header.tsx";
 import { TParticipant } from "./types.ts";
-import { UserIcon } from "../../assets/icons/icon.tsx";
+import { MicMuted, UserIcon } from "../../assets/icons/icon.tsx";
 
 const Container = styled.div`
   width: 100%;
@@ -26,11 +26,12 @@ type TIndicatorProps = {
   isActive: boolean;
 };
 
-const User = styled.div<TUserProps>`
+const UserWrapper = styled.div<TUserProps>`
   display: flex;
   align-items: center;
-  background: #1a1a1a;
+  justify-content: space-between;
   padding: 1rem;
+  background: #1a1a1a;
   color: #ddd;
   border: transparent;
   border-bottom: 0.1rem solid #464646;
@@ -44,7 +45,17 @@ const User = styled.div<TUserProps>`
     border-bottom: 0;
   }
 
+  svg {
+    fill: #4d4d4d;
+    width: 2rem;
+  }
+
   ${({ isYou }) => (isYou ? `background: #353434;` : "")}
+`;
+
+const User = styled.div`
+  display: flex;
+  align-items: center;
 `;
 
 const IsTalkingIndicator = styled.div<TIsTalkingIndicator>`
@@ -75,8 +86,14 @@ const OnlineIndicator = styled.div<TIndicatorProps>`
   ${({ isActive }) => `background: ${isActive ? "#7be27b;" : "#ebca6a;"}`}
 `;
 
-const IconWrapper = styled.div`
-  width: 2rem;
+const MuteParticipantButton = styled.button`
+  width: 3rem;
+  padding: 0.3rem;
+  margin: 0;
+  background: #302b2b;
+  border: 0.1rem solid #707070;
+  border-radius: 0.4rem;
+  cursor: pointer;
 `;
 
 type TUserListOptions = {
@@ -84,6 +101,9 @@ type TUserListOptions = {
   sessionId: string | null;
   dominantSpeaker: string | null;
   audioLevelAboveThreshold: boolean;
+  setConfirmModalOpen: (value: boolean) => void;
+  setUserId: (value: string) => void;
+  setUserName: (value: string) => void;
 };
 
 export const UserList = ({
@@ -91,6 +111,9 @@ export const UserList = ({
   sessionId,
   dominantSpeaker,
   audioLevelAboveThreshold,
+  setConfirmModalOpen,
+  setUserId,
+  setUserName,
 }: TUserListOptions) => {
   if (!participants) return null;
 
@@ -98,22 +121,36 @@ export const UserList = ({
     <Container>
       <DisplayContainerHeader>Participants</DisplayContainerHeader>
       <ListWrapper>
-        {participants.map((p) => (
-          <User key={p.sessionId} isYou={p.sessionId === sessionId}>
-            <IsTalkingIndicator
-              isTalking={
-                audioLevelAboveThreshold && p.endpointId === dominantSpeaker
-              }
-            >
-              <OnlineIndicator isActive={p.isActive}>
-                <IconWrapper>
-                  <UserIcon />
-                </IconWrapper>
-              </OnlineIndicator>
-            </IsTalkingIndicator>
-            {p.name} {p.isActive ? "" : "(inactive)"}
-          </User>
-        ))}
+        {participants.map((p) => {
+          const isYou = p.sessionId === sessionId;
+          return (
+            <UserWrapper key={p.sessionId} isYou={isYou}>
+              <User>
+                <IsTalkingIndicator
+                  isTalking={
+                    audioLevelAboveThreshold && p.endpointId === dominantSpeaker
+                  }
+                >
+                  <OnlineIndicator isActive={p.isActive}>
+                    <UserIcon />
+                  </OnlineIndicator>
+                </IsTalkingIndicator>
+                {p.name} {p.isActive ? "" : "(inactive)"}
+              </User>
+              {!isYou && p.isActive && (
+                <MuteParticipantButton
+                  onClick={() => {
+                    setUserId(p.endpointId);
+                    setUserName(p.name);
+                    setConfirmModalOpen(true);
+                  }}
+                >
+                  <MicMuted />
+                </MuteParticipantButton>
+              )}
+            </UserWrapper>
+          );
+        })}
       </ListWrapper>
     </Container>
   );

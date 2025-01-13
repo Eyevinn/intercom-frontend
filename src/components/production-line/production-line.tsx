@@ -102,6 +102,22 @@ const UserControlBtn = styled(ActionButton)`
   &:disabled {
     background: rgba(50, 56, 59, 0.5);
   }
+
+  svg {
+    width: 2rem;
+  }
+
+  &.mute {
+    svg {
+      fill: #f96c6c;
+    }
+  }
+
+  &.unmuted {
+    svg {
+      fill: #6fd84f;
+    }
+  }
 `;
 
 const LongPressWrapper = styled.div`
@@ -174,6 +190,10 @@ export const ProductionLine = ({
   const [value, setValue] = useState(0.75);
   const [hasReduced, setHasReduced] = useState(false);
   const [initialVolume, setInitialVolume] = useState<number | null>(null);
+  const [confirmModalOpen, setConfirmModalOpen] = useState(false);
+  const [muteError, setMuteError] = useState(false);
+  const [userId, setUserId] = useState("");
+  const [userName, setUserName] = useState("");
   const {
     joinProductionOptions,
     dominantSpeaker,
@@ -182,6 +202,8 @@ export const ProductionLine = ({
     audioElements,
     sessionId,
     hotkeys: savedHotkeys,
+    dataChannel,
+    isRemotelyMuted,
   } = callState;
 
   const {
@@ -276,9 +298,32 @@ export const ProductionLine = ({
         });
         setIsInputMuted(mute);
       }
+      if (mute) {
+        dispatch({
+          type: "UPDATE_CALL",
+          payload: {
+            id,
+            updates: {
+              isRemotelyMuted: false,
+            },
+          },
+        });
+      }
     },
-    [inputAudioStream]
+    [dispatch, id, inputAudioStream]
   );
+
+  useEffect(() => {
+    if (!confirmModalOpen) {
+      setMuteError(false);
+    }
+  }, [confirmModalOpen]);
+
+  useEffect(() => {
+    if (isRemotelyMuted) {
+      muteInput(true);
+    }
+  }, [isRemotelyMuted, muteInput]);
 
   const { playEnterSound, playExitSound } = useAudioCue();
 
@@ -317,7 +362,18 @@ export const ProductionLine = ({
       });
       setIsInputMuted(masterInputMute);
     }
-  }, [inputAudioStream, masterInputMute]);
+    if (masterInputMute) {
+      dispatch({
+        type: "UPDATE_CALL",
+        payload: {
+          id,
+          updates: {
+            isRemotelyMuted: false,
+          },
+        },
+      });
+    }
+  }, [dispatch, id, inputAudioStream, masterInputMute]);
 
   useEffect(() => {
     if (connectionState === "connected") {
@@ -537,6 +593,25 @@ export const ProductionLine = ({
     }
   };
 
+  const muteParticipant = () => {
+    const msg = JSON.stringify({
+      type: "EndpointMessage",
+      to: userId,
+      payload: {
+        muteParticipant: "mute",
+      },
+    });
+
+    if (dataChannel && dataChannel.readyState === "open") {
+      dataChannel.send(msg);
+      setMuteError(false);
+      setConfirmModalOpen(false);
+    } else {
+      setMuteError(true);
+      console.error("Data channel is not open.");
+    }
+  };
+
   // TODO detect if browser back button is pressed and run exit();
 
   return (
@@ -631,22 +706,22 @@ export const ProductionLine = ({
                 {!(
                   line?.programOutputLine && joinProductionOptions.isProgramUser
                 ) && (
-                  <FlexButtonWrapper className="first">
-                    <UserControlBtn
-                      type="button"
-                      onClick={() => muteOutput()}
-                      disabled={value === 0}
-                    >
-                      <ButtonIcon>
-                        {isOutputMuted || value === 0 ? (
-                          <SpeakerOff />
-                        ) : (
-                          <SpeakerOn />
-                        )}
-                      </ButtonIcon>
-                    </UserControlBtn>
-                  </FlexButtonWrapper>
-                )}
+                <FlexButtonWrapper className="first">
+                  <UserControlBtn
+                    type="button"
+                    className={isOutputMuted ? "mute" : "unmuted"}
+                    onClick={() => muteOutput()}
+                    disabled={value === 0}
+                  >
+                    <ButtonIcon>
+                      {isOutputMuted || value === 0 ? (
+                        <SpeakerOff />
+                      ) : (
+                        <SpeakerOn />
+                      )}
+                    </ButtonIcon>
+                  </UserControlBtn>
+                </FlexButtonWrapper>
                 {inputAudioStream &&
                   inputAudioStream !== "no-device" &&
                   (line?.programOutputLine
@@ -794,7 +869,29 @@ export const ProductionLine = ({
                 participants={line.participants}
                 dominantSpeaker={dominantSpeaker}
                 audioLevelAboveThreshold={audioLevelAboveThreshold}
+                setConfirmModalOpen={setConfirmModalOpen}
+                setUserId={setUserId}
+                setUserName={setUserName}
               />
+            )}
+            {confirmModalOpen && (
+              <Modal onClose={() => setConfirmModalOpen(false)}>
+                <DisplayContainerHeader>Confirm</DisplayContainerHeader>
+                <ModalConfirmationText>
+                  {muteError
+                    ? "Something went wrong, Please try again"
+                    : `Are you sure you want to mute ${userName}?`}
+                </ModalConfirmationText>
+                <ModalConfirmationText className="bold">
+                  {muteError
+                    ? ""
+                    : `This will mute ${userName} for everyone in the call.`}
+                </ModalConfirmationText>
+                <VerifyDecision
+                  confirm={muteParticipant}
+                  abort={() => setConfirmModalOpen(false)}
+                />
+              </Modal>
             )}
           </ListWrapper>
         </FlexContainer>
