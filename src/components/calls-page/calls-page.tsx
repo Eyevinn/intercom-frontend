@@ -85,11 +85,23 @@ export const CallsPage = () => {
   const [isMasterInputMuted, setIsMasterInputMuted] = useState(true);
   const [customGlobalMute, setCustomGlobalMute] = useState("p");
   const [{ calls, selectedProductionId }, dispatch] = useGlobalState();
+  const [shouldReduceVolume, setShouldReduceVolume] = useState(false);
+
   const { productionId: paramProductionId, lineId: paramLineId } = useParams();
   const navigate = useNavigate();
 
   const isEmpty = Object.values(calls).length === 0;
   const isSingleCall = Object.values(calls).length === 1;
+
+  useEffect(() => {
+    const reduceVolume = Object.entries(calls).some(
+      ([, callState]) =>
+        !callState.joinProductionOptions?.lineUsedForProgramOutput &&
+        callState.audioLevelAboveThreshold
+    );
+
+    setShouldReduceVolume(reduceVolume);
+  }, [calls]);
 
   useEffect(() => {
     if (selectedProductionId) {
@@ -182,6 +194,7 @@ export const CallsPage = () => {
               <CallContainer key={callId}>
                 <ProductionLine
                   id={callId}
+                  shouldReduceVolume={shouldReduceVolume}
                   callState={callState}
                   isSingleCall={isSingleCall}
                   customGlobalMute={customGlobalMute}

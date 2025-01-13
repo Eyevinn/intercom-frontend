@@ -7,6 +7,8 @@ export type TJoinProductionOptions = {
   audioinput?: string;
   // Not all devices allow choosing output
   audiooutput?: string;
+  lineUsedForProgramOutput: boolean;
+  isProgramUser: boolean;
 };
 
 export type Hotkeys = {
@@ -29,6 +31,7 @@ export type TLine = {
   name: string;
   id: string;
   participants: TParticipant[];
+  programOutputLine?: boolean;
 };
 
 export type TBasicProduction = {

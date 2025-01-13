@@ -11,6 +11,7 @@ import {
   UsersIcon,
 } from "../../assets/icons/icon";
 import { SecondaryButton } from "../landing-page/form-elements";
+import { ProgramOutputModal } from "../program-output-modal/program-output-modal";
 
 const ProductionItemWrapper = styled.div`
   text-align: start;
@@ -127,6 +128,9 @@ export const ProductionsListItem = ({
 }: ProductionsListItemProps) => {
   const [{ userSettings }, dispatch] = useGlobalState();
   const [open, setOpen] = useState<boolean>(false);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [modalLineId, setModalLineId] = useState<string | null>(null);
+  const [isProgramUser, setIsProgramUser] = useState<boolean>(false);
   const navigate = useNavigate();
 
   const totalParticipants = useMemo(() => {
@@ -137,6 +141,10 @@ export const ProductionsListItem = ({
     );
   }, [production]);
 
+  const getLineByLineId = (lineId: string) => {
+    return production.lines?.find((l) => l.id === lineId);
+  };
+
   const goToProduction = (lineId: string) => {
     if (userSettings?.username) {
       const payload = {
@@ -145,6 +153,9 @@ export const ProductionsListItem = ({
         username: userSettings.username,
         audioinput: userSettings?.audioinput,
         audiooutput: userSettings?.audiooutput,
+        lineUsedForProgramOutput:
+          getLineByLineId(lineId)?.programOutputLine || false,
+        isProgramUser,
       };
 
       const uuid = globalThis.crypto.randomUUID();
@@ -215,10 +226,27 @@ export const ProductionsListItem = ({
               </LineBlockTexts>
               <SecondaryButton
                 type="button"
-                onClick={() => goToProduction(l.id)}
+                onClick={() => {
+                  if (l.programOutputLine) {
+                    setModalLineId(l.id);
+                    setIsModalOpen(true);
+                  } else {
+                    goToProduction(l.id);
+                  }
+                }}
               >
                 Join
               </SecondaryButton>
+              {isModalOpen && modalLineId && (
+                <ProgramOutputModal
+                  onClose={() => setIsModalOpen(false)}
+                  onJoin={() => {
+                    setIsModalOpen(false);
+                    goToProduction(modalLineId);
+                  }}
+                  setIsProgramUser={setIsProgramUser}
+                />
+              )}
             </Lineblock>
           ))}
         </InnerDiv>

@@ -1,4 +1,9 @@
-import { SubmitHandler, useFieldArray, useForm } from "react-hook-form";
+import {
+  Controller,
+  SubmitHandler,
+  useFieldArray,
+  useForm,
+} from "react-hook-form";
 import styled from "@emotion/styled";
 import { useCallback, useEffect, useState, useRef } from "react";
 import { ErrorMessage } from "@hookform/error-message";
@@ -18,6 +23,7 @@ import { darkText, errorColour } from "../../css-helpers/defaults";
 import { RemoveButton } from "../remove-button/remove-button";
 import { LineTable } from "./line-table";
 import { isMobile } from "../../bowser";
+import { Checkbox } from "../checkbox/checkbox";
 
 type TManageLines = {
   production: TProduction;
@@ -25,12 +31,32 @@ type TManageLines = {
 };
 
 type FormValues = {
-  lines: { name: string }[];
+  lines: { name: string; programOutputLine: boolean }[];
 };
 
 const NewLineWrapper = styled.div`
-  position: relative;
   width: ${isMobile ? "90%" : ""};
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+`;
+
+const InputContainer = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex: 1;
+  gap: 1rem;
+`;
+
+const RemoveButtonContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+  height: 100%;
+  margin-bottom: 1.75rem;
+  margin-left: 1rem;
 `;
 
 const ButtonWrapper = styled.div`
@@ -63,6 +89,11 @@ const ButtonContainer = styled.div`
   gap: 1rem;
   flex-direction: row;
   justify-content: space-between;
+`;
+
+const CheckboxWrapper = styled.div`
+  margin-bottom: 3rem;
+  margin-top: 0.5rem;
 `;
 
 export const ManageLines = ({
@@ -169,26 +200,45 @@ export const ManageLines = ({
         <div key={field.id} ref={inputRef}>
           <FormLabel>
             <NewLineWrapper>
-              <FormInput
-                // eslint-disable-next-line
-                {...register(`lines.${index}.name`, {
-                  required: "Line name is required",
-                  minLength: 1,
-                })}
-                className="additional-line"
-                autoComplete="off"
-                placeholder="Line Name"
-              />
-              {index === fields.length - 1 && (
-                <RemoveLineButton
-                  isCreatingLine
-                  removeLine={() => {
-                    setCreatingLineError(false);
-                    remove(0);
-                  }}
+              <InputContainer>
+                <FormInput
+                  // eslint-disable-next-line
+                  {...register(`lines.${index}.name`, {
+                    required: "Line name is required",
+                    minLength: 1,
+                  })}
+                  className="additional-line"
+                  autoComplete="off"
+                  placeholder="Line Name"
                 />
-              )}
+                <RemoveButtonContainer>
+                  {index === fields.length - 1 && (
+                    <RemoveLineButton
+                      isCreatingLine
+                      removeLine={() => {
+                        setCreatingLineError(false);
+                        remove(index);
+                      }}
+                    />
+                  )}
+                </RemoveButtonContainer>
+              </InputContainer>
             </NewLineWrapper>
+            <CheckboxWrapper>
+              <Controller
+                name={`lines.${index}.programOutputLine`}
+                control={control}
+                render={({ field: controllerField }) => (
+                  <Checkbox
+                    label="This line will be used for a program output"
+                    checked={controllerField.value}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      controllerField.onChange(e.target.checked)
+                    }
+                  />
+                )}
+              />
+            </CheckboxWrapper>
           </FormLabel>
           <ErrorMessage
             errors={errors}
@@ -239,7 +289,7 @@ export const ManageLines = ({
             disabled={fields.length !== 0}
             onClick={() => {
               setVerifyRemove(null);
-              append({ name: "" });
+              append({ name: "", programOutputLine: false });
             }}
           >
             Create Line

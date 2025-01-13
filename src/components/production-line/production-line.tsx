@@ -11,6 +11,7 @@ import {
   MicUnmuted,
   SpeakerOff,
   SpeakerOn,
+  TVIcon,
 } from "../../assets/icons/icon.tsx";
 import {
   ActionButton,
@@ -62,6 +63,7 @@ const HeaderWrapper = styled.div`
   padding: 2rem;
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
 `;
 
 const SmallText = styled.span`
@@ -126,6 +128,7 @@ const LongPressWrapper = styled.div`
 const ButtonWrapper = styled.div`
   display: flex;
   justify-content: space-between;
+  align-items: center;
   margin: 0 2rem 2rem 1rem;
 `;
 
@@ -154,12 +157,19 @@ const ConnectionErrorWrapper = styled(FlexContainer)`
   padding-top: 12rem;
 `;
 
+const IconWrapper = styled.div`
+  width: 5rem;
+  height: 5rem;
+  margin-left: 2rem;
+`;
+
 type TProductionLine = {
   id: string;
   callState: CallState;
   isSingleCall: boolean;
   customGlobalMute: string;
   masterInputMute: boolean;
+  shouldReduceVolume: boolean;
 };
 
 export const ProductionLine = ({
@@ -168,6 +178,7 @@ export const ProductionLine = ({
   isSingleCall,
   customGlobalMute,
   masterInputMute,
+  shouldReduceVolume,
 }: TProductionLine) => {
   const { productionId: paramProductionId, lineId: paramLineId } = useParams();
   const [{ devices }, dispatch] = useGlobalState();
@@ -177,6 +188,8 @@ export const ProductionLine = ({
   const [showDeviceSettings, setShowDeviceSettings] = useState(false);
   const [confirmExitModalOpen, setConfirmExitModalOpen] = useState(false);
   const [value, setValue] = useState(0.75);
+  const [hasReduced, setHasReduced] = useState(false);
+  const [initialVolume, setInitialVolume] = useState<number | null>(null);
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [muteError, setMuteError] = useState(false);
   const [userId, setUserId] = useState("");
@@ -222,6 +235,17 @@ export const ProductionLine = ({
     audioInputId: joinProductionOptions?.audioinput ?? null,
     audioOutputId: joinProductionOptions?.audiooutput ?? null,
   });
+
+  useEffect(() => {
+    if (audioElements) {
+      audioElements.forEach((audioElement) => {
+        if (audioElement.volume !== 0.75) {
+          // eslint-disable-next-line no-param-reassign
+          audioElement.volume = 0.75;
+        }
+      });
+    }
+  }, [audioElements]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = parseFloat(e.target.value);
@@ -382,6 +406,129 @@ export const ProductionLine = ({
   );
 
   useEffect(() => {
+    if (line?.programOutputLine && joinProductionOptions?.isProgramUser) {
+      muteOutput();
+    } else if (
+      line?.programOutputLine &&
+      !joinProductionOptions?.isProgramUser
+    ) {
+      muteInput(true);
+    }
+  }, [
+    line?.programOutputLine,
+    joinProductionOptions?.isProgramUser,
+    muteInput,
+    muteOutput,
+  ]);
+
+  useEffect(() => {
+    let volumeReductionTimeout: NodeJS.Timeout;
+    let intermediateIncreaseTimeout1: NodeJS.Timeout;
+    let intermediateIncreaseTimeout2: NodeJS.Timeout;
+    let finalIncreaseTimeout: NodeJS.Timeout;
+
+    // Reduce volume by 80%
+    const volumeChangeFactor = 0.2;
+
+    // Steps for increasing volume back to original level
+    const increaseStep1 = 0.25;
+    const increaseStep2 = 0.5;
+
+    if (
+      shouldReduceVolume &&
+      line?.programOutputLine &&
+      !hasReduced &&
+      audioElements
+    ) {
+      volumeReductionTimeout = setTimeout(() => {
+        const currentVolume = audioElements[0].volume;
+        setInitialVolume(currentVolume);
+        setValue((prevValue) => prevValue * volumeChangeFactor);
+        setHasReduced(true);
+
+        audioElements?.forEach((audioElement) => {
+          // eslint-disable-next-line no-param-reassign
+          audioElement.volume *= volumeChangeFactor;
+        });
+      }, 1000);
+
+      return () => clearTimeout(volumeReductionTimeout);
+    }
+
+    if (!shouldReduceVolume && line?.programOutputLine && hasReduced) {
+      if (initialVolume === null) {
+        return undefined;
+      }
+
+      const reductionAmount = 1 - volumeChangeFactor;
+
+      intermediateIncreaseTimeout1 = setTimeout(() => {
+        setValue(
+          (prevValue) =>
+            prevValue + increaseStep1 * initialVolume * reductionAmount
+        );
+
+        audioElements?.forEach((audioElement) => {
+          // eslint-disable-next-line no-param-reassign
+          audioElement.volume +=
+            increaseStep1 * initialVolume * reductionAmount;
+        });
+      }, 2000);
+
+      intermediateIncreaseTimeout2 = setTimeout(() => {
+        setValue(
+          (prevValue) =>
+            prevValue + increaseStep2 * initialVolume * reductionAmount
+        );
+
+        audioElements?.forEach((audioElement) => {
+          // eslint-disable-next-line no-param-reassign
+          audioElement.volume +=
+            increaseStep2 * initialVolume * reductionAmount;
+        });
+      }, 2500);
+
+      finalIncreaseTimeout = setTimeout(() => {
+        setValue(
+          (prevValue) =>
+            prevValue +
+            (1 - increaseStep1 - increaseStep2) *
+              initialVolume *
+              reductionAmount
+        );
+        setHasReduced(false);
+
+        audioElements?.forEach((audioElement) => {
+          // eslint-disable-next-line no-param-reassign
+          audioElement.volume +=
+            (1 - increaseStep1 - increaseStep2) *
+            initialVolume *
+            reductionAmount;
+        });
+      }, 3000);
+
+      return () => {
+        clearTimeout(intermediateIncreaseTimeout1);
+        clearTimeout(intermediateIncreaseTimeout2);
+        clearTimeout(finalIncreaseTimeout);
+      };
+    }
+
+    return () => {
+      clearTimeout(volumeReductionTimeout);
+      clearTimeout(intermediateIncreaseTimeout1);
+      clearTimeout(intermediateIncreaseTimeout2);
+      clearTimeout(finalIncreaseTimeout);
+    };
+  }, [
+    shouldReduceVolume,
+    hasReduced,
+    line?.programOutputLine,
+    audioElements,
+    initialVolume,
+  ]);
+
+  useEffect(() => {
     if (!fetchProductionError) return;
 
     dispatch({
@@ -473,6 +620,11 @@ export const ProductionLine = ({
         {!isSingleCall && (
           <ButtonWrapper>
             <ExitCallButton resetOnExit={() => setConfirmExitModalOpen(true)} />
+            {line?.programOutputLine && (
+              <IconWrapper>
+                <TVIcon />
+              </IconWrapper>
+            )}
             {confirmExitModalOpen && (
               <Modal onClose={() => setConfirmExitModalOpen(false)}>
                 <DisplayContainerHeader>Confirm</DisplayContainerHeader>
@@ -540,61 +692,81 @@ export const ProductionLine = ({
               }}
             >
               <DisplayContainerHeader>Controls</DisplayContainerHeader>
-              {!isIOSMobile && !isIpad && (
-                <VolumeSlider
-                  value={value}
-                  handleInputChange={handleInputChange}
-                />
-              )}
+              {!isIOSMobile &&
+                !isIpad &&
+                !(
+                  line?.programOutputLine && joinProductionOptions.isProgramUser
+                ) && (
+                  <VolumeSlider
+                    value={value}
+                    handleInputChange={handleInputChange}
+                  />
+                )}
               <FlexContainer>
-                <FlexButtonWrapper className="first">
-                  <UserControlBtn
-                    type="button"
-                    className={isOutputMuted ? "mute" : "unmuted"}
-                    onClick={() => muteOutput()}
-                    disabled={value === 0}
-                  >
-                    <ButtonIcon>
-                      {isOutputMuted || value === 0 ? (
-                        <SpeakerOff />
-                      ) : (
-                        <SpeakerOn />
-                      )}
-                    </ButtonIcon>
-                  </UserControlBtn>
-                </FlexButtonWrapper>
-                {inputAudioStream && inputAudioStream !== "no-device" && (
-                  <FlexButtonWrapper className="last">
+                {!(
+                  line?.programOutputLine && joinProductionOptions.isProgramUser
+                ) && (
+                  <FlexButtonWrapper className="first">
                     <UserControlBtn
                       type="button"
-                      className={isInputMuted ? "mute" : "unmuted"}
-                      onClick={() => muteInput(!isInputMuted)}
+                      className={isOutputMuted ? "mute" : "unmuted"}
+                      onClick={() => muteOutput()}
+                      disabled={value === 0}
                     >
                       <ButtonIcon>
-                        {isInputMuted ? <MicMuted /> : <MicUnmuted />}
+                        {isOutputMuted || value === 0 ? (
+                          <SpeakerOff />
+                        ) : (
+                          <SpeakerOn />
+                        )}
                       </ButtonIcon>
                     </UserControlBtn>
                   </FlexButtonWrapper>
                 )}
+
+                {inputAudioStream &&
+                  inputAudioStream !== "no-device" &&
+                  (line?.programOutputLine
+                    ? joinProductionOptions?.isProgramUser
+                    : !joinProductionOptions.isProgramUser) && (
+                    <FlexButtonWrapper className="last">
+                      <UserControlBtn
+                        type="button"
+                        onClick={() => muteInput(!isInputMuted)}
+                      >
+                        <ButtonIcon>
+                          {isInputMuted ? <MicMuted /> : <MicUnmuted />}
+                        </ButtonIcon>
+                      </UserControlBtn>
+                    </FlexButtonWrapper>
+                  )}
               </FlexContainer>
 
-              {inputAudioStream && inputAudioStream !== "no-device" && (
-                <LongPressWrapper>
-                  <LongPressToTalkButton muteInput={muteInput} />
-                </LongPressWrapper>
-              )}
+              {inputAudioStream &&
+                inputAudioStream !== "no-device" &&
+                !line?.programOutputLine && (
+                  <LongPressWrapper>
+                    <LongPressToTalkButton muteInput={muteInput} />
+                  </LongPressWrapper>
+                )}
 
-              {deviceLabels?.inputLabel && (
-                <TempDiv>
-                  <strong>Audio Input:</strong> {deviceLabels.inputLabel}
-                </TempDiv>
-              )}
+              {deviceLabels?.inputLabel &&
+                (line?.programOutputLine
+                  ? joinProductionOptions.isProgramUser
+                  : !joinProductionOptions.isProgramUser) && (
+                  <TempDiv>
+                    <strong>Audio Input:</strong> {deviceLabels.inputLabel}
+                  </TempDiv>
+                )}
 
-              {deviceLabels?.outputLabel && (
-                <TempDiv>
-                  <strong>Audio Output:</strong> {deviceLabels.outputLabel}
-                </TempDiv>
-              )}
+              {deviceLabels?.outputLabel &&
+                !(
+                  line?.programOutputLine && joinProductionOptions.isProgramUser
+                ) && (
+                  <TempDiv>
+                    <strong>Audio Output:</strong> {deviceLabels.outputLabel}
+                  </TempDiv>
+                )}
               <FlexButtonWrapper>
                 <PrimaryButton
                   type="button"
@@ -605,42 +777,57 @@ export const ProductionLine = ({
               </FlexButtonWrapper>
               {showDeviceSettings && devices && (
                 <FormContainer>
-                  <FormLabel>
-                    <DecorativeLabel>Input</DecorativeLabel>
-                    <FormSelect
-                      // eslint-disable-next-line
-                      {...register(`audioinput`)}
-                    >
-                      {devices.input && devices.input.length > 0 ? (
-                        devices.input.map((device) => (
-                          <option key={device.deviceId} value={device.deviceId}>
-                            {device.label}
-                          </option>
-                        ))
-                      ) : (
-                        <option value="no-device">No device available</option>
-                      )}
-                    </FormSelect>
-                  </FormLabel>
-                  <FormLabel>
-                    <DecorativeLabel>Output</DecorativeLabel>
-                    {devices.output && devices.output.length > 0 ? (
+                  {(line?.programOutputLine
+                    ? joinProductionOptions.isProgramUser
+                    : !joinProductionOptions.isProgramUser) && (
+                    <FormLabel>
+                      <DecorativeLabel>Input</DecorativeLabel>
                       <FormSelect
                         // eslint-disable-next-line
-                        {...register(`audiooutput`)}
+                        {...register(`audioinput`)}
                       >
-                        {devices.output.map((device) => (
-                          <option key={device.deviceId} value={device.deviceId}>
-                            {device.label}
-                          </option>
-                        ))}
+                        {devices.input && devices.input.length > 0 ? (
+                          devices.input.map((device) => (
+                            <option
+                              key={device.deviceId}
+                              value={device.deviceId}
+                            >
+                              {device.label}
+                            </option>
+                          ))
+                        ) : (
+                          <option value="no-device">No device available</option>
+                        )}
                       </FormSelect>
-                    ) : (
-                      <StyledWarningMessage>
-                        Controlled by operating system
-                      </StyledWarningMessage>
-                    )}
-                  </FormLabel>
+                    </FormLabel>
+                  )}
+                  {!(
+                    line?.programOutputLine &&
+                    joinProductionOptions.isProgramUser
+                  ) && (
+                    <FormLabel>
+                      <DecorativeLabel>Output</DecorativeLabel>
+                      {devices.output && devices.output.length > 0 ? (
+                        <FormSelect
+                          // eslint-disable-next-line
+                          {...register(`audiooutput`)}
+                        >
+                          {devices.output.map((device) => (
+                            <option
+                              key={device.deviceId}
+                              value={device.deviceId}
+                            >
+                              {device.label}
+                            </option>
+                          ))}
+                        </FormSelect>
+                      ) : (
+                        <StyledWarningMessage>
+                          Controlled by operating system
+                        </StyledWarningMessage>
+                      )}
+                    </FormLabel>
+                  )}
                   {isBrowserFirefox && !isMobile && (
                     <StyledWarningMessage>
                       If a new device has been added Firefox needs the
@@ -672,6 +859,7 @@ export const ProductionLine = ({
                     savedHotkeys={savedHotkeys}
                     customGlobalMute={customGlobalMute}
                     line={line}
+                    joinProductionOptions={joinProductionOptions}
                   />
                 )}
             </div>

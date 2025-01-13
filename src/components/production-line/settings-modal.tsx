@@ -10,7 +10,6 @@ import {
   StyledWarningMessage,
   ActionButton,
 } from "../landing-page/form-elements";
-// eslint-disable-next-line import/no-cycle
 import { useUpdateGlobalHotkey } from "./use-update-global-hotkey";
 import { useCheckForDuplicateHotkey } from "./use-check-for-duplicate-hotkey";
 import { Hotkeys } from "./types";
@@ -71,6 +70,8 @@ type TSettingsModalProps = {
   savedHotkeys: Hotkeys;
   customGlobalMute: string;
   lineName?: string;
+  programOutPutLine?: boolean;
+  isProgramUser: boolean;
   onClose: () => void;
   onSave: () => void;
 };
@@ -81,6 +82,8 @@ export const SettingsModal = ({
   savedHotkeys,
   customGlobalMute,
   lineName,
+  programOutPutLine,
+  isProgramUser,
   onClose,
   onSave,
 }: TSettingsModalProps) => {
@@ -231,161 +234,179 @@ export const SettingsModal = ({
         <ModalCloseButton onClick={onClose}>X</ModalCloseButton>
         <ModalHeader>Hotkey settings for line: {lineName}</ModalHeader>
         <FormContainer>
-          <FormLabel>
-            <DecorativeLabel>Toggle mute: </DecorativeLabel>
-            <FormInput
-              id="hotkeyMute"
-              ref={(el) => setInputRef(0, el)}
-              type="text"
-              placeholder="Enter hotkey"
-              value={hotkeys.muteHotkey}
-              onChange={(e) => handleInputChange("muteHotkey", e.target.value)}
-              maxLength={1}
-              onKeyDown={(e) => handleKeyDown(e, 0)}
-            />
-            {errors.muteHotkey && (
-              <ErrorMessage
-                errors={{ mutekey: { message: errors.muteHotkey } }}
-                name="mutekey"
-                as={<StyledWarningMessage className="error-message" />}
+          {(programOutPutLine ? isProgramUser : !isProgramUser) && (
+            <FormLabel>
+              <DecorativeLabel>Toggle mute: </DecorativeLabel>
+              <FormInput
+                id="hotkeyMute"
+                ref={(el) => setInputRef(0, el)}
+                type="text"
+                placeholder="Enter hotkey"
+                value={hotkeys.muteHotkey}
+                onChange={(e) =>
+                  handleInputChange("muteHotkey", e.target.value)
+                }
+                maxLength={1}
+                onKeyDown={(e) => handleKeyDown(e, 0)}
               />
-            )}
-            {!errors.muteHotkey && warning.muteHotkey && (
-              <ErrorMessage
-                errors={{ mutekey: { message: warning.muteHotkey } }}
-                name="mutekey"
-                as={StyledWarningMessage}
-              />
-            )}
-          </FormLabel>
-          <FormLabel>
-            <DecorativeLabel>Toggle speaker: </DecorativeLabel>
-            <FormInput
-              id="hotkeySpeaker"
-              ref={(el) => setInputRef(1, el)}
-              type="text"
-              value={hotkeys.speakerHotkey}
-              onChange={(e) =>
-                handleInputChange("speakerHotkey", e.target.value)
-              }
-              placeholder="Enter hotkey"
-              maxLength={1}
-              onKeyDown={(e) => handleKeyDown(e, 1)}
-            />
-            {errors.speakerHotkey && (
-              <ErrorMessage
-                errors={{ speakerkey: { message: errors.speakerHotkey } }}
-                name="speakerkey"
-                as={<StyledWarningMessage className="error-message" />}
-              />
-            )}
-            {!errors.speakerHotkey && warning.speakerHotkey && (
-              <ErrorMessage
-                errors={{ speakerkey: { message: warning.speakerHotkey } }}
-                name="speakerkey"
-                as={StyledWarningMessage}
-              />
-            )}
-          </FormLabel>
-          <FormLabel>
-            <DecorativeLabel>Toggle push to talk: </DecorativeLabel>
-            <FormInput
-              id="hotkeyPushToTalk"
-              ref={(el) => setInputRef(2, el)}
-              type="text"
-              value={hotkeys.pushToTalkHotkey}
-              onChange={(e) =>
-                handleInputChange("pushToTalkHotkey", e.target.value)
-              }
-              placeholder="Enter hotkey"
-              maxLength={1}
-              onKeyDown={(e) => handleKeyDown(e, 2)}
-            />
-            {errors.pushToTalkHotkey && (
-              <ErrorMessage
-                errors={{ longpresskey: { message: errors.pushToTalkHotkey } }}
-                name="longpresskey"
-                as={<StyledWarningMessage className="error-message" />}
-              />
-            )}
-            {!errors.pushToTalkHotkey && warning.pushToTalkHotkey && (
-              <ErrorMessage
-                errors={{ longpresskey: { message: warning.pushToTalkHotkey } }}
-                name="longpresskey"
-                as={StyledWarningMessage}
-              />
-            )}
-          </FormLabel>
-          <FormLabel>
-            <DecorativeLabel>Increase volume:</DecorativeLabel>
-            <FormInput
-              id="increaseVolume"
-              ref={(el) => setInputRef(3, el)}
-              type="text"
-              value={hotkeys.increaseVolumeHotkey}
-              onChange={(e) =>
-                handleInputChange("increaseVolumeHotkey", e.target.value)
-              }
-              placeholder="Enter hotkey"
-              maxLength={1}
-              onKeyDown={(e) => handleKeyDown(e, 3)}
-            />
-            {errors.increaseVolumeHotkey && (
-              <ErrorMessage
-                errors={{
-                  increasevolumekey: { message: errors.increaseVolumeHotkey },
-                }}
-                name="increasevolumekey"
-                as={<StyledWarningMessage className="error-message" />}
-              />
-            )}
-            {!errors.increaseVolumeHotkey && warning.increaseVolumeHotkey && (
-              <ErrorMessage
-                errors={{
-                  increasevolumekey: { message: warning.increaseVolumeHotkey },
-                }}
-                name="increasevolumekey"
-                as={StyledWarningMessage}
-              />
-            )}
-          </FormLabel>
-          <FormLabel>
-            <DecorativeLabel>Decrease volume:</DecorativeLabel>
-            <FormInput
-              id="decreaseVolume"
-              ref={(el) => setInputRef(4, el)}
-              type="text"
-              value={hotkeys.decreaseVolumeHotkey}
-              onChange={(e) =>
-                handleInputChange("decreaseVolumeHotkey", e.target.value)
-              }
-              placeholder="Enter hotkey"
-              maxLength={1}
-              onKeyDown={(e) => handleKeyDown(e, 4)}
-            />
-            {errors.decreaseVolumeHotkey && (
-              <ErrorMessage
-                errors={{
-                  decreasevolumehotkey: {
-                    message: errors.decreaseVolumeHotkey,
-                  },
-                }}
-                name="decreasevolumehotkey"
-                as={<StyledWarningMessage className="error-message" />}
-              />
-            )}
-            {!errors.decreaseVolumeHotkey && warning.decreaseVolumeHotkey && (
-              <ErrorMessage
-                errors={{
-                  decreasevolumehotkey: {
-                    message: warning.decreaseVolumeHotkey,
-                  },
-                }}
-                name="decreasevolumehotkey"
-                as={StyledWarningMessage}
-              />
-            )}
-          </FormLabel>
+              {errors.muteHotkey && (
+                <ErrorMessage
+                  errors={{ mutekey: { message: errors.muteHotkey } }}
+                  name="mutekey"
+                  as={<StyledWarningMessage className="error-message" />}
+                />
+              )}
+              {!errors.muteHotkey && warning.muteHotkey && (
+                <ErrorMessage
+                  errors={{ mutekey: { message: warning.muteHotkey } }}
+                  name="mutekey"
+                  as={StyledWarningMessage}
+                />
+              )}
+            </FormLabel>
+          )}
+          {!(programOutPutLine && isProgramUser) && (
+            <>
+              <FormLabel>
+                <DecorativeLabel>Toggle speaker: </DecorativeLabel>
+                <FormInput
+                  id="hotkeySpeaker"
+                  ref={(el) => setInputRef(1, el)}
+                  type="text"
+                  value={hotkeys.speakerHotkey}
+                  onChange={(e) =>
+                    handleInputChange("speakerHotkey", e.target.value)
+                  }
+                  placeholder="Enter hotkey"
+                  maxLength={1}
+                  onKeyDown={(e) => handleKeyDown(e, 1)}
+                />
+                {errors.speakerHotkey && (
+                  <ErrorMessage
+                    errors={{ speakerkey: { message: errors.speakerHotkey } }}
+                    name="speakerkey"
+                    as={<StyledWarningMessage className="error-message" />}
+                  />
+                )}
+                {!errors.speakerHotkey && warning.speakerHotkey && (
+                  <ErrorMessage
+                    errors={{ speakerkey: { message: warning.speakerHotkey } }}
+                    name="speakerkey"
+                    as={StyledWarningMessage}
+                  />
+                )}
+              </FormLabel>
+              <FormLabel>
+                <DecorativeLabel>Toggle push to talk: </DecorativeLabel>
+                <FormInput
+                  id="hotkeyPushToTalk"
+                  ref={(el) => setInputRef(2, el)}
+                  type="text"
+                  value={hotkeys.pushToTalkHotkey}
+                  onChange={(e) =>
+                    handleInputChange("pushToTalkHotkey", e.target.value)
+                  }
+                  placeholder="Enter hotkey"
+                  maxLength={1}
+                  onKeyDown={(e) => handleKeyDown(e, 2)}
+                />
+                {errors.pushToTalkHotkey && (
+                  <ErrorMessage
+                    errors={{
+                      longpresskey: { message: errors.pushToTalkHotkey },
+                    }}
+                    name="longpresskey"
+                    as={<StyledWarningMessage className="error-message" />}
+                  />
+                )}
+                {!errors.pushToTalkHotkey && warning.pushToTalkHotkey && (
+                  <ErrorMessage
+                    errors={{
+                      longpresskey: { message: warning.pushToTalkHotkey },
+                    }}
+                    name="longpresskey"
+                    as={StyledWarningMessage}
+                  />
+                )}
+              </FormLabel>
+              <FormLabel>
+                <DecorativeLabel>Increase volume:</DecorativeLabel>
+                <FormInput
+                  id="increaseVolume"
+                  ref={(el) => setInputRef(3, el)}
+                  type="text"
+                  value={hotkeys.increaseVolumeHotkey}
+                  onChange={(e) =>
+                    handleInputChange("increaseVolumeHotkey", e.target.value)
+                  }
+                  placeholder="Enter hotkey"
+                  maxLength={1}
+                  onKeyDown={(e) => handleKeyDown(e, 3)}
+                />
+                {errors.increaseVolumeHotkey && (
+                  <ErrorMessage
+                    errors={{
+                      increasevolumekey: {
+                        message: errors.increaseVolumeHotkey,
+                      },
+                    }}
+                    name="increasevolumekey"
+                    as={<StyledWarningMessage className="error-message" />}
+                  />
+                )}
+                {!errors.increaseVolumeHotkey &&
+                  warning.increaseVolumeHotkey && (
+                    <ErrorMessage
+                      errors={{
+                        increasevolumekey: {
+                          message: warning.increaseVolumeHotkey,
+                        },
+                      }}
+                      name="increasevolumekey"
+                      as={StyledWarningMessage}
+                    />
+                  )}
+              </FormLabel>
+              <FormLabel>
+                <DecorativeLabel>Decrease volume:</DecorativeLabel>
+                <FormInput
+                  id="decreaseVolume"
+                  ref={(el) => setInputRef(4, el)}
+                  type="text"
+                  value={hotkeys.decreaseVolumeHotkey}
+                  onChange={(e) =>
+                    handleInputChange("decreaseVolumeHotkey", e.target.value)
+                  }
+                  placeholder="Enter hotkey"
+                  maxLength={1}
+                  onKeyDown={(e) => handleKeyDown(e, 4)}
+                />
+                {errors.decreaseVolumeHotkey && (
+                  <ErrorMessage
+                    errors={{
+                      decreasevolumehotkey: {
+                        message: errors.decreaseVolumeHotkey,
+                      },
+                    }}
+                    name="decreasevolumehotkey"
+                    as={<StyledWarningMessage className="error-message" />}
+                  />
+                )}
+                {!errors.decreaseVolumeHotkey &&
+                  warning.decreaseVolumeHotkey && (
+                    <ErrorMessage
+                      errors={{
+                        decreasevolumehotkey: {
+                          message: warning.decreaseVolumeHotkey,
+                        },
+                      }}
+                      name="decreasevolumehotkey"
+                      as={StyledWarningMessage}
+                    />
+                  )}
+              </FormLabel>
+            </>
+          )}
           <FormLabel>
             <DecorativeLabel>Toggle mute all microphones: </DecorativeLabel>
             <FormInput
