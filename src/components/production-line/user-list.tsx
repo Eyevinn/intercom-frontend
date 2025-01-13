@@ -94,6 +94,10 @@ const MuteParticipantButton = styled.button`
   border: 0.1rem solid #707070;
   border-radius: 0.4rem;
   cursor: pointer;
+
+  svg {
+    fill: #f96c6c;
+  }
 `;
 
 type TUserListOptions = {
