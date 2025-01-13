@@ -81,6 +81,10 @@ export const StyledWarningMessage = styled.div`
     background: #f96c6c;
     border: 1px solid #f96c6c;
   }
+
+  &.production-list {
+    margin: 1rem 0;
+  }
 `;
 
 export const ActionButton = styled.button`

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { API } from "../../api/api";
 import { useGlobalState } from "../../global-state/context-provider";
 
-type TUseDeleteProduction = (id: number | null) => {
+type TUseDeleteProduction = (id: string | null) => {
   loading: boolean;
   error: Error | null;
   successfullDelete: boolean;
