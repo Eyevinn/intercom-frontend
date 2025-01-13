@@ -141,6 +141,7 @@ export const DeleteButton = styled(SecondaryButton)`
   display: flex;
   align-items: center;
   background: #dc2626;
+  color: white;
 
   &:disabled {
     background: #990f0f;
