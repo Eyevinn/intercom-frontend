@@ -173,6 +173,7 @@ export const ProductionLine = ({
   const [confirmExitModalOpen, setConfirmExitModalOpen] = useState(false);
   const [value, setValue] = useState(0.75);
   const [hasReduced, setHasReduced] = useState(false);
+  const [initialVolume, setInitialVolume] = useState<number | null>(null);
   const {
     joinProductionOptions,
     dominantSpeaker,
@@ -366,11 +367,26 @@ export const ProductionLine = ({
 
   useEffect(() => {
     let volumeReductionTimeout: NodeJS.Timeout;
-    let volumeIncreaseTimeout: NodeJS.Timeout;
+    let intermediateIncreaseTimeout1: NodeJS.Timeout;
+    let intermediateIncreaseTimeout2: NodeJS.Timeout;
+    let finalIncreaseTimeout: NodeJS.Timeout;
+
+    // Reduce volume by 80%
     const volumeChangeFactor = 0.2;
 
-    if (shouldReduceVolume && line?.programOutputLine && !hasReduced) {
+    // Steps for increasing volume back to original level
+    const increaseStep1 = 0.25;
+    const increaseStep2 = 0.5;
+
+    if (
+      shouldReduceVolume &&
+      line?.programOutputLine &&
+      !hasReduced &&
+      audioElements
+    ) {
       volumeReductionTimeout = setTimeout(() => {
+        const currentVolume = audioElements[0].volume;
+        setInitialVolume(currentVolume);
         setValue((prevValue) => prevValue * volumeChangeFactor);
         setHasReduced(true);
 
@@ -384,24 +400,77 @@ export const ProductionLine = ({
     }
 
     if (!shouldReduceVolume && line?.programOutputLine && hasReduced) {
-      volumeIncreaseTimeout = setTimeout(() => {
-        setValue((prevValue) => prevValue / volumeChangeFactor);
+      if (initialVolume === null) {
+        return undefined;
+      }
+
+      const reductionAmount = 1 - volumeChangeFactor;
+
+      intermediateIncreaseTimeout1 = setTimeout(() => {
+        setValue(
+          (prevValue) =>
+            prevValue + increaseStep1 * initialVolume * reductionAmount
+        );
+
+        audioElements?.forEach((audioElement) => {
+          // eslint-disable-next-line no-param-reassign
+          audioElement.volume +=
+            increaseStep1 * initialVolume * reductionAmount;
+        });
+      }, 2000);
+
+      intermediateIncreaseTimeout2 = setTimeout(() => {
+        setValue(
+          (prevValue) =>
+            prevValue + increaseStep2 * initialVolume * reductionAmount
+        );
+
+        audioElements?.forEach((audioElement) => {
+          // eslint-disable-next-line no-param-reassign
+          audioElement.volume +=
+            increaseStep2 * initialVolume * reductionAmount;
+        });
+      }, 2500);
+
+      finalIncreaseTimeout = setTimeout(() => {
+        setValue(
+          (prevValue) =>
+            prevValue +
+            (1 - increaseStep1 - increaseStep2) *
+              initialVolume *
+              reductionAmount
+        );
         setHasReduced(false);
 
         audioElements?.forEach((audioElement) => {
           // eslint-disable-next-line no-param-reassign
-          audioElement.volume /= volumeChangeFactor;
+          audioElement.volume +=
+            (1 - increaseStep1 - increaseStep2) *
+            initialVolume *
+            reductionAmount;
         });
       }, 3000);
 
-      return () => clearTimeout(volumeIncreaseTimeout);
+      return () => {
+        clearTimeout(intermediateIncreaseTimeout1);
+        clearTimeout(intermediateIncreaseTimeout2);
+        clearTimeout(finalIncreaseTimeout);
+      };
     }
 
     return () => {
       clearTimeout(volumeReductionTimeout);
-      clearTimeout(volumeIncreaseTimeout);
+      clearTimeout(intermediateIncreaseTimeout1);
+      clearTimeout(intermediateIncreaseTimeout2);
+      clearTimeout(finalIncreaseTimeout);
     };
-  }, [shouldReduceVolume, hasReduced, line?.programOutputLine, audioElements]);
+  }, [
+    shouldReduceVolume,
+    hasReduced,
+    line?.programOutputLine,
+    audioElements,
+    initialVolume,
+  ]);
 
   useEffect(() => {
     if (!fetchProductionError) return;
