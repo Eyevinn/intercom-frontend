@@ -92,6 +92,33 @@ export const LineBlockTitle = styled.div`
   font-size: 1.5rem;
 `;
 
+export const LineBlockTitleWrapper = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
+export const ParticipantExpandBtn = styled.button`
+  margin-left: 0.5rem;
+  display: flex;
+  align-items: center;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+  color: #a6a6a6;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  svg {
+    fill: #a6a6a6;
+    width: 2rem;
+    margin-top: 0.3rem;
+  }
+`;
+
 export const LineBlockParticipants = styled.div``;
 
 export const LineBlockParticipant = styled.div`
@@ -100,6 +127,7 @@ export const LineBlockParticipant = styled.div`
   align-items: center;
 
   svg {
+    fill: #d6d3d1;
     height: 2rem;
     width: 2rem;
   }
