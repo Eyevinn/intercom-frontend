@@ -45,6 +45,11 @@ const UserWrapper = styled.div<TUserProps>`
     border-bottom: 0;
   }
 
+  svg {
+    fill: #4d4d4d;
+    width: 2rem;
+  }
+
   ${({ isYou }) => (isYou ? `background: #353434;` : "")}
 `;
 
@@ -79,10 +84,6 @@ const OnlineIndicator = styled.div<TIndicatorProps>`
   justify-content: center;
 
   ${({ isActive }) => `background: ${isActive ? "#7be27b;" : "#ebca6a;"}`}
-`;
-
-const IconWrapper = styled.div`
-  width: 2rem;
 `;
 
 const MuteParticipantButton = styled.button`
@@ -131,9 +132,7 @@ export const UserList = ({
                   }
                 >
                   <OnlineIndicator isActive={p.isActive}>
-                    <IconWrapper>
-                      <UserIcon />
-                    </IconWrapper>
+                    <UserIcon />
                   </OnlineIndicator>
                 </IsTalkingIndicator>
                 {p.name} {p.isActive ? "" : "(inactive)"}

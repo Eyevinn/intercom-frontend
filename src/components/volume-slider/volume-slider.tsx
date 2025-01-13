@@ -15,12 +15,12 @@ const VolumeContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-`;
 
-const IconWrapper = styled.div`
-  width: 5rem;
-  height: 5rem;
-  padding: 0.5rem;
+  svg {
+    width: 5rem;
+    padding: 0.5rem;
+    fill: #59cbe8;
+  }
 `;
 
 const SliderTrack = styled.div`
@@ -65,9 +65,7 @@ export const VolumeSlider: FC<TVolumeSliderProps> = ({
     <SliderWrapper>
       <VolumeWrapper>
         <VolumeContainer>
-          <IconWrapper>
-            <NoSoundIcon />
-          </IconWrapper>
+          <NoSoundIcon />
         </VolumeContainer>
         <SliderTrack>
           <SliderThumb position={thumbPosition} />
@@ -90,9 +88,7 @@ export const VolumeSlider: FC<TVolumeSliderProps> = ({
           />
         </SliderTrack>
         <VolumeContainer>
-          <IconWrapper>
-            <FullSoundIcon />
-          </IconWrapper>
+          <FullSoundIcon />
         </VolumeContainer>
       </VolumeWrapper>
     </SliderWrapper>
