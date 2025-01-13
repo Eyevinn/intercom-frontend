@@ -21,6 +21,7 @@ const HeaderButton = styled(PrimaryButton)`
   }
 
   svg {
+    fill: #482307;
     height: 2rem;
     width: 2rem;
   }
