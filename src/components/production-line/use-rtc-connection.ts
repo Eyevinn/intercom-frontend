@@ -127,6 +127,16 @@ const establishConnection = ({
     }
   );
 
+  dispatch({
+    type: "UPDATE_CALL",
+    payload: {
+      id: callId,
+      updates: {
+        dataChannel,
+      },
+    },
+  });
+
   const onDataChannelMessage = ({ data }: MessageEvent) => {
     let message: unknown;
 
@@ -150,6 +160,30 @@ const establishConnection = ({
           id: callId,
           updates: {
             dominantSpeaker: message.endpoint,
+          },
+        },
+      });
+    } else if (
+      message &&
+      typeof message === "object" &&
+      "type" in message &&
+      message.type === "EndpointMessage" &&
+      "payload" in message &&
+      "to" in message &&
+      "from" in message &&
+      message.payload &&
+      typeof message.payload === "object" &&
+      "muteParticipant" in message.payload &&
+      typeof message.payload.muteParticipant === "string"
+    ) {
+      dispatch({
+        type: "UPDATE_CALL",
+        payload: {
+          id: callId,
+          updates: {
+            isRemotelyMuted:
+              message.payload.muteParticipant === "mute" &&
+              message.to !== message.from,
           },
         },
       });

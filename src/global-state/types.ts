@@ -24,6 +24,8 @@ export interface CallState {
   audioElements: HTMLAudioElement[] | null;
   sessionId: string | null;
   hotkeys: Hotkeys;
+  dataChannel: RTCDataChannel | null;
+  isRemotelyMuted: boolean;
 }
 
 export type TGlobalState = {
