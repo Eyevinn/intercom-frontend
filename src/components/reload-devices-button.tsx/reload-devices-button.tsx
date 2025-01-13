@@ -19,11 +19,7 @@ const StyledRefreshBtn = styled(PrimaryButton)`
   .refresh-devices {
     width: 2rem;
     height: 2rem;
-  }
-
-  &.dummy {
-    background-color: #242424;
-    pointer-events: none;
+    fill: #242424;
   }
 `;
 

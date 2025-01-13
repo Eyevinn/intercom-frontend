@@ -100,6 +100,22 @@ const UserControlBtn = styled(ActionButton)`
   &:disabled {
     background: rgba(50, 56, 59, 0.5);
   }
+
+  svg {
+    width: 2rem;
+  }
+
+  &.mute {
+    svg {
+      fill: #f96c6c;
+    }
+  }
+
+  &.unmuted {
+    svg {
+      fill: #6fd84f;
+    }
+  }
 `;
 
 const LongPressWrapper = styled.div`
@@ -534,6 +550,7 @@ export const ProductionLine = ({
                 <FlexButtonWrapper className="first">
                   <UserControlBtn
                     type="button"
+                    className={isOutputMuted ? "mute" : "unmuted"}
                     onClick={() => muteOutput()}
                     disabled={value === 0}
                   >
@@ -550,6 +567,7 @@ export const ProductionLine = ({
                   <FlexButtonWrapper className="last">
                     <UserControlBtn
                       type="button"
+                      className={isInputMuted ? "mute" : "unmuted"}
                       onClick={() => muteInput(!isInputMuted)}
                     >
                       <ButtonIcon>
