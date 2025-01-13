@@ -25,6 +25,10 @@ const VerifyButtons = styled.div`
 const CancelButton = styled(ActionButton)`
   background: #d6d3d1;
   color: "#27272a";
+
+  &:disabled {
+    background: #d6d3d1;
+  }
 `;
 
 export const VerifyDecision = ({ loader, confirm, abort }: TVerifyDecision) => {
