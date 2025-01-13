@@ -105,6 +105,7 @@ type TUserListOptions = {
   sessionId: string | null;
   dominantSpeaker: string | null;
   audioLevelAboveThreshold: boolean;
+  programOutputLine?: boolean;
   setConfirmModalOpen: (value: boolean) => void;
   setUserId: (value: string) => void;
   setUserName: (value: string) => void;
@@ -115,6 +116,7 @@ export const UserList = ({
   sessionId,
   dominantSpeaker,
   audioLevelAboveThreshold,
+  programOutputLine,
   setConfirmModalOpen,
   setUserId,
   setUserName,
@@ -141,7 +143,7 @@ export const UserList = ({
                 </IsTalkingIndicator>
                 {p.name} {p.isActive ? "" : "(inactive)"}
               </User>
-              {!isYou && p.isActive && (
+              {!isYou && p.isActive && !programOutputLine && (
                 <MuteParticipantButton
                   onClick={() => {
                     setUserId(p.endpointId);
