@@ -5,7 +5,7 @@ import { useGlobalState } from "../../global-state/context-provider";
 import {
   ChevronDownIcon,
   ChevronUpIcon,
-  PersonIcon,
+  UserIcon,
   UsersIcon,
 } from "../../assets/icons/icon";
 import {
@@ -25,7 +25,9 @@ import {
   LineBlockParticipants,
   LineBlockTexts,
   LineBlockTitle,
+  LineBlockTitleWrapper,
   ParticipantCount,
+  ParticipantExpandBtn,
   PersonText,
   ProductionItemWrapper,
   ProductionLines,
@@ -49,6 +51,7 @@ export const ProductionsListItem = ({
   const navigate = useNavigate();
 
   const [open, setOpen] = useState<boolean>(false);
+  const [showFullUserList, setShowFullUserList] = useState<boolean>(false);
   const [selectedLine, setSelectedLine] = useState<TLine | null>();
   const [lineRemoveId, setLineRemoveId] = useState<string>("");
 
@@ -138,17 +141,38 @@ export const ProductionsListItem = ({
           {production.lines?.map((l) => (
             <Lineblock key={`line-${l.id}-${l.name}`}>
               <LineBlockTexts>
-                <LineBlockTitle>{l.name}</LineBlockTitle>
+                <LineBlockTitleWrapper>
+                  <LineBlockTitle>{l.name}</LineBlockTitle>
+                  {l.participants.length > 4 && (
+                    <ParticipantExpandBtn
+                      type="button"
+                      title={showFullUserList ? "Hide users" : "Show all users"}
+                      onClick={() => setShowFullUserList(!showFullUserList)}
+                    >
+                      <PersonText>
+                        {showFullUserList ? "hide" : "show"} full list
+                      </PersonText>
+                      {showFullUserList ? (
+                        <ChevronUpIcon />
+                      ) : (
+                        <ChevronDownIcon />
+                      )}
+                    </ParticipantExpandBtn>
+                  )}
+                </LineBlockTitleWrapper>
                 <LineBlockParticipants>
-                  {l.participants.slice(0, 4).map((participant) => (
+                  {(showFullUserList
+                    ? l.participants
+                    : l.participants.slice(0, 4)
+                  ).map((participant) => (
                     <LineBlockParticipant
                       key={`participant-${participant.sessionId}`}
                     >
-                      <PersonIcon />
+                      <UserIcon />
                       <PersonText>{participant.name}</PersonText>
                     </LineBlockParticipant>
                   ))}
-                  {l.participants.length > 4 && (
+                  {l.participants.length > 4 && !showFullUserList && (
                     <LineBlockParticipant>
                       <UsersIcon />
                       <PersonText>{`+${l.participants.length - 4} other user${l.participants.length - 4 > 1 ? "s" : ""}`}</PersonText>
