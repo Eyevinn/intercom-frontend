@@ -9,7 +9,6 @@ import ConfirmSvg from "./done.svg?react";
 import RefreshSvg from "./refresh.svg?react";
 import Settings from "./settings.svg?react";
 import NoSound from "./no_sound.svg?react";
-import FullSound from "./full_sound.svg?react";
 import Headset from "./headset.svg?react";
 import UserSettings from "./user_settings.svg?react";
 import ChevronDown from "./chevron_down.svg?react";
@@ -40,8 +39,6 @@ export const RefreshIcon = () => <RefreshSvg />;
 export const SettingsIcon = () => <Settings />;
 
 export const NoSoundIcon = () => <NoSound />;
-
-export const FullSoundIcon = () => <FullSound />;
 
 export const UserSettingsIcon = () => <UserSettings />;
 

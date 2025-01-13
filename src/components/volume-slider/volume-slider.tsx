@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 import { FC } from "react";
-import { NoSoundIcon, FullSoundIcon } from "../../assets/icons/icon";
+import { NoSoundIcon, SpeakerOn } from "../../assets/icons/icon";
 
 const SliderWrapper = styled.div`
   width: 100%;
@@ -88,7 +88,7 @@ export const VolumeSlider: FC<TVolumeSliderProps> = ({
           />
         </SliderTrack>
         <VolumeContainer>
-          <FullSoundIcon />
+          <SpeakerOn />
         </VolumeContainer>
       </VolumeWrapper>
     </SliderWrapper>
