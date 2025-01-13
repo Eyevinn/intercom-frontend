@@ -407,7 +407,7 @@ export const ProductionLine = ({
 
   useEffect(() => {
     if (line?.programOutputLine && joinProductionOptions?.isProgramUser) {
-      muteOutput();
+      setIsOutputMuted(true);
     } else if (
       line?.programOutputLine &&
       !joinProductionOptions?.isProgramUser
@@ -874,6 +874,7 @@ export const ProductionLine = ({
                 participants={line.participants}
                 dominantSpeaker={dominantSpeaker}
                 audioLevelAboveThreshold={audioLevelAboveThreshold}
+                programOutputLine={line.programOutputLine}
                 setConfirmModalOpen={setConfirmModalOpen}
                 setUserId={setUserId}
                 setUserName={setUserName}
