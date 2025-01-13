@@ -8,7 +8,7 @@ const API_KEY = import.meta.env.VITE_BACKEND_API_KEY;
 
 type TCreateProductionOptions = {
   name: string;
-  lines: { name: string }[];
+  lines: { name: string; programOutputLine?: boolean }[];
 };
 
 type TParticipant = {
@@ -23,6 +23,7 @@ type TLine = {
   id: string;
   smbConferenceId: string;
   participants: TParticipant[];
+  programOutputLine?: boolean;
 };
 
 export type TBasicProductionResponse = {
@@ -132,7 +133,11 @@ export const API = {
         },
       })
     ),
-  addProductionLine: (productionId: number, name: string): Promise<TLine> =>
+  addProductionLine: (
+    productionId: number,
+    name: string,
+    programOutputLine?: boolean
+  ): Promise<TLine> =>
     handleFetchRequest<TLine>(
       fetch(`${API_URL}production/${productionId}/line`, {
         method: "POST",
@@ -142,6 +147,7 @@ export const API = {
         },
         body: JSON.stringify({
           name,
+          programOutputLine,
         }),
       })
     ),

@@ -75,7 +75,7 @@ export const VolumeSlider: FC<TVolumeSliderProps> = ({
             min={0}
             max={1}
             step={0.05}
-            value={value}
+            value={value || 0.75}
             onChange={handleInputChange}
             style={{
               width: "100%",
