@@ -5,12 +5,12 @@ import { ActionButton } from "../landing-page/form-elements";
 const RemoveBtn = styled(ActionButton)`
   cursor: pointer;
   padding: 1rem;
-  background: #dc2626;
+  background: #d15c5c;
   color: white;
   z-index: 1;
 
   &:active:enabled {
-    background: #990f0f;
+    background: #ab5252;
   }
 `;
 
