@@ -2,10 +2,8 @@ import { useEffect, useState } from "react";
 import { API } from "../../api/api";
 
 type TUseAddProductionLine = (
-  productionId: number | null,
-  linesData: {
-    lines: { name: string; programOutputLine: boolean }[];
-  } | null
+  productionId: string | null,
+  line: { name: string; programOutputLine: boolean } | null
 ) => {
   loading: boolean;
   successfullCreate: boolean;
@@ -14,7 +12,7 @@ type TUseAddProductionLine = (
 
 export const useAddProductionLine: TUseAddProductionLine = (
   productionId,
-  linesData
+  line
 ) => {
   const [successfullCreate, setSuccessfullCreate] = useState(false);
   const [loading, setLoading] = useState<boolean>(false);
@@ -25,12 +23,8 @@ export const useAddProductionLine: TUseAddProductionLine = (
     setError(null);
     setSuccessfullCreate(false);
     setLoading(true);
-    if (productionId && linesData?.lines.length) {
-      API.addProductionLine(
-        productionId,
-        linesData.lines[0].name,
-        linesData.lines[0].programOutputLine
-      )
+    if (productionId && line) {
+      API.addProductionLine(productionId, line.name, line.programOutputLine)
         .then(() => {
           if (aborted) return;
 
@@ -49,7 +43,7 @@ export const useAddProductionLine: TUseAddProductionLine = (
     return () => {
       aborted = true;
     };
-  }, [linesData, productionId]);
+  }, [line, productionId]);
 
   return {
     loading,

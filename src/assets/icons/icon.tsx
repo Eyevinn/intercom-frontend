@@ -5,7 +5,6 @@ import RemoveSvg from "./clear.svg?react";
 import VolumeOn from "./volume_on.svg?react";
 import VolumeOff from "./volume_off.svg?react";
 import UserSvg from "./user.svg?react";
-import ConfirmSvg from "./done.svg?react";
 import RefreshSvg from "./refresh.svg?react";
 import Settings from "./settings.svg?react";
 import NoSound from "./no_sound.svg?react";
@@ -32,8 +31,6 @@ export const SpeakerOff = () => <VolumeOff />;
 export const SpeakerOn = () => <VolumeOn />;
 
 export const UserIcon = () => <UserSvg />;
-
-export const ConfirmIcon = () => <ConfirmSvg />;
 
 export const RefreshIcon = () => <RefreshSvg />;
 

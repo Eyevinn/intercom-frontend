@@ -1,7 +1,5 @@
-import styled from "@emotion/styled";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { isMobile } from "../../bowser";
 import { TBasicProductionResponse } from "../../api/api";
 import { useGlobalState } from "../../global-state/context-provider";
 import {
@@ -10,121 +8,45 @@ import {
   UserIcon,
   UsersIcon,
 } from "../../assets/icons/icon";
-import { SecondaryButton } from "../landing-page/form-elements";
+import {
+  SecondaryButton,
+  StyledWarningMessage,
+} from "../landing-page/form-elements";
+import { Spinner } from "../loader/loader";
+import { useRemoveProductionLine } from "../manage-productions-page/use-remove-production-line";
+import {
+  DeleteButton,
+  HeaderIcon,
+  HeaderTexts,
+  HeaderWrapper,
+  InnerDiv,
+  Lineblock,
+  LineBlockParticipant,
+  LineBlockParticipants,
+  LineBlockTexts,
+  LineBlockTitle,
+  LineBlockTitleWrapper,
+  ParticipantCount,
+  ParticipantExpandBtn,
+  PersonText,
+  ProductionItemWrapper,
+  ProductionLines,
+  ProductionName,
+  SpinnerWrapper,
+} from "./production-list-components";
 import { ProgramOutputModal } from "../program-output-modal/program-output-modal";
-
-const ProductionItemWrapper = styled.div`
-  text-align: start;
-  color: #ffffff;
-  background-color: transparent;
-  flex: 0 0 calc(25% - 2rem);
-  ${() => (isMobile ? `flex-grow: 1;` : `flex-grow: 0;`)}
-  justify-content: start;
-  min-width: 20rem;
-  border: 1px solid #424242;
-  border-radius: 0.5rem;
-  margin: 0 2rem 2rem 0;
-  cursor: pointer;
-`;
-
-const ProductionName = styled.div`
-  font-size: 1.4rem;
-  font-weight: bold;
-  margin-right: 1rem;
-  word-break: break-word;
-`;
-
-const ParticipantCount = styled.div`
-  font-size: 1.5rem;
-  color: #9e9e9e;
-`;
-
-const HeaderWrapper = styled.div`
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  padding: 2rem;
-`;
-
-const HeaderTexts = styled.div`
-  display: flex;
-  align-items: center;
-  svg {
-    height: 1.5rem;
-    width: 1.5rem;
-    margin-right: 0.5rem;
-  }
-  &.active {
-    svg {
-      fill: #73d16d;
-    }
-  }
-`;
-
-const HeaderIcon = styled.svg`
-  height: 2rem;
-  width: 2rem;
-  fill: #d6d3d1;
-`;
-
-const ProductionLines = styled.div`
-  display: grid;
-  padding: 0 2rem;
-  grid-template-rows: 0fr;
-  transition: grid-template-rows 0.3s ease-out;
-
-  &.expanded {
-    grid-template-rows: 1fr;
-    padding-bottom: 2rem;
-  }
-`;
-
-const InnerDiv = styled.div`
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-`;
-
-const Lineblock = styled.div`
-  margin-top: 1rem;
-  background-color: #4d4d4d;
-  border-radius: 1rem;
-  padding: 1rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-`;
-
-const LineBlockTexts = styled.div``;
-
-const LineBlockTitle = styled.div`
-  font-weight: bold;
-  font-size: 1.5rem;
-`;
-
-const LineBlockParticipants = styled.div``;
-
-const LineBlockParticipant = styled.div`
-  margin-top: 0.5rem;
-  display: flex;
-  align-items: center;
-
-  svg {
-    height: 2rem;
-    width: 2rem;
-  }
-`;
-
-const PersonText = styled.div`
-  margin-left: 0.5rem;
-`;
+import { ManageProductionButtons } from "./manage-production-buttons";
+import { ConfirmationModal } from "../verify-decision/confirmation-modal";
+import { TLine } from "../production-line/types";
 
 type ProductionsListItemProps = {
   production: TBasicProductionResponse;
+  managementMode?: boolean;
 };
 
 export const ProductionsListItem = ({
   production,
+  managementMode = false,
 }: ProductionsListItemProps) => {
   const [{ userSettings }, dispatch] = useGlobalState();
   const [open, setOpen] = useState<boolean>(false);
@@ -132,6 +54,26 @@ export const ProductionsListItem = ({
   const [modalLineId, setModalLineId] = useState<string | null>(null);
   const [isProgramUser, setIsProgramUser] = useState<boolean>(false);
   const navigate = useNavigate();
+
+  const [showFullUserList, setShowFullUserList] = useState<boolean>(false);
+  const [selectedLine, setSelectedLine] = useState<TLine | null>();
+  const [lineRemoveId, setLineRemoveId] = useState<string>("");
+
+  const {
+    loading: deleteLineLoading,
+    successfullDelete: successfullDeleteLine,
+    error: lineDeleteError,
+  } = useRemoveProductionLine(production.productionId, lineRemoveId);
+
+  useEffect(() => {
+    if (successfullDeleteLine) {
+      dispatch({
+        type: "PRODUCTION_UPDATED",
+      });
+    }
+    setLineRemoveId("");
+    setSelectedLine(null);
+  }, [successfullDeleteLine, dispatch]);
 
   const totalParticipants = useMemo(() => {
     return (
@@ -210,11 +152,32 @@ export const ProductionsListItem = ({
       <ProductionLines className={open ? "expanded" : ""}>
         <InnerDiv>
           {production.lines?.map((l) => (
-            <Lineblock key={`line-${l.smbConferenceId}`}>
+            <Lineblock key={`line-${l.id}-${l.name}`}>
               <LineBlockTexts>
-                <LineBlockTitle>{l.name}</LineBlockTitle>
+                <LineBlockTitleWrapper>
+                  <LineBlockTitle>{l.name}</LineBlockTitle>
+                  {l.participants.length > 4 && (
+                    <ParticipantExpandBtn
+                      type="button"
+                      title={showFullUserList ? "Hide users" : "Show all users"}
+                      onClick={() => setShowFullUserList(!showFullUserList)}
+                    >
+                      <PersonText>
+                        {showFullUserList ? "hide" : "show"} full list
+                      </PersonText>
+                      {showFullUserList ? (
+                        <ChevronUpIcon />
+                      ) : (
+                        <ChevronDownIcon />
+                      )}
+                    </ParticipantExpandBtn>
+                  )}
+                </LineBlockTitleWrapper>
                 <LineBlockParticipants>
-                  {l.participants.map((participant) => (
+                  {(showFullUserList
+                    ? l.participants
+                    : l.participants.slice(0, 4)
+                  ).map((participant) => (
                     <LineBlockParticipant
                       key={`participant-${participant.sessionId}`}
                     >
@@ -222,21 +185,42 @@ export const ProductionsListItem = ({
                       <PersonText>{participant.name}</PersonText>
                     </LineBlockParticipant>
                   ))}
+                  {l.participants.length > 4 && !showFullUserList && (
+                    <LineBlockParticipant>
+                      <UsersIcon />
+                      <PersonText>{`+${l.participants.length - 4} other user${l.participants.length - 4 > 1 ? "s" : ""}`}</PersonText>
+                    </LineBlockParticipant>
+                  )}
                 </LineBlockParticipants>
               </LineBlockTexts>
-              <SecondaryButton
-                type="button"
-                onClick={() => {
-                  if (l.programOutputLine) {
-                    setModalLineId(l.id);
-                    setIsModalOpen(true);
-                  } else {
-                    goToProduction(l.id);
-                  }
-                }}
-              >
-                Join
-              </SecondaryButton>
+              {managementMode ? (
+                <DeleteButton
+                  type="button"
+                  disabled={!!l.participants.length}
+                  onClick={() => setSelectedLine(l)}
+                >
+                  Delete
+                  {deleteLineLoading && (
+                    <SpinnerWrapper>
+                      <Spinner className="production-list" />
+                    </SpinnerWrapper>
+                  )}
+                </DeleteButton>
+              ) : (
+                <SecondaryButton
+                  type="button"
+                  onClick={() => {
+                    if (l.programOutputLine) {
+                      setModalLineId(l.id);
+                      setIsModalOpen(true);
+                    } else {
+                      goToProduction(l.id);
+                    }
+                  }}
+                >
+                  Join
+                </SecondaryButton>
+              )}
               {isModalOpen && modalLineId && (
                 <ProgramOutputModal
                   onClose={() => setIsModalOpen(false)}
@@ -249,8 +233,27 @@ export const ProductionsListItem = ({
               )}
             </Lineblock>
           ))}
+          {lineDeleteError && (
+            <StyledWarningMessage className="error-message production-list">
+              {lineDeleteError.message}
+            </StyledWarningMessage>
+          )}
+          {managementMode && (
+            <ManageProductionButtons
+              production={production}
+              isDeleteProductionDisabled={totalParticipants > 0}
+            />
+          )}
         </InnerDiv>
       </ProductionLines>
+      {selectedLine && (
+        <ConfirmationModal
+          title="Delete Line"
+          description={`You are about to delete the line: ${selectedLine.name}. Are you sure?`}
+          onCancel={() => setSelectedLine(null)}
+          onConfirm={() => setLineRemoveId(selectedLine.id)}
+        />
+      )}
     </ProductionItemWrapper>
   );
 };

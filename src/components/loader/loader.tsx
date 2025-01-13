@@ -37,6 +37,11 @@ const Loading = styled.div`
     border-top: 0.4rem solid #595959;
   }
 
+  &.production-list {
+    height: 2rem;
+    width: 2rem;
+  }
+
   @keyframes spin {
     0% {
       transform: rotate(0deg);
