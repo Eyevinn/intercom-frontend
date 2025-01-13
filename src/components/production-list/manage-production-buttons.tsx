@@ -1,5 +1,6 @@
+import styled from "@emotion/styled";
 import { ErrorMessage } from "@hookform/error-message";
-import { useForm } from "react-hook-form";
+import { useForm, Controller, SubmitHandler } from "react-hook-form";
 import { FC, useEffect, useState } from "react";
 import { RemoveIcon } from "../../assets/icons/icon";
 import { ListItemWrapper } from "../create-production/create-production";
@@ -24,11 +25,21 @@ import { useDeleteProduction } from "../manage-productions-page/use-delete-produ
 import { useGlobalState } from "../../global-state/context-provider";
 import { ConfirmationModal } from "../verify-decision/confirmation-modal";
 import { TBasicProductionResponse } from "../../api/api";
+import { Checkbox } from "../checkbox/checkbox";
 
 interface ManageProductionButtonsProps {
   production: TBasicProductionResponse;
   isDeleteProductionDisabled: boolean;
 }
+
+type FormValues = {
+  lines: { name: string; programOutputLine: boolean }[];
+};
+
+const CheckboxWrapper = styled.div`
+  margin-bottom: 3rem;
+  margin-top: 0.5rem;
+`;
 
 export const ManageProductionButtons: FC<ManageProductionButtonsProps> = (
   props
@@ -39,18 +50,27 @@ export const ManageProductionButtons: FC<ManageProductionButtonsProps> = (
   const [removeProductionId, setRemoveProductionId] = useState<string>("");
   const [displayConfirmationModal, setDisplayConfirmationModal] =
     useState<boolean>(false);
-  const [lineName, setLineName] = useState<string>("");
   const [addLineOpen, setAddLineOpen] = useState<boolean>(false);
+  const [updateLines, setUpdateLines] = useState<FormValues | null>(null);
 
   const {
     formState: { errors },
     register,
     handleSubmit,
+    control,
     setValue,
-  } = useForm<{ lineName: string }>({
+  } = useForm<FormValues>({
+    defaultValues: {
+      lines: [
+        {
+          name: "",
+          programOutputLine: false,
+        },
+      ],
+    },
     resetOptions: {
-      keepDirtyValues: true, // user-interacted input will be retained
-      keepErrors: true, // input errors will be retained with value update
+      keepDirtyValues: true,
+      keepErrors: true,
     },
   });
 
@@ -58,7 +78,7 @@ export const ManageProductionButtons: FC<ManageProductionButtonsProps> = (
     loading: createLineLoading,
     successfullCreate: successfullCreateLine,
     error: lineCreateError,
-  } = useAddProductionLine(production.productionId, lineName);
+  } = useAddProductionLine(production.productionId, updateLines);
 
   const {
     loading: deleteProductionLoading,
@@ -80,14 +100,21 @@ export const ManageProductionButtons: FC<ManageProductionButtonsProps> = (
       dispatch({
         type: "PRODUCTION_UPDATED",
       });
-      setValue("lineName", "");
-      setLineName("");
       setAddLineOpen(false);
+      setUpdateLines(null);
     }
-  }, [successfullCreateLine, setValue, dispatch]);
+  }, [successfullCreateLine, dispatch]);
 
-  const onSubmit = (values: { lineName: string }) => {
-    if (values.lineName) setLineName(values.lineName);
+  const onSubmit: SubmitHandler<FormValues> = (values) => {
+    if (values.lines[0].name) {
+      setUpdateLines(values);
+    }
+  };
+
+  const handleAddLineOpen = () => {
+    setAddLineOpen(!addLineOpen);
+    setValue("lines.0.name", "");
+    setValue("lines.0.programOutputLine", false);
   };
 
   return (
@@ -102,7 +129,7 @@ export const ManageProductionButtons: FC<ManageProductionButtonsProps> = (
           <SecondaryButton
             style={{ marginRight: "1rem" }}
             type="button"
-            onClick={() => setAddLineOpen(!addLineOpen)}
+            onClick={handleAddLineOpen}
           >
             Add Line
           </SecondaryButton>
@@ -132,12 +159,27 @@ export const ManageProductionButtons: FC<ManageProductionButtonsProps> = (
             <ListItemWrapper>
               <FormInput
                 // eslint-disable-next-line
-                {...register(`lineName`, {
+                {...register(`lines.${0}.name`, {
                   required: "Line name is required",
                   minLength: 1,
                 })}
               />
             </ListItemWrapper>
+            <CheckboxWrapper>
+              <Controller
+                name={`lines.${0}.programOutputLine`}
+                control={control}
+                render={({ field: controllerField }) => (
+                  <Checkbox
+                    label="This line will be used for a program output"
+                    checked={controllerField.value}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      controllerField.onChange(e.target.checked)
+                    }
+                  />
+                )}
+              />
+            </CheckboxWrapper>
           </FormLabel>
           <ErrorMessage
             errors={errors}

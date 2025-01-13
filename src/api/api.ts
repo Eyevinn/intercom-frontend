@@ -134,7 +134,7 @@ export const API = {
       })
     ),
   addProductionLine: (
-    productionId: number,
+    productionId: string,
     name: string,
     programOutputLine?: boolean
   ): Promise<TLine> =>
@@ -163,6 +163,7 @@ export const API = {
         },
       })
     ),
+
   offerAudioSession: ({
     productionId,
     lineId,
