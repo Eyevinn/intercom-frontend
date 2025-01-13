@@ -32,8 +32,9 @@ interface ManageProductionButtonsProps {
   isDeleteProductionDisabled: boolean;
 }
 
-type FormValues = {
-  lines: { name: string; programOutputLine: boolean }[];
+type Line = {
+  name: string;
+  programOutputLine: boolean;
 };
 
 const CheckboxWrapper = styled.div`
@@ -51,7 +52,7 @@ export const ManageProductionButtons: FC<ManageProductionButtonsProps> = (
   const [displayConfirmationModal, setDisplayConfirmationModal] =
     useState<boolean>(false);
   const [addLineOpen, setAddLineOpen] = useState<boolean>(false);
-  const [updateLines, setUpdateLines] = useState<FormValues | null>(null);
+  const [newLine, setNewLine] = useState<Line | null>(null);
 
   const {
     formState: { errors },
@@ -59,14 +60,10 @@ export const ManageProductionButtons: FC<ManageProductionButtonsProps> = (
     handleSubmit,
     control,
     setValue,
-  } = useForm<FormValues>({
+  } = useForm<Line>({
     defaultValues: {
-      lines: [
-        {
-          name: "",
-          programOutputLine: false,
-        },
-      ],
+      name: "",
+      programOutputLine: false,
     },
     resetOptions: {
       keepDirtyValues: true,
@@ -78,7 +75,7 @@ export const ManageProductionButtons: FC<ManageProductionButtonsProps> = (
     loading: createLineLoading,
     successfullCreate: successfullCreateLine,
     error: lineCreateError,
-  } = useAddProductionLine(production.productionId, updateLines);
+  } = useAddProductionLine(production.productionId, newLine);
 
   const {
     loading: deleteProductionLoading,
@@ -101,20 +98,20 @@ export const ManageProductionButtons: FC<ManageProductionButtonsProps> = (
         type: "PRODUCTION_UPDATED",
       });
       setAddLineOpen(false);
-      setUpdateLines(null);
+      setNewLine(null);
     }
   }, [successfullCreateLine, dispatch]);
 
-  const onSubmit: SubmitHandler<FormValues> = (values) => {
-    if (values.lines[0].name) {
-      setUpdateLines(values);
+  const onSubmit: SubmitHandler<Line> = (values) => {
+    if (values) {
+      setNewLine(values);
     }
   };
 
   const handleAddLineOpen = () => {
     setAddLineOpen(!addLineOpen);
-    setValue("lines.0.name", "");
-    setValue("lines.0.programOutputLine", false);
+    setValue("name", "");
+    setValue("programOutputLine", false);
   };
 
   return (
@@ -159,7 +156,7 @@ export const ManageProductionButtons: FC<ManageProductionButtonsProps> = (
             <ListItemWrapper>
               <FormInput
                 // eslint-disable-next-line
-                {...register(`lines.${0}.name`, {
+                {...register("name", {
                   required: "Line name is required",
                   minLength: 1,
                 })}
@@ -167,7 +164,7 @@ export const ManageProductionButtons: FC<ManageProductionButtonsProps> = (
             </ListItemWrapper>
             <CheckboxWrapper>
               <Controller
-                name={`lines.${0}.programOutputLine`}
+                name="programOutputLine"
                 control={control}
                 render={({ field: controllerField }) => (
                   <Checkbox
@@ -181,11 +178,7 @@ export const ManageProductionButtons: FC<ManageProductionButtonsProps> = (
               />
             </CheckboxWrapper>
           </FormLabel>
-          <ErrorMessage
-            errors={errors}
-            name="lineName"
-            as={StyledWarningMessage}
-          />
+          <ErrorMessage errors={errors} name="name" as={StyledWarningMessage} />
           {lineCreateError && (
             <StyledWarningMessage className="error-message">
               {lineCreateError.message}
