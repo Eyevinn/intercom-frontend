@@ -10,7 +10,7 @@ import { DisplayContainerHeader } from "../landing-page/display-container-header
 import { Modal } from "../modal/modal";
 import { VerifyDecision } from "../verify-decision/verify-decision";
 import { ModalConfirmationText } from "../modal/modal-confirmation-text";
-import { MegaphoneOffIcon, MegaphoneOnIcon } from "../../assets/icons/icon";
+import { MegaphoneIcon } from "../../assets/icons/icon";
 import { useGlobalHotkeys } from "../production-line/use-line-hotkeys";
 
 const Container = styled.div`
@@ -53,11 +53,29 @@ const ButtonWrapper = styled.div`
 
 const MuteAllCallsBtn = styled(PrimaryButton)`
   background: rgba(50, 56, 59, 1);
+  color: #6fd84f;
   border: 0.2rem solid #6d6d6d;
-  padding: 0.5rem;
+  padding: 0.5rem 1rem;
   margin: 0 0 0 1rem;
-  width: 4rem;
+  width: fit-content;
   height: 4rem;
+
+  &.mute {
+    color: #f96c6c;
+    svg {
+      fill: #f96c6c;
+    }
+  }
+
+  svg {
+    fill: #6fd84f;
+    width: 3rem;
+  }
+`;
+
+const MuteAllCallsBtnText = styled.span`
+  text-align: center;
+  width: 100%;
 `;
 
 export const CallsPage = () => {
@@ -146,9 +164,13 @@ export const CallsPage = () => {
         {!isEmpty && (
           <MuteAllCallsBtn
             type="button"
+            className={isMasterInputMuted ? "mute" : ""}
             onClick={() => setIsMasterInputMuted(!isMasterInputMuted)}
           >
-            {isMasterInputMuted ? <MegaphoneOffIcon /> : <MegaphoneOnIcon />}
+            <MuteAllCallsBtnText>
+              {isMasterInputMuted ? "Mute" : "Unmute"} all Inputs
+            </MuteAllCallsBtnText>
+            <MegaphoneIcon />
           </MuteAllCallsBtn>
         )}
       </ButtonWrapper>

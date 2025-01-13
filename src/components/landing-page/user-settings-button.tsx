@@ -12,8 +12,13 @@ const UserSettingsWrapper = styled.div`
   display: flex;
   align-items: center;
   font-weight: bold;
+
   &:hover {
     cursor: pointer;
+  }
+
+  svg {
+    width: 2.5rem;
   }
 `;
 

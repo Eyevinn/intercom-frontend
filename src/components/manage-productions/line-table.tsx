@@ -75,12 +75,6 @@ const TruncatedTableCell = styled.td`
   `}
 `;
 
-const ConfirmIconWrapper = styled.div`
-  width: 3rem;
-  margin-left: 1rem;
-  cursor: pointer;
-`;
-
 const ConfirmButton = styled.div`
   border-radius: 0.5rem;
   cursor: pointer;
@@ -99,6 +93,13 @@ const ConfirmButton = styled.div`
 
   &:hover {
     transform: scale(1.1);
+  }
+
+  svg {
+    width: 3rem;
+    margin-left: 1rem;
+    cursor: pointer;
+    fill: #91fa8c;
   }
 
   ${isMobile ? `width: fit-content;` : ""}
@@ -217,9 +218,7 @@ export const LineTable = ({
           }}
         >
           Remove {lines?.find((line) => line.id === verifyRemove)?.name}?
-          <ConfirmIconWrapper>
-            <ConfirmIcon />
-          </ConfirmIconWrapper>
+          <ConfirmIcon />
         </ConfirmButton>
       )}
     </TableContainer>

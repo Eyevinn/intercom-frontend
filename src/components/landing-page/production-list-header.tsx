@@ -15,6 +15,7 @@ const HeaderContainer = styled(DisplayContainer)`
   width: 100%;
   max-width: 100%;
   justify-content: space-between;
+
   svg {
     height: 2.5rem;
     width: 2.5rem;
@@ -49,8 +50,13 @@ const HeaderButton = styled.div`
   display: inline-flex;
   justify-content: center;
   align-items: center;
+
   &:hover {
     cursor: pointer;
+  }
+
+  svg {
+    width: 2rem;
   }
 `;
 

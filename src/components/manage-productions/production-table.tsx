@@ -40,10 +40,10 @@ const TableHeader = styled.div`
 const TableIcon = styled.span`
   font-size: 1.4rem;
   transform: ${({ isOpen }: { isOpen: boolean }) => (isOpen ? "50rem" : "0")};
-`;
 
-const IconWrapper = styled.div`
-  width: 2.4rem;
+  svg {
+    width: 2.4rem;
+  }
 `;
 
 const TableBody = styled.div<{ isOpen: boolean }>`
@@ -141,9 +141,7 @@ export const ProductionTable = ({
           <TableHeader isOpen={isOpen} onClick={toggleOpen}>
             <span>Production List</span>
             <TableIcon isOpen={isOpen}>
-              <IconWrapper>
-                {isOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}
-              </IconWrapper>
+              {isOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}
             </TableIcon>
           </TableHeader>
           <TableBody isOpen={isOpen} onScroll={onScroll}>

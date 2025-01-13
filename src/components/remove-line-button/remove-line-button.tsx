@@ -7,10 +7,11 @@ const RemoveLineBtn = styled.button`
   border: transparent;
   position: ${({ isCreatingLine }: { isCreatingLine?: boolean }) =>
     isCreatingLine ? "absolute" : "relative"};
-`;
 
-const ButtonIcon = styled.div`
-  width: 2.5rem;
+  svg {
+    width: 2.5rem;
+    fill: #f96c6c;
+  }
 `;
 
 export const RemoveLineButton = ({
@@ -26,9 +27,7 @@ export const RemoveLineButton = ({
       type="button"
       onClick={() => removeLine()}
     >
-      <ButtonIcon>
-        <RemoveIcon />
-      </ButtonIcon>
+      <RemoveIcon />
     </RemoveLineBtn>
   );
 };

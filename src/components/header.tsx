@@ -27,6 +27,7 @@ const Logo = styled.svg`
   height: 2.4rem;
   margin-right: 1rem;
   margin-left: 1rem;
+  fill: #59cbe8;
 `;
 
 export const Header: FC = () => {
