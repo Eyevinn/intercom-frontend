@@ -20,14 +20,14 @@ const HeaderWrapper = styled.div`
   font-weight: semi-bold;
   margin: 0 0 1rem 0;
   cursor: pointer;
-`;
 
-const Logo = styled.svg`
-  width: 2.4rem;
-  height: 2.4rem;
-  margin-right: 1rem;
-  margin-left: 1rem;
-  fill: #59cbe8;
+  svg {
+    width: 2.4rem;
+    height: 2.4rem;
+    margin-right: 1rem;
+    margin-left: 1rem;
+    fill: #59cbe8;
+  }
 `;
 
 export const Header: FC = () => {
@@ -67,9 +67,7 @@ export const Header: FC = () => {
   return (
     <>
       <HeaderWrapper onClick={returnToRoot}>
-        <Logo>
-          <HeadsetIcon />
-        </Logo>
+        <HeadsetIcon />
         Intercom
       </HeaderWrapper>
       {confirmExitModalOpen && (

@@ -79,6 +79,18 @@ const ButtonIcon = styled.div`
   display: inline-block;
   vertical-align: middle;
   margin: 0 auto;
+
+  &.mute {
+    svg {
+      fill: #f96c6c;
+    }
+  }
+
+  &.unmuted {
+    svg {
+      fill: #6fd84f;
+    }
+  }
 `;
 
 const FlexButtonWrapper = styled.div`
@@ -105,18 +117,6 @@ const UserControlBtn = styled(ActionButton)`
 
   svg {
     width: 2rem;
-  }
-
-  &.mute {
-    svg {
-      fill: #f96c6c;
-    }
-  }
-
-  &.unmuted {
-    svg {
-      fill: #6fd84f;
-    }
   }
 `;
 
@@ -709,11 +709,12 @@ export const ProductionLine = ({
                   <FlexButtonWrapper className="first">
                     <UserControlBtn
                       type="button"
-                      className={isOutputMuted ? "mute" : "unmuted"}
                       onClick={() => muteOutput()}
                       disabled={value === 0}
                     >
-                      <ButtonIcon>
+                      <ButtonIcon
+                        className={isOutputMuted ? "mute" : "unmuted"}
+                      >
                         {isOutputMuted || value === 0 ? (
                           <SpeakerOff />
                         ) : (
@@ -734,7 +735,9 @@ export const ProductionLine = ({
                         type="button"
                         onClick={() => muteInput(!isInputMuted)}
                       >
-                        <ButtonIcon>
+                        <ButtonIcon
+                          className={isInputMuted ? "mute" : "unmuted"}
+                        >
                           {isInputMuted ? <MicMuted /> : <MicUnmuted />}
                         </ButtonIcon>
                       </UserControlBtn>
