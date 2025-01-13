@@ -706,22 +706,24 @@ export const ProductionLine = ({
                 {!(
                   line?.programOutputLine && joinProductionOptions.isProgramUser
                 ) && (
-                <FlexButtonWrapper className="first">
-                  <UserControlBtn
-                    type="button"
-                    className={isOutputMuted ? "mute" : "unmuted"}
-                    onClick={() => muteOutput()}
-                    disabled={value === 0}
-                  >
-                    <ButtonIcon>
-                      {isOutputMuted || value === 0 ? (
-                        <SpeakerOff />
-                      ) : (
-                        <SpeakerOn />
-                      )}
-                    </ButtonIcon>
-                  </UserControlBtn>
-                </FlexButtonWrapper>
+                  <FlexButtonWrapper className="first">
+                    <UserControlBtn
+                      type="button"
+                      className={isOutputMuted ? "mute" : "unmuted"}
+                      onClick={() => muteOutput()}
+                      disabled={value === 0}
+                    >
+                      <ButtonIcon>
+                        {isOutputMuted || value === 0 ? (
+                          <SpeakerOff />
+                        ) : (
+                          <SpeakerOn />
+                        )}
+                      </ButtonIcon>
+                    </UserControlBtn>
+                  </FlexButtonWrapper>
+                )}
+
                 {inputAudioStream &&
                   inputAudioStream !== "no-device" &&
                   (line?.programOutputLine
