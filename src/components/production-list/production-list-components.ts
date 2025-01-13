@@ -140,11 +140,11 @@ export const PersonText = styled.div`
 export const DeleteButton = styled(SecondaryButton)`
   display: flex;
   align-items: center;
-  background: #dc2626;
+  background: #d15c5c;
   color: white;
 
   &:disabled {
-    background: #990f0f;
+    background: #ab5252;
   }
 `;
 
