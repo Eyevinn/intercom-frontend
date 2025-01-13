@@ -55,6 +55,10 @@ const ModalCloseButton = styled.button`
 
 const CancelButton = styled(ActionButton)`
   background: #d6d3d1;
+
+  &:disabled {
+    background: rgba(214, 211, 209, 0.8);
+  }
 `;
 
 const ButtonDiv = styled.div`

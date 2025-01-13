@@ -159,6 +159,10 @@ export const PrimaryButton = styled(ActionButton)`
   &:not(:disabled):active {
     transform: translateY(0.125rem);
   }
+
+  &:disabled {
+    background: rgba(89, 203, 232, 0.5);
+  }
 `;
 
 export const SecondaryButton = styled(ActionButton)`
@@ -216,5 +220,9 @@ export const SecondaryButton = styled(ActionButton)`
     left: 0.4rem;
     right: 0.4rem;
     top: 0.4rem;
+  }
+
+  &:disabled {
+    background: rgba(255, 255, 255, 0.8);
   }
 `;

@@ -12,6 +12,10 @@ const RemoveBtn = styled(ActionButton)`
   &:active:enabled {
     background: #990f0f;
   }
+
+  &:disabled {
+    background: rgba(220, 38, 38, 0.8);
+  }
 `;
 
 type TRemoveButton = {
