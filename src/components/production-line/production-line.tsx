@@ -407,7 +407,7 @@ export const ProductionLine = ({
 
   useEffect(() => {
     if (line?.programOutputLine && joinProductionOptions?.isProgramUser) {
-      muteOutput();
+      setIsOutputMuted(true);
     } else if (
       line?.programOutputLine &&
       !joinProductionOptions?.isProgramUser

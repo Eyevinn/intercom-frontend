@@ -6,7 +6,6 @@ import {
   ChevronDownIcon,
   ChevronUpIcon,
   UserIcon,
-  RemoveIcon,
   UsersIcon,
 } from "../../assets/icons/icon";
 import {
@@ -56,7 +55,6 @@ export const ProductionsListItem = ({
   const [isProgramUser, setIsProgramUser] = useState<boolean>(false);
   const navigate = useNavigate();
 
-  const [open, setOpen] = useState<boolean>(false);
   const [showFullUserList, setShowFullUserList] = useState<boolean>(false);
   const [selectedLine, setSelectedLine] = useState<TLine | null>();
   const [lineRemoveId, setLineRemoveId] = useState<string>("");
