@@ -181,7 +181,6 @@ const CallHeaderWrapper = styled.div`
   display: flex;
   align-items: center;
   margin-bottom: 2rem;
-  border: 0.5rem solid #f0c900;
 `;
 
 type TProductionLine = {
