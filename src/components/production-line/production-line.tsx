@@ -486,6 +486,10 @@ export const ProductionLine = ({
   }, [isProgramOutputLine, isProgramUser]);
 
   useEffect(() => {
+    console.log("VALUE: ", value);
+  }, [value]);
+
+  useEffect(() => {
     let volumeReductionTimeout: NodeJS.Timeout;
     let intermediateIncreaseTimeout1: NodeJS.Timeout;
     let intermediateIncreaseTimeout2: NodeJS.Timeout;
@@ -509,6 +513,7 @@ export const ProductionLine = ({
         audioElements?.forEach((audioElement) => {
           // eslint-disable-next-line no-param-reassign
           audioElement.volume *= volumeChangeFactor;
+          console.log("VOLUME REDUCED TO: ", audioElement.volume);
         });
       }, 1000);
 
@@ -529,6 +534,7 @@ export const ProductionLine = ({
         audioElements?.forEach((audioElement) => {
           // eslint-disable-next-line no-param-reassign
           audioElement.volume += increasePerStep;
+          console.log("VOLUME INCREASED TO (STEP 1): ", audioElement.volume);
         });
       }, 2000);
 
@@ -536,6 +542,7 @@ export const ProductionLine = ({
         audioElements?.forEach((audioElement) => {
           // eslint-disable-next-line no-param-reassign
           audioElement.volume += increasePerStep;
+          console.log("VOLUME INCREASED TO (STEP 2): ", audioElement.volume);
         });
       }, 2500);
 
@@ -543,6 +550,10 @@ export const ProductionLine = ({
         audioElements?.forEach((audioElement) => {
           // eslint-disable-next-line no-param-reassign
           audioElement.volume += increasePerStep;
+          console.log(
+            "VOLUME INCREASED TO (FINAL STEP): ",
+            audioElement.volume
+          );
         });
         setHasReduced(false);
       }, 3000);
