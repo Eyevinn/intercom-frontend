@@ -513,7 +513,7 @@ export const ProductionLine = ({
         audioElements?.forEach((audioElement) => {
           // eslint-disable-next-line no-param-reassign
           audioElement.volume *= volumeChangeFactor;
-          console.log("VOLUME REDUCED TO: ", audioElement.volume);
+          console.log("VOLUME REDUCTION: ", audioElement.volume);
         });
       }, 1000);
 
@@ -542,7 +542,7 @@ export const ProductionLine = ({
         audioElements?.forEach((audioElement) => {
           // eslint-disable-next-line no-param-reassign
           audioElement.volume += increasePerStep;
-          console.log("VOLUME INCREASED TO (STEP 2): ", audioElement.volume);
+          console.log("VOLUME STEP 2: ", audioElement.volume);
         });
       }, 2500);
 
@@ -550,10 +550,7 @@ export const ProductionLine = ({
         audioElements?.forEach((audioElement) => {
           // eslint-disable-next-line no-param-reassign
           audioElement.volume += increasePerStep;
-          console.log(
-            "VOLUME INCREASED TO (FINAL STEP): ",
-            audioElement.volume
-          );
+          console.log("VOLUME STEP 3: ", audioElement.volume);
         });
         setHasReduced(false);
       }, 3000);
@@ -578,6 +575,30 @@ export const ProductionLine = ({
     audioElements,
     initialVolume,
   ]);
+
+  useEffect(() => {
+    console.log("VALUE: ", value);
+  }, [value]);
+
+  useEffect(() => {
+    console.log("SHOULD REDUCE VOLUME: ", shouldReduceVolume);
+  }, [shouldReduceVolume]);
+
+  useEffect(() => {
+    console.log("HAS REDUCED: ", hasReduced);
+  }, [hasReduced]);
+
+  useEffect(() => {
+    console.log("INITIAL VOLUME: ", initialVolume);
+  }, [initialVolume]);
+
+  useEffect(() => {
+    console.log("PROGRAM OUTPUT: ", line?.programOutputLine);
+  }, [line?.programOutputLine]);
+
+  useEffect(() => {
+    console.log("AUDIO ELEMENTS: ", audioElements);
+  }, [audioElements]);
 
   useEffect(() => {
     if (!fetchProductionError) return;
