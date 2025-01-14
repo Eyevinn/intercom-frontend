@@ -289,12 +289,28 @@ export const ProductionLine = ({
     }
   });
 
+  const line = useLinePolling({ callId: id, joinProductionOptions });
+  const isProgramOutputLine = line && line.programOutputLine;
+  const isProgramUser =
+    joinProductionOptions && joinProductionOptions.isProgramUser;
+
+  const { production, error: fetchProductionError } = useFetchProduction(
+    joinProductionOptions
+      ? parseInt(joinProductionOptions.productionId, 10)
+      : null
+  );
+
   const muteInput = useCallback(
     (mute: boolean) => {
       if (inputAudioStream && inputAudioStream !== "no-device") {
         inputAudioStream.getTracks().forEach((t) => {
-          // eslint-disable-next-line no-param-reassign
-          t.enabled = !mute;
+          if (isProgramOutputLine && !isProgramUser) {
+            // eslint-disable-next-line no-param-reassign
+            t.enabled = false;
+          } else {
+            // eslint-disable-next-line no-param-reassign
+            t.enabled = !mute;
+          }
         });
         setIsInputMuted(mute);
       }
@@ -310,7 +326,7 @@ export const ProductionLine = ({
         });
       }
     },
-    [dispatch, id, inputAudioStream]
+    [dispatch, id, inputAudioStream, isProgramOutputLine, isProgramUser]
   );
 
   useEffect(() => {
@@ -320,10 +336,10 @@ export const ProductionLine = ({
   }, [confirmModalOpen]);
 
   useEffect(() => {
-    if (isRemotelyMuted) {
+    if (isRemotelyMuted && !isProgramOutputLine) {
       muteInput(true);
     }
-  }, [isRemotelyMuted, muteInput]);
+  }, [isProgramOutputLine, isRemotelyMuted, muteInput]);
 
   const { playEnterSound, playExitSound } = useAudioCue();
 
@@ -355,14 +371,18 @@ export const ProductionLine = ({
   }, [joinProductionOptions]);
 
   useEffect(() => {
-    if (inputAudioStream && inputAudioStream !== "no-device") {
+    if (
+      inputAudioStream &&
+      inputAudioStream !== "no-device" &&
+      !isProgramOutputLine
+    ) {
       inputAudioStream.getTracks().forEach((t) => {
         // eslint-disable-next-line no-param-reassign
         t.enabled = !masterInputMute;
       });
       setIsInputMuted(masterInputMute);
     }
-    if (masterInputMute) {
+    if (masterInputMute && !isProgramOutputLine) {
       dispatch({
         type: "UPDATE_CALL",
         payload: {
@@ -373,7 +393,7 @@ export const ProductionLine = ({
         },
       });
     }
-  }, [dispatch, id, inputAudioStream, masterInputMute]);
+  }, [dispatch, id, inputAudioStream, isProgramOutputLine, masterInputMute]);
 
   useEffect(() => {
     if (connectionState === "connected") {
@@ -397,29 +417,11 @@ export const ProductionLine = ({
     customKey: savedHotkeys?.speakerHotkey || "n",
   });
 
-  const line = useLinePolling({ callId: id, joinProductionOptions });
-
-  const { production, error: fetchProductionError } = useFetchProduction(
-    joinProductionOptions
-      ? parseInt(joinProductionOptions.productionId, 10)
-      : null
-  );
-
   useEffect(() => {
-    if (line?.programOutputLine && joinProductionOptions?.isProgramUser) {
+    if (isProgramOutputLine && isProgramUser) {
       setIsOutputMuted(true);
-    } else if (
-      line?.programOutputLine &&
-      !joinProductionOptions?.isProgramUser
-    ) {
-      muteInput(true);
     }
-  }, [
-    line?.programOutputLine,
-    joinProductionOptions?.isProgramUser,
-    muteInput,
-    muteOutput,
-  ]);
+  }, [isProgramOutputLine, isProgramUser]);
 
   useEffect(() => {
     let volumeReductionTimeout: NodeJS.Timeout;
