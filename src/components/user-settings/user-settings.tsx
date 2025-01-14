@@ -26,6 +26,11 @@ export const ResponsiveFormContainer = styled(FormContainer)`
     margin-top: 15rem;
     width: 50rem;
   }
+
+  &.calls-page {
+    margin: 0;
+    padding: 2rem;
+  }
 `;
 
 export const ButtonWrapper = styled.div`

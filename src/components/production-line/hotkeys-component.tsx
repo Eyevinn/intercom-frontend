@@ -9,16 +9,17 @@ const TempDiv = styled.div`
 `;
 
 const HotkeyDiv = styled.div`
-  padding: 0 0 2rem 0;
-  flex-direction: row;
-  display: flex;
+  position: relative;
   align-items: center;
+  padding-top: 1rem;
 `;
 
 const SettingsBtn = styled.div`
   padding: 0;
-  margin-left: 1.5rem;
   width: 3rem;
+  position: absolute;
+  top: 0;
+  right: 0;
   cursor: pointer;
   color: white;
   background: transparent;
@@ -51,7 +52,6 @@ export const HotkeysComponent = ({
   return (
     <>
       <HotkeyDiv>
-        <strong>Hotkeys</strong>
         <SettingsBtn onClick={handleSettingsClick}>
           <SettingsIcon />
         </SettingsBtn>

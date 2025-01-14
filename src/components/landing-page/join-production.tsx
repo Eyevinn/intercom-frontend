@@ -49,6 +49,7 @@ type TProps = {
   customGlobalMute: string;
   addAdditionalCallId?: string;
   closeAddCallView?: () => void;
+  className?: string;
 };
 
 export const JoinProduction = ({
@@ -56,6 +57,7 @@ export const JoinProduction = ({
   customGlobalMute,
   addAdditionalCallId,
   closeAddCallView,
+  className,
 }: TProps) => {
   const [joinProductionId, setJoinProductionId] = useState<null | number>(null);
   const [joinProductionOptions, setJoinProductionOptions] =
@@ -209,7 +211,9 @@ export const JoinProduction = ({
   };
 
   return (
-    <ResponsiveFormContainer className={isMobile ? "" : "desktop"}>
+    <ResponsiveFormContainer
+      className={`${isMobile ? "" : "desktop"} ${className}`}
+    >
       <DisplayContainerHeader>Join Production</DisplayContainerHeader>
       {devices && (
         <>
