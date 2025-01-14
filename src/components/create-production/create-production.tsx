@@ -228,7 +228,7 @@ export const CreateProduction = () => {
             <CheckboxWrapper>
               <Checkbox
                 label="This line will be used for a program output"
-                checked={field.value}
+                checked={field.value || false}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   field.onChange(e.target.checked)
                 }
@@ -264,7 +264,7 @@ export const CreateProduction = () => {
                   <CheckboxWrapper>
                     <Checkbox
                       label="This line will be used for a program output"
-                      checked={controllerField.value}
+                      checked={controllerField.value || false}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                         controllerField.onChange(e.target.checked)
                       }
