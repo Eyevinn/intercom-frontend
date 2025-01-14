@@ -461,7 +461,7 @@ export const ProductionLine = ({
       const increasePerStep = totalIncrease / 3;
 
       intermediateIncreaseTimeout1 = setTimeout(() => {
-        setValue((prevValue) => prevValue + increasePerStep);
+        setValue((prevValue) => prevValue + totalIncrease);
         audioElements?.forEach((audioElement) => {
           // eslint-disable-next-line no-param-reassign
           audioElement.volume += increasePerStep;
@@ -469,7 +469,6 @@ export const ProductionLine = ({
       }, 2000);
 
       intermediateIncreaseTimeout2 = setTimeout(() => {
-        setValue((prevValue) => prevValue + increasePerStep);
         audioElements?.forEach((audioElement) => {
           // eslint-disable-next-line no-param-reassign
           audioElement.volume += increasePerStep;
@@ -477,7 +476,6 @@ export const ProductionLine = ({
       }, 2500);
 
       finalIncreaseTimeout = setTimeout(() => {
-        setValue((prevValue) => prevValue + increasePerStep);
         audioElements?.forEach((audioElement) => {
           // eslint-disable-next-line no-param-reassign
           audioElement.volume += increasePerStep;
