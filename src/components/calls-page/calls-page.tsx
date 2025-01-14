@@ -3,15 +3,15 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useGlobalState } from "../../global-state/context-provider";
 import { JoinProduction } from "../landing-page/join-production";
-import { ProductionLine } from "../production-line/production-line";
 import { PrimaryButton, SecondaryButton } from "../landing-page/form-elements";
 import { NavigateToRootButton } from "../navigate-to-root-button/navigate-to-root-button";
 import { DisplayContainerHeader } from "../landing-page/display-container-header";
 import { Modal } from "../modal/modal";
 import { VerifyDecision } from "../verify-decision/verify-decision";
 import { ModalConfirmationText } from "../modal/modal-confirmation-text";
-import { MegaphoneIcon } from "../../assets/icons/icon";
+import { MicMuted, MicUnmuted } from "../../assets/icons/icon";
 import { useGlobalHotkeys } from "../production-line/use-line-hotkeys";
+import { ProductionLine } from "../production-line/production-line";
 
 const Container = styled.div`
   display: flex;
@@ -24,7 +24,10 @@ const CallsContainer = styled.div`
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-  padding: 2rem;
+
+  form {
+    margin: 0;
+  }
 `;
 
 const CallContainer = styled.div`
@@ -37,35 +40,29 @@ const CallContainer = styled.div`
 
 const AddCallContainer = styled.div`
   display: flex;
-  flex-direction: column;
-  padding: 4rem;
-  max-width: 40rem;
-  min-width: 30rem;
 `;
 
 const ButtonWrapper = styled.div`
   display: flex;
-  margin: 0 1rem 1rem 0;
-  :last-of-type {
-    margin: 0 0 4rem;
-  }
+  justify-content: space-between;
+  height: 4rem;
 `;
 
 const MuteAllCallsBtn = styled(PrimaryButton)`
   background: rgba(50, 56, 59, 1);
   color: #6fd84f;
   border: 0.2rem solid #6d6d6d;
-  padding: 0.5rem 1rem;
-  margin: 0 0 0 1rem;
-  width: fit-content;
-  height: 4rem;
-
   &.mute {
-    color: #f96c6c;
     svg {
       fill: #f96c6c;
     }
   }
+
+  padding: 1rem;
+  margin-right: 1rem;
+  display: flex;
+  align-items: center;
+  color: white;
 
   svg {
     fill: #6fd84f;
@@ -73,9 +70,8 @@ const MuteAllCallsBtn = styled(PrimaryButton)`
   }
 `;
 
-const MuteAllCallsBtnText = styled.span`
-  text-align: center;
-  width: 100%;
+const HeaderRightSide = styled.div`
+  display: flex;
 `;
 
 export const CallsPage = () => {
@@ -161,31 +157,52 @@ export const CallsPage = () => {
             }
           }}
         />
-        {confirmExitModalOpen && (
-          <Modal onClose={() => setConfirmExitModalOpen(false)}>
-            <DisplayContainerHeader>Confirm</DisplayContainerHeader>
-            <ModalConfirmationText>
-              Are you sure you want to leave all calls?
-            </ModalConfirmationText>
-            <VerifyDecision
-              confirm={runExitAllCalls}
-              abort={() => setConfirmExitModalOpen(false)}
-            />
-          </Modal>
-        )}
-        {!isEmpty && !isSingleCall && (
-          <MuteAllCallsBtn
-            type="button"
-            className={!isMasterInputMuted ? "mute" : ""}
-            onClick={() => setIsMasterInputMuted(!isMasterInputMuted)}
-          >
-            <MuteAllCallsBtnText>
-              {isMasterInputMuted ? "Mute" : "Unmute"} all Inputs
-            </MuteAllCallsBtnText>
-            <MegaphoneIcon />
-          </MuteAllCallsBtn>
-        )}
+        <HeaderRightSide>
+          {confirmExitModalOpen && (
+            <Modal onClose={() => setConfirmExitModalOpen(false)}>
+              <DisplayContainerHeader>Confirm</DisplayContainerHeader>
+              <ModalConfirmationText>
+                Are you sure you want to leave all calls?
+              </ModalConfirmationText>
+              <VerifyDecision
+                confirm={runExitAllCalls}
+                abort={() => setConfirmExitModalOpen(false)}
+              />
+            </Modal>
+          )}
+          {!isEmpty && !isSingleCall && (
+            <MuteAllCallsBtn
+              type="button"
+              onClick={() => setIsMasterInputMuted(!isMasterInputMuted)}
+              className={isMasterInputMuted ? "mute" : ""}
+            >
+              {isMasterInputMuted ? "Unmute All" : "Mute All"}
+              {isMasterInputMuted ? <MicMuted /> : <MicUnmuted />}
+            </MuteAllCallsBtn>
+          )}
+          {!isEmpty && (
+            <AddCallContainer>
+              <ButtonWrapper>
+                <SecondaryButton
+                  type="button"
+                  onClick={() => setAddCallActive(!addCallActive)}
+                >
+                  Add Call
+                </SecondaryButton>
+              </ButtonWrapper>
+            </AddCallContainer>
+          )}
+        </HeaderRightSide>
       </ButtonWrapper>
+      {isEmpty && paramProductionId && paramLineId && (
+        <JoinProduction
+          preSelected={{
+            preSelectedProductionId: paramProductionId,
+            preSelectedLineId: paramLineId,
+          }}
+          customGlobalMute={customGlobalMute}
+        />
+      )}
       <CallsContainer>
         {Object.entries(calls).map(
           ([callId, callState]) =>
@@ -203,32 +220,12 @@ export const CallsPage = () => {
               </CallContainer>
             )
         )}
-        {!isEmpty && (
-          <AddCallContainer>
-            <ButtonWrapper>
-              <SecondaryButton
-                type="button"
-                onClick={() => setAddCallActive(!addCallActive)}
-              >
-                Add Call
-              </SecondaryButton>
-            </ButtonWrapper>
-            {addCallActive && productionId && (
-              <JoinProduction
-                customGlobalMute={customGlobalMute}
-                addAdditionalCallId={productionId}
-                closeAddCallView={() => setAddCallActive(false)}
-              />
-            )}
-          </AddCallContainer>
-        )}
-        {isEmpty && paramProductionId && paramLineId && (
+        {addCallActive && productionId && (
           <JoinProduction
-            preSelected={{
-              preSelectedProductionId: paramProductionId,
-              preSelectedLineId: paramLineId,
-            }}
             customGlobalMute={customGlobalMute}
+            addAdditionalCallId={productionId}
+            closeAddCallView={() => setAddCallActive(false)}
+            className="calls-page"
           />
         )}
       </CallsContainer>

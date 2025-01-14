@@ -1,5 +1,4 @@
 import styled from "@emotion/styled";
-import { DisplayContainerHeader } from "../landing-page/display-container-header.tsx";
 import { TParticipant } from "./types.ts";
 import { MicMuted, UserIcon } from "../../assets/icons/icon.tsx";
 
@@ -125,7 +124,6 @@ export const UserList = ({
 
   return (
     <Container>
-      <DisplayContainerHeader>Participants</DisplayContainerHeader>
       <ListWrapper>
         {participants.map((p) => {
           const isYou = p.sessionId === sessionId;

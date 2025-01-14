@@ -300,39 +300,41 @@ export const SettingsModal = ({
                   />
                 )}
               </FormLabel>
-              <FormLabel>
-                <DecorativeLabel>Toggle push to talk: </DecorativeLabel>
-                <FormInput
-                  id="hotkeyPushToTalk"
-                  ref={(el) => setInputRef(2, el)}
-                  type="text"
-                  value={hotkeys.pushToTalkHotkey}
-                  onChange={(e) =>
-                    handleInputChange("pushToTalkHotkey", e.target.value)
-                  }
-                  placeholder="Enter hotkey"
-                  maxLength={1}
-                  onKeyDown={(e) => handleKeyDown(e, 2)}
-                />
-                {errors.pushToTalkHotkey && (
-                  <ErrorMessage
-                    errors={{
-                      longpresskey: { message: errors.pushToTalkHotkey },
-                    }}
-                    name="longpresskey"
-                    as={<StyledWarningMessage className="error-message" />}
+              {!programOutPutLine && (
+                <FormLabel>
+                  <DecorativeLabel>Toggle push to talk: </DecorativeLabel>
+                  <FormInput
+                    id="hotkeyPushToTalk"
+                    ref={(el) => setInputRef(2, el)}
+                    type="text"
+                    value={hotkeys.pushToTalkHotkey}
+                    onChange={(e) =>
+                      handleInputChange("pushToTalkHotkey", e.target.value)
+                    }
+                    placeholder="Enter hotkey"
+                    maxLength={1}
+                    onKeyDown={(e) => handleKeyDown(e, 2)}
                   />
-                )}
-                {!errors.pushToTalkHotkey && warning.pushToTalkHotkey && (
-                  <ErrorMessage
-                    errors={{
-                      longpresskey: { message: warning.pushToTalkHotkey },
-                    }}
-                    name="longpresskey"
-                    as={StyledWarningMessage}
-                  />
-                )}
-              </FormLabel>
+                  {errors.pushToTalkHotkey && (
+                    <ErrorMessage
+                      errors={{
+                        longpresskey: { message: errors.pushToTalkHotkey },
+                      }}
+                      name="longpresskey"
+                      as={<StyledWarningMessage className="error-message" />}
+                    />
+                  )}
+                  {!errors.pushToTalkHotkey && warning.pushToTalkHotkey && (
+                    <ErrorMessage
+                      errors={{
+                        longpresskey: { message: warning.pushToTalkHotkey },
+                      }}
+                      name="longpresskey"
+                      as={StyledWarningMessage}
+                    />
+                  )}
+                </FormLabel>
+              )}
               <FormLabel>
                 <DecorativeLabel>Increase volume:</DecorativeLabel>
                 <FormInput
@@ -411,39 +413,41 @@ export const SettingsModal = ({
               </FormLabel>
             </>
           )}
-          <FormLabel>
-            <DecorativeLabel>Toggle mute all microphones: </DecorativeLabel>
-            <FormInput
-              id="globalMuteMicrophones"
-              ref={(el) => setInputRef(3, el)}
-              type="text"
-              value={hotkeys.globalMuteHotkey}
-              onChange={(e) =>
-                handleInputChange("globalMuteHotkey", e.target.value)
-              }
-              placeholder="Enter hotkey"
-              maxLength={1}
-              onKeyDown={(e) => handleKeyDown(e, 3)}
-            />
-            {errors.globalMuteHotkey && (
-              <ErrorMessage
-                errors={{
-                  globalMuteHotkey: { message: errors.globalMuteHotkey },
-                }}
-                name="globalMuteHotkey"
-                as={<StyledWarningMessage className="error-message" />}
+          {!programOutPutLine && (
+            <FormLabel>
+              <DecorativeLabel>Toggle mute all microphones: </DecorativeLabel>
+              <FormInput
+                id="globalMuteMicrophones"
+                ref={(el) => setInputRef(3, el)}
+                type="text"
+                value={hotkeys.globalMuteHotkey}
+                onChange={(e) =>
+                  handleInputChange("globalMuteHotkey", e.target.value)
+                }
+                placeholder="Enter hotkey"
+                maxLength={1}
+                onKeyDown={(e) => handleKeyDown(e, 3)}
               />
-            )}
-            {!errors.globalMuteHotkey && warning.globalMuteHotkey && (
-              <ErrorMessage
-                errors={{
-                  globalMuteHotkey: { message: warning.globalMuteHotkey },
-                }}
-                name="globalMuteHotkey"
-                as={StyledWarningMessage}
-              />
-            )}
-          </FormLabel>
+              {errors.globalMuteHotkey && (
+                <ErrorMessage
+                  errors={{
+                    globalMuteHotkey: { message: errors.globalMuteHotkey },
+                  }}
+                  name="globalMuteHotkey"
+                  as={<StyledWarningMessage className="error-message" />}
+                />
+              )}
+              {!errors.globalMuteHotkey && warning.globalMuteHotkey && (
+                <ErrorMessage
+                  errors={{
+                    globalMuteHotkey: { message: warning.globalMuteHotkey },
+                  }}
+                  name="globalMuteHotkey"
+                  as={StyledWarningMessage}
+                />
+              )}
+            </FormLabel>
+          )}
           <ButtonDiv>
             <CancelButton type="button" onClick={onClose}>
               Cancel
