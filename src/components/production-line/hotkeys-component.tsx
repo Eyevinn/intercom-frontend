@@ -40,6 +40,9 @@ export const HotkeysComponent = ({
   joinProductionOptions,
 }: HotkeysComponentProps) => {
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+  const isProgramOutputLine = line && line.programOutputLine;
+  const isProgramUser =
+    joinProductionOptions && joinProductionOptions.isProgramUser;
 
   const handleSettingsClick = () => {
     setIsSettingsModalOpen(!isSettingsModalOpen);
@@ -53,15 +56,13 @@ export const HotkeysComponent = ({
           <SettingsIcon />
         </SettingsBtn>
       </HotkeyDiv>
-      {(line?.programOutputLine
-        ? joinProductionOptions?.isProgramUser
-        : !joinProductionOptions.isProgramUser) && (
+      {(isProgramOutputLine ? isProgramUser : !isProgramUser) && (
         <TempDiv>
           <strong>{(savedHotkeys?.muteHotkey || "").toUpperCase()}: </strong>
           Toggle Input Mute
         </TempDiv>
       )}
-      {!(line?.programOutputLine && joinProductionOptions.isProgramUser) && (
+      {!(isProgramOutputLine && isProgramUser) && (
         <>
           <TempDiv>
             <strong>
@@ -89,12 +90,14 @@ export const HotkeysComponent = ({
           </TempDiv>
         </>
       )}
-      <TempDiv>
-        <strong>
-          {(savedHotkeys?.globalMuteHotkey || "").toUpperCase()}:{" "}
-        </strong>
-        Toggle Mute All Inputs
-      </TempDiv>
+      {!isProgramOutputLine && (
+        <TempDiv>
+          <strong>
+            {(savedHotkeys?.globalMuteHotkey || "").toUpperCase()}:{" "}
+          </strong>
+          Toggle Mute All Inputs
+        </TempDiv>
+      )}
       {isSettingsModalOpen && (
         <SettingsModal
           isOpen={isSettingsModalOpen}
