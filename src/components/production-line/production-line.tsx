@@ -432,10 +432,6 @@ export const ProductionLine = ({
     // Reduce volume by 80%
     const volumeChangeFactor = 0.2;
 
-    // Steps for increasing volume back to original level
-    const increaseStep1 = 0.25;
-    const increaseStep2 = 0.5;
-
     if (
       shouldReduceVolume &&
       line?.programOutputLine &&
@@ -463,50 +459,30 @@ export const ProductionLine = ({
       }
 
       const reductionAmount = 1 - volumeChangeFactor;
+      const totalIncrease = initialVolume * reductionAmount;
+      const increasePerStep = totalIncrease / 3;
 
       intermediateIncreaseTimeout1 = setTimeout(() => {
-        setValue(
-          (prevValue) =>
-            prevValue + increaseStep1 * initialVolume * reductionAmount
-        );
-
+        setValue((prevValue) => prevValue + totalIncrease);
         audioElements?.forEach((audioElement) => {
           // eslint-disable-next-line no-param-reassign
-          audioElement.volume +=
-            increaseStep1 * initialVolume * reductionAmount;
+          audioElement.volume += increasePerStep;
         });
       }, 2000);
 
       intermediateIncreaseTimeout2 = setTimeout(() => {
-        setValue(
-          (prevValue) =>
-            prevValue + increaseStep2 * initialVolume * reductionAmount
-        );
-
         audioElements?.forEach((audioElement) => {
           // eslint-disable-next-line no-param-reassign
-          audioElement.volume +=
-            increaseStep2 * initialVolume * reductionAmount;
+          audioElement.volume += increasePerStep;
         });
       }, 2500);
 
       finalIncreaseTimeout = setTimeout(() => {
-        setValue(
-          (prevValue) =>
-            prevValue +
-            (1 - increaseStep1 - increaseStep2) *
-              initialVolume *
-              reductionAmount
-        );
-        setHasReduced(false);
-
         audioElements?.forEach((audioElement) => {
           // eslint-disable-next-line no-param-reassign
-          audioElement.volume +=
-            (1 - increaseStep1 - increaseStep2) *
-            initialVolume *
-            reductionAmount;
+          audioElement.volume += increasePerStep;
         });
+        setHasReduced(false);
       }, 3000);
 
       return () => {

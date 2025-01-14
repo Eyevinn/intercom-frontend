@@ -169,7 +169,7 @@ export const ManageProductionButtons: FC<ManageProductionButtonsProps> = (
                 render={({ field: controllerField }) => (
                   <Checkbox
                     label="This line will be used for a program output"
-                    checked={controllerField.value}
+                    checked={controllerField.value || false}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                       controllerField.onChange(e.target.checked)
                     }
