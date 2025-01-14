@@ -7,6 +7,7 @@ const DisplayBox = styled.div`
   border: ${borderRadius}rem solid #424242;
   border-radius: 0.5rem;
   max-width: 50rem;
+  margin: 0 1rem;
 `;
 
 const DisplayBoxTitle = styled.div`
