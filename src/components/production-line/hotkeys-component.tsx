@@ -70,12 +70,14 @@ export const HotkeysComponent = ({
             </strong>
             Toggle Output Mute
           </TempDiv>
-          <TempDiv>
-            <strong>
-              {(savedHotkeys?.pushToTalkHotkey || "").toUpperCase()}:{" "}
-            </strong>
-            Push to Talk
-          </TempDiv>
+          {!isProgramOutputLine && (
+            <TempDiv>
+              <strong>
+                {(savedHotkeys?.pushToTalkHotkey || "").toUpperCase()}:{" "}
+              </strong>
+              Push to Talk
+            </TempDiv>
+          )}
           <TempDiv>
             <strong>
               {savedHotkeys?.increaseVolumeHotkey.toUpperCase()}:{" "}
