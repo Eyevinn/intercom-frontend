@@ -56,6 +56,7 @@ type FormValues = TJoinProductionOptions;
 const HeaderWrapper = styled.div`
   display: flex;
   justify-content: space-between;
+  gap: 1rem;
 `;
 
 const ProductionLineInfo = styled.div`
@@ -91,7 +92,7 @@ const ButtonIcon = styled.div`
   }
 `;
 
-const FlexButtonWrapper = styled.div`
+const FlexButtonWrapper = styled.div<{ isProgramUser: boolean }>`
   width: 50%;
   padding: 0 1rem 2rem 1rem;
 
@@ -101,6 +102,7 @@ const FlexButtonWrapper = styled.div`
 
   &.last {
     padding-right: 0;
+    padding-left: ${({ isProgramUser }) => (isProgramUser ? "0" : "1rem")};
   }
 `;
 
@@ -126,6 +128,7 @@ const LongPressWrapper = styled.div`
 const ButtonWrapper = styled.div`
   display: flex;
   justify-content: space-between;
+  height: 4rem;
 `;
 
 const ListWrapper = styled(DisplayContainer)`
@@ -154,11 +157,27 @@ const ConnectionErrorWrapper = styled(FlexContainer)`
   padding-top: 12rem;
 `;
 
-const IconWrapper = styled.div`
-  width: 5rem;
-  height: 5rem;
-  margin-left: 2rem;
+const ProgramOutputIcon = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  background: rgba(50, 56, 59, 1);
+  color: #59cbe8;
+  border: 0.2rem solid #6d6d6d;
+  padding: 0.5rem 1rem;
+  width: fit-content;
+  height: 4rem;
+  border-radius: 0.5rem;
+  margin: 0 2rem 2rem 1rem;
+  gap: 1rem;
+  font-size: 1.2rem;
+
+  svg {
+    fill: #59cbe8;
+    width: 3.5rem;
+  }
 `;
+
 const DeviceButtonWrapper = styled.div`
   display: flex;
   justify-content: flex-end;
@@ -606,11 +625,6 @@ export const ProductionLine = ({
         {!isSingleCall && production && line && (
           <ButtonWrapper>
             <ExitCallButton resetOnExit={() => setConfirmExitModalOpen(true)} />
-            {line?.programOutputLine && (
-              <IconWrapper>
-                <TVIcon />
-              </IconWrapper>
-            )}
             {confirmExitModalOpen && (
               <Modal onClose={() => setConfirmExitModalOpen(false)}>
                 <DisplayContainerHeader>Confirm</DisplayContainerHeader>
@@ -624,6 +638,13 @@ export const ProductionLine = ({
               </Modal>
             )}
           </ButtonWrapper>
+        )}
+
+        {line?.programOutputLine && (
+          <ProgramOutputIcon>
+            <TVIcon />
+            Program Output
+          </ProgramOutputIcon>
         )}
       </HeaderWrapper>
 
@@ -682,7 +703,10 @@ export const ProductionLine = ({
                 {!(
                   line?.programOutputLine && joinProductionOptions.isProgramUser
                 ) && (
-                  <FlexButtonWrapper className="first">
+                  <FlexButtonWrapper
+                    className="first"
+                    isProgramUser={joinProductionOptions.isProgramUser}
+                  >
                     <UserControlBtn
                       type="button"
                       onClick={() => muteOutput()}
@@ -706,7 +730,10 @@ export const ProductionLine = ({
                   (line?.programOutputLine
                     ? joinProductionOptions?.isProgramUser
                     : !joinProductionOptions.isProgramUser) && (
-                    <FlexButtonWrapper className="last">
+                    <FlexButtonWrapper
+                      className="last"
+                      isProgramUser={joinProductionOptions.isProgramUser}
+                    >
                       <UserControlBtn
                         type="button"
                         onClick={() => muteInput(!isInputMuted)}
