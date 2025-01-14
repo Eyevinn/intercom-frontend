@@ -170,7 +170,7 @@ export const CallsPage = () => {
               />
             </Modal>
           )}
-          {!isEmpty && (
+          {!isEmpty && !isSingleCall && (
             <MuteAllCallsBtn
               type="button"
               onClick={() => setIsMasterInputMuted(!isMasterInputMuted)}
