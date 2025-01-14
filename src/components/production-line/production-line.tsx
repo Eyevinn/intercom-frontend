@@ -157,10 +157,31 @@ const ConnectionErrorWrapper = styled(FlexContainer)`
   padding-top: 12rem;
 `;
 
-const IconWrapper = styled.div`
-  width: 5rem;
-  height: 5rem;
-  margin-left: 2rem;
+const ProgramOutputIcon = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  background: rgba(50, 56, 59, 1);
+  color: #59cbe8;
+  border: 0.2rem solid #6d6d6d;
+  padding: 0.5rem 1rem;
+  width: fit-content;
+  height: 4rem;
+  border-radius: 0.5rem;
+  margin: 0 2rem 2rem 1rem;
+  gap: 1rem;
+
+  svg {
+    fill: #59cbe8;
+    width: 3.5rem;
+  }
+`;
+
+const CallHeaderWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  margin-bottom: 2rem;
+  border: 0.5rem solid #f0c900;
 `;
 
 type TProductionLine = {
@@ -619,29 +640,33 @@ export const ProductionLine = ({
   return (
     <>
       <HeaderWrapper>
-        {!isSingleCall && (
-          <ButtonWrapper>
-            <ExitCallButton resetOnExit={() => setConfirmExitModalOpen(true)} />
-            {line?.programOutputLine && (
-              <IconWrapper>
-                <TVIcon />
-              </IconWrapper>
-            )}
-            {confirmExitModalOpen && (
-              <Modal onClose={() => setConfirmExitModalOpen(false)}>
-                <DisplayContainerHeader>Confirm</DisplayContainerHeader>
-                <ModalConfirmationText>
-                  Are you sure you want to leave the call?
-                </ModalConfirmationText>
-                <VerifyDecision
-                  confirm={exit}
-                  abort={() => setConfirmExitModalOpen(false)}
-                />
-              </Modal>
-            )}
-          </ButtonWrapper>
-        )}
-
+        <CallHeaderWrapper>
+          {!isSingleCall && (
+            <ButtonWrapper>
+              <ExitCallButton
+                resetOnExit={() => setConfirmExitModalOpen(true)}
+              />
+              {confirmExitModalOpen && (
+                <Modal onClose={() => setConfirmExitModalOpen(false)}>
+                  <DisplayContainerHeader>Confirm</DisplayContainerHeader>
+                  <ModalConfirmationText>
+                    Are you sure you want to leave the call?
+                  </ModalConfirmationText>
+                  <VerifyDecision
+                    confirm={exit}
+                    abort={() => setConfirmExitModalOpen(false)}
+                  />
+                </Modal>
+              )}
+            </ButtonWrapper>
+          )}
+          {line?.programOutputLine && (
+            <ProgramOutputIcon>
+              <TVIcon />
+              Program Output
+            </ProgramOutputIcon>
+          )}
+        </CallHeaderWrapper>
         {!loading && production && line && (
           <DisplayContainerHeader>
             <SmallText>Production:</SmallText>
