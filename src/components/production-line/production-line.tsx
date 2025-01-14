@@ -19,13 +19,11 @@ import {
   FormLabel,
   FormContainer,
   FormSelect,
-  PrimaryButton,
   StyledWarningMessage,
 } from "../landing-page/form-elements.tsx";
 import { Spinner } from "../loader/loader.tsx";
 import { DisplayContainerHeader } from "../landing-page/display-container-header.tsx";
 import { DisplayContainer, FlexContainer } from "../generic-components.ts";
-import { useDeviceLabels } from "./use-device-labels.ts";
 import {
   isBrowserFirefox,
   isMobile,
@@ -50,20 +48,21 @@ import { VerifyDecision } from "../verify-decision/verify-decision.tsx";
 import { ModalConfirmationText } from "../modal/modal-confirmation-text.ts";
 import { SymphonyRtcConnectionComponent } from "./symphony-rtc-connection-component.tsx";
 import { ReloadDevicesButton } from "../reload-devices-button.tsx/reload-devices-button.tsx";
-import { useFetchDevices } from "../../hooks/use-fetch-devices.ts";
 import { HotkeysComponent } from "./hotkeys-component.tsx";
+import { CollapsableSection } from "./collapsable-section.tsx";
 
 type FormValues = TJoinProductionOptions;
 
-const TempDiv = styled.div`
-  padding: 0 0 2rem 0;
+const HeaderWrapper = styled.div`
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
 `;
 
-const HeaderWrapper = styled.div`
-  padding: 2rem;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
+const ProductionLineInfo = styled.div`
+  font-size: 3rem;
+  font-weight: bold;
+  line-height: 1;
 `;
 
 const SmallText = styled.span`
@@ -71,7 +70,7 @@ const SmallText = styled.span`
 `;
 
 const LargeText = styled.span`
-  word-break: break-all;
+  font-size: 2rem;
 `;
 
 const ButtonIcon = styled.div`
@@ -93,7 +92,7 @@ const ButtonIcon = styled.div`
   }
 `;
 
-const FlexButtonWrapper = styled.div`
+const FlexButtonWrapper = styled.div<{ isProgramUser: boolean }>`
   width: 50%;
   padding: 0 1rem 2rem 1rem;
 
@@ -103,6 +102,7 @@ const FlexButtonWrapper = styled.div`
 
   &.last {
     padding-right: 0;
+    padding-left: ${({ isProgramUser }) => (isProgramUser ? "0" : "1rem")};
   }
 `;
 
@@ -128,12 +128,12 @@ const LongPressWrapper = styled.div`
 const ButtonWrapper = styled.div`
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin: 0 2rem 2rem 1rem;
+  height: 4rem;
 `;
 
 const ListWrapper = styled(DisplayContainer)`
   width: 100%;
+  padding: 0;
 `;
 
 const StateText = styled.span<{ state: string }>`
@@ -157,10 +157,46 @@ const ConnectionErrorWrapper = styled(FlexContainer)`
   padding-top: 12rem;
 `;
 
-const IconWrapper = styled.div`
-  width: 5rem;
-  height: 5rem;
-  margin-left: 2rem;
+const ProgramOutputIcon = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  background: rgba(50, 56, 59, 1);
+  color: #59cbe8;
+  border: 0.2rem solid #6d6d6d;
+  padding: 0.5rem 1rem;
+  width: fit-content;
+  height: 4rem;
+  border-radius: 0.5rem;
+  margin: 0 2rem 2rem 1rem;
+  gap: 1rem;
+  font-size: 1.2rem;
+
+  svg {
+    fill: #59cbe8;
+    width: 3.5rem;
+  }
+`;
+
+const DeviceButtonWrapper = styled.div`
+  display: flex;
+  justify-content: flex-end;
+
+  button {
+    margin: 0;
+  }
+
+  .save-button {
+    margin-right: 1rem;
+  }
+`;
+
+const StatusContainer = styled.div`
+  margin-bottom: 1rem;
+`;
+
+const SpinnerWrapper = styled.div`
+  margin-top: 2rem;
 `;
 
 type TProductionLine = {
@@ -185,7 +221,6 @@ export const ProductionLine = ({
   const [connectionActive, setConnectionActive] = useState(true);
   const [isInputMuted, setIsInputMuted] = useState(true);
   const [isOutputMuted, setIsOutputMuted] = useState(false);
-  const [showDeviceSettings, setShowDeviceSettings] = useState(false);
   const [confirmExitModalOpen, setConfirmExitModalOpen] = useState(false);
   const [value, setValue] = useState(0.75);
   const [hasReduced, setHasReduced] = useState(false);
@@ -359,11 +394,6 @@ export const ProductionLine = ({
     customKeyPress: savedHotkeys?.pushToTalkHotkey || "t",
   });
 
-  const [refresh] = useFetchDevices({
-    dispatch,
-    permission: true,
-  });
-
   useEffect(() => {
     if (joinProductionOptions) {
       setConnectionActive(true);
@@ -522,8 +552,6 @@ export const ProductionLine = ({
 
   const { loading, connectionError } = useIsLoading({ connectionState });
 
-  const deviceLabels = useDeviceLabels({ joinProductionOptions });
-
   useCheckBadLineData({
     joinProductionOptions,
     paramLineId,
@@ -531,11 +559,6 @@ export const ProductionLine = ({
     callId: id,
     dispatch,
   });
-
-  const settingsButtonPressed = () => {
-    refresh();
-    setShowDeviceSettings(!showDeviceSettings);
-  };
 
   // Reset connection and re-connect to production-line
   const onSubmit: SubmitHandler<FormValues> = async (payload) => {
@@ -566,8 +589,6 @@ export const ProductionLine = ({
           },
         },
       });
-
-      setShowDeviceSettings(false);
     }
   };
 
@@ -595,14 +616,15 @@ export const ProductionLine = ({
   return (
     <>
       <HeaderWrapper>
-        {!isSingleCall && (
+        {!loading && production && line && (
+          <ProductionLineInfo>
+            <LargeText>{`${production.name}/`} </LargeText>
+            <SmallText>{line.name}</SmallText>
+          </ProductionLineInfo>
+        )}
+        {!isSingleCall && production && line && (
           <ButtonWrapper>
             <ExitCallButton resetOnExit={() => setConfirmExitModalOpen(true)} />
-            {line?.programOutputLine && (
-              <IconWrapper>
-                <TVIcon />
-              </IconWrapper>
-            )}
             {confirmExitModalOpen && (
               <Modal onClose={() => setConfirmExitModalOpen(false)}>
                 <DisplayContainerHeader>Confirm</DisplayContainerHeader>
@@ -618,13 +640,11 @@ export const ProductionLine = ({
           </ButtonWrapper>
         )}
 
-        {!loading && production && line && (
-          <DisplayContainerHeader>
-            <SmallText>Production:</SmallText>
-            <LargeText>{production.name} </LargeText>
-            <SmallText>Line:</SmallText>
-            <LargeText>{line.name}</LargeText>
-          </DisplayContainerHeader>
+        {line?.programOutputLine && (
+          <ProgramOutputIcon>
+            <TVIcon />
+            Program Output
+          </ProgramOutputIcon>
         )}
       </HeaderWrapper>
 
@@ -638,20 +658,20 @@ export const ProductionLine = ({
       )}
 
       {joinProductionOptions && connectionState && (
-        <FlexContainer>
-          <DisplayContainer>
-            <span>
-              <strong>Status</strong>:{" "}
-              <StateText state={connectionState}>{connectionState}</StateText>
-            </span>
-          </DisplayContainer>
-        </FlexContainer>
+        <StatusContainer>
+          <span>
+            <strong>Status</strong>:{" "}
+            <StateText state={connectionState}>{connectionState}</StateText>
+          </span>
+        </StatusContainer>
       )}
 
       {joinProductionOptions &&
         loading &&
         (!connectionError ? (
-          <Spinner className="join-production" />
+          <SpinnerWrapper>
+            <Spinner className="join-production" />
+          </SpinnerWrapper>
         ) : (
           <ConnectionErrorWrapper>
             <DisplayWarning
@@ -669,7 +689,6 @@ export const ProductionLine = ({
                 width: "100%",
               }}
             >
-              <DisplayContainerHeader>Controls</DisplayContainerHeader>
               {!isIOSMobile &&
                 !isIpad &&
                 !(
@@ -684,7 +703,10 @@ export const ProductionLine = ({
                 {!(
                   line?.programOutputLine && joinProductionOptions.isProgramUser
                 ) && (
-                  <FlexButtonWrapper className="first">
+                  <FlexButtonWrapper
+                    className="first"
+                    isProgramUser={joinProductionOptions.isProgramUser}
+                  >
                     <UserControlBtn
                       type="button"
                       onClick={() => muteOutput()}
@@ -708,7 +730,10 @@ export const ProductionLine = ({
                   (line?.programOutputLine
                     ? joinProductionOptions?.isProgramUser
                     : !joinProductionOptions.isProgramUser) && (
-                    <FlexButtonWrapper className="last">
+                    <FlexButtonWrapper
+                      className="last"
+                      isProgramUser={joinProductionOptions.isProgramUser}
+                    >
                       <UserControlBtn
                         type="button"
                         onClick={() => muteInput(!isInputMuted)}
@@ -722,7 +747,6 @@ export const ProductionLine = ({
                     </FlexButtonWrapper>
                   )}
               </FlexContainer>
-
               {inputAudioStream &&
                 inputAudioStream !== "no-device" &&
                 !line?.programOutputLine && (
@@ -730,58 +754,35 @@ export const ProductionLine = ({
                     <LongPressToTalkButton muteInput={muteInput} />
                   </LongPressWrapper>
                 )}
-
-              {deviceLabels?.inputLabel &&
-                (line?.programOutputLine
-                  ? joinProductionOptions.isProgramUser
-                  : !joinProductionOptions.isProgramUser) && (
-                  <TempDiv>
-                    <strong>Audio Input:</strong> {deviceLabels.inputLabel}
-                  </TempDiv>
-                )}
-
-              {deviceLabels?.outputLabel &&
-                !(
-                  line?.programOutputLine && joinProductionOptions.isProgramUser
-                ) && (
-                  <TempDiv>
-                    <strong>Audio Output:</strong> {deviceLabels.outputLabel}
-                  </TempDiv>
-                )}
-              <FlexButtonWrapper>
-                <PrimaryButton
-                  type="button"
-                  onClick={() => settingsButtonPressed()}
-                >
-                  {!showDeviceSettings ? "Change device" : "Close"}
-                </PrimaryButton>
-              </FlexButtonWrapper>
-              {showDeviceSettings && devices && (
+              <CollapsableSection title="Devices">
                 <FormContainer>
-                  {(line?.programOutputLine
-                    ? joinProductionOptions.isProgramUser
-                    : !joinProductionOptions.isProgramUser) && (
-                    <FormLabel>
-                      <DecorativeLabel>Input</DecorativeLabel>
-                      <FormSelect
-                        // eslint-disable-next-line
-                        {...register(`audioinput`)}
-                      >
-                        {devices.input && devices.input.length > 0 ? (
-                          devices.input.map((device) => (
-                            <option
-                              key={device.deviceId}
-                              value={device.deviceId}
-                            >
-                              {device.label}
+                  {devices &&
+                    (line?.programOutputLine
+                      ? joinProductionOptions.isProgramUser
+                      : !joinProductionOptions.isProgramUser) && (
+                      <FormLabel>
+                        <DecorativeLabel>Input</DecorativeLabel>
+                        <FormSelect
+                          // eslint-disable-next-line
+                          {...register(`audioinput`)}
+                        >
+                          {devices.input && devices.input.length > 0 ? (
+                            devices.input.map((device) => (
+                              <option
+                                key={device.deviceId}
+                                value={device.deviceId}
+                              >
+                                {device.label}
+                              </option>
+                            ))
+                          ) : (
+                            <option value="no-device">
+                              No device available
                             </option>
-                          ))
-                        ) : (
-                          <option value="no-device">No device available</option>
-                        )}
-                      </FormSelect>
-                    </FormLabel>
-                  )}
+                          )}
+                        </FormSelect>
+                      </FormLabel>
+                    )}
                   {!(
                     line?.programOutputLine &&
                     joinProductionOptions.isProgramUser
@@ -816,9 +817,10 @@ export const ProductionLine = ({
                       missing, please remove the permission and reload page.
                     </StyledWarningMessage>
                   )}
-                  <ButtonWrapper>
+                  <DeviceButtonWrapper>
                     <ActionButton
                       type="submit"
+                      className="save-button"
                       disabled={audioNotChanged || !isValid || !isDirty}
                       onClick={handleSubmit(onSubmit)}
                     >
@@ -827,37 +829,40 @@ export const ProductionLine = ({
                     {!(isBrowserFirefox && !isMobile) && (
                       <ReloadDevicesButton />
                     )}
-                  </ButtonWrapper>
+                  </DeviceButtonWrapper>
                 </FormContainer>
-              )}
-
+              </CollapsableSection>
               {inputAudioStream &&
                 inputAudioStream !== "no-device" &&
                 !isMobile &&
                 !isTablet && (
-                  <HotkeysComponent
-                    callId={id}
-                    savedHotkeys={savedHotkeys}
-                    customGlobalMute={customGlobalMute}
-                    line={line}
-                    joinProductionOptions={joinProductionOptions}
+                  <CollapsableSection title="Hotkeys">
+                    <HotkeysComponent
+                      callId={id}
+                      savedHotkeys={savedHotkeys}
+                      customGlobalMute={customGlobalMute}
+                      line={line}
+                      joinProductionOptions={joinProductionOptions}
+                    />
+                  </CollapsableSection>
+                )}
+              <CollapsableSection title="Participants">
+                {line && (
+                  <UserList
+                    sessionId={sessionId}
+                    participants={line.participants}
+                    dominantSpeaker={dominantSpeaker}
+                    audioLevelAboveThreshold={audioLevelAboveThreshold}
+                    programOutputLine={line.programOutputLine}
+                    setConfirmModalOpen={setConfirmModalOpen}
+                    setUserId={setUserId}
+                    setUserName={setUserName}
                   />
                 )}
+              </CollapsableSection>
             </div>
           </ListWrapper>
           <ListWrapper>
-            {line && (
-              <UserList
-                sessionId={sessionId}
-                participants={line.participants}
-                dominantSpeaker={dominantSpeaker}
-                audioLevelAboveThreshold={audioLevelAboveThreshold}
-                programOutputLine={line.programOutputLine}
-                setConfirmModalOpen={setConfirmModalOpen}
-                setUserId={setUserId}
-                setUserName={setUserName}
-              />
-            )}
             {confirmModalOpen && (
               <Modal onClose={() => setConfirmModalOpen(false)}>
                 <DisplayContainerHeader>Confirm</DisplayContainerHeader>
