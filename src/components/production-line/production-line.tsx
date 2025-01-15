@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { useHotkeys } from "react-hotkeys-hook";
@@ -255,7 +255,7 @@ export const ProductionLine = ({
   const [confirmExitModalOpen, setConfirmExitModalOpen] = useState(false);
   const [value, setValue] = useState(0.75);
   const [hasReduced, setHasReduced] = useState(false);
-  const [initialVolume, setInitialVolume] = useState<number | null>(null);
+  const [baseVolume, setBaseVolume] = useState<number | null>(null);
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [muteError, setMuteError] = useState(false);
   const [userId, setUserId] = useState("");
@@ -289,6 +289,8 @@ export const ProductionLine = ({
       keepErrors: true, // input errors will be retained with value update
     },
   });
+  const finalIncreaseTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isRunningRef = useRef<boolean>(false);
 
   // Watch all form values
   const watchedValues = watch();
@@ -485,119 +487,74 @@ export const ProductionLine = ({
     }
   }, [isProgramOutputLine, isProgramUser]);
 
-  useEffect(() => {
-    console.log("VALUE: ", value);
-  }, [value]);
+  // MÅSTE MUTEA SPEAKER PÅ PROGRAM LINE!!!!!
 
   useEffect(() => {
-    let volumeReductionTimeout: NodeJS.Timeout;
-    let intermediateIncreaseTimeout1: NodeJS.Timeout;
-    let intermediateIncreaseTimeout2: NodeJS.Timeout;
-    let finalIncreaseTimeout: NodeJS.Timeout;
-
     // Reduce volume by 80%
     const volumeChangeFactor = 0.2;
 
-    if (
-      shouldReduceVolume &&
-      line?.programOutputLine &&
-      !hasReduced &&
-      audioElements
-    ) {
-      volumeReductionTimeout = setTimeout(() => {
-        const currentVolume = audioElements[0].volume;
-        setInitialVolume(currentVolume);
-        setValue((prevValue) => prevValue * volumeChangeFactor);
-        setHasReduced(true);
+    if (!line?.programOutputLine) return;
 
-        audioElements?.forEach((audioElement) => {
-          // eslint-disable-next-line no-param-reassign
-          audioElement.volume *= volumeChangeFactor;
-          console.log("VOLUME REDUCTION: ", audioElement.volume);
-        });
-      }, 1000);
+    if (shouldReduceVolume && !hasReduced) {
+      setBaseVolume(value);
+      setHasReduced(true);
 
-      return () => clearTimeout(volumeReductionTimeout);
+      audioElements?.forEach((audioElement) => {
+        // eslint-disable-next-line no-param-reassign
+        audioElement.volume *= volumeChangeFactor;
+        console.log("VOLUME REDUCTION: ", audioElement.volume);
+      });
     }
 
-    if (!shouldReduceVolume && line?.programOutputLine && hasReduced) {
-      if (initialVolume === null) {
-        return undefined;
+    console.log("IF ONE !isAudioActive: ", !shouldReduceVolume);
+    console.log("IF TWO hasReduced: ", hasReduced);
+    console.log("IF THREE !isRunning: ", !isRunningRef.current);
+
+    if (!shouldReduceVolume && hasReduced && !isRunningRef.current) {
+      isRunningRef.current = true;
+      if (baseVolume === null) {
+        return;
       }
 
-      const reductionAmount = 1 - volumeChangeFactor;
-      const totalIncrease = initialVolume * reductionAmount;
-      const increasePerStep = totalIncrease / 3;
+      console.log("BASE VOLUME: ", baseVolume);
 
-      intermediateIncreaseTimeout1 = setTimeout(() => {
-        setValue((prevValue) => prevValue + totalIncrease);
-        audioElements?.forEach((audioElement) => {
-          // eslint-disable-next-line no-param-reassign
-          audioElement.volume += increasePerStep;
-          console.log("VOLUME INCREASED TO (STEP 1): ", audioElement.volume);
-        });
-      }, 2000);
+      console.log(
+        "FINAL INCREASE TIMEOUT REF: ",
+        finalIncreaseTimeoutRef.current
+      );
 
-      intermediateIncreaseTimeout2 = setTimeout(() => {
+      finalIncreaseTimeoutRef.current = setTimeout(() => {
+        console.log("LINDA");
         audioElements?.forEach((audioElement) => {
+          console.log("SANDRA INSIDE SECOND INCREASE");
           // eslint-disable-next-line no-param-reassign
-          audioElement.volume += increasePerStep;
-          console.log("VOLUME STEP 2: ", audioElement.volume);
-        });
-      }, 2500);
-
-      finalIncreaseTimeout = setTimeout(() => {
-        audioElements?.forEach((audioElement) => {
-          // eslint-disable-next-line no-param-reassign
-          audioElement.volume += increasePerStep;
+          audioElement.volume = baseVolume;
           console.log("VOLUME STEP 3: ", audioElement.volume);
         });
         setHasReduced(false);
+        isRunningRef.current = false;
       }, 3000);
-
-      return () => {
-        clearTimeout(intermediateIncreaseTimeout1);
-        clearTimeout(intermediateIncreaseTimeout2);
-        clearTimeout(finalIncreaseTimeout);
-      };
     }
 
+    // eslint-disable-next-line consistent-return
     return () => {
-      clearTimeout(volumeReductionTimeout);
-      clearTimeout(intermediateIncreaseTimeout1);
-      clearTimeout(intermediateIncreaseTimeout2);
-      clearTimeout(finalIncreaseTimeout);
+      if (finalIncreaseTimeoutRef.current) {
+        clearTimeout(finalIncreaseTimeoutRef.current);
+      }
     };
   }, [
     shouldReduceVolume,
+    baseVolume,
     hasReduced,
-    line?.programOutputLine,
+    value,
     audioElements,
-    initialVolume,
+    line?.programOutputLine,
   ]);
 
   useEffect(() => {
-    console.log("VALUE: ", value);
-  }, [value]);
-
-  useEffect(() => {
-    console.log("SHOULD REDUCE VOLUME: ", shouldReduceVolume);
-  }, [shouldReduceVolume]);
-
-  useEffect(() => {
-    console.log("HAS REDUCED: ", hasReduced);
-  }, [hasReduced]);
-
-  useEffect(() => {
-    console.log("INITIAL VOLUME: ", initialVolume);
-  }, [initialVolume]);
-
-  useEffect(() => {
-    console.log("PROGRAM OUTPUT: ", line?.programOutputLine);
-  }, [line?.programOutputLine]);
-
-  useEffect(() => {
-    console.log("AUDIO ELEMENTS: ", audioElements);
+    audioElements?.forEach((audioElement) => {
+      console.log("AUDIO ELEMENT VOLUME: ", audioElement.volume);
+    });
   }, [audioElements]);
 
   useEffect(() => {

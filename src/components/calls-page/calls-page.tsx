@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useGlobalState } from "../../global-state/context-provider";
 import { JoinProduction } from "../landing-page/join-production";
@@ -70,6 +70,8 @@ export const CallsPage = () => {
   const [customGlobalMute, setCustomGlobalMute] = useState("p");
   const [{ calls, selectedProductionId }, dispatch] = useGlobalState();
   const [shouldReduceVolume, setShouldReduceVolume] = useState(false);
+  // en icke-programlinje pratar
+  const [isSomeoneSpeaking, setIsSomeoneSpeaking] = useState(false);
 
   const { productionId: paramProductionId, lineId: paramLineId } = useParams();
   const navigate = useNavigate();
@@ -77,15 +79,70 @@ export const CallsPage = () => {
   const isEmpty = Object.values(calls).length === 0;
   const isSingleCall = Object.values(calls).length === 1;
 
-  useEffect(() => {
-    const reduceVolume = Object.entries(calls).some(
-      ([, callState]) =>
-        !callState.joinProductionOptions?.lineUsedForProgramOutput &&
-        callState.audioLevelAboveThreshold
-    );
+  // någon pratar (kan även vara programljudets ljud)
+  const audioLevelAboveThreshold = Object.entries(calls).some(
+    ([, callState]) => callState.audioLevelAboveThreshold
+  );
 
-    setShouldReduceVolume(reduceVolume);
-  }, [calls]);
+  // finns minst en linje i ens callpage som är program
+  const isProgramOutputAdded = Object.entries(calls).some(
+    ([, callState]) =>
+      callState.joinProductionOptions?.lineUsedForProgramOutput &&
+      !callState.joinProductionOptions.isProgramUser
+  );
+
+  useEffect(() => {
+    if (isProgramOutputAdded) {
+      Object.entries(calls).forEach(([, callState]) => {
+        if (!callState.joinProductionOptions?.lineUsedForProgramOutput) {
+          setIsSomeoneSpeaking(audioLevelAboveThreshold);
+        }
+      });
+    }
+  }, [audioLevelAboveThreshold, calls, isProgramOutputAdded]);
+
+  const startTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const stopTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    if (isSomeoneSpeaking) {
+      if (stopTimeoutRef.current) {
+        clearTimeout(stopTimeoutRef.current);
+        stopTimeoutRef.current = null;
+      }
+
+      if (!shouldReduceVolume) {
+        startTimeoutRef.current = setTimeout(() => {
+          setShouldReduceVolume(true);
+        }, 1000);
+      }
+    } else {
+      if (startTimeoutRef.current) {
+        clearTimeout(startTimeoutRef.current);
+        startTimeoutRef.current = null;
+      }
+
+      if (shouldReduceVolume) {
+        stopTimeoutRef.current = setTimeout(() => {
+          setShouldReduceVolume(false);
+        }, 1000);
+      }
+    }
+
+    return () => {
+      if (startTimeoutRef.current) {
+        clearTimeout(startTimeoutRef.current);
+      }
+
+      if (stopTimeoutRef.current) {
+        clearTimeout(stopTimeoutRef.current);
+      }
+    };
+  }, [isSomeoneSpeaking, shouldReduceVolume]);
+
+  useEffect(() => {
+    console.log("IS AUDIO ACTIVE CALLS PAGE: ", shouldReduceVolume);
+  }, [shouldReduceVolume]);
 
   useEffect(() => {
     if (selectedProductionId) {
