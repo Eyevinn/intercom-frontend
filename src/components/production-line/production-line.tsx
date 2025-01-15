@@ -837,7 +837,7 @@ export const ProductionLine = ({
                             <DecorativeLabel>Input</DecorativeLabel>
                             <FormSelect
                               // eslint-disable-next-line
-                                {...register(`audioinput`)}
+                              {...register(`audioinput`)}
                             >
                               {devices.input && devices.input.length > 0 ? (
                                 devices.input.map((device) => (
@@ -865,7 +865,7 @@ export const ProductionLine = ({
                           {devices.output && devices.output.length > 0 ? (
                             <FormSelect
                               // eslint-disable-next-line
-                                {...register(`audiooutput`)}
+                              {...register(`audiooutput`)}
                             >
                               {devices.output.map((device) => (
                                 <option
