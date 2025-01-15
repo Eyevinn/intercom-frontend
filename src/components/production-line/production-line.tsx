@@ -290,7 +290,6 @@ export const ProductionLine = ({
     },
   });
   const finalIncreaseTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const isRunningRef = useRef<boolean>(false);
 
   // Watch all form values
   const watchedValues = watch();
@@ -496,6 +495,7 @@ export const ProductionLine = ({
     if (!line?.programOutputLine) return;
 
     if (shouldReduceVolume && !hasReduced) {
+      console.log("ONE VOLUME REDUCTION: ");
       setBaseVolume(value);
       setHasReduced(true);
 
@@ -506,33 +506,25 @@ export const ProductionLine = ({
       });
     }
 
-    console.log("IF ONE !isAudioActive: ", !shouldReduceVolume);
-    console.log("IF TWO hasReduced: ", hasReduced);
-    console.log("IF THREE !isRunning: ", !isRunningRef.current);
+    console.log("IF REQUIREMENT 1 !shouldReduceVolume: ", !shouldReduceVolume);
+    console.log("IF REQUIREMENT 2 hasReduced: ", hasReduced);
 
-    if (!shouldReduceVolume && hasReduced && !isRunningRef.current) {
-      isRunningRef.current = true;
+    if (!shouldReduceVolume && hasReduced) {
+      console.log("INSIDE INCREASE IF");
       if (baseVolume === null) {
         return;
       }
 
       console.log("BASE VOLUME: ", baseVolume);
 
-      console.log(
-        "FINAL INCREASE TIMEOUT REF: ",
-        finalIncreaseTimeoutRef.current
-      );
-
       finalIncreaseTimeoutRef.current = setTimeout(() => {
-        console.log("LINDA");
         audioElements?.forEach((audioElement) => {
-          console.log("SANDRA INSIDE SECOND INCREASE");
+          console.log("INSIDE INCREASE");
           // eslint-disable-next-line no-param-reassign
           audioElement.volume = baseVolume;
           console.log("VOLUME STEP 3: ", audioElement.volume);
         });
         setHasReduced(false);
-        isRunningRef.current = false;
       }, 3000);
     }
 
