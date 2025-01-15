@@ -17,17 +17,17 @@ const StyledBackBtn = styled.div`
 `;
 
 export const NavigateToRootButton = ({
-  resetOnExitRequest,
+  onNavigate,
 }: {
-  resetOnExitRequest?: () => void;
+  onNavigate?: () => void;
 }) => {
   const navigate = useNavigate();
 
   return (
     <StyledBackBtn
       onClick={() => {
-        if (resetOnExitRequest) {
-          resetOnExitRequest();
+        if (onNavigate) {
+          onNavigate();
         } else {
           navigate("/");
         }

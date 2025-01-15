@@ -6,7 +6,7 @@ const SectionWrapper = styled.div`
   border: 0.2rem #6d6d6d solid;
   border-radius: 1rem;
   padding: 1rem;
-  margin-bottom: 1rem;
+  margin-top: 1rem;
 `;
 
 const SectionHeader = styled.div`
