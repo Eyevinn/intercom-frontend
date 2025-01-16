@@ -94,8 +94,7 @@ export const CallsPage = () => {
   }, [selectedProductionId]);
 
   useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    Object.entries(calls).forEach(([_, callState]) => {
+    Object.entries(calls).forEach(([, callState]) => {
       if (
         callState.hotkeys?.globalMuteHotkey &&
         callState.hotkeys.globalMuteHotkey !== customGlobalMute
