@@ -5,6 +5,7 @@ import { useGlobalState } from "../../global-state/context-provider";
 import {
   ChevronDownIcon,
   ChevronUpIcon,
+  TVIcon,
   UserIcon,
   UsersIcon,
 } from "../../assets/icons/icon";
@@ -19,6 +20,7 @@ import {
   HeaderIcon,
   HeaderTexts,
   HeaderWrapper,
+  IconWrapper,
   InnerDiv,
   Lineblock,
   LineBlockParticipant,
@@ -34,10 +36,10 @@ import {
   ProductionName,
   SpinnerWrapper,
 } from "./production-list-components";
-import { ProgramOutputModal } from "../program-output-modal/program-output-modal";
 import { ManageProductionButtons } from "./manage-production-buttons";
 import { ConfirmationModal } from "../verify-decision/confirmation-modal";
 import { TLine } from "../production-line/types";
+import { AudioFeedModal } from "../audio-feed-modal/audio-feed-modal";
 
 type ProductionsListItemProps = {
   production: TBasicProductionResponse;
@@ -152,9 +154,17 @@ export const ProductionsListItem = ({
       <ProductionLines className={open ? "expanded" : ""}>
         <InnerDiv>
           {production.lines?.map((l) => (
-            <Lineblock key={`line-${l.id}-${l.name}`}>
+            <Lineblock
+              key={`line-${l.id}-${l.name}`}
+              isProgramOutput={l.programOutputLine}
+            >
               <LineBlockTexts>
                 <LineBlockTitleWrapper>
+                  {l.programOutputLine && (
+                    <IconWrapper>
+                      <TVIcon />
+                    </IconWrapper>
+                  )}
                   <LineBlockTitle>{l.name}</LineBlockTitle>
                   {l.participants.length > 4 && (
                     <ParticipantExpandBtn
@@ -222,13 +232,14 @@ export const ProductionsListItem = ({
                 </SecondaryButton>
               )}
               {isModalOpen && modalLineId && (
-                <ProgramOutputModal
+                <AudioFeedModal
                   onClose={() => setIsModalOpen(false)}
                   onJoin={() => {
                     setIsModalOpen(false);
                     goToProduction(modalLineId);
                   }}
                   setIsProgramUser={setIsProgramUser}
+                  isProgramUser={isProgramUser}
                 />
               )}
             </Lineblock>

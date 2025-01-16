@@ -14,32 +14,42 @@ const ButtonWrapper = styled.div`
 `;
 
 const CheckboxWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
   margin-bottom: 1rem;
   margin-top: 1rem;
 `;
 
-type ProgramOutputModalProps = {
+type AudioFeedModalProps = {
   onClose: () => void;
   onJoin: () => void;
   setIsProgramUser: (value: boolean) => void;
+  isProgramUser: boolean;
 };
 
-export const ProgramOutputModal = ({
+export const AudioFeedModal = ({
   onClose,
   onJoin,
   setIsProgramUser,
-}: ProgramOutputModalProps) => {
+  isProgramUser,
+}: AudioFeedModalProps) => {
   return (
     <Modal onClose={onClose}>
       <ContentWrapper>
         <p>
-          This is a line for program output. Do you wish to join the line as a
-          as the program output or as a listener?
+          This is a line for audio feed. Do you wish to join the line as the
+          audio feed or as a listener?
         </p>
         <CheckboxWrapper>
           <Checkbox
-            label="Join as program output"
-            onChange={(e) => setIsProgramUser(e.target.checked)}
+            label="Listener"
+            checked={!isProgramUser}
+            onChange={() => setIsProgramUser(false)}
+          />
+          <Checkbox
+            label="Audio feed"
+            checked={isProgramUser}
+            onChange={() => setIsProgramUser(true)}
           />
         </CheckboxWrapper>
       </ContentWrapper>

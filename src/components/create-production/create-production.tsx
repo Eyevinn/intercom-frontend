@@ -227,7 +227,7 @@ export const CreateProduction = () => {
           render={({ field }) => (
             <CheckboxWrapper>
               <Checkbox
-                label="This line will be used for a program output"
+                label="This line will be used for an audio feed"
                 checked={field.value || false}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   field.onChange(e.target.checked)
@@ -263,7 +263,7 @@ export const CreateProduction = () => {
                 render={({ field: controllerField }) => (
                   <CheckboxWrapper>
                     <Checkbox
-                      label="This line will be used for a program output"
+                      label="This line will be used for an audio feed"
                       checked={controllerField.value || false}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                         controllerField.onChange(e.target.checked)
