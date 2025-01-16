@@ -36,7 +36,6 @@ export const ErrorBanner: FC = () => {
     const displayedMessages = new Set<string>();
     if (error.callErrors) {
       Object.entries(error.callErrors).forEach(([, singleError]) => {
-        // _ is needed to destructure the object
         if (singleError && !displayedMessages.has(singleError.message)) {
           console.error(`Error:`, singleError.message); // Display only unique errors
           displayedMessages.add(singleError.message);
