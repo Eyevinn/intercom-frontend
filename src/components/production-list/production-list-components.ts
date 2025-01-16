@@ -77,12 +77,14 @@ export const InnerDiv = styled.div`
 
 export const Lineblock = styled.div`
   margin-top: 1rem;
-  background-color: #4d4d4d;
+  background-color: ${({ isProgramOutput }: { isProgramOutput?: boolean }) =>
+    isProgramOutput ? "rgb(73, 67, 124)" : "rgb(77, 77, 77)"};
   border-radius: 1rem;
   padding: 1rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 0.5rem;
 `;
 
 export const LineBlockTexts = styled.div``;
@@ -95,6 +97,7 @@ export const LineBlockTitle = styled.div`
 export const LineBlockTitleWrapper = styled.div`
   display: flex;
   align-items: center;
+  gap: 0.5rem;
 `;
 
 export const ParticipantExpandBtn = styled.button`
@@ -187,4 +190,19 @@ export const SpinnerWrapper = styled.div`
   position: relative;
   width: 2rem;
   height: 2rem;
+`;
+
+export const IconWrapper = styled.div`
+  height: 2rem;
+  width: 2rem;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  svg {
+    fill: white;
+    height: 100%;
+    width: 100%;
+  }
 `;

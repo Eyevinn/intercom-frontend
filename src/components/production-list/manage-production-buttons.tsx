@@ -168,7 +168,7 @@ export const ManageProductionButtons: FC<ManageProductionButtonsProps> = (
                 control={control}
                 render={({ field: controllerField }) => (
                   <Checkbox
-                    label="This line will be used for a program output"
+                    label="This line will be used for an audio feed"
                     checked={controllerField.value || false}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                       controllerField.onChange(e.target.checked)
