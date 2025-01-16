@@ -119,7 +119,7 @@ export const ProgramOutputIcon = styled.div`
 
   svg {
     fill: #59cbe8;
-    width: 3.5rem;
+    width: 2.5rem;
   }
 `;
 
@@ -151,11 +151,16 @@ export const CallWrapper = styled.div`
   min-width: 20rem;
 `;
 
-export const CallContainer = styled(ProductionItemWrapper)`
+export const CallContainer = styled(ProductionItemWrapper)<{
+  isProgramLine?: boolean;
+}>`
   margin: 0;
   min-width: 30rem;
   display: flex;
   flex-direction: column;
+
+  background: ${({ isProgramLine }) =>
+    isProgramLine ? "rgba(73, 67, 124, 0.2)" : "transparent"};
 `;
 
 export const CallHeader = styled(HeaderWrapper)``;

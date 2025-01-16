@@ -324,7 +324,7 @@ export const ProductionLine = ({
   // TODO detect if browser back button is pressed and run exit();
 
   return (
-    <CallWrapper isProgramLine={line?.programOutputLine}>
+    <CallWrapper>
       {joinProductionOptions &&
         loading &&
         (!connectionError ? (
@@ -348,7 +348,7 @@ export const ProductionLine = ({
         />
       )}
       {!connectionError && !loading && (
-        <CallContainer>
+        <CallContainer isProgramLine={line?.programOutputLine}>
           {line && (
             <CallHeaderComponent
               open={open}
@@ -375,7 +375,7 @@ export const ProductionLine = ({
                 {line?.programOutputLine && (
                   <ProgramOutputIcon>
                     <TVIcon />
-                    Program Output
+                    Audio Feed
                   </ProgramOutputIcon>
                 )}
               </CallInfo>
