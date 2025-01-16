@@ -142,37 +142,21 @@ export const JoinProduction = ({
 
   // IF THE DEVICE NO LONGER EXISTS SET FIELD VALUES TO DEFAULT
   useEffect(() => {
-    if (userSettings) {
-      const userInput = devices.input?.find(
-        (device) => device.deviceId === userSettings.audioinput
-      );
-      const userOutput = devices.output?.find(
-        (device) => device.deviceId === userSettings.audiooutput
-      );
-
-      if (userInput)
-        setValue("audioinput", userInput.deviceId, { shouldValidate: true });
-      if (userOutput)
-        setValue("audiooutput", userOutput.deviceId, { shouldValidate: true });
-      if (userSettings.username)
-        setValue("username", userSettings.username, { shouldValidate: true });
-    } else {
-      if (!devices.input?.length) {
-        setValue("audioinput", "no-device", { shouldValidate: true });
-      } else if (
-        !devices.input?.find(
-          (device) => device.deviceId === getValues("audioinput")
-        )
-      ) {
-        setValue("audioinput", "default", { shouldValidate: true });
-      }
-      if (
-        !devices.output?.find(
-          (device) => device.deviceId === getValues("audiooutput")
-        )
+    if (!devices.input?.length) {
+      setValue("audioinput", "no-device", { shouldValidate: true });
+    } else if (
+      !devices.input?.find(
+        (device) => device.deviceId === getValues("audioinput")
       )
-        setValue("audiooutput", "default", { shouldValidate: true });
+    ) {
+      setValue("audioinput", "default", { shouldValidate: true });
     }
+    if (
+      !devices.output?.find(
+        (device) => device.deviceId === getValues("audiooutput")
+      )
+    )
+      setValue("audiooutput", "default", { shouldValidate: true });
   }, [devices, getValues, setValue, userSettings]);
 
   // If user selects a production from the productionlist
