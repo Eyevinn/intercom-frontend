@@ -81,7 +81,9 @@ export const CallsPage = () => {
 
   // någon pratar (kan även vara programljudets ljud)
   const audioLevelAboveThreshold = Object.entries(calls).some(
-    ([, callState]) => callState.audioLevelAboveThreshold
+    ([, callState]) =>
+      callState.audioLevelAboveThreshold &&
+      !callState.joinProductionOptions?.isProgramUser
   );
 
   // finns minst en linje i ens callpage som är program
