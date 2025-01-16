@@ -1,17 +1,27 @@
 import styled from "@emotion/styled";
-import { RemoveIcon } from "../../assets/icons/icon";
+import { LogoutIcon } from "../../assets/icons/icon";
 import { PrimaryButton } from "../landing-page/form-elements";
 
 const StyledBackBtn = styled(PrimaryButton)`
-  padding: 0;
-  margin: 0;
-  width: 4rem;
-  background: #32383b;
+  margin-top: 1rem;
+  background: rgba(50, 56, 59, 1);
+  color: white;
   border: 0.2rem solid #6d6d6d;
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   svg {
+    width: 2.5rem;
+    height: 2.5rem;
     fill: #f96c6c;
   }
+`;
+
+const ButtonText = styled.div`
+  line-height: 2.4rem;
 `;
 
 export const ExitCallButton = ({
@@ -25,7 +35,8 @@ export const ExitCallButton = ({
       title="Exit call"
       onClick={() => resetOnExit()}
     >
-      <RemoveIcon />
+      <ButtonText>Leave Call</ButtonText>
+      <LogoutIcon />
     </StyledBackBtn>
   );
 };
