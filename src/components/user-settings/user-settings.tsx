@@ -58,8 +58,8 @@ export const UserSettings: FC<UserSettingsProps> = (props) => {
   } = useForm<TUserSettings>({
     defaultValues: {
       username: userSettings?.username,
-      audioinput: userSettings?.audioinput,
-      audiooutput: userSettings?.audiooutput,
+      audioinput: userSettings?.audioinput || "default",
+      audiooutput: userSettings?.audiooutput || "default",
     },
     resetOptions: {
       keepDirtyValues: true, // user-interacted input will be retained
@@ -67,6 +67,7 @@ export const UserSettings: FC<UserSettingsProps> = (props) => {
     },
   });
 
+  // IF THE DEVICE NO LONGER EXISTS SET FIELD VALUES TO DEFAULT
   useEffect(() => {
     if (!devices.input?.length) {
       setValue("audioinput", "no-device");
@@ -74,8 +75,9 @@ export const UserSettings: FC<UserSettingsProps> = (props) => {
       !devices.input?.find(
         (device) => device.deviceId === getValues("audioinput")
       )
-    )
+    ) {
       setValue("audioinput", "default");
+    }
     if (
       !devices.output?.find(
         (device) => device.deviceId === getValues("audiooutput")
