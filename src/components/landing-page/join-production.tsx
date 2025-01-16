@@ -66,6 +66,7 @@ export const JoinProduction = ({
   const [isProgramOutputLine, setIsProgramOutputLine] = useState(false);
 
   const { readFromStorage, writeToStorage } = useStorage();
+  const cachedUsername = readFromStorage("username");
 
   const {
     formState: { errors, isValid },
@@ -131,7 +132,6 @@ export const JoinProduction = ({
 
   // Use local cache
   useEffect(() => {
-    const cachedUsername = readFromStorage("username");
     if (cachedUsername) {
       setValue("username", cachedUsername);
     }
@@ -139,7 +139,7 @@ export const JoinProduction = ({
     if (addAdditionalCallId) {
       setValue("productionId", addAdditionalCallId);
     }
-  }, [addAdditionalCallId, readFromStorage, setValue]);
+  }, [addAdditionalCallId, cachedUsername, setValue]);
 
   // If user selects a production from the productionlist
   useEffect(() => {
