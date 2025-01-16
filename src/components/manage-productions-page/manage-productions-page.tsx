@@ -9,7 +9,7 @@ export const ManageProductionsPage = () => {
   const [{ reloadProductionList }] = useGlobalState();
   const { productions, doInitialLoad, error, setIntervalLoad } =
     useFetchProductionList({
-      limit: "10",
+      limit: "30",
       extended: "true",
     });
 
