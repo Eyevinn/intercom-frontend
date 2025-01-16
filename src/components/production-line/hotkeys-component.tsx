@@ -11,14 +11,13 @@ const TempDiv = styled.div`
 const HotkeyDiv = styled.div`
   position: relative;
   align-items: center;
-  padding-top: 1rem;
 `;
 
 const SettingsBtn = styled.div`
   padding: 0;
   width: 3rem;
   position: absolute;
-  top: 0;
+  bottom: 0;
   right: 0;
   cursor: pointer;
   color: white;
@@ -51,11 +50,6 @@ export const HotkeysComponent = ({
 
   return (
     <>
-      <HotkeyDiv>
-        <SettingsBtn onClick={handleSettingsClick}>
-          <SettingsIcon />
-        </SettingsBtn>
-      </HotkeyDiv>
       {(isProgramOutputLine ? isProgramUser : !isProgramUser) && (
         <TempDiv>
           <strong>{(savedHotkeys?.muteHotkey || "").toUpperCase()}: </strong>
@@ -100,6 +94,11 @@ export const HotkeysComponent = ({
           Toggle Mute All Inputs
         </TempDiv>
       )}
+      <HotkeyDiv>
+        <SettingsBtn title="Modify hotkeys" onClick={handleSettingsClick}>
+          <SettingsIcon />
+        </SettingsBtn>
+      </HotkeyDiv>
       {isSettingsModalOpen && (
         <SettingsModal
           isOpen={isSettingsModalOpen}
