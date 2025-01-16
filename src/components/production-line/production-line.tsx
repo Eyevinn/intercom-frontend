@@ -255,7 +255,6 @@ export const ProductionLine = ({
   const [confirmExitModalOpen, setConfirmExitModalOpen] = useState(false);
   const [value, setValue] = useState(0.75);
   const [hasReduced, setHasReduced] = useState(false);
-  const [baseVolume, setBaseVolume] = useState<number | null>(null);
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [muteError, setMuteError] = useState(false);
   const [userId, setUserId] = useState("");
@@ -487,22 +486,25 @@ export const ProductionLine = ({
   }, [isProgramOutputLine, isProgramUser]);
 
   // MÅSTE MUTEA SPEAKER PÅ PROGRAM LINE!!!!!
+  // Ska vara mutead om man är programUser bara vilket den är right??
 
   useEffect(() => {
     // Reduce volume by 80%
     const volumeChangeFactor = 0.2;
-
     if (!line?.programOutputLine) return;
 
     if (shouldReduceVolume && !hasReduced) {
+      console.log("BASE VOLUME 1: ", value);
       console.log("ONE VOLUME REDUCTION: ");
-      setBaseVolume(value);
       setHasReduced(true);
 
       audioElements?.forEach((audioElement) => {
         // eslint-disable-next-line no-param-reassign
         audioElement.volume *= volumeChangeFactor;
-        console.log("VOLUME REDUCTION: ", audioElement.volume);
+        console.log(
+          "TWO VOLUME REDUCTION (INSIDE AUDIOELEMENT): ",
+          audioElement.volume
+        );
       });
     }
 
@@ -510,18 +512,13 @@ export const ProductionLine = ({
     console.log("IF REQUIREMENT 2 hasReduced: ", hasReduced);
 
     if (!shouldReduceVolume && hasReduced) {
-      console.log("INSIDE INCREASE IF");
-      if (baseVolume === null) {
-        return;
-      }
-
-      console.log("BASE VOLUME: ", baseVolume);
+      console.log("BASE VOLUME 2: ", value);
 
       finalIncreaseTimeoutRef.current = setTimeout(() => {
         audioElements?.forEach((audioElement) => {
-          console.log("INSIDE INCREASE");
+          console.log("INSIDE INCREASE AUDIO ELEMENT");
           // eslint-disable-next-line no-param-reassign
-          audioElement.volume = baseVolume;
+          audioElement.volume = value;
           console.log("VOLUME STEP 3: ", audioElement.volume);
         });
         setHasReduced(false);
@@ -536,7 +533,6 @@ export const ProductionLine = ({
     };
   }, [
     shouldReduceVolume,
-    baseVolume,
     hasReduced,
     value,
     audioElements,
