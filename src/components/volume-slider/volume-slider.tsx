@@ -4,7 +4,6 @@ import { NoSoundIcon, SpeakerOn } from "../../assets/icons/icon";
 
 const SliderWrapper = styled.div`
   width: 100%;
-  margin: 2rem 0;
   display: flex;
   flex-direction: column;
   align-items: center;

@@ -7,11 +7,14 @@ import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { useAudioInput } from "./use-audio-input.ts";
 import { UserList } from "./user-list.tsx";
 import {
+  ChevronDownIcon,
+  ChevronUpIcon,
   MicMuted,
   MicUnmuted,
   SpeakerOff,
   SpeakerOn,
   TVIcon,
+  UsersIcon,
 } from "../../assets/icons/icon.tsx";
 import {
   ActionButton,
@@ -50,27 +53,23 @@ import { SymphonyRtcConnectionComponent } from "./symphony-rtc-connection-compon
 import { ReloadDevicesButton } from "../reload-devices-button.tsx/reload-devices-button.tsx";
 import { HotkeysComponent } from "./hotkeys-component.tsx";
 import { CollapsableSection } from "./collapsable-section.tsx";
+import {
+  HeaderIcon,
+  HeaderTexts,
+  HeaderWrapper,
+  InnerDiv,
+  ParticipantCount,
+  ProductionItemWrapper,
+  ProductionLines,
+  ProductionName,
+} from "../production-list/production-list-components.ts";
 
 type FormValues = TJoinProductionOptions;
 
-const HeaderWrapper = styled.div`
+const CallInfo = styled.div`
   display: flex;
   justify-content: space-between;
   gap: 1rem;
-`;
-
-const ProductionLineInfo = styled.div`
-  font-size: 3rem;
-  font-weight: bold;
-  line-height: 1;
-`;
-
-const SmallText = styled.span`
-  font-size: 1.6rem;
-`;
-
-const LargeText = styled.span`
-  font-size: 2rem;
 `;
 
 const ButtonIcon = styled.div`
@@ -94,7 +93,7 @@ const ButtonIcon = styled.div`
 
 const FlexButtonWrapper = styled.div<{ isProgramUser: boolean }>`
   width: 50%;
-  padding: 0 1rem 2rem 1rem;
+  padding: 0 1rem 1rem 1rem;
 
   &.first {
     padding-left: 0;
@@ -121,14 +120,20 @@ const UserControlBtn = styled(ActionButton)`
 `;
 
 const LongPressWrapper = styled.div`
-  margin: 0 0 2rem 0;
   touch-action: none;
+`;
+
+const PTTWrapper = styled(LongPressWrapper)`
+  width: 100%;
+  button {
+    padding: 1rem;
+    line-height: 2rem;
+  }
 `;
 
 const ButtonWrapper = styled.div`
   display: flex;
-  justify-content: space-between;
-  height: 4rem;
+  justify-content: space-around;
 `;
 
 const ListWrapper = styled(DisplayContainer)`
@@ -136,19 +141,19 @@ const ListWrapper = styled(DisplayContainer)`
   padding: 0;
 `;
 
-const StateText = styled.span<{ state: string }>`
-  font-weight: 700;
-  color: ${({ state }) => {
-    switch (state) {
-      case "connected":
-        return "#7be27b";
-      case "failed":
-        return "#f96c6c";
-      default:
-        return "#ddd";
-    }
-  }};
-`;
+// const StateText = styled.span<{ state: string }>`
+//   font-weight: 700;
+//   color: ${({ state }) => {
+//     switch (state) {
+//       case "connected":
+//         return "#7be27b";
+//       case "failed":
+//         return "#f96c6c";
+//       default:
+//         return "#ddd";
+//     }
+//   }};
+// `;
 
 const ConnectionErrorWrapper = styled(FlexContainer)`
   width: 100vw;
@@ -191,12 +196,50 @@ const DeviceButtonWrapper = styled.div`
   }
 `;
 
-const StatusContainer = styled.div`
-  margin-bottom: 1rem;
-`;
-
 const SpinnerWrapper = styled.div`
   margin-top: 2rem;
+`;
+
+const CallWrapper = styled(ProductionItemWrapper)`
+  margin: 0 0 2rem 0;
+`;
+
+const CallHeader = styled(HeaderWrapper)``;
+
+const MinifiedControls = styled.div`
+  padding: 0 2rem 2rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+  button {
+    margin: 0;
+  }
+`;
+
+const MinifiedControlsBlock = styled.div`
+  width: 50%;
+  display: flex;
+  gap: 1rem;
+`;
+
+const MinifiedControlsButton = styled(UserControlBtn)`
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  color: white;
+  line-height: 2rem;
+  &.off {
+    svg {
+      fill: #f96c6c;
+    }
+  }
+
+  &.on {
+    svg {
+      fill: #6fd84f;
+    }
+  }
 `;
 
 type TProductionLine = {
@@ -229,6 +272,7 @@ export const ProductionLine = ({
   const [muteError, setMuteError] = useState(false);
   const [userId, setUserId] = useState("");
   const [userName, setUserName] = useState("");
+  const [open, setOpen] = useState<boolean>(!isMobile);
   const {
     joinProductionOptions,
     dominantSpeaker,
@@ -614,58 +658,7 @@ export const ProductionLine = ({
   // TODO detect if browser back button is pressed and run exit();
 
   return (
-    <>
-      <HeaderWrapper>
-        {!loading && production && line && (
-          <ProductionLineInfo>
-            <LargeText>{`${production.name}/`} </LargeText>
-            <SmallText>{line.name}</SmallText>
-          </ProductionLineInfo>
-        )}
-        {!isSingleCall && production && line && (
-          <ButtonWrapper>
-            <ExitCallButton resetOnExit={() => setConfirmExitModalOpen(true)} />
-            {confirmExitModalOpen && (
-              <Modal onClose={() => setConfirmExitModalOpen(false)}>
-                <DisplayContainerHeader>Confirm</DisplayContainerHeader>
-                <ModalConfirmationText>
-                  Are you sure you want to leave the call?
-                </ModalConfirmationText>
-                <VerifyDecision
-                  confirm={exit}
-                  abort={() => setConfirmExitModalOpen(false)}
-                />
-              </Modal>
-            )}
-          </ButtonWrapper>
-        )}
-
-        {line?.programOutputLine && (
-          <ProgramOutputIcon>
-            <TVIcon />
-            Program Output
-          </ProgramOutputIcon>
-        )}
-      </HeaderWrapper>
-
-      {connectionActive && (
-        <SymphonyRtcConnectionComponent
-          joinProductionOptions={joinProductionOptions}
-          inputAudioStream={inputAudioStream}
-          callId={id}
-          dispatch={dispatch}
-        />
-      )}
-
-      {joinProductionOptions && connectionState && (
-        <StatusContainer>
-          <span>
-            <strong>Status</strong>:{" "}
-            <StateText state={connectionState}>{connectionState}</StateText>
-          </span>
-        </StatusContainer>
-      )}
-
+    <CallWrapper>
       {joinProductionOptions &&
         loading &&
         (!connectionError ? (
@@ -680,211 +673,314 @@ export const ProductionLine = ({
             />
           </ConnectionErrorWrapper>
         ))}
-
-      {joinProductionOptions && !loading && (
-        <FlexContainer>
-          <ListWrapper>
-            <div
-              style={{
-                width: "100%",
-              }}
-            >
-              {!isIOSMobile &&
-                !isIpad &&
-                !(
-                  line?.programOutputLine && joinProductionOptions.isProgramUser
-                ) && (
-                  <VolumeSlider
-                    value={value}
-                    handleInputChange={handleInputChange}
-                  />
-                )}
-              <FlexContainer>
-                {!(
-                  line?.programOutputLine && joinProductionOptions.isProgramUser
-                ) && (
-                  <FlexButtonWrapper
-                    className="first"
-                    isProgramUser={joinProductionOptions.isProgramUser}
-                  >
-                    <UserControlBtn
-                      type="button"
-                      onClick={() => muteOutput()}
-                      disabled={value === 0}
-                    >
-                      <ButtonIcon
-                        className={isOutputMuted ? "mute" : "unmuted"}
-                      >
-                        {isOutputMuted || value === 0 ? (
-                          <SpeakerOff />
-                        ) : (
-                          <SpeakerOn />
-                        )}
-                      </ButtonIcon>
-                    </UserControlBtn>
-                  </FlexButtonWrapper>
-                )}
-
-                {inputAudioStream &&
-                  inputAudioStream !== "no-device" &&
-                  (line?.programOutputLine
-                    ? joinProductionOptions?.isProgramUser
-                    : !joinProductionOptions.isProgramUser) && (
-                    <FlexButtonWrapper
-                      className="last"
-                      isProgramUser={joinProductionOptions.isProgramUser}
-                    >
-                      <UserControlBtn
-                        type="button"
-                        onClick={() => muteInput(!isInputMuted)}
-                      >
-                        <ButtonIcon
-                          className={isInputMuted ? "mute" : "unmuted"}
-                        >
-                          {isInputMuted ? <MicMuted /> : <MicUnmuted />}
-                        </ButtonIcon>
-                      </UserControlBtn>
-                    </FlexButtonWrapper>
+      {line && (
+        <CallHeader onClick={() => setOpen(!open)}>
+          <HeaderTexts
+            className={(line?.participants.length || 0) > 0 ? "active" : ""}
+          >
+            <ProductionName>{`${production?.name}/${line?.name}`}</ProductionName>
+            <UsersIcon />
+            <ParticipantCount>{line?.participants.length}</ParticipantCount>
+          </HeaderTexts>
+          <HeaderIcon>
+            {open ? <ChevronUpIcon /> : <ChevronDownIcon />}
+          </HeaderIcon>
+        </CallHeader>
+      )}
+      {!open && joinProductionOptions && (
+        <MinifiedControls>
+          <MinifiedControlsBlock>
+            {line &&
+              !(
+                line?.programOutputLine && joinProductionOptions.isProgramUser
+              ) && (
+                <MinifiedControlsButton
+                  className={isOutputMuted ? "off" : "on"}
+                  onClick={() => setIsOutputMuted(!isOutputMuted)}
+                >
+                  {isOutputMuted || value === 0 ? (
+                    <SpeakerOff />
+                  ) : (
+                    <SpeakerOn />
                   )}
-              </FlexContainer>
-              {inputAudioStream &&
-                inputAudioStream !== "no-device" &&
-                !line?.programOutputLine && (
-                  <LongPressWrapper>
-                    <LongPressToTalkButton muteInput={muteInput} />
-                  </LongPressWrapper>
-                )}
-              <CollapsableSection title="Devices">
-                <FormContainer>
-                  {devices &&
-                    (line?.programOutputLine
-                      ? joinProductionOptions.isProgramUser
-                      : !joinProductionOptions.isProgramUser) && (
-                      <FormLabel>
-                        <DecorativeLabel>Input</DecorativeLabel>
-                        <FormSelect
-                          // eslint-disable-next-line
-                          {...register(`audioinput`)}
-                        >
-                          {devices.input && devices.input.length > 0 ? (
-                            devices.input.map((device) => (
-                              <option
-                                key={device.deviceId}
-                                value={device.deviceId}
-                              >
-                                {device.label}
-                              </option>
-                            ))
-                          ) : (
-                            <option value="no-device">
-                              No device available
-                            </option>
-                          )}
-                        </FormSelect>
-                      </FormLabel>
+                </MinifiedControlsButton>
+              )}
+            {inputAudioStream &&
+              inputAudioStream !== "no-device" &&
+              (line?.programOutputLine
+                ? joinProductionOptions?.isProgramUser
+                : !joinProductionOptions.isProgramUser) && (
+                <MinifiedControlsButton
+                  className={isInputMuted ? "off" : "on"}
+                  onClick={() => muteInput(!isInputMuted)}
+                >
+                  {isInputMuted ? <MicMuted /> : <MicUnmuted />}
+                </MinifiedControlsButton>
+              )}
+          </MinifiedControlsBlock>
+          <MinifiedControlsBlock>
+            {inputAudioStream &&
+              inputAudioStream !== "no-device" &&
+              !line?.programOutputLine && (
+                <PTTWrapper>
+                  <LongPressToTalkButton
+                    muteInput={muteInput}
+                    text="Push To Talk"
+                  />
+                </PTTWrapper>
+              )}
+          </MinifiedControlsBlock>
+        </MinifiedControls>
+      )}
+      <ProductionLines className={open ? "expanded" : ""}>
+        <InnerDiv>
+          <CallInfo>
+            {line?.programOutputLine && (
+              <ProgramOutputIcon>
+                <TVIcon />
+                Program Output
+              </ProgramOutputIcon>
+            )}
+          </CallInfo>
+
+          {connectionActive && (
+            <SymphonyRtcConnectionComponent
+              joinProductionOptions={joinProductionOptions}
+              inputAudioStream={inputAudioStream}
+              callId={id}
+              dispatch={dispatch}
+            />
+          )}
+
+          {joinProductionOptions && !loading && (
+            <FlexContainer>
+              <ListWrapper>
+                <div
+                  style={{
+                    width: "100%",
+                  }}
+                >
+                  {!isIOSMobile &&
+                    !isIpad &&
+                    !(
+                      line?.programOutputLine &&
+                      joinProductionOptions.isProgramUser
+                    ) && (
+                      <VolumeSlider
+                        value={value}
+                        handleInputChange={handleInputChange}
+                      />
                     )}
-                  {!(
-                    line?.programOutputLine &&
-                    joinProductionOptions.isProgramUser
-                  ) && (
-                    <FormLabel>
-                      <DecorativeLabel>Output</DecorativeLabel>
-                      {devices.output && devices.output.length > 0 ? (
-                        <FormSelect
-                          // eslint-disable-next-line
-                          {...register(`audiooutput`)}
+                  <FlexContainer>
+                    {!(
+                      line?.programOutputLine &&
+                      joinProductionOptions.isProgramUser
+                    ) && (
+                      <FlexButtonWrapper
+                        className="first"
+                        isProgramUser={joinProductionOptions.isProgramUser}
+                      >
+                        <UserControlBtn
+                          type="button"
+                          onClick={() => muteOutput()}
+                          disabled={value === 0}
                         >
-                          {devices.output.map((device) => (
-                            <option
-                              key={device.deviceId}
-                              value={device.deviceId}
+                          <ButtonIcon
+                            className={isOutputMuted ? "mute" : "unmuted"}
+                          >
+                            {isOutputMuted || value === 0 ? (
+                              <SpeakerOff />
+                            ) : (
+                              <SpeakerOn />
+                            )}
+                          </ButtonIcon>
+                        </UserControlBtn>
+                      </FlexButtonWrapper>
+                    )}
+
+                    {inputAudioStream &&
+                      inputAudioStream !== "no-device" &&
+                      (line?.programOutputLine
+                        ? joinProductionOptions?.isProgramUser
+                        : !joinProductionOptions.isProgramUser) && (
+                        <FlexButtonWrapper
+                          className="last"
+                          isProgramUser={joinProductionOptions.isProgramUser}
+                        >
+                          <UserControlBtn
+                            type="button"
+                            onClick={() => muteInput(!isInputMuted)}
+                          >
+                            <ButtonIcon
+                              className={isInputMuted ? "mute" : "unmuted"}
                             >
-                              {device.label}
-                            </option>
-                          ))}
-                        </FormSelect>
-                      ) : (
+                              {isInputMuted ? <MicMuted /> : <MicUnmuted />}
+                            </ButtonIcon>
+                          </UserControlBtn>
+                        </FlexButtonWrapper>
+                      )}
+                  </FlexContainer>
+                  {inputAudioStream &&
+                    inputAudioStream !== "no-device" &&
+                    !line?.programOutputLine && (
+                      <LongPressWrapper>
+                        <LongPressToTalkButton muteInput={muteInput} />
+                      </LongPressWrapper>
+                    )}
+                  <CollapsableSection title="Devices">
+                    <FormContainer>
+                      {devices &&
+                        (line?.programOutputLine
+                          ? joinProductionOptions.isProgramUser
+                          : !joinProductionOptions.isProgramUser) && (
+                          <FormLabel>
+                            <DecorativeLabel>Input</DecorativeLabel>
+                            <FormSelect
+                              // eslint-disable-next-line
+                              {...register(`audioinput`)}
+                            >
+                              {devices.input && devices.input.length > 0 ? (
+                                devices.input.map((device) => (
+                                  <option
+                                    key={device.deviceId}
+                                    value={device.deviceId}
+                                  >
+                                    {device.label}
+                                  </option>
+                                ))
+                              ) : (
+                                <option value="no-device">
+                                  No device available
+                                </option>
+                              )}
+                            </FormSelect>
+                          </FormLabel>
+                        )}
+                      {!(
+                        line?.programOutputLine &&
+                        joinProductionOptions.isProgramUser
+                      ) && (
+                        <FormLabel>
+                          <DecorativeLabel>Output</DecorativeLabel>
+                          {devices.output && devices.output.length > 0 ? (
+                            <FormSelect
+                              // eslint-disable-next-line
+                              {...register(`audiooutput`)}
+                            >
+                              {devices.output.map((device) => (
+                                <option
+                                  key={device.deviceId}
+                                  value={device.deviceId}
+                                >
+                                  {device.label}
+                                </option>
+                              ))}
+                            </FormSelect>
+                          ) : (
+                            <StyledWarningMessage>
+                              Controlled by operating system
+                            </StyledWarningMessage>
+                          )}
+                        </FormLabel>
+                      )}
+                      {isBrowserFirefox && !isMobile && (
                         <StyledWarningMessage>
-                          Controlled by operating system
+                          If a new device has been added Firefox needs the
+                          permission to be manually reset. If your device is
+                          missing, please remove the permission and reload page.
                         </StyledWarningMessage>
                       )}
-                    </FormLabel>
-                  )}
-                  {isBrowserFirefox && !isMobile && (
-                    <StyledWarningMessage>
-                      If a new device has been added Firefox needs the
-                      permission to be manually reset. If your device is
-                      missing, please remove the permission and reload page.
-                    </StyledWarningMessage>
-                  )}
-                  <DeviceButtonWrapper>
-                    <ActionButton
-                      type="submit"
-                      className="save-button"
-                      disabled={audioNotChanged || !isValid || !isDirty}
-                      onClick={handleSubmit(onSubmit)}
-                    >
-                      Save
-                    </ActionButton>
-                    {!(isBrowserFirefox && !isMobile) && (
-                      <ReloadDevicesButton />
-                    )}
-                  </DeviceButtonWrapper>
-                </FormContainer>
-              </CollapsableSection>
-              {inputAudioStream &&
-                inputAudioStream !== "no-device" &&
-                !isMobile &&
-                !isTablet && (
-                  <CollapsableSection title="Hotkeys">
-                    <HotkeysComponent
-                      callId={id}
-                      savedHotkeys={savedHotkeys}
-                      customGlobalMute={customGlobalMute}
-                      line={line}
-                      joinProductionOptions={joinProductionOptions}
-                    />
+                      <DeviceButtonWrapper>
+                        <ActionButton
+                          type="submit"
+                          className="save-button"
+                          disabled={audioNotChanged || !isValid || !isDirty}
+                          onClick={handleSubmit(onSubmit)}
+                        >
+                          Save
+                        </ActionButton>
+                        {!(isBrowserFirefox && !isMobile) && (
+                          <ReloadDevicesButton />
+                        )}
+                      </DeviceButtonWrapper>
+                    </FormContainer>
                   </CollapsableSection>
+                  {inputAudioStream &&
+                    inputAudioStream !== "no-device" &&
+                    !isMobile &&
+                    !isTablet && (
+                      <CollapsableSection title="Hotkeys">
+                        <HotkeysComponent
+                          callId={id}
+                          savedHotkeys={savedHotkeys}
+                          customGlobalMute={customGlobalMute}
+                          line={line}
+                          joinProductionOptions={joinProductionOptions}
+                        />
+                      </CollapsableSection>
+                    )}
+                  <CollapsableSection title="Participants">
+                    {line && (
+                      <UserList
+                        sessionId={sessionId}
+                        participants={line.participants}
+                        dominantSpeaker={dominantSpeaker}
+                        audioLevelAboveThreshold={audioLevelAboveThreshold}
+                        programOutputLine={line.programOutputLine}
+                        setConfirmModalOpen={setConfirmModalOpen}
+                        setUserId={setUserId}
+                        setUserName={setUserName}
+                      />
+                    )}
+                  </CollapsableSection>
+                  {!isSingleCall && production && line && (
+                    <ButtonWrapper>
+                      <ExitCallButton
+                        resetOnExit={() => setConfirmExitModalOpen(true)}
+                      />
+                      {confirmExitModalOpen && (
+                        <Modal onClose={() => setConfirmExitModalOpen(false)}>
+                          <DisplayContainerHeader>
+                            Confirm
+                          </DisplayContainerHeader>
+                          <ModalConfirmationText>
+                            Are you sure you want to leave the call?
+                          </ModalConfirmationText>
+                          <VerifyDecision
+                            confirm={exit}
+                            abort={() => setConfirmExitModalOpen(false)}
+                          />
+                        </Modal>
+                      )}
+                    </ButtonWrapper>
+                  )}
+                </div>
+              </ListWrapper>
+              <ListWrapper>
+                {confirmModalOpen && (
+                  <Modal onClose={() => setConfirmModalOpen(false)}>
+                    <DisplayContainerHeader>Confirm</DisplayContainerHeader>
+                    <ModalConfirmationText>
+                      {muteError
+                        ? "Something went wrong, Please try again"
+                        : `Are you sure you want to mute ${userName}?`}
+                    </ModalConfirmationText>
+                    <ModalConfirmationText className="bold">
+                      {muteError
+                        ? ""
+                        : `This will mute ${userName} for everyone in the call.`}
+                    </ModalConfirmationText>
+                    <VerifyDecision
+                      confirm={muteParticipant}
+                      abort={() => setConfirmModalOpen(false)}
+                    />
+                  </Modal>
                 )}
-              <CollapsableSection title="Participants">
-                {line && (
-                  <UserList
-                    sessionId={sessionId}
-                    participants={line.participants}
-                    dominantSpeaker={dominantSpeaker}
-                    audioLevelAboveThreshold={audioLevelAboveThreshold}
-                    programOutputLine={line.programOutputLine}
-                    setConfirmModalOpen={setConfirmModalOpen}
-                    setUserId={setUserId}
-                    setUserName={setUserName}
-                  />
-                )}
-              </CollapsableSection>
-            </div>
-          </ListWrapper>
-          <ListWrapper>
-            {confirmModalOpen && (
-              <Modal onClose={() => setConfirmModalOpen(false)}>
-                <DisplayContainerHeader>Confirm</DisplayContainerHeader>
-                <ModalConfirmationText>
-                  {muteError
-                    ? "Something went wrong, Please try again"
-                    : `Are you sure you want to mute ${userName}?`}
-                </ModalConfirmationText>
-                <ModalConfirmationText className="bold">
-                  {muteError
-                    ? ""
-                    : `This will mute ${userName} for everyone in the call.`}
-                </ModalConfirmationText>
-                <VerifyDecision
-                  confirm={muteParticipant}
-                  abort={() => setConfirmModalOpen(false)}
-                />
-              </Modal>
-            )}
-          </ListWrapper>
-        </FlexContainer>
-      )}
-    </>
+              </ListWrapper>
+            </FlexContainer>
+          )}
+        </InnerDiv>
+      </ProductionLines>
+    </CallWrapper>
   );
 };

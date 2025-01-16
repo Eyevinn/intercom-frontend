@@ -4,7 +4,6 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useGlobalState } from "../../global-state/context-provider";
 import { JoinProduction } from "../landing-page/join-production";
 import { PrimaryButton, SecondaryButton } from "../landing-page/form-elements";
-import { NavigateToRootButton } from "../navigate-to-root-button/navigate-to-root-button";
 import { DisplayContainerHeader } from "../landing-page/display-container-header";
 import { Modal } from "../modal/modal";
 import { VerifyDecision } from "../verify-decision/verify-decision";
@@ -12,40 +11,29 @@ import { ModalConfirmationText } from "../modal/modal-confirmation-text";
 import { MicMuted, MicUnmuted } from "../../assets/icons/icon";
 import { useGlobalHotkeys } from "../production-line/use-line-hotkeys";
 import { ProductionLine } from "../production-line/production-line";
+import { PageHeader } from "../page-layout/page-header";
+import { isMobile } from "../../bowser";
 
 const Container = styled.div`
   display: flex;
   flex-direction: column;
   flex-wrap: wrap;
-  padding: 2rem;
 `;
 
 const CallsContainer = styled.div`
   display: flex;
-  flex-direction: row;
   flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 2rem;
+  padding: 0 2rem 2rem 2rem;
 
   form {
     margin: 0;
   }
 `;
 
-const CallContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  padding: 2rem;
-  max-width: 40rem;
-  min-width: 30rem;
-`;
-
 const AddCallContainer = styled.div`
   display: flex;
-`;
-
-const ButtonWrapper = styled.div`
-  display: flex;
-  justify-content: space-between;
-  height: 4rem;
 `;
 
 const MuteAllCallsBtn = styled(PrimaryButton)`
@@ -70,7 +58,7 @@ const MuteAllCallsBtn = styled(PrimaryButton)`
   }
 `;
 
-const HeaderRightSide = styled.div`
+const HeaderButtons = styled.div`
   display: flex;
 `;
 
@@ -146,31 +134,32 @@ export const CallsPage = () => {
   };
 
   return (
-    <Container>
-      <ButtonWrapper>
-        <NavigateToRootButton
-          resetOnExitRequest={() => {
-            if (isEmpty) {
-              runExitAllCalls();
-            } else {
-              setConfirmExitModalOpen(true);
-            }
-          }}
-        />
-        <HeaderRightSide>
-          {confirmExitModalOpen && (
-            <Modal onClose={() => setConfirmExitModalOpen(false)}>
-              <DisplayContainerHeader>Confirm</DisplayContainerHeader>
-              <ModalConfirmationText>
-                Are you sure you want to leave all calls?
-              </ModalConfirmationText>
-              <VerifyDecision
-                confirm={runExitAllCalls}
-                abort={() => setConfirmExitModalOpen(false)}
-              />
-            </Modal>
-          )}
-          {!isEmpty && !isSingleCall && (
+    <>
+      <PageHeader
+        title={!isEmpty ? "Calls" : ""}
+        hasNavigateToRoot
+        onNavigateToRoot={() => {
+          if (isEmpty) {
+            runExitAllCalls();
+          } else {
+            setConfirmExitModalOpen(true);
+          }
+        }}
+      >
+        {confirmExitModalOpen && (
+          <Modal onClose={() => setConfirmExitModalOpen(false)}>
+            <DisplayContainerHeader>Confirm</DisplayContainerHeader>
+            <ModalConfirmationText>
+              Are you sure you want to leave all calls?
+            </ModalConfirmationText>
+            <VerifyDecision
+              confirm={runExitAllCalls}
+              abort={() => setConfirmExitModalOpen(false)}
+            />
+          </Modal>
+        )}
+        <HeaderButtons>
+          {!isEmpty && !isSingleCall && !isMobile && (
             <MuteAllCallsBtn
               type="button"
               onClick={() => setIsMasterInputMuted(!isMasterInputMuted)}
@@ -182,53 +171,54 @@ export const CallsPage = () => {
           )}
           {!isEmpty && (
             <AddCallContainer>
-              <ButtonWrapper>
-                <SecondaryButton
-                  type="button"
-                  onClick={() => setAddCallActive(!addCallActive)}
-                >
-                  Add Call
-                </SecondaryButton>
-              </ButtonWrapper>
+              <SecondaryButton
+                type="button"
+                onClick={() => setAddCallActive(!addCallActive)}
+              >
+                Add Call
+              </SecondaryButton>
             </AddCallContainer>
           )}
-        </HeaderRightSide>
-      </ButtonWrapper>
-      {isEmpty && paramProductionId && paramLineId && (
-        <JoinProduction
-          preSelected={{
-            preSelectedProductionId: paramProductionId,
-            preSelectedLineId: paramLineId,
-          }}
-          customGlobalMute={customGlobalMute}
-        />
-      )}
-      <CallsContainer>
-        {Object.entries(calls).map(
-          ([callId, callState]) =>
-            callId &&
-            callState.joinProductionOptions && (
-              <CallContainer key={callId}>
-                <ProductionLine
-                  id={callId}
-                  shouldReduceVolume={shouldReduceVolume}
-                  callState={callState}
-                  isSingleCall={isSingleCall}
-                  customGlobalMute={customGlobalMute}
-                  masterInputMute={isMasterInputMuted}
-                />
-              </CallContainer>
-            )
-        )}
-        {addCallActive && productionId && (
+        </HeaderButtons>
+      </PageHeader>
+      <Container>
+        {isEmpty && paramProductionId && paramLineId && (
           <JoinProduction
+            preSelected={{
+              preSelectedProductionId: paramProductionId,
+              preSelectedLineId: paramLineId,
+            }}
             customGlobalMute={customGlobalMute}
-            addAdditionalCallId={productionId}
-            closeAddCallView={() => setAddCallActive(false)}
-            className="calls-page"
           />
         )}
-      </CallsContainer>
-    </Container>
+        <CallsContainer>
+          {addCallActive && productionId && (
+            <JoinProduction
+              customGlobalMute={customGlobalMute}
+              addAdditionalCallId={productionId}
+              closeAddCallView={() => setAddCallActive(false)}
+              className="calls-page"
+            />
+          )}
+          {Object.entries(calls)
+            .toReversed()
+            .map(
+              ([callId, callState]) =>
+                callId &&
+                callState.joinProductionOptions && (
+                  <ProductionLine
+                    key={callId}
+                    id={callId}
+                    shouldReduceVolume={shouldReduceVolume}
+                    callState={callState}
+                    isSingleCall={isSingleCall}
+                    customGlobalMute={customGlobalMute}
+                    masterInputMute={isMasterInputMuted}
+                  />
+                )
+            )}
+        </CallsContainer>
+      </Container>
+    </>
   );
 };

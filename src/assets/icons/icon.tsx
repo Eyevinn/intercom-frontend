@@ -17,6 +17,7 @@ import Add from "./add.svg?react";
 import Edit from "./edit.svg?react";
 import TV from "./tv.svg?react";
 import Megaphone from "./campaign.svg?react";
+import Logout from "./logout.svg?react";
 
 export const MicMuted = () => <MicMute />;
 
@@ -55,3 +56,5 @@ export const EditIcon = () => <Edit />;
 export const TVIcon = () => <TV />;
 
 export const MegaphoneIcon = () => <Megaphone />;
+
+export const LogoutIcon = () => <Logout />;

@@ -55,18 +55,25 @@ const RootButtonWrapper = styled.div`
 interface PageHeaderProps extends PropsWithChildren {
   title: string;
   hasNavigateToRoot?: boolean;
+  onNavigateToRoot?: () => void;
   loading?: boolean;
 }
 
 export const PageHeader: FC<PageHeaderProps> = (props) => {
-  const { title, hasNavigateToRoot = false, loading = false, children } = props;
+  const {
+    title,
+    hasNavigateToRoot = false,
+    onNavigateToRoot,
+    loading = false,
+    children,
+  } = props;
 
   return (
     <HeaderContainer>
       <HeaderLeftSide>
         {hasNavigateToRoot && (
           <RootButtonWrapper>
-            <NavigateToRootButton />
+            <NavigateToRootButton onNavigate={onNavigateToRoot} />
           </RootButtonWrapper>
         )}
         <CustomContainerHeader>{title}</CustomContainerHeader>
