@@ -14,6 +14,8 @@ const ButtonWrapper = styled.div`
 `;
 
 const CheckboxWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
   margin-bottom: 1rem;
   margin-top: 1rem;
 `;
@@ -22,12 +24,14 @@ type ProgramOutputModalProps = {
   onClose: () => void;
   onJoin: () => void;
   setIsProgramUser: (value: boolean) => void;
+  isProgramUser: boolean;
 };
 
 export const ProgramOutputModal = ({
   onClose,
   onJoin,
   setIsProgramUser,
+  isProgramUser,
 }: ProgramOutputModalProps) => {
   return (
     <Modal onClose={onClose}>
@@ -38,8 +42,14 @@ export const ProgramOutputModal = ({
         </p>
         <CheckboxWrapper>
           <Checkbox
-            label="Join as program output"
-            onChange={(e) => setIsProgramUser(e.target.checked)}
+            label="Listener"
+            checked={!isProgramUser}
+            onChange={() => setIsProgramUser(false)}
+          />
+          <Checkbox
+            label="Program output"
+            checked={isProgramUser}
+            onChange={() => setIsProgramUser(true)}
           />
         </CheckboxWrapper>
       </ContentWrapper>

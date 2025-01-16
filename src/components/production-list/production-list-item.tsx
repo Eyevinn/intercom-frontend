@@ -5,6 +5,7 @@ import { useGlobalState } from "../../global-state/context-provider";
 import {
   ChevronDownIcon,
   ChevronUpIcon,
+  TVIcon,
   UserIcon,
   UsersIcon,
 } from "../../assets/icons/icon";
@@ -19,6 +20,7 @@ import {
   HeaderIcon,
   HeaderTexts,
   HeaderWrapper,
+  IconWrapper,
   InnerDiv,
   Lineblock,
   LineBlockParticipant,
@@ -152,9 +154,17 @@ export const ProductionsListItem = ({
       <ProductionLines className={open ? "expanded" : ""}>
         <InnerDiv>
           {production.lines?.map((l) => (
-            <Lineblock key={`line-${l.id}-${l.name}`}>
+            <Lineblock
+              key={`line-${l.id}-${l.name}`}
+              isProgramOutput={l.programOutputLine}
+            >
               <LineBlockTexts>
                 <LineBlockTitleWrapper>
+                  {l.programOutputLine && (
+                    <IconWrapper>
+                      <TVIcon />
+                    </IconWrapper>
+                  )}
                   <LineBlockTitle>{l.name}</LineBlockTitle>
                   {l.participants.length > 4 && (
                     <ParticipantExpandBtn
@@ -229,6 +239,7 @@ export const ProductionsListItem = ({
                     goToProduction(modalLineId);
                   }}
                   setIsProgramUser={setIsProgramUser}
+                  isProgramUser={isProgramUser}
                 />
               )}
             </Lineblock>

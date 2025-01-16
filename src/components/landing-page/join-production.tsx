@@ -37,6 +37,8 @@ const FetchErrorMessage = styled.div`
 `;
 
 const CheckboxWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
   margin-bottom: 3rem;
   margin-top: 1rem;
 `;
@@ -337,13 +339,19 @@ export const JoinProduction = ({
           {isProgramOutputLine && (
             <>
               <p>
-                Do you want to join this call as the program output or as a
-                listener?
+                This is a line for program output. Do you wish to join the line
+                as a as the program output or as a listener?
               </p>
               <CheckboxWrapper>
                 <Checkbox
-                  label="Join as program output"
-                  onChange={(e) => setIsProgramUser(e.target.checked)}
+                  label="Listener"
+                  checked={!isProgramUser}
+                  onChange={() => setIsProgramUser(false)}
+                />
+                <Checkbox
+                  label="Program output"
+                  checked={isProgramUser}
+                  onChange={() => setIsProgramUser(true)}
                 />
               </CheckboxWrapper>
             </>
