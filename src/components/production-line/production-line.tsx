@@ -141,20 +141,6 @@ const ListWrapper = styled(DisplayContainer)`
   padding: 0;
 `;
 
-// const StateText = styled.span<{ state: string }>`
-//   font-weight: 700;
-//   color: ${({ state }) => {
-//     switch (state) {
-//       case "connected":
-//         return "#7be27b";
-//       case "failed":
-//         return "#f96c6c";
-//       default:
-//         return "#ddd";
-//     }
-//   }};
-// `;
-
 const ConnectionErrorWrapper = styled(FlexContainer)`
   width: 100vw;
   justify-content: center;
@@ -179,7 +165,7 @@ const ProgramOutputIcon = styled.div`
 
   svg {
     fill: #59cbe8;
-    width: 3.5rem;
+    width: 2.5rem;
   }
 `;
 
@@ -200,8 +186,10 @@ const SpinnerWrapper = styled.div`
   margin-top: 2rem;
 `;
 
-const CallWrapper = styled(ProductionItemWrapper)`
+const CallWrapper = styled(ProductionItemWrapper)<{ isProgramLine?: boolean }>`
   margin: 0 0 2rem 0;
+  background: ${({ isProgramLine }) =>
+    isProgramLine ? "rgba(73, 67, 124, 0.2)" : "transparent"};
 `;
 
 const CallHeader = styled(HeaderWrapper)``;
@@ -658,7 +646,7 @@ export const ProductionLine = ({
   // TODO detect if browser back button is pressed and run exit();
 
   return (
-    <CallWrapper>
+    <CallWrapper isProgramLine={line?.programOutputLine}>
       {joinProductionOptions &&
         loading &&
         (!connectionError ? (
@@ -738,7 +726,7 @@ export const ProductionLine = ({
             {line?.programOutputLine && (
               <ProgramOutputIcon>
                 <TVIcon />
-                Program Output
+                Audio feed
               </ProgramOutputIcon>
             )}
           </CallInfo>

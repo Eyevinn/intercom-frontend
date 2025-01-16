@@ -20,25 +20,25 @@ const CheckboxWrapper = styled.div`
   margin-top: 1rem;
 `;
 
-type ProgramOutputModalProps = {
+type AudioFeedModalProps = {
   onClose: () => void;
   onJoin: () => void;
   setIsProgramUser: (value: boolean) => void;
   isProgramUser: boolean;
 };
 
-export const ProgramOutputModal = ({
+export const AudioFeedModal = ({
   onClose,
   onJoin,
   setIsProgramUser,
   isProgramUser,
-}: ProgramOutputModalProps) => {
+}: AudioFeedModalProps) => {
   return (
     <Modal onClose={onClose}>
       <ContentWrapper>
         <p>
-          This is a line for program output. Do you wish to join the line as a
-          as the program output or as a listener?
+          This is a line for audio feed. Do you wish to join the line as the
+          audio feed or as a listener?
         </p>
         <CheckboxWrapper>
           <Checkbox
@@ -47,7 +47,7 @@ export const ProgramOutputModal = ({
             onChange={() => setIsProgramUser(false)}
           />
           <Checkbox
-            label="Program output"
+            label="Audio feed"
             checked={isProgramUser}
             onChange={() => setIsProgramUser(true)}
           />

@@ -36,10 +36,10 @@ import {
   ProductionName,
   SpinnerWrapper,
 } from "./production-list-components";
-import { ProgramOutputModal } from "../program-output-modal/program-output-modal";
 import { ManageProductionButtons } from "./manage-production-buttons";
 import { ConfirmationModal } from "../verify-decision/confirmation-modal";
 import { TLine } from "../production-line/types";
+import { AudioFeedModal } from "../audio-feed-modal/audio-feed-modal";
 
 type ProductionsListItemProps = {
   production: TBasicProductionResponse;
@@ -232,7 +232,7 @@ export const ProductionsListItem = ({
                 </SecondaryButton>
               )}
               {isModalOpen && modalLineId && (
-                <ProgramOutputModal
+                <AudioFeedModal
                   onClose={() => setIsModalOpen(false)}
                   onJoin={() => {
                     setIsModalOpen(false);

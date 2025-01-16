@@ -339,8 +339,8 @@ export const JoinProduction = ({
           {isProgramOutputLine && (
             <>
               <p>
-                This is a line for program output. Do you wish to join the line
-                as a as the program output or as a listener?
+                This is a line for audio feed. Do you wish to join the line as
+                the audio feed or as a listener?
               </p>
               <CheckboxWrapper>
                 <Checkbox
@@ -349,7 +349,7 @@ export const JoinProduction = ({
                   onChange={() => setIsProgramUser(false)}
                 />
                 <Checkbox
-                  label="Program output"
+                  label="Audio feed"
                   checked={isProgramUser}
                   onChange={() => setIsProgramUser(true)}
                 />
