@@ -140,7 +140,7 @@ export const JoinProduction = ({
     }
   }, [addAdditionalCallId, setValue]);
 
-  // IF THE DEVICE NO LONGER EXISTS SET FIELD VALUES TO DEFAULT
+  // If the device no longer exists set field values to default
   useEffect(() => {
     if (!devices.input?.length) {
       setValue("audioinput", "no-device", { shouldValidate: true });
