@@ -55,6 +55,7 @@ const UserWrapper = styled.div<TUserProps>`
 const User = styled.div`
   display: flex;
   align-items: center;
+  max-width: 29rem;
 `;
 
 const IsTalkingIndicator = styled.div<TIsTalkingIndicator>`
@@ -127,9 +128,11 @@ export const UserList = ({
       <ListWrapper>
         {participants.map((p) => {
           const isYou = p.sessionId === sessionId;
+          const truncatedUsername =
+            p.name.length > 40 ? `${p.name.slice(0, 40)}...` : p.name;
           return (
             <UserWrapper key={p.sessionId} isYou={isYou}>
-              <User>
+              <User title={p.name}>
                 <IsTalkingIndicator
                   isTalking={
                     audioLevelAboveThreshold && p.endpointId === dominantSpeaker
@@ -139,7 +142,7 @@ export const UserList = ({
                     <UserIcon />
                   </OnlineIndicator>
                 </IsTalkingIndicator>
-                {p.name} {p.isActive ? "" : "(inactive)"}
+                {truncatedUsername} {p.isActive ? "" : "(inactive)"}
               </User>
               {!isYou && p.isActive && !programOutputLine && (
                 <MuteParticipantButton

@@ -9,7 +9,7 @@ export const ProductionItemWrapper = styled.div`
   flex: 0 0 calc(25% - 2rem);
   ${() => (isMobile ? `flex-grow: 1;` : `flex-grow: 0;`)}
   justify-content: start;
-  min-width: 20rem;
+  min-width: 30rem;
   border: 1px solid #424242;
   border-radius: 0.5rem;
   margin: 0 2rem 2rem 0;
@@ -20,6 +20,7 @@ export const ProductionName = styled.div`
   font-size: 1.4rem;
   font-weight: bold;
   margin-right: 1rem;
+  max-width: 30rem;
   word-break: break-word;
 `;
 
@@ -31,6 +32,7 @@ export const ParticipantCount = styled.div`
 export const HeaderWrapper = styled.div`
   width: 100%;
   display: flex;
+  align-items: center;
   justify-content: space-between;
   padding: 2rem;
 `;
@@ -38,10 +40,12 @@ export const HeaderWrapper = styled.div`
 export const HeaderTexts = styled.div`
   display: flex;
   align-items: center;
+
   svg {
     height: 1.5rem;
     width: 1.5rem;
     margin-right: 0.5rem;
+    flex-shrink: 0;
   }
   &.active {
     svg {
@@ -55,6 +59,7 @@ export const HeaderIcon = styled.div`
   align-items: center;
   height: 2rem;
   width: 2rem;
+  flex-shrink: 0;
 `;
 
 export const ProductionLines = styled.div`
@@ -119,6 +124,7 @@ export const ParticipantExpandBtn = styled.button`
     fill: #a6a6a6;
     width: 2rem;
     margin-top: 0.3rem;
+    flex-shrink: 0;
   }
 `;
 
@@ -133,6 +139,7 @@ export const LineBlockParticipant = styled.div`
     fill: #d6d3d1;
     height: 2rem;
     width: 2rem;
+    flex-shrink: 0;
   }
 `;
 

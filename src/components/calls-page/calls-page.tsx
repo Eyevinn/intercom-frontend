@@ -117,17 +117,7 @@ export const CallsPage = () => {
         setShouldReduceVolume(false);
       }
     }
-
-    return () => {
-      if (startTimeoutRef.current) {
-        clearTimeout(startTimeoutRef.current);
-      }
-    };
   }, [isSomeoneSpeaking, shouldReduceVolume]);
-
-  useEffect(() => {
-    console.log("SHOULD REDUCE VOLUME CALLS PAGE: ", shouldReduceVolume);
-  }, [shouldReduceVolume]);
 
   useEffect(() => {
     if (selectedProductionId) {
