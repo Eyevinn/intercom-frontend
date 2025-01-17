@@ -235,7 +235,7 @@ export const ProductionLine = ({
         // eslint-disable-next-line no-param-reassign
         t.enabled = !masterInputMute;
       });
-      setIsInputMuted(masterInputMute);
+      muteInput(masterInputMute);
     }
     if (masterInputMute && !isProgramOutputLine) {
       dispatch({
@@ -248,7 +248,14 @@ export const ProductionLine = ({
         },
       });
     }
-  }, [dispatch, id, inputAudioStream, isProgramOutputLine, masterInputMute]);
+  }, [
+    dispatch,
+    id,
+    inputAudioStream,
+    isProgramOutputLine,
+    masterInputMute,
+    muteInput,
+  ]);
 
   useEffect(() => {
     if (connectionState === "connected") {

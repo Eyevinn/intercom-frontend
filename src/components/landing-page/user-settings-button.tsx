@@ -33,6 +33,13 @@ const UserSettingsWrapper = styled.div`
 
 const Username = styled.div`
   margin-right: 0.5rem;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-height: 1.2;
+  max-height: calc(1.2em * 2);
 `;
 
 interface UserSettingsButtonProps {
@@ -44,12 +51,9 @@ export const UserSettingsButton: FC<UserSettingsButtonProps> = (props) => {
   const { readFromStorage } = useStorage();
   const username = readFromStorage("username") || "Guest";
 
-  const truncatedUsername =
-    isMobile && username.length > 20 ? `${username.slice(0, 20)}...` : username;
-
   return (
     <UserSettingsWrapper className={isMobile ? "mobile" : ""} onClick={onClick}>
-      <Username>{truncatedUsername}</Username>
+      <Username>{username}</Username>
       <UserSettingsIcon />
     </UserSettingsWrapper>
   );
