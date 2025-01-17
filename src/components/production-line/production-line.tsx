@@ -139,32 +139,37 @@ export const ProductionLine = ({
   useEffect(() => {
     // Reduce volume by 80%
     const volumeChangeFactor = 0.2;
-    if (!line?.programOutputLine) return;
 
-    if (shouldReduceVolume && !hasReduced) {
-      setHasReduced(true);
+    if (line?.programOutputLine) {
+      if (shouldReduceVolume && !hasReduced) {
+        setHasReduced(true);
 
-      audioElements?.forEach((audioElement) => {
-        // eslint-disable-next-line no-param-reassign
-        audioElement.volume = value * volumeChangeFactor;
-        console.log("AUDIO FEED VOLUME REDUCED TO: ", audioElement.volume);
-      });
-    }
-
-    if (!shouldReduceVolume && hasReduced) {
-      increaseVolumeTimeoutRef.current = setTimeout(() => {
         audioElements?.forEach((audioElement) => {
           // eslint-disable-next-line no-param-reassign
-          audioElement.volume = value;
-          console.log("AUDIO FEED VOLUME INCREASED TO: ", audioElement.volume);
+          audioElement.volume = value * volumeChangeFactor;
+          console.log("AUDIO FEED VOLUME REDUCED TO: ", audioElement.volume);
         });
-        setHasReduced(false);
-      }, 3000);
-    }
+      }
 
-    if (increaseVolumeTimeoutRef.current) {
-      clearTimeout(increaseVolumeTimeoutRef.current);
+      if (!shouldReduceVolume && hasReduced) {
+        increaseVolumeTimeoutRef.current = setTimeout(() => {
+          audioElements?.forEach((audioElement) => {
+            // eslint-disable-next-line no-param-reassign
+            audioElement.volume = value;
+            console.log(
+              "AUDIO FEED VOLUME INCREASED TO: ",
+              audioElement.volume
+            );
+          });
+          setHasReduced(false);
+        }, 3000);
+      }
     }
+    return () => {
+      if (increaseVolumeTimeoutRef.current) {
+        clearTimeout(increaseVolumeTimeoutRef.current);
+      }
+    };
   }, [
     shouldReduceVolume,
     hasReduced,
