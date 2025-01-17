@@ -39,6 +39,7 @@ import {
 import { ManageProductionButtons } from "./manage-production-buttons";
 import { ConfirmationModal } from "../verify-decision/confirmation-modal";
 import { TLine } from "../production-line/types";
+import { isMobile } from "../../bowser";
 import { AudioFeedModal } from "../audio-feed-modal/audio-feed-modal";
 
 type ProductionsListItemProps = {
@@ -143,7 +144,11 @@ export const ProductionsListItem = ({
     <ProductionItemWrapper>
       <HeaderWrapper onClick={() => setOpen(!open)}>
         <HeaderTexts className={totalParticipants > 0 ? "active" : ""}>
-          <ProductionName>{production.name}</ProductionName>
+          <ProductionName title={production.name}>
+            {production.name.length > 40
+              ? `${production.name.slice(0, 40)}...`
+              : production.name}
+          </ProductionName>
           <UsersIcon />
           <ParticipantCount>{totalParticipants}</ParticipantCount>
         </HeaderTexts>
@@ -165,7 +170,9 @@ export const ProductionsListItem = ({
                       <TVIcon />
                     </IconWrapper>
                   )}
-                  <LineBlockTitle>{l.name}</LineBlockTitle>
+                  <LineBlockTitle title={l.name}>
+                    {l.name.length > 40 ? `${l.name.slice(0, 40)}...` : l.name}
+                  </LineBlockTitle>
                   {l.participants.length > 4 && (
                     <ParticipantExpandBtn
                       type="button"
@@ -173,7 +180,8 @@ export const ProductionsListItem = ({
                       onClick={() => setShowFullUserList(!showFullUserList)}
                     >
                       <PersonText>
-                        {showFullUserList ? "hide" : "show"} full list
+                        {showFullUserList ? "hide" : "show"}{" "}
+                        {isMobile ? "" : "full list"}
                       </PersonText>
                       {showFullUserList ? (
                         <ChevronUpIcon />
