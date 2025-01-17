@@ -303,6 +303,17 @@ export const ProductionLine = ({
     audioOutputId: joinProductionOptions?.audiooutput ?? null,
   });
 
+  const line = useLinePolling({ callId: id, joinProductionOptions });
+  const isProgramOutputLine = line && line.programOutputLine;
+  const isProgramUser =
+    joinProductionOptions && joinProductionOptions.isProgramUser;
+
+  const { production, error: fetchProductionError } = useFetchProduction(
+    joinProductionOptions
+      ? parseInt(joinProductionOptions.productionId, 10)
+      : null
+  );
+
   useEffect(() => {
     if (audioElements) {
       audioElements.forEach((audioElement) => {
@@ -317,55 +328,77 @@ export const ProductionLine = ({
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = parseFloat(e.target.value);
     setValue(newValue);
+  };
 
+  useEffect(() => {
     audioElements?.forEach((audioElement) => {
       // eslint-disable-next-line no-param-reassign
-      audioElement.volume = newValue;
+      audioElement.volume = value;
     });
 
-    if (newValue > 0 && isOutputMuted) {
+    if (value > 0) {
       setIsOutputMuted(false);
       audioElements?.forEach((audioElement) => {
         // eslint-disable-next-line no-param-reassign
         audioElement.muted = false;
       });
     }
-  };
+  }, [audioElements, value]);
+
+  useEffect(() => {
+    // Reduce volume by 80%
+    const volumeChangeFactor = 0.2;
+    if (!line?.programOutputLine) return;
+
+    if (shouldReduceVolume && !hasReduced) {
+      console.log("BASE VOLUME 1: ", value);
+      setHasReduced(true);
+
+      audioElements?.forEach((audioElement) => {
+        // eslint-disable-next-line no-param-reassign
+        audioElement.volume = value * volumeChangeFactor;
+        console.log(
+          "VOLUME REDUCTION (INSIDE AUDIOELEMENT): ",
+          audioElement.volume
+        );
+      });
+    }
+
+    if (!shouldReduceVolume && hasReduced) {
+      console.log("BASE VOLUME 2: ", value);
+      finalIncreaseTimeoutRef.current = setTimeout(() => {
+        audioElements?.forEach((audioElement) => {
+          // eslint-disable-next-line no-param-reassign
+          audioElement.volume = value;
+          console.log("VOLUME INCREASE: ", audioElement.volume);
+        });
+        setHasReduced(false);
+      }, 3000);
+    }
+
+    // eslint-disable-next-line consistent-return
+    return () => {
+      if (finalIncreaseTimeoutRef.current) {
+        clearTimeout(finalIncreaseTimeoutRef.current);
+      }
+    };
+  }, [
+    shouldReduceVolume,
+    hasReduced,
+    value,
+    audioElements,
+    line?.programOutputLine,
+  ]);
 
   useHotkeys(savedHotkeys?.increaseVolumeHotkey || "u", () => {
     const newValue = Math.min(value + 0.05, 1);
     setValue(newValue);
-
-    audioElements?.forEach((audioElement) => {
-      // eslint-disable-next-line no-param-reassign
-      audioElement.volume = newValue;
-    });
   });
 
   useHotkeys(savedHotkeys?.decreaseVolumeHotkey || "d", () => {
     const newValue = Math.max(value - 0.05, 0);
     setValue(newValue);
-
-    audioElements?.forEach((audioElement) => {
-      // eslint-disable-next-line no-param-reassign
-      audioElement.volume = newValue;
-    });
-
-    if (newValue > 0 && isOutputMuted) {
-      setIsOutputMuted(false);
-    }
   });
-
-  const line = useLinePolling({ callId: id, joinProductionOptions });
-  const isProgramOutputLine = line && line.programOutputLine;
-  const isProgramUser =
-    joinProductionOptions && joinProductionOptions.isProgramUser;
-
-  const { production, error: fetchProductionError } = useFetchProduction(
-    joinProductionOptions
-      ? parseInt(joinProductionOptions.productionId, 10)
-      : null
-  );
 
   const muteInput = useCallback(
     (mute: boolean) => {
@@ -484,66 +517,6 @@ export const ProductionLine = ({
       setIsOutputMuted(true);
     }
   }, [isProgramOutputLine, isProgramUser]);
-
-  // MÅSTE MUTEA SPEAKER PÅ PROGRAM LINE!!!!!
-  // Ska vara mutead om man är programUser bara vilket den är right??
-
-  useEffect(() => {
-    // Reduce volume by 80%
-    const volumeChangeFactor = 0.2;
-    if (!line?.programOutputLine) return;
-
-    if (shouldReduceVolume && !hasReduced) {
-      console.log("BASE VOLUME 1: ", value);
-      console.log("ONE VOLUME REDUCTION: ");
-      setHasReduced(true);
-
-      audioElements?.forEach((audioElement) => {
-        // eslint-disable-next-line no-param-reassign
-        audioElement.volume *= volumeChangeFactor;
-        console.log(
-          "TWO VOLUME REDUCTION (INSIDE AUDIOELEMENT): ",
-          audioElement.volume
-        );
-      });
-    }
-
-    console.log("IF REQUIREMENT 1 !shouldReduceVolume: ", !shouldReduceVolume);
-    console.log("IF REQUIREMENT 2 hasReduced: ", hasReduced);
-
-    if (!shouldReduceVolume && hasReduced) {
-      console.log("BASE VOLUME 2: ", value);
-
-      finalIncreaseTimeoutRef.current = setTimeout(() => {
-        audioElements?.forEach((audioElement) => {
-          console.log("INSIDE INCREASE AUDIO ELEMENT");
-          // eslint-disable-next-line no-param-reassign
-          audioElement.volume = value;
-          console.log("VOLUME STEP 3: ", audioElement.volume);
-        });
-        setHasReduced(false);
-      }, 3000);
-    }
-
-    // eslint-disable-next-line consistent-return
-    return () => {
-      if (finalIncreaseTimeoutRef.current) {
-        clearTimeout(finalIncreaseTimeoutRef.current);
-      }
-    };
-  }, [
-    shouldReduceVolume,
-    hasReduced,
-    value,
-    audioElements,
-    line?.programOutputLine,
-  ]);
-
-  useEffect(() => {
-    audioElements?.forEach((audioElement) => {
-      console.log("AUDIO ELEMENT VOLUME: ", audioElement.volume);
-    });
-  }, [audioElements]);
 
   useEffect(() => {
     if (!fetchProductionError) return;

@@ -70,7 +70,6 @@ export const CallsPage = () => {
   const [customGlobalMute, setCustomGlobalMute] = useState("p");
   const [{ calls, selectedProductionId }, dispatch] = useGlobalState();
   const [shouldReduceVolume, setShouldReduceVolume] = useState(false);
-  // en icke-programlinje pratar
   const [isSomeoneSpeaking, setIsSomeoneSpeaking] = useState(false);
 
   const { productionId: paramProductionId, lineId: paramLineId } = useParams();
@@ -79,14 +78,6 @@ export const CallsPage = () => {
   const isEmpty = Object.values(calls).length === 0;
   const isSingleCall = Object.values(calls).length === 1;
 
-  // någon pratar (kan även vara programljudets ljud)
-  const audioLevelAboveThreshold = Object.entries(calls).some(
-    ([, callState]) =>
-      callState.audioLevelAboveThreshold &&
-      !callState.joinProductionOptions?.isProgramUser
-  );
-
-  // finns minst en linje i ens callpage som är program
   const isProgramOutputAdded = Object.entries(calls).some(
     ([, callState]) =>
       callState.joinProductionOptions?.lineUsedForProgramOutput &&
@@ -95,28 +86,29 @@ export const CallsPage = () => {
 
   useEffect(() => {
     if (isProgramOutputAdded) {
+      let isSpeaking = false;
+
       Object.entries(calls).forEach(([, callState]) => {
-        if (!callState.joinProductionOptions?.lineUsedForProgramOutput) {
-          setIsSomeoneSpeaking(audioLevelAboveThreshold);
+        if (
+          !callState.joinProductionOptions?.lineUsedForProgramOutput &&
+          callState.audioLevelAboveThreshold &&
+          !callState.joinProductionOptions?.isProgramUser
+        ) {
+          isSpeaking = true;
         }
       });
+      setIsSomeoneSpeaking(isSpeaking);
     }
-  }, [audioLevelAboveThreshold, calls, isProgramOutputAdded]);
+  }, [calls, isProgramOutputAdded]);
 
   const startTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const stopTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (isSomeoneSpeaking) {
-      if (stopTimeoutRef.current) {
-        clearTimeout(stopTimeoutRef.current);
-        stopTimeoutRef.current = null;
-      }
-
       if (!shouldReduceVolume) {
         startTimeoutRef.current = setTimeout(() => {
           setShouldReduceVolume(true);
-        }, 1000);
+        }, 500);
       }
     } else {
       if (startTimeoutRef.current) {
@@ -125,19 +117,13 @@ export const CallsPage = () => {
       }
 
       if (shouldReduceVolume) {
-        stopTimeoutRef.current = setTimeout(() => {
-          setShouldReduceVolume(false);
-        }, 1000);
+        setShouldReduceVolume(false);
       }
     }
 
     return () => {
       if (startTimeoutRef.current) {
         clearTimeout(startTimeoutRef.current);
-      }
-
-      if (stopTimeoutRef.current) {
-        clearTimeout(stopTimeoutRef.current);
       }
     };
   }, [isSomeoneSpeaking, shouldReduceVolume]);
