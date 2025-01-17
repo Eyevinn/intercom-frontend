@@ -147,7 +147,6 @@ export const ProductionLine = ({
         audioElements?.forEach((audioElement) => {
           // eslint-disable-next-line no-param-reassign
           audioElement.volume = value * volumeChangeFactor;
-          console.log("AUDIO FEED VOLUME REDUCED TO: ", audioElement.volume);
         });
       }
 
@@ -156,15 +155,12 @@ export const ProductionLine = ({
           audioElements?.forEach((audioElement) => {
             // eslint-disable-next-line no-param-reassign
             audioElement.volume = value;
-            console.log(
-              "AUDIO FEED VOLUME INCREASED TO: ",
-              audioElement.volume
-            );
           });
           setHasReduced(false);
         }, 3000);
       }
     }
+
     return () => {
       if (increaseVolumeTimeoutRef.current) {
         clearTimeout(increaseVolumeTimeoutRef.current);

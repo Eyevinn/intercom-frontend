@@ -55,7 +55,7 @@ const UserWrapper = styled.div<TUserProps>`
 const User = styled.div`
   display: flex;
   align-items: center;
-  max-width: 28rem;
+  max-width: 29rem;
 `;
 
 const IsTalkingIndicator = styled.div<TIsTalkingIndicator>`
