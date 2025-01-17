@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { useHotkeys } from "react-hotkeys-hook";
@@ -255,7 +255,6 @@ export const ProductionLine = ({
   const [confirmExitModalOpen, setConfirmExitModalOpen] = useState(false);
   const [value, setValue] = useState(0.75);
   const [hasReduced, setHasReduced] = useState(false);
-  const [initialVolume, setInitialVolume] = useState<number | null>(null);
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [muteError, setMuteError] = useState(false);
   const [userId, setUserId] = useState("");
@@ -289,6 +288,7 @@ export const ProductionLine = ({
       keepErrors: true, // input errors will be retained with value update
     },
   });
+  const increaseVolumeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Watch all form values
   const watchedValues = watch();
@@ -302,6 +302,17 @@ export const ProductionLine = ({
     audioInputId: joinProductionOptions?.audioinput ?? null,
     audioOutputId: joinProductionOptions?.audiooutput ?? null,
   });
+
+  const line = useLinePolling({ callId: id, joinProductionOptions });
+  const isProgramOutputLine = line && line.programOutputLine;
+  const isProgramUser =
+    joinProductionOptions && joinProductionOptions.isProgramUser;
+
+  const { production, error: fetchProductionError } = useFetchProduction(
+    joinProductionOptions
+      ? parseInt(joinProductionOptions.productionId, 10)
+      : null
+  );
 
   useEffect(() => {
     if (audioElements) {
@@ -317,55 +328,69 @@ export const ProductionLine = ({
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = parseFloat(e.target.value);
     setValue(newValue);
+  };
 
+  useEffect(() => {
     audioElements?.forEach((audioElement) => {
       // eslint-disable-next-line no-param-reassign
-      audioElement.volume = newValue;
+      audioElement.volume = value;
     });
 
-    if (newValue > 0 && isOutputMuted) {
+    if (value > 0) {
       setIsOutputMuted(false);
       audioElements?.forEach((audioElement) => {
         // eslint-disable-next-line no-param-reassign
         audioElement.muted = false;
       });
     }
-  };
+  }, [audioElements, value]);
+
+  useEffect(() => {
+    // Reduce volume by 80%
+    const volumeChangeFactor = 0.2;
+    if (!line?.programOutputLine) return;
+
+    if (shouldReduceVolume && !hasReduced) {
+      setHasReduced(true);
+
+      audioElements?.forEach((audioElement) => {
+        // eslint-disable-next-line no-param-reassign
+        audioElement.volume = value * volumeChangeFactor;
+        console.log("AUDIO FEED VOLUME REDUCED TO: ", audioElement.volume);
+      });
+    }
+
+    if (!shouldReduceVolume && hasReduced) {
+      increaseVolumeTimeoutRef.current = setTimeout(() => {
+        audioElements?.forEach((audioElement) => {
+          // eslint-disable-next-line no-param-reassign
+          audioElement.volume = value;
+          console.log("AUDIO FEED VOLUME INCREASED TO: ", audioElement.volume);
+        });
+        setHasReduced(false);
+      }, 3000);
+    }
+
+    if (increaseVolumeTimeoutRef.current) {
+      clearTimeout(increaseVolumeTimeoutRef.current);
+    }
+  }, [
+    shouldReduceVolume,
+    hasReduced,
+    value,
+    audioElements,
+    line?.programOutputLine,
+  ]);
 
   useHotkeys(savedHotkeys?.increaseVolumeHotkey || "u", () => {
     const newValue = Math.min(value + 0.05, 1);
     setValue(newValue);
-
-    audioElements?.forEach((audioElement) => {
-      // eslint-disable-next-line no-param-reassign
-      audioElement.volume = newValue;
-    });
   });
 
   useHotkeys(savedHotkeys?.decreaseVolumeHotkey || "d", () => {
     const newValue = Math.max(value - 0.05, 0);
     setValue(newValue);
-
-    audioElements?.forEach((audioElement) => {
-      // eslint-disable-next-line no-param-reassign
-      audioElement.volume = newValue;
-    });
-
-    if (newValue > 0 && isOutputMuted) {
-      setIsOutputMuted(false);
-    }
   });
-
-  const line = useLinePolling({ callId: id, joinProductionOptions });
-  const isProgramOutputLine = line && line.programOutputLine;
-  const isProgramUser =
-    joinProductionOptions && joinProductionOptions.isProgramUser;
-
-  const { production, error: fetchProductionError } = useFetchProduction(
-    joinProductionOptions
-      ? parseInt(joinProductionOptions.productionId, 10)
-      : null
-  );
 
   const muteInput = useCallback(
     (mute: boolean) => {
@@ -484,89 +509,6 @@ export const ProductionLine = ({
       setIsOutputMuted(true);
     }
   }, [isProgramOutputLine, isProgramUser]);
-
-  useEffect(() => {
-    let volumeReductionTimeout: NodeJS.Timeout;
-    let intermediateIncreaseTimeout1: NodeJS.Timeout;
-    let intermediateIncreaseTimeout2: NodeJS.Timeout;
-    let finalIncreaseTimeout: NodeJS.Timeout;
-
-    // Reduce volume by 80%
-    const volumeChangeFactor = 0.2;
-
-    if (
-      shouldReduceVolume &&
-      line?.programOutputLine &&
-      !hasReduced &&
-      audioElements
-    ) {
-      volumeReductionTimeout = setTimeout(() => {
-        const currentVolume = audioElements[0].volume;
-        setInitialVolume(currentVolume);
-        setValue((prevValue) => prevValue * volumeChangeFactor);
-        setHasReduced(true);
-
-        audioElements?.forEach((audioElement) => {
-          // eslint-disable-next-line no-param-reassign
-          audioElement.volume *= volumeChangeFactor;
-        });
-      }, 1000);
-
-      return () => clearTimeout(volumeReductionTimeout);
-    }
-
-    if (!shouldReduceVolume && line?.programOutputLine && hasReduced) {
-      if (initialVolume === null) {
-        return undefined;
-      }
-
-      const reductionAmount = 1 - volumeChangeFactor;
-      const totalIncrease = initialVolume * reductionAmount;
-      const increasePerStep = totalIncrease / 3;
-
-      intermediateIncreaseTimeout1 = setTimeout(() => {
-        setValue((prevValue) => prevValue + totalIncrease);
-        audioElements?.forEach((audioElement) => {
-          // eslint-disable-next-line no-param-reassign
-          audioElement.volume += increasePerStep;
-        });
-      }, 2000);
-
-      intermediateIncreaseTimeout2 = setTimeout(() => {
-        audioElements?.forEach((audioElement) => {
-          // eslint-disable-next-line no-param-reassign
-          audioElement.volume += increasePerStep;
-        });
-      }, 2500);
-
-      finalIncreaseTimeout = setTimeout(() => {
-        audioElements?.forEach((audioElement) => {
-          // eslint-disable-next-line no-param-reassign
-          audioElement.volume += increasePerStep;
-        });
-        setHasReduced(false);
-      }, 3000);
-
-      return () => {
-        clearTimeout(intermediateIncreaseTimeout1);
-        clearTimeout(intermediateIncreaseTimeout2);
-        clearTimeout(finalIncreaseTimeout);
-      };
-    }
-
-    return () => {
-      clearTimeout(volumeReductionTimeout);
-      clearTimeout(intermediateIncreaseTimeout1);
-      clearTimeout(intermediateIncreaseTimeout2);
-      clearTimeout(finalIncreaseTimeout);
-    };
-  }, [
-    shouldReduceVolume,
-    hasReduced,
-    line?.programOutputLine,
-    audioElements,
-    initialVolume,
-  ]);
 
   useEffect(() => {
     if (!fetchProductionError) return;
