@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
@@ -249,6 +249,7 @@ export const ProductionLine = ({
 }: TProductionLine) => {
   const { productionId: paramProductionId, lineId: paramLineId } = useParams();
   const [{ devices }, dispatch] = useGlobalState();
+  const navigate = useNavigate();
   const [connectionActive, setConnectionActive] = useState(true);
   const [isInputMuted, setIsInputMuted] = useState(true);
   const [isOutputMuted, setIsOutputMuted] = useState(false);
@@ -442,7 +443,11 @@ export const ProductionLine = ({
       type: "REMOVE_CALL",
       payload: { id },
     });
-  }, [dispatch, id, playExitSound]);
+
+    if (isSingleCall) {
+      navigate("/");
+    }
+  }, [dispatch, id, playExitSound, isSingleCall, navigate]);
 
   useLineHotkeys({
     muteInput,
@@ -863,7 +868,7 @@ export const ProductionLine = ({
                       />
                     )}
                   </CollapsableSection>
-                  {!isSingleCall && production && line && (
+                  {production && line && (
                     <ButtonWrapper>
                       <ExitCallButton
                         resetOnExit={() => setConfirmExitModalOpen(true)}

@@ -13,6 +13,7 @@ import { useGlobalHotkeys } from "../production-line/use-line-hotkeys";
 import { ProductionLine } from "../production-line/production-line";
 import { PageHeader } from "../page-layout/page-header";
 import { isMobile } from "../../bowser";
+import { useAudioCue } from "../production-line/use-audio-cue";
 
 const Container = styled.div`
   display: flex;
@@ -158,8 +159,11 @@ export const CallsPage = () => {
     customKey: customGlobalMute || "p",
   });
 
+  const { playExitSound } = useAudioCue();
+
   const runExitAllCalls = async () => {
     setProductionId(null);
+    playExitSound();
     navigate("/");
     if (!isEmpty) {
       Object.entries(calls).forEach(([callId]) => {
