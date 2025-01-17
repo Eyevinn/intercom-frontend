@@ -78,28 +78,99 @@ export const CallsPage = () => {
   const isEmpty = Object.values(calls).length === 0;
   const isSingleCall = Object.values(calls).length === 1;
 
+  // const audioLevelAboveThreshold = Object.entries(calls).some(
+  //   ([, callState]) =>
+  //     callState.audioLevelAboveThreshold &&
+  //     !callState.joinProductionOptions?.isProgramUser
+  // );
+
+  // const isProgramOutputAdded = Object.entries(calls).some(
+  //   ([, callState]) =>
+  //     callState.joinProductionOptions?.lineUsedForProgramOutput &&
+  //     !callState.joinProductionOptions.isProgramUser
+  // );
+
+  // useEffect(() => {
+  //   if (isProgramOutputAdded) {
+  //     Object.entries(calls).forEach(([, callState]) => {
+  //       if (!callState.joinProductionOptions?.lineUsedForProgramOutput) {
+  //         setIsSomeoneSpeaking(audioLevelAboveThreshold);
+  //       }
+  //     });
+  //   }
+  // }, [audioLevelAboveThreshold, calls, isProgramOutputAdded]);
+
+  // const startTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  // const stopTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // useEffect(() => {
+  //   if (isSomeoneSpeaking) {
+  //     if (stopTimeoutRef.current) {
+  //       clearTimeout(stopTimeoutRef.current);
+  //       stopTimeoutRef.current = null;
+  //     }
+
+  //     if (!shouldReduceVolume) {
+  //       startTimeoutRef.current = setTimeout(() => {
+  //         setShouldReduceVolume(true);
+  //       }, 1000);
+  //     }
+  //   } else {
+  //     if (startTimeoutRef.current) {
+  //       clearTimeout(startTimeoutRef.current);
+  //       startTimeoutRef.current = null;
+  //     }
+
+  //     if (shouldReduceVolume) {
+  //       stopTimeoutRef.current = setTimeout(() => {
+  //         setShouldReduceVolume(false);
+  //       }, 1000);
+  //     }
+  //   }
+
+  //   return () => {
+  //     if (startTimeoutRef.current) {
+  //       clearTimeout(startTimeoutRef.current);
+  //     }
+
+  //     if (stopTimeoutRef.current) {
+  //       clearTimeout(stopTimeoutRef.current);
+  //     }
+  //   };
+  // }, [isSomeoneSpeaking, shouldReduceVolume]);
+
+  // useEffect(() => {
+  //   console.log("SHOULD REDUCE VOLUME: ", shouldReduceVolume);
+  // }, [shouldReduceVolume]);
+
   const isProgramOutputAdded = Object.entries(calls).some(
     ([, callState]) =>
       callState.joinProductionOptions?.lineUsedForProgramOutput &&
       !callState.joinProductionOptions.isProgramUser
   );
 
+  // const audioLevelAboveThreshold = Object.entries(calls).some(
+  //   ([, callState]) =>
+  //     callState.audioLevelAboveThreshold &&
+  //     !callState.joinProductionOptions?.isProgramUser
+  // );
+
   useEffect(() => {
     if (isProgramOutputAdded) {
-      let isSpeaking = false;
-
-      Object.entries(calls).forEach(([, callState]) => {
-        if (
-          !callState.joinProductionOptions?.lineUsedForProgramOutput &&
-          callState.audioLevelAboveThreshold &&
-          !callState.joinProductionOptions?.isProgramUser
-        ) {
-          isSpeaking = true;
-        }
-      });
-      setIsSomeoneSpeaking(isSpeaking);
+      setIsSomeoneSpeaking(
+        Object.entries(calls).some(
+          ([, callState]) =>
+            !callState.joinProductionOptions?.lineUsedForProgramOutput &&
+            callState.audioLevelAboveThreshold &&
+            !callState.joinProductionOptions?.isProgramUser
+        )
+      );
     }
   }, [calls, isProgramOutputAdded]);
+
+  useEffect(() => {
+    console.log("IS SOMEONE SPEAKING: ", isSomeoneSpeaking);
+  }, [isSomeoneSpeaking]);
 
   const startTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
