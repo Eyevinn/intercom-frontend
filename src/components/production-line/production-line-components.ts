@@ -81,6 +81,7 @@ export const ListWrapper = styled(DisplayContainer)`
   padding: 0;
 `;
 
+// TODO: Decide if we want to reintroduce status text
 // const StateText = styled.span<{ state: string }>`
 //   font-weight: 700;
 //   color: ${({ state }) => {
