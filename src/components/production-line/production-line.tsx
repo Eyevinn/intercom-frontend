@@ -288,7 +288,7 @@ export const ProductionLine = ({
       keepErrors: true, // input errors will be retained with value update
     },
   });
-  const finalIncreaseTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const increaseVolumeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Watch all form values
   const watchedValues = watch();
@@ -361,7 +361,7 @@ export const ProductionLine = ({
     }
 
     if (!shouldReduceVolume && hasReduced) {
-      finalIncreaseTimeoutRef.current = setTimeout(() => {
+      increaseVolumeTimeoutRef.current = setTimeout(() => {
         audioElements?.forEach((audioElement) => {
           // eslint-disable-next-line no-param-reassign
           audioElement.volume = value;
@@ -371,12 +371,9 @@ export const ProductionLine = ({
       }, 3000);
     }
 
-    // eslint-disable-next-line consistent-return
-    return () => {
-      if (finalIncreaseTimeoutRef.current) {
-        clearTimeout(finalIncreaseTimeoutRef.current);
-      }
-    };
+    if (increaseVolumeTimeoutRef.current) {
+      clearTimeout(increaseVolumeTimeoutRef.current);
+    }
   }, [
     shouldReduceVolume,
     hasReduced,
