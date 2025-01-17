@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useGlobalState } from "../../global-state/context-provider";
 import { JoinProduction } from "../landing-page/join-production";
@@ -70,6 +70,7 @@ export const CallsPage = () => {
   const [customGlobalMute, setCustomGlobalMute] = useState("p");
   const [{ calls, selectedProductionId }, dispatch] = useGlobalState();
   const [shouldReduceVolume, setShouldReduceVolume] = useState(false);
+  const [isSomeoneSpeaking, setIsSomeoneSpeaking] = useState(false);
 
   const { productionId: paramProductionId, lineId: paramLineId } = useParams();
   const navigate = useNavigate();
@@ -77,15 +78,55 @@ export const CallsPage = () => {
   const isEmpty = Object.values(calls).length === 0;
   const isSingleCall = Object.values(calls).length === 1;
 
-  useEffect(() => {
-    const reduceVolume = Object.entries(calls).some(
-      ([, callState]) =>
-        !callState.joinProductionOptions?.lineUsedForProgramOutput &&
-        callState.audioLevelAboveThreshold
-    );
+  const isProgramOutputAdded = Object.entries(calls).some(
+    ([, callState]) =>
+      callState.joinProductionOptions?.lineUsedForProgramOutput &&
+      !callState.joinProductionOptions.isProgramUser
+  );
 
-    setShouldReduceVolume(reduceVolume);
-  }, [calls]);
+  useEffect(() => {
+    if (isProgramOutputAdded) {
+      setIsSomeoneSpeaking(
+        Object.entries(calls).some(
+          ([, callState]) =>
+            !callState.joinProductionOptions?.lineUsedForProgramOutput &&
+            callState.audioLevelAboveThreshold &&
+            !callState.joinProductionOptions?.isProgramUser
+        )
+      );
+    }
+  }, [calls, isProgramOutputAdded]);
+
+  const startTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    if (isSomeoneSpeaking) {
+      if (!shouldReduceVolume) {
+        startTimeoutRef.current = setTimeout(() => {
+          setShouldReduceVolume(true);
+        }, 1000);
+      }
+    } else {
+      if (startTimeoutRef.current) {
+        clearTimeout(startTimeoutRef.current);
+        startTimeoutRef.current = null;
+      }
+
+      if (shouldReduceVolume) {
+        setShouldReduceVolume(false);
+      }
+    }
+
+    return () => {
+      if (startTimeoutRef.current) {
+        clearTimeout(startTimeoutRef.current);
+      }
+    };
+  }, [isSomeoneSpeaking, shouldReduceVolume]);
+
+  useEffect(() => {
+    console.log("SHOULD REDUCE VOLUME CALLS PAGE: ", shouldReduceVolume);
+  }, [shouldReduceVolume]);
 
   useEffect(() => {
     if (selectedProductionId) {
