@@ -157,7 +157,7 @@ export const ProductionLine = ({
             audioElement.volume = value;
           });
           setHasReduced(false);
-        }, 3000);
+        }, 2000);
       }
     }
 
