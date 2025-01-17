@@ -45,7 +45,7 @@ export const UserSettingsButton: FC<UserSettingsButtonProps> = (props) => {
   const username = readFromStorage("username") || "Guest";
 
   const truncatedUsername =
-    isMobile && username.length > 25 ? `${username.slice(0, 25)}...` : username;
+    isMobile && username.length > 20 ? `${username.slice(0, 20)}...` : username;
 
   return (
     <UserSettingsWrapper className={isMobile ? "mobile" : ""} onClick={onClick}>
