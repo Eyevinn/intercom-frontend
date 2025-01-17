@@ -188,6 +188,7 @@ export const CallsPage = () => {
               preSelectedLineId: paramLineId,
             }}
             customGlobalMute={customGlobalMute}
+            updateUserSettings
           />
         )}
         <CallsContainer>
