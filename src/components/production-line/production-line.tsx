@@ -491,18 +491,15 @@ export const ProductionLine = ({
     }
   }, [connectionState, playEnterSound]);
 
-  const muteOutput = useCallback(
-    (isMuted: boolean) => {
-      if (!audioElements) return;
+  const muteOutput = useCallback(() => {
+    if (!audioElements) return;
 
-      audioElements.forEach((singleElement: HTMLAudioElement) => {
-        // eslint-disable-next-line no-param-reassign
-        singleElement.muted = isMuted;
-      });
-      setIsOutputMuted(isMuted);
-    },
-    [audioElements, setIsOutputMuted]
-  );
+    audioElements.forEach((singleElement: HTMLAudioElement) => {
+      // eslint-disable-next-line no-param-reassign
+      singleElement.muted = !isOutputMuted;
+    });
+    setIsOutputMuted(!isOutputMuted);
+  }, [audioElements, isOutputMuted]);
 
   useSpeakerHotkeys({
     muteOutput,
@@ -718,7 +715,7 @@ export const ProductionLine = ({
                       >
                         <UserControlBtn
                           type="button"
-                          onClick={() => muteOutput(!isOutputMuted)}
+                          onClick={() => muteOutput()}
                           disabled={value === 0}
                         >
                           <ButtonIcon
