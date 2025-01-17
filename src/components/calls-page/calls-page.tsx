@@ -97,10 +97,6 @@ export const CallsPage = () => {
     }
   }, [calls, isProgramOutputAdded]);
 
-  useEffect(() => {
-    console.log("IS SOMEONE SPEAKING: ", isSomeoneSpeaking);
-  }, [isSomeoneSpeaking]);
-
   const startTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
@@ -129,7 +125,7 @@ export const CallsPage = () => {
   }, [isSomeoneSpeaking, shouldReduceVolume]);
 
   useEffect(() => {
-    console.log("IS AUDIO ACTIVE CALLS PAGE: ", shouldReduceVolume);
+    console.log("SHOULD REDUCE VOLUME CALLS PAGE: ", shouldReduceVolume);
   }, [shouldReduceVolume]);
 
   useEffect(() => {

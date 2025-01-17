@@ -351,26 +351,21 @@ export const ProductionLine = ({
     if (!line?.programOutputLine) return;
 
     if (shouldReduceVolume && !hasReduced) {
-      console.log("BASE VOLUME 1: ", value);
       setHasReduced(true);
 
       audioElements?.forEach((audioElement) => {
         // eslint-disable-next-line no-param-reassign
         audioElement.volume = value * volumeChangeFactor;
-        console.log(
-          "VOLUME REDUCTION (INSIDE AUDIOELEMENT): ",
-          audioElement.volume
-        );
+        console.log("AUDIO FEED VOLUME REDUCED TO: ", audioElement.volume);
       });
     }
 
     if (!shouldReduceVolume && hasReduced) {
-      console.log("BASE VOLUME 2: ", value);
       finalIncreaseTimeoutRef.current = setTimeout(() => {
         audioElements?.forEach((audioElement) => {
           // eslint-disable-next-line no-param-reassign
           audioElement.volume = value;
-          console.log("VOLUME INCREASE: ", audioElement.volume);
+          console.log("AUDIO FEED VOLUME INCREASED TO: ", audioElement.volume);
         });
         setHasReduced(false);
       }, 3000);
