@@ -2,7 +2,6 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { ErrorMessage } from "@hookform/error-message";
 import { useEffect, useState } from "react";
 import styled from "@emotion/styled";
-import { DisplayContainerHeader } from "./display-container-header.tsx";
 import {
   DecorativeLabel,
   FormLabel,
@@ -26,6 +25,7 @@ import {
 import { isMobile } from "../../bowser.ts";
 import { Checkbox } from "../checkbox/checkbox.tsx";
 import { TUserSettings } from "../user-settings/types.ts";
+import { RemoveIcon } from "../../assets/icons/icon.tsx";
 
 type FormValues = TJoinProductionOptions;
 
@@ -42,6 +42,30 @@ const CheckboxWrapper = styled.div`
   flex-direction: row;
   margin-bottom: 3rem;
   margin-top: 1rem;
+`;
+
+const HeaderWrapper = styled.div`
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+`;
+
+const HeaderText = styled.div`
+  font-size: 3rem;
+  font-weight: bold;
+  line-height: 1;
+`;
+
+const HeaderExitButton = styled.div`
+  &:hover {
+    cursor: pointer;
+  }
+
+  svg {
+    fill: #f96c6c;
+    width: 3rem;
+    height: 3rem;
+  }
 `;
 
 type TProps = {
@@ -255,7 +279,14 @@ export const JoinProduction = ({
     <ResponsiveFormContainer
       className={`${isMobile ? "" : "desktop"} ${className}`}
     >
-      <DisplayContainerHeader>Join Production</DisplayContainerHeader>
+      <HeaderWrapper>
+        <HeaderText>Join Production</HeaderText>
+        {closeAddCallView && (
+          <HeaderExitButton onClick={() => closeAddCallView()}>
+            <RemoveIcon />
+          </HeaderExitButton>
+        )}
+      </HeaderWrapper>
       {devices && (
         <>
           {!preSelected && (
