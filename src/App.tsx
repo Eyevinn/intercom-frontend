@@ -51,7 +51,7 @@ const App = () => {
   const continueToApp = isValidBrowser || unsupportedContinue;
   const { denied, permission } = useDevicePermissions({ continueToApp });
   const initializedGlobalState = useInitializeGlobalStateReducer();
-  const [{ devices }, dispatch] = initializedGlobalState;
+  const [{ devices, userSettings }, dispatch] = initializedGlobalState;
   const [apiError, setApiError] = useState(false);
 
   useFetchDevices({
@@ -114,7 +114,7 @@ const App = () => {
                 />
               </DisplayBoxPositioningContainer>
             )}
-            {permission && !denied && !apiError && (
+            {permission && !denied && !apiError && userSettings && (
               <Routes>
                 <>
                   <Route

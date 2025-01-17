@@ -15,10 +15,12 @@ export const LandingPage = ({ setApiError }: { setApiError: () => void }) => {
     }
   }, [apiError, setApiError]);
 
-  if (!userSettings) return <div />;
-
-  const isUserSettingsComplete = (settings: TUserSettings) => {
-    return settings.username && (settings.audioinput || settings.audiooutput);
+  const isUserSettingsComplete = (settings: TUserSettings | null) => {
+    return (
+      settings &&
+      settings.username &&
+      (settings.audioinput || settings.audiooutput)
+    );
   };
 
   return (

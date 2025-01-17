@@ -25,6 +25,7 @@ import {
 } from "../user-settings/user-settings.tsx";
 import { isMobile } from "../../bowser.ts";
 import { Checkbox } from "../checkbox/checkbox.tsx";
+import { TUserSettings } from "../user-settings/types.ts";
 
 type FormValues = TJoinProductionOptions;
 
@@ -52,6 +53,7 @@ type TProps = {
   addAdditionalCallId?: string;
   closeAddCallView?: () => void;
   className?: string;
+  updateUserSettings?: boolean;
 };
 
 export const JoinProduction = ({
@@ -60,15 +62,16 @@ export const JoinProduction = ({
   addAdditionalCallId,
   closeAddCallView,
   className,
+  updateUserSettings = false,
 }: TProps) => {
   const [joinProductionId, setJoinProductionId] = useState<null | number>(null);
   const [joinProductionOptions, setJoinProductionOptions] =
     useState<TJoinProductionOptions | null>(null);
   const [isProgramUser, setIsProgramUser] = useState(false);
   const [isProgramOutputLine, setIsProgramOutputLine] = useState(false);
-
-  const { readFromStorage, writeToStorage } = useStorage();
-  const cachedUsername = readFromStorage("username");
+  const [{ devices, userSettings, selectedProductionId }, dispatch] =
+    useGlobalState();
+  const { writeToStorage } = useStorage();
 
   const {
     formState: { errors, isValid },
@@ -76,13 +79,16 @@ export const JoinProduction = ({
     handleSubmit,
     reset,
     setValue,
+    getValues,
     watch,
   } = useForm<FormValues>({
     defaultValues: {
       productionId:
         preSelected?.preSelectedProductionId || addAdditionalCallId || "",
       lineId: preSelected?.preSelectedLineId || undefined,
-      username: readFromStorage("username") || "",
+      username: userSettings?.username,
+      audioinput: userSettings?.audioinput || "default",
+      audiooutput: userSettings?.audiooutput || "default",
       lineUsedForProgramOutput: false,
     },
     resetOptions: {
@@ -90,8 +96,6 @@ export const JoinProduction = ({
       keepErrors: true, // input errors will be retained with value update
     },
   });
-
-  const [{ devices, selectedProductionId }, dispatch] = useGlobalState();
 
   const {
     error: productionFetchError,
@@ -132,16 +136,30 @@ export const JoinProduction = ({
     });
   }, [preSelected, production, reset]);
 
-  // Use local cache
   useEffect(() => {
-    if (cachedUsername) {
-      setValue("username", cachedUsername);
-    }
-
     if (addAdditionalCallId) {
       setValue("productionId", addAdditionalCallId);
     }
-  }, [addAdditionalCallId, cachedUsername, setValue]);
+  }, [addAdditionalCallId, setValue]);
+
+  // If the device no longer exists set field values to default
+  useEffect(() => {
+    if (!devices.input?.length) {
+      setValue("audioinput", "no-device", { shouldValidate: true });
+    } else if (
+      !devices.input?.find(
+        (device) => device.deviceId === getValues("audioinput")
+      )
+    ) {
+      setValue("audioinput", "default", { shouldValidate: true });
+    }
+    if (
+      !devices.output?.find(
+        (device) => device.deviceId === getValues("audiooutput")
+      )
+    )
+      setValue("audiooutput", "default", { shouldValidate: true });
+  }, [devices, getValues, setValue, userSettings]);
 
   // If user selects a production from the productionlist
   useEffect(() => {
@@ -169,8 +187,29 @@ export const JoinProduction = ({
       isProgramUser,
     };
 
-    if (payload.username) {
-      writeToStorage("username", payload.username);
+    if (updateUserSettings) {
+      const newUserSettings: TUserSettings = {
+        username: payload.username,
+        audioinput: payload.audioinput,
+        audiooutput: payload.audiooutput,
+      };
+
+      if (payload.username) {
+        writeToStorage("username", payload.username);
+      }
+
+      if (payload.audioinput) {
+        writeToStorage("audioinput", payload.audioinput);
+      }
+
+      if (payload.audiooutput) {
+        writeToStorage("audiooutput", payload.audiooutput);
+      }
+
+      dispatch({
+        type: "UPDATE_USER_SETTINGS",
+        payload: newUserSettings,
+      });
     }
 
     if (closeAddCallView) {
