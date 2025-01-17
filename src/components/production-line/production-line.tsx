@@ -87,30 +87,7 @@ export const ProductionLine = ({
     isRemotelyMuted,
   } = callState;
 
-  const {
-    formState: { isValid, isDirty },
-    register,
-    handleSubmit,
-    watch,
-  } = useForm<FormValues>({
-    defaultValues: {
-      username: "",
-      productionId: paramProductionId || "",
-      lineId: paramLineId || undefined,
-    },
-    resetOptions: {
-      keepDirtyValues: true, // user-interacted input will be retained
-      keepErrors: true, // input errors will be retained with value update
-    },
-  });
-
-  // Watch all form values
-  const watchedValues = watch();
-  const audioInputTheSame =
-    joinProductionOptions?.audioinput === watchedValues.audioinput;
-  const audioOutputTheSame =
-    joinProductionOptions?.audiooutput === watchedValues.audiooutput;
-  const audioNotChanged = audioInputTheSame && audioOutputTheSame;
+  const increaseVolumeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const [inputAudioStream, resetAudioInput] = useAudioInput({
     audioInputId: joinProductionOptions?.audioinput ?? null,
@@ -157,16 +134,48 @@ export const ProductionLine = ({
         audioElement.muted = false;
       });
     }
-  };
+  }, [audioElements, value]);
+
+  useEffect(() => {
+    // Reduce volume by 80%
+    const volumeChangeFactor = 0.2;
+    if (!line?.programOutputLine) return;
+
+    if (shouldReduceVolume && !hasReduced) {
+      setHasReduced(true);
+
+      audioElements?.forEach((audioElement) => {
+        // eslint-disable-next-line no-param-reassign
+        audioElement.volume = value * volumeChangeFactor;
+        console.log("AUDIO FEED VOLUME REDUCED TO: ", audioElement.volume);
+      });
+    }
+
+    if (!shouldReduceVolume && hasReduced) {
+      increaseVolumeTimeoutRef.current = setTimeout(() => {
+        audioElements?.forEach((audioElement) => {
+          // eslint-disable-next-line no-param-reassign
+          audioElement.volume = value;
+          console.log("AUDIO FEED VOLUME INCREASED TO: ", audioElement.volume);
+        });
+        setHasReduced(false);
+      }, 3000);
+    }
+
+    if (increaseVolumeTimeoutRef.current) {
+      clearTimeout(increaseVolumeTimeoutRef.current);
+    }
+  }, [
+    shouldReduceVolume,
+    hasReduced,
+    value,
+    audioElements,
+    line?.programOutputLine,
+  ]);
 
   useHotkeys(savedHotkeys?.increaseVolumeHotkey || "u", () => {
     const newValue = Math.min(value + 0.05, 1);
     setValue(newValue);
-
-    audioElements?.forEach((audioElement) => {
-      // eslint-disable-next-line no-param-reassign
-      audioElement.volume = newValue;
-    });
   });
 
   useHotkeys(savedHotkeys?.decreaseVolumeHotkey || "d", () => {
