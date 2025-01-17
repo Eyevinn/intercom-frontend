@@ -76,9 +76,14 @@ export const ButtonWrapper = styled.div`
   justify-content: space-around;
 `;
 
-export const ListWrapper = styled(DisplayContainer)`
+export const ListWrapper = styled(DisplayContainer)<{
+  isProgramUser?: boolean;
+  isProgramLine?: boolean;
+}>`
   width: 100%;
   padding: 0;
+  margin-top: ${({ isProgramUser, isProgramLine }) =>
+    isProgramUser && isProgramLine ? "1rem" : "0"};
 `;
 
 // TODO: Decide if we want to reintroduce status text
@@ -103,24 +108,20 @@ export const ConnectionErrorWrapper = styled(FlexContainer)`
   padding-top: 12rem;
 `;
 
-export const ProgramOutputIcon = styled.div`
+export const AudioFeedIcon = styled.div`
   display: flex;
   flex-direction: row;
   align-items: center;
-  background: rgba(50, 56, 59, 1);
   color: #59cbe8;
-  border: 0.2rem solid #6d6d6d;
-  padding: 0.5rem 1rem;
-  width: fit-content;
-  height: 4rem;
-  border-radius: 0.5rem;
-  margin: 0 2rem 2rem 1rem;
-  gap: 1rem;
   font-size: 1.2rem;
+  gap: 1rem;
+  position: absolute;
+  top: ${({ open }: { open: boolean }) => (open ? "4.5rem" : "2.35rem")};
+  left: ${({ open }: { open: boolean }) => (open ? "2rem" : "1.5rem")};
 
   svg {
-    fill: #59cbe8;
-    width: 2.5rem;
+    fill: #59cbe8 !important;
+    width: 1.5rem !important;
   }
 `;
 
@@ -164,7 +165,9 @@ export const CallContainer = styled(ProductionItemWrapper)<{
     isProgramLine ? "rgba(73, 67, 124, 0.2)" : "transparent"};
 `;
 
-export const CallHeader = styled(HeaderWrapper)``;
+export const CallHeader = styled(HeaderWrapper)`
+  position: relative;
+`;
 
 export const MinifiedControls = styled.div`
   padding: 0 2rem 2rem 2rem;

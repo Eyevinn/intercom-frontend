@@ -4,7 +4,6 @@ import { useHotkeys } from "react-hotkeys-hook";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { useAudioInput } from "./use-audio-input.ts";
 import { UserList } from "./user-list.tsx";
-import { TVIcon } from "../../assets/icons/icon.tsx";
 import { Spinner } from "../loader/loader.tsx";
 import { FlexContainer } from "../generic-components.ts";
 import { isMobile, isTablet } from "../../bowser.ts";
@@ -28,8 +27,6 @@ import {
 import {
   CallWrapper,
   ConnectionErrorWrapper,
-  CallInfo,
-  ProgramOutputIcon,
   ListWrapper,
   LongPressWrapper,
   ButtonWrapper,
@@ -388,18 +385,12 @@ export const ProductionLine = ({
           )}
           <ProductionLines className={open ? "expanded" : ""}>
             <InnerDiv>
-              <CallInfo>
-                {line?.programOutputLine && (
-                  <ProgramOutputIcon>
-                    <TVIcon />
-                    Audio Feed
-                  </ProgramOutputIcon>
-                )}
-              </CallInfo>
-
               {joinProductionOptions && !loading && (
                 <FlexContainer>
-                  <ListWrapper>
+                  <ListWrapper
+                    isProgramUser={isProgramUser || undefined}
+                    isProgramLine={isProgramOutputLine || undefined}
+                  >
                     <div
                       style={{
                         width: "100%",
