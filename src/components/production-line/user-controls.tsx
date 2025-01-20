@@ -54,7 +54,9 @@ export const UserControls = ({
               onClick={muteOutput}
               disabled={value === 0}
             >
-              <ButtonIcon className={isOutputMuted ? "mute" : "unmuted"}>
+              <ButtonIcon
+                className={isOutputMuted || value === 0 ? "mute" : "unmuted"}
+              >
                 {isOutputMuted || value === 0 ? <SpeakerOff /> : <SpeakerOn />}
               </ButtonIcon>
             </UserControlBtn>
