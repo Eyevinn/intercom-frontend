@@ -35,6 +35,11 @@ const CallsContainer = styled.div`
 
 const AddCallContainer = styled.div`
   display: flex;
+
+  button {
+    display: flex;
+    align-items: center;
+  }
 `;
 
 const MuteAllCallsBtn = styled(PrimaryButton)`
