@@ -209,7 +209,6 @@ export const IconWrapper = styled.div`
   justify-content: center;
 
   svg {
-    fill: white;
     height: 100%;
     width: 100%;
   }
