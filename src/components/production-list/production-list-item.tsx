@@ -143,7 +143,10 @@ export const ProductionsListItem = ({
   return (
     <ProductionItemWrapper>
       <HeaderWrapper onClick={() => setOpen(!open)}>
-        <HeaderTexts className={totalParticipants > 0 ? "active" : ""}>
+        <HeaderTexts
+          open={open}
+          className={totalParticipants > 0 ? "active" : ""}
+        >
           <ProductionName title={production.name}>
             {production.name.length > 40
               ? `${production.name.slice(0, 40)}...`
