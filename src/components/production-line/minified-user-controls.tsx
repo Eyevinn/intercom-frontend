@@ -39,7 +39,7 @@ export const MinifiedUserControls = ({
         {line &&
           !(line?.programOutputLine && joinProductionOptions.isProgramUser) && (
             <MinifiedControlsButton
-              className={isOutputMuted ? "off" : "on"}
+              className={isOutputMuted || value === 0 ? "off" : "on"}
               onClick={setIsOutputMuted}
             >
               {isOutputMuted || value === 0 ? <SpeakerOff /> : <SpeakerOn />}
