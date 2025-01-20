@@ -58,18 +58,18 @@ export const MinifiedUserControls = ({
             </MinifiedControlsButton>
           )}
       </MinifiedControlsBlock>
-      <MinifiedControlsBlock>
-        {inputAudioStream &&
-          inputAudioStream !== "no-device" &&
-          !line?.programOutputLine && (
+      {inputAudioStream &&
+        inputAudioStream !== "no-device" &&
+        !line?.programOutputLine && (
+          <MinifiedControlsBlock>
             <PTTWrapper>
               <LongPressToTalkButton
                 muteInput={muteInput}
                 text="Push To Talk"
               />
             </PTTWrapper>
-          )}
-      </MinifiedControlsBlock>
+          </MinifiedControlsBlock>
+        )}
     </MinifiedControls>
   );
 };
