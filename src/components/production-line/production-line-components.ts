@@ -20,12 +20,16 @@ export const ButtonIcon = styled.div`
 
   &.mute {
     svg {
+      display: block;
+      margin: auto;
       fill: #f96c6c;
     }
   }
 
   &.unmuted {
     svg {
+      display: block;
+      margin: auto;
       fill: #6fd84f;
     }
   }
