@@ -32,7 +32,7 @@ export const SelectDevices = ({
   setConnectionActive: () => void;
 }) => {
   const { productionId: paramProductionId, lineId: paramLineId } = useParams();
-  const [{ devices }, dispatch] = useGlobalState();
+  const [{ devices, userSettings }, dispatch] = useGlobalState();
   const {
     formState: { isValid, isDirty },
     register,
@@ -41,6 +41,8 @@ export const SelectDevices = ({
   } = useForm<FormValues>({
     defaultValues: {
       username: "",
+      audioinput: userSettings?.audioinput,
+      audiooutput: userSettings?.audiooutput,
       productionId: paramProductionId || "",
       lineId: paramLineId || undefined,
     },
@@ -142,6 +144,7 @@ export const SelectDevices = ({
         </StyledWarningMessage>
       )}
       <DeviceButtonWrapper>
+        {!(isBrowserFirefox && !isMobile) && <ReloadDevicesButton />}
         <PrimaryButton
           type="submit"
           className="save-button"
@@ -150,7 +153,6 @@ export const SelectDevices = ({
         >
           Save
         </PrimaryButton>
-        {!(isBrowserFirefox && !isMobile) && <ReloadDevicesButton />}
       </DeviceButtonWrapper>
     </FormContainer>
   );

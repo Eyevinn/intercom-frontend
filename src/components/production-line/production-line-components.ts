@@ -35,20 +35,6 @@ export const ButtonIcon = styled.div`
   }
 `;
 
-export const FlexButtonWrapper = styled.div<{ isProgramUser: boolean }>`
-  width: 50%;
-  padding: 0 1rem 1rem 1rem;
-
-  &.first {
-    padding-left: 0;
-  }
-
-  &.last {
-    padding-right: 0;
-    padding-left: ${({ isProgramUser }) => (isProgramUser ? "0" : "1rem")};
-  }
-`;
-
 export const UserControlBtn = styled(ActionButton)`
   background: rgba(50, 56, 59, 1);
   border: 0.2rem solid #6d6d6d;
@@ -138,7 +124,7 @@ export const DeviceButtonWrapper = styled.div`
   }
 
   .save-button {
-    margin-right: 1rem;
+    margin-left: 1rem;
   }
 `;
 

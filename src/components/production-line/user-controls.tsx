@@ -1,3 +1,4 @@
+import styled from "@emotion/styled";
 import {
   SpeakerOff,
   SpeakerOn,
@@ -5,15 +6,22 @@ import {
   MicUnmuted,
 } from "../../assets/icons/icon";
 import { isIOSMobile, isIpad } from "../../bowser";
-import { FlexContainer } from "../generic-components";
 import { VolumeSlider } from "../volume-slider/volume-slider";
-import {
-  FlexButtonWrapper,
-  UserControlBtn,
-  ButtonIcon,
-} from "./production-line-components";
+import { UserControlBtn, ButtonIcon } from "./production-line-components";
 import { TLine, TJoinProductionOptions } from "./types";
 import { TUseAudioInputValues } from "./use-audio-input";
+
+const ButtonWrapper = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+  gap: 1rem;
+`;
+
+const ControlButton = styled(UserControlBtn)`
+  width: unset;
+  flex-grow: 1;
+`;
 
 export const UserControls = ({
   line,
@@ -43,24 +51,19 @@ export const UserControls = ({
         !(line?.programOutputLine && joinProductionOptions.isProgramUser) && (
           <VolumeSlider value={value} handleInputChange={handleInputChange} />
         )}
-      <FlexContainer>
+      <ButtonWrapper>
         {!(line?.programOutputLine && joinProductionOptions.isProgramUser) && (
-          <FlexButtonWrapper
-            className="first"
-            isProgramUser={joinProductionOptions.isProgramUser}
+          <ControlButton
+            type="button"
+            onClick={muteOutput}
+            disabled={value === 0}
           >
-            <UserControlBtn
-              type="button"
-              onClick={muteOutput}
-              disabled={value === 0}
+            <ButtonIcon
+              className={isOutputMuted || value === 0 ? "mute" : "unmuted"}
             >
-              <ButtonIcon
-                className={isOutputMuted || value === 0 ? "mute" : "unmuted"}
-              >
-                {isOutputMuted || value === 0 ? <SpeakerOff /> : <SpeakerOn />}
-              </ButtonIcon>
-            </UserControlBtn>
-          </FlexButtonWrapper>
+              {isOutputMuted || value === 0 ? <SpeakerOff /> : <SpeakerOn />}
+            </ButtonIcon>
+          </ControlButton>
         )}
 
         {inputAudioStream &&
@@ -68,18 +71,13 @@ export const UserControls = ({
           (line?.programOutputLine
             ? joinProductionOptions?.isProgramUser
             : !joinProductionOptions.isProgramUser) && (
-            <FlexButtonWrapper
-              className="last"
-              isProgramUser={joinProductionOptions.isProgramUser}
-            >
-              <UserControlBtn type="button" onClick={muteInput}>
-                <ButtonIcon className={isInputMuted ? "mute" : "unmuted"}>
-                  {isInputMuted ? <MicMuted /> : <MicUnmuted />}
-                </ButtonIcon>
-              </UserControlBtn>
-            </FlexButtonWrapper>
+            <ControlButton type="button" onClick={muteInput}>
+              <ButtonIcon className={isInputMuted ? "mute" : "unmuted"}>
+                {isInputMuted ? <MicMuted /> : <MicUnmuted />}
+              </ButtonIcon>
+            </ControlButton>
           )}
-      </FlexContainer>
+      </ButtonWrapper>
     </>
   );
 };
