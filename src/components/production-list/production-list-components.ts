@@ -40,6 +40,7 @@ export const HeaderWrapper = styled.div`
 export const HeaderTexts = styled.div`
   display: flex;
   align-items: center;
+  margin-left: ${({ open }: { open: boolean }) => (open ? "0" : "1.5rem")};
 
   svg {
     height: 1.5rem;
