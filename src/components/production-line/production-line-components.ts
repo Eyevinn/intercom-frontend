@@ -171,7 +171,7 @@ export const MinifiedControls = styled.div`
 `;
 
 export const MinifiedControlsBlock = styled.div`
-  width: 50%;
+  flex-grow: 1;
   display: flex;
   gap: 1rem;
 `;
