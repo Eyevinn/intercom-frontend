@@ -17,11 +17,16 @@ export const ProductionItemWrapper = styled.div`
 `;
 
 export const ProductionName = styled.div`
+  display: flex;
   font-size: 1.4rem;
   font-weight: bold;
   margin-right: 1rem;
   max-width: 30rem;
   word-break: break-word;
+`;
+
+export const Id = styled.p`
+  font-weight: normal;
 `;
 
 export const ParticipantCount = styled.div`
