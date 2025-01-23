@@ -29,6 +29,22 @@ import { RemoveIcon } from "../../assets/icons/icon.tsx";
 
 type FormValues = TJoinProductionOptions;
 
+const NameWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 2rem;
+`;
+
+const ProductionName = styled.p`
+  margin-bottom: 1rem;
+
+  &.name {
+    font-weight: bold;
+    min-height: 1.5rem;
+    margin: 0 0 0 0.5rem;
+  }
+`;
+
 const FetchErrorMessage = styled.div`
   background: ${errorColour};
   color: ${darkText};
@@ -291,6 +307,12 @@ export const JoinProduction = ({
         <>
           {!preSelected && (
             <>
+              <NameWrapper>
+                <ProductionName>Production name</ProductionName>
+                <ProductionName className="name">
+                  {production?.name || "Enter a production ID"}
+                </ProductionName>
+              </NameWrapper>
               <FormInputWithLoader
                 onChange={(ev) => {
                   onChange(ev);
