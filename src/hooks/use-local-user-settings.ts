@@ -14,9 +14,7 @@ export const useLocalUserSettings = ({
 }: TUseLocalUserSettings) => {
   const { readFromStorage, removeFromStorage } = useStorage();
   useEffect(() => {
-    console.log("INNE");
     if (devices.input || devices.output) {
-      console.log("INNE2");
       const storedAudioInput = readFromStorage("audioinput");
       const storedAudioOutput = readFromStorage("audiooutput");
 
