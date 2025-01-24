@@ -14,7 +14,9 @@ export const useLocalUserSettings = ({
 }: TUseLocalUserSettings) => {
   const { readFromStorage, removeFromStorage } = useStorage();
   useEffect(() => {
+    console.log("INNE");
     if (devices.input || devices.output) {
+      console.log("INNE2");
       const storedAudioInput = readFromStorage("audioinput");
       const storedAudioOutput = readFromStorage("audiooutput");
 
@@ -42,6 +44,5 @@ export const useLocalUserSettings = ({
         payload,
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [devices, dispatch]);
+  }, [devices, dispatch, readFromStorage, removeFromStorage]);
 };

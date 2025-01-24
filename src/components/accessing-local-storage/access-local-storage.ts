@@ -1,4 +1,5 @@
-import { createStorage, StorageType } from "@martinstark/storage-ts";
+import { createStorage, StorageTS, StorageType } from "@martinstark/storage-ts";
+import { useCallback, useEffect, useState } from "react";
 
 type Schema = {
   username: string;
@@ -6,27 +7,42 @@ type Schema = {
   audiooutput?: string;
 };
 
-// Create a store of the desired type. If it is not available,
-// in-memory storage will be used as a fallback.
-const store = createStorage<Schema>({
-  type: StorageType.LOCAL,
-  prefix: "id",
-  silent: true,
-});
-
 export function useStorage() {
+  const [store, setStore] = useState<StorageTS<Schema>>();
+
+  useEffect(() => {
+    // Create a store of the desired type. If it is not available,
+    // in-memory storage will be used as a fallback.
+    setStore(
+      createStorage<Schema>({
+        type: StorageType.LOCAL,
+        prefix: "id",
+        silent: true,
+      })
+    );
+  }, []);
+
   type Key = keyof Schema;
-  const readFromStorage = (key: keyof Schema): Schema[Key] | null => {
-    return store.read(key);
-  };
+  const readFromStorage = useCallback(
+    (key: keyof Schema): Schema[Key] | null => {
+      return store?.read(key);
+    },
+    [store]
+  );
 
-  const writeToStorage = (key: keyof Schema, value: Schema[Key]): void => {
-    store.write(key, value);
-  };
+  const writeToStorage = useCallback(
+    (key: keyof Schema, value: Schema[Key]): void => {
+      store?.write(key, value);
+    },
+    [store]
+  );
 
-  const removeFromStorage = (key: keyof Schema) => {
-    store.delete(key);
-  };
+  const removeFromStorage = useCallback(
+    (key: keyof Schema) => {
+      store?.delete(key);
+    },
+    [store]
+  );
 
   return { readFromStorage, writeToStorage, removeFromStorage };
 }
