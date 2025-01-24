@@ -3,7 +3,7 @@ import { ErrorMessage } from "@hookform/error-message";
 import { useForm, Controller, SubmitHandler } from "react-hook-form";
 import { FC, useEffect, useState } from "react";
 import { RemoveIcon } from "../../assets/icons/icon";
-import { ListItemWrapper } from "../create-production/create-production";
+import { ListItemWrapper } from "../create-production/create-production-page";
 import {
   FormInput,
   FormLabel,
