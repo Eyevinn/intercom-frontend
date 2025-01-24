@@ -7,7 +7,7 @@ export const ProductionItemWrapper = styled.div`
   color: #ffffff;
   background-color: transparent;
   flex: 0 0 calc(25% - 2rem);
-  ${() => (isMobile ? `flex-grow: 1;` : `flex-grow: 0;`)}
+  ${isMobile ? `flex-grow: 1;` : `flex-grow: 0;`}
   justify-content: start;
   min-width: 30rem;
   border: 1px solid #424242;
