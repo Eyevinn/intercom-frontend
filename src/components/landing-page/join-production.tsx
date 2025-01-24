@@ -1,4 +1,4 @@
-import { SubmitHandler, useForm } from "react-hook-form";
+import { SubmitHandler, useForm, useWatch } from "react-hook-form";
 import { ErrorMessage } from "@hookform/error-message";
 import { useEffect, useState } from "react";
 import styled from "@emotion/styled";
@@ -104,7 +104,7 @@ export const JoinProduction = ({
     reset,
     setValue,
     getValues,
-    watch,
+    control,
   } = useForm<FormValues>({
     defaultValues: {
       productionId:
@@ -129,16 +129,17 @@ export const JoinProduction = ({
 
   useNavigateToProduction(joinProductionOptions);
 
+  // this will update whenever lineId changes
+  const selectedLineId = useWatch({ name: "lineId", control });
+
   useEffect(() => {
-    const selectedLineId = watch("lineId");
     if (production) {
       const selectedLine = production.lines.find(
         (line) => line.id.toString() === selectedLineId
       );
       setIsProgramOutputLine(!!selectedLine?.programOutputLine);
     }
-    // eslint-disable-next-line
-  }, [production, watch("lineId")]);
+  }, [production, selectedLineId]);
 
   // Update selected line id when a new production is fetched
   useEffect(() => {
