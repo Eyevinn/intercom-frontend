@@ -116,10 +116,12 @@ export const CallsPage = () => {
       setShouldReduceVolume(false);
     }
 
-    if (startTimeoutRef.current) {
-      clearTimeout(startTimeoutRef.current);
-      startTimeoutRef.current = null;
-    }
+    return () => {
+      if (startTimeoutRef.current) {
+        clearTimeout(startTimeoutRef.current);
+        startTimeoutRef.current = null;
+      }
+    };
   }, [isSomeoneSpeaking, shouldReduceVolume]);
 
   useEffect(() => {
