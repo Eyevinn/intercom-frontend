@@ -12,7 +12,7 @@ export const useLocalUserSettings = ({
   devices,
   dispatch,
 }: TUseLocalUserSettings) => {
-  const { readFromStorage, clearStorage } = useStorage();
+  const { readFromStorage, removeFromStorage } = useStorage();
   useEffect(() => {
     if (devices.input || devices.output) {
       const storedAudioInput = readFromStorage("audioinput");
@@ -27,9 +27,9 @@ export const useLocalUserSettings = ({
         (device) => device.deviceId === storedAudioOutput
       )?.deviceId;
 
-      if (!foundInputDevice) clearStorage("audioinput");
+      if (!foundInputDevice) removeFromStorage("audioinput");
 
-      if (!foundOutputDevice) clearStorage("audiooutput");
+      if (!foundOutputDevice) removeFromStorage("audiooutput");
 
       const payload = {
         username: readFromStorage("username") || "",

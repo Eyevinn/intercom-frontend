@@ -24,9 +24,9 @@ export function useStorage() {
     store.write(key, value);
   };
 
-  const clearStorage = (key: keyof Schema) => {
+  const removeFromStorage = (key: keyof Schema) => {
     store.delete(key);
   };
 
-  return { readFromStorage, writeToStorage, clearStorage };
+  return { readFromStorage, writeToStorage, removeFromStorage };
 }
