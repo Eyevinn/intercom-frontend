@@ -1,5 +1,5 @@
-export const isVolumeRestrictedDevice = !Object.getOwnPropertyDescriptor(
-  HTMLMediaElement.prototype,
+export const isVolumeRestrictedDevice = !!Object.getOwnPropertyDescriptor(
+  HTMLAudioElement.prototype,
   "volume"
 )?.configurable;
 
