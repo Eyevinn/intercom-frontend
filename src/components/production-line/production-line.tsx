@@ -40,6 +40,10 @@ import { CallHeaderComponent } from "./call-header.tsx";
 import { UserControls } from "./user-controls.tsx";
 import { SelectDevices } from "./select-devices.tsx";
 import { useMuteInput } from "./use-mute-input.tsx";
+import {
+  isVolumeRestrictedDevice,
+  isVolumeRestrictedDeviceCheck,
+} from "../../device-volume-support.ts";
 
 type TProductionLine = {
   id: string;
@@ -101,6 +105,14 @@ export const ProductionLine = ({
       ? parseInt(joinProductionOptions.productionId, 10)
       : null
   );
+
+  useEffect(() => {
+    console.log("isVolumeRestrictedDevice: ", isVolumeRestrictedDevice);
+    console.log(
+      "isVolumeRestrictedDeviceCheck: ",
+      isVolumeRestrictedDeviceCheck
+    );
+  }, []);
 
   useEffect(() => {
     if (audioElements) {
