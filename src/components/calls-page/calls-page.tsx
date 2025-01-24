@@ -112,15 +112,13 @@ export const CallsPage = () => {
           setShouldReduceVolume(true);
         }, 1000);
       }
-    } else {
-      if (startTimeoutRef.current) {
-        clearTimeout(startTimeoutRef.current);
-        startTimeoutRef.current = null;
-      }
+    } else if (shouldReduceVolume) {
+      setShouldReduceVolume(false);
+    }
 
-      if (shouldReduceVolume) {
-        setShouldReduceVolume(false);
-      }
+    if (startTimeoutRef.current) {
+      clearTimeout(startTimeoutRef.current);
+      startTimeoutRef.current = null;
     }
   }, [isSomeoneSpeaking, shouldReduceVolume]);
 
