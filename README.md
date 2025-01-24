@@ -1,28 +1,32 @@
-# Intercom Frontend
+# Open Intercom Client
 
-User interface for web based intercom solution.
+Low latency, web based, open source, high quality, voice-over-ip intercom solution.
 
-Frontend application for [Intercom Manager](https://github.com/Eyevinn/intercom-manager/).
+User interface for the [Open Intercom Server](https://github.com/Eyevinn/intercom-manager/)
+
+Supported by [Eyevinn Technology](https://eyevinn.se)
+
+Hosted solution with support available in [Open Source Cloud](https://www.osaas.io/use-cases/intercom).
 
 ## Get Started
 
-Pre-requisites: Node v20, yarn
+Pre-requisites: [Node v20](https://nodejs.org/), [Yarn Classic](https://classic.yarnpkg.com/)
 
 `yarn` to install packages
 
-`cp .env.local.sample .env.local` to set up local environment (do not skip!)
+`cp .env.local.sample .env.local` to set up the local environment (do not skip!)
 
-To use a local manager instance, set `VITE_BACKEND_URL=http://0.0.0.0:8000/`
+To use a local [Open Intercom Server](https://github.com/Eyevinn/intercom-manager/), set the environment variable `VITE_BACKEND_URL=http://0.0.0.0:8000/`
 
 `yarn dev` to start a dev server
 
-### Manager in Open Source Cloud
+### Open Intercom Server in Open Source Cloud
 
-To develop against a manager in Open Source Cloud you need to provide a bearer token (service access token) in the Authorization header.
+To develop using a server hosted by [Open Source Cloud](https://www.osaas.io/), you need to provide a bearer token (service access token) in the Authorization header. The environment should be set to:
 
 ```
-% export VITE_BACKEND_URL=https://<instance>.eyevinn-intercom-manager.auto.prod.osaas.io/
-% export OSC_ACCESS_TOKEN=<personal-access-token>
+export VITE_BACKEND_URL=https://<instance>.eyevinn-intercom-manager.auto.prod.osaas.io/
+export OSC_ACCESS_TOKEN=<personal-access-token>
 ```
 
 To obtain the service access token you need your Open Source Cloud personal access token. You find that one in the settings menu in the [user interface](https://app.osaas.io). Get the service access token with the following HTTP request using curl.
@@ -79,7 +83,7 @@ docker stop frontend
 
 ## Contributing
 
-Contributions to are welcome.
+Contributions are welcome.
 
 ### Git Ways of Working
 
