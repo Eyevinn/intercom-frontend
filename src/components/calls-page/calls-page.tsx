@@ -103,25 +103,25 @@ export const CallsPage = () => {
     }
   }, [calls, isProgramOutputAdded]);
 
-  const startTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const startTimeoutRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (isSomeoneSpeaking) {
       if (!shouldReduceVolume) {
-        startTimeoutRef.current = setTimeout(() => {
+        startTimeoutRef.current = window.setTimeout(() => {
           setShouldReduceVolume(true);
         }, 1000);
       }
-    } else {
-      if (startTimeoutRef.current) {
-        clearTimeout(startTimeoutRef.current);
+    } else if (shouldReduceVolume) {
+      setShouldReduceVolume(false);
+    }
+
+    return () => {
+      if (startTimeoutRef.current !== null) {
+        window.clearTimeout(startTimeoutRef.current);
         startTimeoutRef.current = null;
       }
-
-      if (shouldReduceVolume) {
-        setShouldReduceVolume(false);
-      }
-    }
+    };
   }, [isSomeoneSpeaking, shouldReduceVolume]);
 
   useEffect(() => {
