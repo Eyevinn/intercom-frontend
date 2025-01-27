@@ -84,7 +84,7 @@ export const ProductionLine = ({
     isRemotelyMuted,
   } = callState;
 
-  const increaseVolumeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const increaseVolumeTimeoutRef = useRef<number | null>(null);
 
   const [inputAudioStream, resetAudioInput] = useAudioInput({
     audioInputId: joinProductionOptions?.audioinput ?? null,
@@ -148,7 +148,7 @@ export const ProductionLine = ({
       }
 
       if (!shouldReduceVolume && hasReduced) {
-        increaseVolumeTimeoutRef.current = setTimeout(() => {
+        increaseVolumeTimeoutRef.current = window.setTimeout(() => {
           audioElements?.forEach((audioElement) => {
             // eslint-disable-next-line no-param-reassign
             audioElement.volume = value;
@@ -160,7 +160,7 @@ export const ProductionLine = ({
 
     return () => {
       if (increaseVolumeTimeoutRef.current) {
-        clearTimeout(increaseVolumeTimeoutRef.current);
+        window.clearTimeout(increaseVolumeTimeoutRef.current);
       }
     };
   }, [
