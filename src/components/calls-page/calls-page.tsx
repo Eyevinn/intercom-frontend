@@ -103,12 +103,12 @@ export const CallsPage = () => {
     }
   }, [calls, isProgramOutputAdded]);
 
-  const startTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const startTimeoutRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (isSomeoneSpeaking) {
       if (!shouldReduceVolume) {
-        startTimeoutRef.current = setTimeout(() => {
+        startTimeoutRef.current = window.setTimeout(() => {
           setShouldReduceVolume(true);
         }, 1000);
       }
@@ -117,8 +117,8 @@ export const CallsPage = () => {
     }
 
     return () => {
-      if (startTimeoutRef.current) {
-        clearTimeout(startTimeoutRef.current);
+      if (startTimeoutRef.current !== null) {
+        window.clearTimeout(startTimeoutRef.current);
         startTimeoutRef.current = null;
       }
     };
