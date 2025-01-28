@@ -17,10 +17,10 @@ import { isValidBrowser } from "./bowser.ts";
 import { DisplayContainerHeader } from "./components/landing-page/display-container-header.tsx";
 import { NavigateToRootButton } from "./components/navigate-to-root-button/navigate-to-root-button.tsx";
 import { CallsPage } from "./components/calls-page/calls-page.tsx";
-import { CreateProductionPage } from "./components/create-production/create-production-page.tsx";
 import { Header } from "./components/header.tsx";
 import { useLocalUserSettings } from "./hooks/use-local-user-settings.ts";
 import { ManageProductionsPage } from "./components/manage-productions-page/manage-productions-page.tsx";
+import { CreateProductionPage } from "./components/create-production/create-production-page.tsx";
 
 const DisplayBoxPositioningContainer = styled(FlexContainer)`
   justify-content: center;
@@ -126,16 +126,16 @@ const App = () => {
                   />
                   <Route
                     path="/create-production"
-                    element={
-                      <CreateProductionPage
-                        setApiError={() => setApiError(true)}
-                      />
-                    }
+                    element={<CreateProductionPage />}
                     errorElement={<ErrorPage />}
                   />
                   <Route
                     path="/manage-productions"
-                    element={<ManageProductionsPage />}
+                    element={
+                      <ManageProductionsPage
+                        setApiError={() => setApiError(true)}
+                      />
+                    }
                     errorElement={<ErrorPage />}
                   />
                   <Route

@@ -1,4 +1,4 @@
-import { useForm, SubmitHandler } from "react-hook-form";
+import { useForm, SubmitHandler, useWatch } from "react-hook-form";
 import { useParams } from "react-router-dom";
 import { isBrowserFirefox, isMobile } from "../../bowser";
 import {
@@ -37,7 +37,7 @@ export const SelectDevices = ({
     formState: { isValid, isDirty },
     register,
     handleSubmit,
-    watch,
+    control,
   } = useForm<FormValues>({
     defaultValues: {
       username: "",
@@ -53,11 +53,14 @@ export const SelectDevices = ({
   });
 
   // Watch all form values
-  const watchedValues = watch();
+  const watchedValues = useWatch({
+    name: ["audioinput", "audiooutput"],
+    control,
+  });
   const audioInputTheSame =
-    joinProductionOptions?.audioinput === watchedValues.audioinput;
+    joinProductionOptions?.audioinput === watchedValues[0];
   const audioOutputTheSame =
-    joinProductionOptions?.audiooutput === watchedValues.audiooutput;
+    joinProductionOptions?.audiooutput === watchedValues[1];
   const audioNotChanged = audioInputTheSame && audioOutputTheSame;
 
   // Reset connection and re-connect to production-line
