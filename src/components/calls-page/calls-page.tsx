@@ -131,16 +131,21 @@ export const CallsPage = () => {
   }, [selectedProductionId]);
 
   useEffect(() => {
+    let newGlobalMute = customGlobalMute;
+
     Object.entries(calls).forEach(([, callState]) => {
       if (
         callState.hotkeys?.globalMuteHotkey &&
-        callState.hotkeys.globalMuteHotkey !== customGlobalMute
+        callState.hotkeys.globalMuteHotkey !== newGlobalMute
       ) {
-        setCustomGlobalMute(callState.hotkeys.globalMuteHotkey);
+        newGlobalMute = callState.hotkeys.globalMuteHotkey;
       }
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [calls]);
+
+    if (newGlobalMute !== customGlobalMute) {
+      setCustomGlobalMute(newGlobalMute);
+    }
+  }, [calls, customGlobalMute]);
 
   useEffect(() => {
     if (isEmpty && !paramProductionId && !paramLineId) {
