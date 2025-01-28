@@ -1,5 +1,6 @@
 import styled from "@emotion/styled";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
+import { SubmitHandler, useForm } from "react-hook-form";
 import { ErrorMessage } from "@hookform/error-message";
 import {
   PrimaryButton,
@@ -92,7 +93,6 @@ export const SettingsModal = ({
   onSave,
 }: TSettingsModalProps) => {
   const stopPropagation = (e: React.MouseEvent) => e.stopPropagation();
-  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const [hotkeys, setHotkeys] = useState<Hotkeys>({
     muteHotkey: "m",
     speakerHotkey: "n",
@@ -100,14 +100,6 @@ export const SettingsModal = ({
     increaseVolumeHotkey: "u",
     decreaseVolumeHotkey: "d",
     globalMuteHotkey: customGlobalMute,
-  });
-  const [errors, setErrors] = useState<{ [key: string]: string }>({
-    muteHotkey: "",
-    speakerHotkey: "",
-    pushToTalkHotkey: "",
-    increaseVolumeHotkey: "",
-    decreaseVolumeHotkey: "",
-    globalMuteHotkey: "",
   });
   const [warning, setWarning] = useState<{ [key: string]: string }>({
     muteHotkey: "",
@@ -121,6 +113,29 @@ export const SettingsModal = ({
   const [updateGlobalHotkey] = useUpdateGlobalHotkey();
   const globalStateDuplicates = useCheckForDuplicateHotkey({ callId, hotkeys });
 
+  const {
+    formState: { errors },
+    register,
+    handleSubmit,
+    clearErrors,
+    setValue,
+    trigger,
+    watch,
+  } = useForm<Hotkeys>({
+    defaultValues: {
+      muteHotkey: savedHotkeys.muteHotkey,
+      speakerHotkey: savedHotkeys.speakerHotkey,
+      pushToTalkHotkey: savedHotkeys.pushToTalkHotkey,
+      increaseVolumeHotkey: savedHotkeys.increaseVolumeHotkey,
+      decreaseVolumeHotkey: savedHotkeys.decreaseVolumeHotkey,
+      globalMuteHotkey: customGlobalMute,
+    },
+    resetOptions: {
+      keepDirtyValues: true, // user-interacted input will be retained
+      keepErrors: true, // input errors will be retained with value update
+    },
+  });
+
   useEffect(() => {
     if (isOpen) {
       setHotkeys({
@@ -129,108 +144,123 @@ export const SettingsModal = ({
     }
   }, [savedHotkeys, isOpen]);
 
-  const validateFields = (key: keyof Hotkeys, value: string) => {
-    const currentValues = {
-      ...hotkeys,
-      [key]: value,
+  useEffect(() => {
+    if (!globalStateDuplicates) return;
+
+    const validateFieldsGlobally = () => {
+      const currentValues = watch();
+
+      const newWarning = (
+        Object.keys(currentValues) as Array<keyof Hotkeys>
+      ).reduce(
+        (acc, field) => {
+          const isGlobalStateDuplicate = currentValues[field]
+            ? globalStateDuplicates?.includes(currentValues[field])
+            : false;
+          const isGlobalMute =
+            field === "globalMuteHotkey" &&
+            customGlobalMute === currentValues[field];
+
+          if (isGlobalStateDuplicate && !isGlobalMute) {
+            acc[field] = "This key is used in another connected line.";
+          } else {
+            acc[field] = "";
+          }
+
+          return acc;
+        },
+        {} as { [K in keyof Hotkeys]: string }
+      );
+
+      setWarning(newWarning);
     };
 
-    const newErrors = (
-      Object.keys(currentValues) as Array<keyof Hotkeys>
-    ).reduce(
-      (acc, field) => {
-        const isDuplicate =
-          Object.values(currentValues).filter(
-            (val) => val && val === currentValues[field]
-          ).length > 1;
+    validateFieldsGlobally();
+  }, [globalStateDuplicates, customGlobalMute, watch]);
 
-        if (!currentValues[field]) {
-          acc[field] = "This field can not be empty.";
-        } else if (isDuplicate) {
-          acc[field] = "This key is already in use.";
-        } else {
-          acc[field] = "";
-        }
+  const validateFieldsLocally = (value: string, key: string) => {
+    const currentValues = watch();
 
-        return acc;
-      },
-      {} as { [K in keyof Hotkeys]: string }
+    const otherValues = Object.entries(currentValues)
+      .filter(([k]) => k !== key)
+      .map(([, v]) => v);
+    return (
+      !otherValues.includes(value) ||
+      `The hotkey "${value}" is already assigned.`
     );
-
-    const newWarning = (
-      Object.keys(currentValues) as Array<keyof Hotkeys>
-    ).reduce(
-      (acc, field) => {
-        const isGlobalStateDuplicate = globalStateDuplicates?.includes(
-          currentValues[field]
-        );
-        const isGlobalMute =
-          field === "globalMuteHotkey" &&
-          customGlobalMute === currentValues[field];
-
-        if (isGlobalStateDuplicate && !isGlobalMute) {
-          acc[field] = "This key is used in another connected line.";
-        } else {
-          acc[field] = "";
-        }
-
-        return acc;
-      },
-      {} as { [K in keyof Hotkeys]: string }
-    );
-
-    setErrors(newErrors);
-    setWarning(newWarning);
   };
 
-  const handleInputChange = (key: keyof typeof hotkeys, value: string) => {
-    if (value.length <= 1 && /^[a-zA-Z]?$/.test(value)) {
-      setHotkeys((prev) => ({
-        ...prev,
-        [key]: value,
-      }));
-      validateFields(key, value);
-    }
-  };
-
-  const handleSave = () => {
-    const hasErrors = Object.values(errors).some((error) => error !== "");
-    const hasEmptyFields = Object.values(hotkeys).some((value) => !value);
-
-    if (hasErrors || hasEmptyFields) {
-      return;
-    }
-    updateGlobalHotkey({ callId, hotkeys });
+  const onSubmit: SubmitHandler<Hotkeys> = (payload) => {
+    updateGlobalHotkey({ callId, hotkeys: payload });
     onSave();
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent, index: number) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      const nextInput = inputRefs.current[index + 1];
-      if (nextInput) {
-        nextInput.focus();
-      } else {
-        handleSave();
-      }
-    } else if (e.key === "ArrowUp") {
-      e.preventDefault();
-      const previousInput = inputRefs.current[index - 1];
-      if (previousInput) {
-        previousInput.focus();
-      }
-    } else if (e.key === "ArrowDown") {
-      e.preventDefault();
-      const nextInput = inputRefs.current[index + 1];
-      if (nextInput) {
-        nextInput.focus();
-      }
-    }
+  const updateFieldErrors = (field: keyof Hotkeys, value: string) => {
+    const currentValues = watch();
+
+    const uniqueKeys = Object.entries(currentValues).reduce<
+      Record<string, boolean>
+    >((acc, [key, val]) => {
+      const isUnique =
+        Object.values(currentValues).filter((v) => v === val).length === 1;
+      acc[key] = isUnique;
+      return acc;
+    }, {});
+
+    const uniqueFields = Object.keys(uniqueKeys).filter(
+      (key) => uniqueKeys[key]
+    );
+
+    clearErrors(uniqueFields as Array<keyof Hotkeys>);
+
+    const duplicateFields = Object.entries(currentValues)
+      .filter(([key, val]) => val === value && key !== field)
+      .map(([key]) => key);
+
+    const fieldsToUpdate = [
+      field,
+      ...(duplicateFields as Array<keyof Hotkeys>),
+    ];
+
+    trigger(fieldsToUpdate);
   };
 
-  const setInputRef = (index: number, el: HTMLInputElement | null) => {
-    inputRefs.current[index] = el;
-  };
+  const renderFormInput = (
+    field: keyof Hotkeys,
+    formError: boolean,
+    formWarning: string
+  ) => (
+    <>
+      <FormInput
+        // eslint-disable-next-line
+        {...register(field, {
+          required: "Hotkey is required",
+          minLength: 1,
+          validate: (value) => {
+            return validateFieldsLocally(value, field);
+          },
+          onChange: (e) => {
+            setValue(field, e.target.value);
+            setHotkeys((prev) => ({ ...prev, [field]: e.target.value }));
+            updateFieldErrors(field, e.target.value);
+          },
+        })}
+        placeholder="Enter hotkey"
+      />
+      <ErrorMessage
+        errors={errors}
+        name={field}
+        as={<StyledWarningMessage className="error-message" />}
+      />
+      {formError && formWarning && (
+        <ErrorMessage
+          errors={{ [field]: { message: formWarning } }}
+          name={field}
+          as={StyledWarningMessage}
+        />
+      )}
+    </>
+  );
 
   return (
     <ModalOverlay onClick={onClose}>
@@ -241,31 +271,10 @@ export const SettingsModal = ({
           {(programOutPutLine ? isProgramUser : !isProgramUser) && (
             <FormLabel>
               <DecorativeLabel>Toggle mute: </DecorativeLabel>
-              <FormInput
-                id="hotkeyMute"
-                ref={(el) => setInputRef(0, el)}
-                type="text"
-                placeholder="Enter hotkey"
-                value={hotkeys.muteHotkey}
-                onChange={(e) =>
-                  handleInputChange("muteHotkey", e.target.value)
-                }
-                maxLength={1}
-                onKeyDown={(e) => handleKeyDown(e, 0)}
-              />
-              {errors.muteHotkey && (
-                <ErrorMessage
-                  errors={{ mutekey: { message: errors.muteHotkey } }}
-                  name="mutekey"
-                  as={<StyledWarningMessage className="error-message" />}
-                />
-              )}
-              {!errors.muteHotkey && warning.muteHotkey && (
-                <ErrorMessage
-                  errors={{ mutekey: { message: warning.muteHotkey } }}
-                  name="mutekey"
-                  as={StyledWarningMessage}
-                />
+              {renderFormInput(
+                "muteHotkey",
+                !errors.muteHotkey,
+                warning.muteHotkey
               )}
             </FormLabel>
           )}
@@ -273,178 +282,47 @@ export const SettingsModal = ({
             <>
               <FormLabel>
                 <DecorativeLabel>Toggle speaker: </DecorativeLabel>
-                <FormInput
-                  id="hotkeySpeaker"
-                  ref={(el) => setInputRef(1, el)}
-                  type="text"
-                  value={hotkeys.speakerHotkey}
-                  onChange={(e) =>
-                    handleInputChange("speakerHotkey", e.target.value)
-                  }
-                  placeholder="Enter hotkey"
-                  maxLength={1}
-                  onKeyDown={(e) => handleKeyDown(e, 1)}
-                />
-                {errors.speakerHotkey && (
-                  <ErrorMessage
-                    errors={{ speakerkey: { message: errors.speakerHotkey } }}
-                    name="speakerkey"
-                    as={<StyledWarningMessage className="error-message" />}
-                  />
-                )}
-                {!errors.speakerHotkey && warning.speakerHotkey && (
-                  <ErrorMessage
-                    errors={{ speakerkey: { message: warning.speakerHotkey } }}
-                    name="speakerkey"
-                    as={StyledWarningMessage}
-                  />
+                {renderFormInput(
+                  "speakerHotkey",
+                  !errors.speakerHotkey,
+                  warning.speakerHotkey
                 )}
               </FormLabel>
               {!programOutPutLine && (
                 <FormLabel>
                   <DecorativeLabel>Toggle push to talk: </DecorativeLabel>
-                  <FormInput
-                    id="hotkeyPushToTalk"
-                    ref={(el) => setInputRef(2, el)}
-                    type="text"
-                    value={hotkeys.pushToTalkHotkey}
-                    onChange={(e) =>
-                      handleInputChange("pushToTalkHotkey", e.target.value)
-                    }
-                    placeholder="Enter hotkey"
-                    maxLength={1}
-                    onKeyDown={(e) => handleKeyDown(e, 2)}
-                  />
-                  {errors.pushToTalkHotkey && (
-                    <ErrorMessage
-                      errors={{
-                        longpresskey: { message: errors.pushToTalkHotkey },
-                      }}
-                      name="longpresskey"
-                      as={<StyledWarningMessage className="error-message" />}
-                    />
-                  )}
-                  {!errors.pushToTalkHotkey && warning.pushToTalkHotkey && (
-                    <ErrorMessage
-                      errors={{
-                        longpresskey: { message: warning.pushToTalkHotkey },
-                      }}
-                      name="longpresskey"
-                      as={StyledWarningMessage}
-                    />
+                  {renderFormInput(
+                    "pushToTalkHotkey",
+                    !errors.pushToTalkHotkey,
+                    warning.pushToTalkHotkey
                   )}
                 </FormLabel>
               )}
               <FormLabel>
                 <DecorativeLabel>Increase volume:</DecorativeLabel>
-                <FormInput
-                  id="increaseVolume"
-                  ref={(el) => setInputRef(3, el)}
-                  type="text"
-                  value={hotkeys.increaseVolumeHotkey}
-                  onChange={(e) =>
-                    handleInputChange("increaseVolumeHotkey", e.target.value)
-                  }
-                  placeholder="Enter hotkey"
-                  maxLength={1}
-                  onKeyDown={(e) => handleKeyDown(e, 3)}
-                />
-                {errors.increaseVolumeHotkey && (
-                  <ErrorMessage
-                    errors={{
-                      increasevolumekey: {
-                        message: errors.increaseVolumeHotkey,
-                      },
-                    }}
-                    name="increasevolumekey"
-                    as={<StyledWarningMessage className="error-message" />}
-                  />
+                {renderFormInput(
+                  "increaseVolumeHotkey",
+                  !errors.increaseVolumeHotkey,
+                  warning.increaseVolumeHotkey
                 )}
-                {!errors.increaseVolumeHotkey &&
-                  warning.increaseVolumeHotkey && (
-                    <ErrorMessage
-                      errors={{
-                        increasevolumekey: {
-                          message: warning.increaseVolumeHotkey,
-                        },
-                      }}
-                      name="increasevolumekey"
-                      as={StyledWarningMessage}
-                    />
-                  )}
               </FormLabel>
               <FormLabel>
                 <DecorativeLabel>Decrease volume:</DecorativeLabel>
-                <FormInput
-                  id="decreaseVolume"
-                  ref={(el) => setInputRef(4, el)}
-                  type="text"
-                  value={hotkeys.decreaseVolumeHotkey}
-                  onChange={(e) =>
-                    handleInputChange("decreaseVolumeHotkey", e.target.value)
-                  }
-                  placeholder="Enter hotkey"
-                  maxLength={1}
-                  onKeyDown={(e) => handleKeyDown(e, 4)}
-                />
-                {errors.decreaseVolumeHotkey && (
-                  <ErrorMessage
-                    errors={{
-                      decreasevolumehotkey: {
-                        message: errors.decreaseVolumeHotkey,
-                      },
-                    }}
-                    name="decreasevolumehotkey"
-                    as={<StyledWarningMessage className="error-message" />}
-                  />
+                {renderFormInput(
+                  "decreaseVolumeHotkey",
+                  !errors.decreaseVolumeHotkey,
+                  warning.decreaseVolumeHotkey
                 )}
-                {!errors.decreaseVolumeHotkey &&
-                  warning.decreaseVolumeHotkey && (
-                    <ErrorMessage
-                      errors={{
-                        decreasevolumehotkey: {
-                          message: warning.decreaseVolumeHotkey,
-                        },
-                      }}
-                      name="decreasevolumehotkey"
-                      as={StyledWarningMessage}
-                    />
-                  )}
               </FormLabel>
             </>
           )}
           {!programOutPutLine && (
             <FormLabel>
               <DecorativeLabel>Toggle mute all microphones: </DecorativeLabel>
-              <FormInput
-                id="globalMuteMicrophones"
-                ref={(el) => setInputRef(3, el)}
-                type="text"
-                value={hotkeys.globalMuteHotkey}
-                onChange={(e) =>
-                  handleInputChange("globalMuteHotkey", e.target.value)
-                }
-                placeholder="Enter hotkey"
-                maxLength={1}
-                onKeyDown={(e) => handleKeyDown(e, 3)}
-              />
-              {errors.globalMuteHotkey && (
-                <ErrorMessage
-                  errors={{
-                    globalMuteHotkey: { message: errors.globalMuteHotkey },
-                  }}
-                  name="globalMuteHotkey"
-                  as={<StyledWarningMessage className="error-message" />}
-                />
-              )}
-              {!errors.globalMuteHotkey && warning.globalMuteHotkey && (
-                <ErrorMessage
-                  errors={{
-                    globalMuteHotkey: { message: warning.globalMuteHotkey },
-                  }}
-                  name="globalMuteHotkey"
-                  as={StyledWarningMessage}
-                />
+              {renderFormInput(
+                "globalMuteHotkey",
+                !errors.globalMuteHotkey,
+                warning.globalMuteHotkey
               )}
             </FormLabel>
           )}
@@ -452,7 +330,7 @@ export const SettingsModal = ({
             <CancelButton type="button" onClick={onClose}>
               Cancel
             </CancelButton>
-            <PrimaryButton type="button" onClick={handleSave}>
+            <PrimaryButton type="button" onClick={handleSubmit(onSubmit)}>
               Save settings
             </PrimaryButton>
           </ButtonDiv>
