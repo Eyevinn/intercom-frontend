@@ -139,15 +139,10 @@ export const CallsPage = () => {
         callState.hotkeys.globalMuteHotkey !== newGlobalMute
       ) {
         newGlobalMute = callState.hotkeys.globalMuteHotkey;
-        console.log(
-          "callState.hotkeys.globalMuteHotkey",
-          callState.hotkeys.globalMuteHotkey
-        );
       }
     });
 
     if (newGlobalMute !== customGlobalMute) {
-      console.log("newGlobalMute", newGlobalMute);
       setCustomGlobalMute(newGlobalMute);
     }
   }, [calls, customGlobalMute]);
