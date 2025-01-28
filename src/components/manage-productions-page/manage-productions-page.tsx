@@ -5,8 +5,12 @@ import { useRefreshAnimation } from "../landing-page/use-refresh-animation";
 import { ProductionsList } from "../production-list/productions-list";
 import { PageHeader } from "../page-layout/page-header";
 
-export const ManageProductionsPage = () => {
-  const [{ reloadProductionList }] = useGlobalState();
+export const ManageProductionsPage = ({
+  setApiError,
+}: {
+  setApiError: () => void;
+}) => {
+  const [{ apiError, reloadProductionList }] = useGlobalState();
   const { productions, doInitialLoad, error, setIntervalLoad } =
     useFetchProductionList({
       limit: "30",
@@ -17,6 +21,12 @@ export const ManageProductionsPage = () => {
     reloadProductionList,
     doInitialLoad,
   });
+
+  useEffect(() => {
+    if (apiError) {
+      setApiError();
+    }
+  }, [apiError, setApiError]);
 
   useEffect(() => {
     const interval = window.setInterval(() => {

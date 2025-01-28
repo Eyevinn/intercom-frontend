@@ -29,10 +29,6 @@ type TLine = {
 export type TBasicProductionResponse = {
   name: string;
   productionId: string;
-  lines?: TLine[];
-};
-
-type TFetchProductionResponse = TBasicProductionResponse & {
   lines: TLine[];
 };
 
@@ -97,8 +93,8 @@ export const API = {
         },
       })
     ),
-  fetchProduction: (id: number): Promise<TFetchProductionResponse> =>
-    handleFetchRequest<TFetchProductionResponse>(
+  fetchProduction: (id: number): Promise<TBasicProductionResponse> =>
+    handleFetchRequest<TBasicProductionResponse>(
       fetch(`${API_URL}production/${id}`, {
         method: "GET",
         headers: {
