@@ -16,7 +16,6 @@ import {
   PrimaryButton,
   SecondaryButton,
 } from "../landing-page/form-elements.tsx";
-import { API } from "../../api/api.ts";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { Spinner } from "../loader/loader.tsx";
 import { FlexContainer } from "../generic-components.ts";
@@ -27,13 +26,7 @@ import { NavigateToRootButton } from "../navigate-to-root-button/navigate-to-roo
 import { ResponsiveFormContainer } from "../user-settings/user-settings.tsx";
 import { isMobile } from "../../bowser.ts";
 import { Checkbox } from "../checkbox/checkbox.tsx";
-
-type FormValues = {
-  productionName: string;
-  defaultLine: string;
-  defaultLineProgramOutput: boolean;
-  lines: { name: string; programOutputLine?: boolean }[];
-};
+import { FormValues, useCreateProduction } from "./use-create-production.tsx";
 
 const HeaderWrapper = styled.div`
   display: flex;
@@ -88,10 +81,8 @@ const CheckboxWrapper = styled.div`
 
 export const CreateProductionPage = () => {
   const [, dispatch] = useGlobalState();
-  const [createdProductionId, setCreatedProductionId] = useState<string | null>(
-    null
-  );
-  const [loading, setLoading] = useState<boolean>(false);
+  const [createNewProduction, setCreateNewProduction] =
+    useState<FormValues | null>(null);
   const [copiedUrl, setCopiedUrl] = useState<boolean>(false);
   const {
     formState: { errors },
@@ -116,33 +107,16 @@ export const CreateProductionPage = () => {
     },
   });
 
+  const { createdProductionId, loading } = useCreateProduction({
+    createNewProduction,
+  });
+
   const { error: productionFetchError, production } = useFetchProduction(
     createdProductionId ? parseInt(createdProductionId, 10) : null
   );
 
   const onSubmit: SubmitHandler<FormValues> = (value) => {
-    setLoading(true);
-    API.createProduction({
-      name: value.productionName,
-      lines: [
-        {
-          name: value.defaultLine,
-          programOutputLine: value.defaultLineProgramOutput,
-        },
-        ...value.lines,
-      ],
-    })
-      .then((v) => {
-        setCreatedProductionId(v.productionId);
-        setLoading(false);
-      })
-      .catch((error) => {
-        dispatch({
-          type: "ERROR",
-          payload: error,
-        });
-        setLoading(false);
-      });
+    setCreateNewProduction(value);
   };
 
   // Reset form values when created production id changes
