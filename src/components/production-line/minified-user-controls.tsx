@@ -1,8 +1,8 @@
 import {
-  SpeakerOff,
-  SpeakerOn,
   MicMuted,
   MicUnmuted,
+  SpeakerOff,
+  SpeakerOn,
 } from "../../assets/icons/icon";
 import { LongPressToTalkButton } from "./long-press-to-talk-button";
 import {
@@ -15,7 +15,7 @@ import { TJoinProductionOptions, TLine } from "./types";
 import { TUseAudioInputValues } from "./use-audio-input";
 
 export const MinifiedUserControls = ({
-  setIsOutputMuted,
+  muteOutput,
   muteInput,
   line,
   joinProductionOptions,
@@ -24,7 +24,7 @@ export const MinifiedUserControls = ({
   inputAudioStream,
   value,
 }: {
-  setIsOutputMuted: () => void;
+  muteOutput: () => void;
   muteInput: () => void;
   line: TLine | null;
   joinProductionOptions: TJoinProductionOptions;
@@ -40,7 +40,7 @@ export const MinifiedUserControls = ({
           !(line?.programOutputLine && joinProductionOptions.isProgramUser) && (
             <MinifiedControlsButton
               className={isOutputMuted || value === 0 ? "off" : "on"}
-              onClick={setIsOutputMuted}
+              onClick={muteOutput}
             >
               {isOutputMuted || value === 0 ? <SpeakerOff /> : <SpeakerOn />}
             </MinifiedControlsButton>

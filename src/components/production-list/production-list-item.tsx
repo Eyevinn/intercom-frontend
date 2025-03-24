@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { TBasicProductionResponse } from "../../api/api";
-import { useGlobalState } from "../../global-state/context-provider";
 import {
   ChevronDownIcon,
   ChevronUpIcon,
@@ -9,12 +8,18 @@ import {
   UserIcon,
   UsersIcon,
 } from "../../assets/icons/icon";
+import { isMobile } from "../../bowser";
+import { useGlobalState } from "../../global-state/context-provider";
+import { AudioFeedModal } from "../audio-feed-modal/audio-feed-modal";
 import {
   SecondaryButton,
   StyledWarningMessage,
 } from "../landing-page/form-elements";
 import { Spinner } from "../loader/loader";
 import { useRemoveProductionLine } from "../manage-productions-page/use-remove-production-line";
+import { TLine } from "../production-line/types";
+import { ConfirmationModal } from "../verify-decision/confirmation-modal";
+import { ManageProductionButtons } from "./manage-production-buttons";
 import {
   DeleteButton,
   HeaderIcon,
@@ -37,11 +42,6 @@ import {
   ProductionName,
   SpinnerWrapper,
 } from "./production-list-components";
-import { ManageProductionButtons } from "./manage-production-buttons";
-import { ConfirmationModal } from "../verify-decision/confirmation-modal";
-import { TLine } from "../production-line/types";
-import { isMobile } from "../../bowser";
-import { AudioFeedModal } from "../audio-feed-modal/audio-feed-modal";
 
 type ProductionsListItemProps = {
   production: TBasicProductionResponse;
