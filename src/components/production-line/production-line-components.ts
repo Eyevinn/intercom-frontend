@@ -2,8 +2,8 @@ import styled from "@emotion/styled";
 import { DisplayContainer, FlexContainer } from "../generic-components";
 import { ActionButton } from "../landing-page/form-elements";
 import {
-  ProductionItemWrapper,
   HeaderWrapper,
+  ProductionItemWrapper,
 } from "../production-list/production-list-components";
 
 export const CallInfo = styled.div`
@@ -106,7 +106,7 @@ export const AudioFeedIcon = styled.div`
   font-size: 1.2rem;
   gap: 1rem;
   position: absolute;
-  top: ${({ open }: { open: boolean }) => (open ? "4.5rem" : "2.35rem")};
+  top: ${({ open }: { open: boolean }) => (open ? "5rem" : "2.35rem")};
   left: ${({ open }: { open: boolean }) => (open ? "2rem" : "1.5rem")};
 
   svg {
