@@ -148,7 +148,6 @@ export const ShareLineLinkModal = ({
             isCopied={isCopied}
             onClick={() => {
               if (isCopied) return;
-              console.log("copied");
               handleCopyUrlToClipboard(url);
             }}
           >
