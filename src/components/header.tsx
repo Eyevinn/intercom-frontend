@@ -1,14 +1,14 @@
 import styled from "@emotion/styled";
 import { FC, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { HeadsetIcon } from "../assets/icons/icon.tsx";
 import { backgroundColour } from "../css-helpers/defaults.ts";
 import { useGlobalState } from "../global-state/context-provider.tsx";
-import { HeadsetIcon } from "../assets/icons/icon.tsx";
-import { useAudioCue } from "./production-line/use-audio-cue.ts";
 import { DisplayContainerHeader } from "./landing-page/display-container-header.tsx";
-import { Modal } from "./modal/modal.tsx";
-import { VerifyDecision } from "./verify-decision/verify-decision.tsx";
 import { ModalConfirmationText } from "./modal/modal-confirmation-text.ts";
+import { Modal } from "./modal/modal.tsx";
+import { useAudioCue } from "./production-line/use-audio-cue.ts";
+import { VerifyDecision } from "./verify-decision/verify-decision.tsx";
 
 const HeaderWrapper = styled.div`
   width: 100%;
@@ -26,6 +26,7 @@ const HomeButton = styled.button`
   font-size: 3rem;
   font-weight: semi-bold;
   cursor: pointer;
+  color: rgba(255, 255, 255, 0.87);
 
   svg {
     width: 2.4rem;
