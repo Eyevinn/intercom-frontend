@@ -1,45 +1,45 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
 import { useHotkeys } from "react-hotkeys-hook";
-import { useGlobalState } from "../../global-state/context-provider.tsx";
-import { useAudioInput } from "./use-audio-input.ts";
-import { UserList } from "./user-list.tsx";
-import { Spinner } from "../loader/loader.tsx";
-import { FlexContainer } from "../generic-components.ts";
+import { useNavigate, useParams } from "react-router-dom";
 import { isMobile, isTablet } from "../../bowser.ts";
-import { useLineHotkeys, useSpeakerHotkeys } from "./use-line-hotkeys.ts";
-import { LongPressToTalkButton } from "./long-press-to-talk-button.tsx";
-import { useLinePolling } from "./use-line-polling.ts";
-import { useFetchProduction } from "../landing-page/use-fetch-production.ts";
-import { useIsLoading } from "./use-is-loading.ts";
-import { useCheckBadLineData } from "./use-check-bad-line-data.ts";
-import { useAudioCue } from "./use-audio-cue.ts";
-import { DisplayWarning } from "../display-box.tsx";
+import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { CallState } from "../../global-state/types.ts";
-import { ExitCallButton } from "./exit-call-button.tsx";
-import { SymphonyRtcConnectionComponent } from "./symphony-rtc-connection-component.tsx";
-import { HotkeysComponent } from "./hotkeys-component.tsx";
-import { CollapsableSection } from "./collapsable-section.tsx";
+import { DisplayWarning } from "../display-box.tsx";
+import { FlexContainer } from "../generic-components.ts";
+import { useFetchProduction } from "../landing-page/use-fetch-production.ts";
+import { Spinner } from "../loader/loader.tsx";
 import {
   InnerDiv,
   ProductionLines,
 } from "../production-list/production-list-components.ts";
+import { CallHeaderComponent } from "./call-header.tsx";
+import { CollapsableSection } from "./collapsable-section.tsx";
+import { ExitCallButton } from "./exit-call-button.tsx";
+import { ExitCallModal } from "./exit-call-modal.tsx";
+import { HotkeysComponent } from "./hotkeys-component.tsx";
+import { LongPressToTalkButton } from "./long-press-to-talk-button.tsx";
+import { MinifiedUserControls } from "./minified-user-controls.tsx";
+import { MuteRemoteParticipantModal } from "./mute-remote-participant-modal.tsx";
 import {
+  ButtonWrapper,
+  CallContainer,
   CallWrapper,
   ConnectionErrorWrapper,
   ListWrapper,
-  LongPressWrapper,
-  ButtonWrapper,
   LoaderWrapper,
-  CallContainer,
+  LongPressWrapper,
 } from "./production-line-components.ts";
-import { ExitCallModal } from "./exit-call-modal.tsx";
-import { MuteRemoteParticipantModal } from "./mute-remote-participant-modal.tsx";
-import { MinifiedUserControls } from "./minified-user-controls.tsx";
-import { CallHeaderComponent } from "./call-header.tsx";
-import { UserControls } from "./user-controls.tsx";
 import { SelectDevices } from "./select-devices.tsx";
+import { SymphonyRtcConnectionComponent } from "./symphony-rtc-connection-component.tsx";
+import { useAudioCue } from "./use-audio-cue.ts";
+import { useAudioInput } from "./use-audio-input.ts";
+import { useCheckBadLineData } from "./use-check-bad-line-data.ts";
+import { useIsLoading } from "./use-is-loading.ts";
+import { useLineHotkeys, useSpeakerHotkeys } from "./use-line-hotkeys.ts";
+import { useLinePolling } from "./use-line-polling.ts";
 import { useMuteInput } from "./use-mute-input.tsx";
+import { UserControls } from "./user-controls.tsx";
+import { UserList } from "./user-list.tsx";
 
 type TProductionLine = {
   id: string;
@@ -373,7 +373,7 @@ export const ProductionLine = ({
           )}
           {!open && joinProductionOptions && (
             <MinifiedUserControls
-              setIsOutputMuted={() => setIsOutputMuted(!isOutputMuted)}
+              muteOutput={muteOutput}
               muteInput={() => muteInput(!isInputMuted)}
               line={line}
               joinProductionOptions={joinProductionOptions}

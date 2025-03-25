@@ -1,18 +1,18 @@
-import { useForm, SubmitHandler, useWatch } from "react-hook-form";
+import { SubmitHandler, useForm, useWatch } from "react-hook-form";
 import { useParams } from "react-router-dom";
 import { isBrowserFirefox, isMobile } from "../../bowser";
+import { useGlobalState } from "../../global-state/context-provider";
 import {
+  DecorativeLabel,
   FormContainer,
   FormLabel,
-  DecorativeLabel,
   FormSelect,
-  StyledWarningMessage,
   PrimaryButton,
+  StyledWarningMessage,
 } from "../landing-page/form-elements";
 import { ReloadDevicesButton } from "../reload-devices-button.tsx/reload-devices-button";
 import { DeviceButtonWrapper } from "./production-line-components";
-import { TLine, TJoinProductionOptions } from "./types";
-import { useGlobalState } from "../../global-state/context-provider";
+import { TJoinProductionOptions, TLine } from "./types";
 
 type FormValues = TJoinProductionOptions;
 
@@ -43,6 +43,7 @@ export const SelectDevices = ({
       username: "",
       audioinput: joinProductionOptions.audioinput,
       audiooutput: joinProductionOptions.audiooutput,
+      isProgramUser: joinProductionOptions.isProgramUser,
       productionId: paramProductionId || "",
       lineId: paramLineId || undefined,
     },
@@ -72,6 +73,7 @@ export const SelectDevices = ({
 
       const newJoinProductionOptions = {
         ...payload,
+        isProgramUser: joinProductionOptions.isProgramUser,
         productionId: joinProductionOptions.productionId,
         lineId: joinProductionOptions.lineId,
         username: joinProductionOptions.username,
