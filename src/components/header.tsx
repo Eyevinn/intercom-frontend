@@ -11,14 +11,20 @@ import { VerifyDecision } from "./verify-decision/verify-decision.tsx";
 import { ModalConfirmationText } from "./modal/modal-confirmation-text.ts";
 
 const HeaderWrapper = styled.div`
-  display: flex;
-  align-items: center;
   width: 100%;
   background: ${backgroundColour};
+  margin: 0 0 1rem 0;
+`;
+
+const HomeButton = styled.button`
+  background: ${backgroundColour};
+  border: none;
   padding: 1rem;
+  display: flex;
+  align-items: center;
+  width: fit-content;
   font-size: 3rem;
   font-weight: semi-bold;
-  margin: 0 0 1rem 0;
   cursor: pointer;
 
   svg {
@@ -66,9 +72,11 @@ export const Header: FC = () => {
 
   return (
     <>
-      <HeaderWrapper onClick={returnToRoot}>
-        <HeadsetIcon />
-        Intercom
+      <HeaderWrapper>
+        <HomeButton onClick={returnToRoot}>
+          <HeadsetIcon />
+          Intercom
+        </HomeButton>
       </HeaderWrapper>
       {confirmExitModalOpen && (
         <Modal onClose={() => setConfirmExitModalOpen(false)}>
