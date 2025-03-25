@@ -1,8 +1,11 @@
 import styled from "@emotion/styled";
 import { ErrorMessage } from "@hookform/error-message";
-import { useForm, Controller, SubmitHandler } from "react-hook-form";
 import { FC, useEffect, useState } from "react";
+import { Controller, SubmitHandler, useForm } from "react-hook-form";
+import { TBasicProductionResponse } from "../../api/api";
 import { RemoveIcon } from "../../assets/icons/icon";
+import { useGlobalState } from "../../global-state/context-provider";
+import { Checkbox } from "../checkbox/checkbox";
 import { ListItemWrapper } from "../create-production/create-production-page";
 import {
   FormInput,
@@ -11,6 +14,9 @@ import {
   StyledWarningMessage,
 } from "../landing-page/form-elements";
 import { Spinner } from "../loader/loader";
+import { useAddProductionLine } from "../manage-productions-page/use-add-production-line";
+import { useDeleteProduction } from "../manage-productions-page/use-delete-production";
+import { ConfirmationModal } from "../verify-decision/confirmation-modal";
 import {
   AddLineHeader,
   AddLineSectionForm,
@@ -20,12 +26,6 @@ import {
   RemoveIconWrapper,
   SpinnerWrapper,
 } from "./production-list-components";
-import { useAddProductionLine } from "../manage-productions-page/use-add-production-line";
-import { useDeleteProduction } from "../manage-productions-page/use-delete-production";
-import { useGlobalState } from "../../global-state/context-provider";
-import { ConfirmationModal } from "../verify-decision/confirmation-modal";
-import { TBasicProductionResponse } from "../../api/api";
-import { Checkbox } from "../checkbox/checkbox";
 
 interface ManageProductionButtonsProps {
   production: TBasicProductionResponse;
@@ -136,7 +136,7 @@ export const ManageProductionButtons: FC<ManageProductionButtonsProps> = (
           disabled={isDeleteProductionDisabled}
           onClick={() => setDisplayConfirmationModal(true)}
         >
-          Remove Production
+          Delete Production
           {deleteProductionLoading && (
             <SpinnerWrapper>
               <Spinner className="production-list" />
