@@ -65,6 +65,14 @@ type THeartbeatOptions = {
   sessionId: string;
 };
 
+export type TShareUrlOptions = {
+  path: string;
+};
+
+type TShareUrlResponse = {
+  url: string;
+};
+
 export const API = {
   createProduction: async ({ name, lines }: TCreateProductionOptions) =>
     handleFetchRequest<TBasicProductionResponse>(
@@ -215,4 +223,18 @@ export const API = {
         },
       })
     ),
+  shareUrl: ({ path }: TShareUrlOptions): Promise<TShareUrlResponse> => {
+    return handleFetchRequest<TShareUrlResponse>(
+      fetch(`${API_URL}share`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
+        },
+        body: JSON.stringify({
+          path,
+        }),
+      })
+    );
+  },
 };

@@ -165,6 +165,7 @@ export const MinifiedControls = styled.div`
   justify-content: space-between;
   gap: 1rem;
   width: 100%;
+  align-items: center;
   button {
     margin: 0;
   }

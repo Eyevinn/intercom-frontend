@@ -1,16 +1,16 @@
 import styled from "@emotion/styled";
 import { useEffect, useState } from "react";
 import { RefreshIcon } from "../../assets/icons/icon";
-import { PrimaryButton } from "../landing-page/form-elements";
-import { Spinner } from "../loader/loader";
 import { isBrowserFirefox, isMobile } from "../../bowser";
 import { useGlobalState } from "../../global-state/context-provider";
-import { useFetchDevices } from "../../hooks/use-fetch-devices";
 import { useDevicePermissions } from "../../hooks/use-device-permission";
-import { Modal } from "../modal/modal";
+import { useFetchDevices } from "../../hooks/use-fetch-devices";
 import { DisplayContainerHeader } from "../landing-page/display-container-header";
+import { PrimaryButton } from "../landing-page/form-elements";
+import { Spinner } from "../loader/loader";
+import { Modal } from "../modal/modal";
 
-const StyledRefreshBtn = styled(PrimaryButton)`
+export const StyledRefreshBtn = styled(PrimaryButton)`
   margin-right: 1.5rem;
   display: flex;
   align-items: center;

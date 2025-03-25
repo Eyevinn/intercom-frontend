@@ -30,6 +30,7 @@ import {
   LongPressWrapper,
 } from "./production-line-components.ts";
 import { SelectDevices } from "./select-devices.tsx";
+import { ShareLineButton } from "./share-line-button.tsx";
 import { SymphonyRtcConnectionComponent } from "./symphony-rtc-connection-component.tsx";
 import { useAudioCue } from "./use-audio-cue.ts";
 import { useAudioInput } from "./use-audio-input.ts";
@@ -381,6 +382,7 @@ export const ProductionLine = ({
               isInputMuted={isInputMuted}
               inputAudioStream={inputAudioStream}
               value={value}
+              productionId={joinProductionOptions.productionId}
             />
           )}
           <ProductionLines className={open ? "expanded" : ""}>
@@ -480,6 +482,12 @@ export const ProductionLine = ({
                     )}
                   </ListWrapper>
                 </FlexContainer>
+              )}
+              {production && line && (
+                <ShareLineButton
+                  productionId={production?.productionId}
+                  lineId={line?.id}
+                />
               )}
             </InnerDiv>
           </ProductionLines>
