@@ -68,6 +68,7 @@ const ModalTextBold = styled.p`
   font-size: 1.4rem;
   font-weight: 700;
   margin-right: 0.5rem;
+  font-style: italic;
 `;
 
 const ModalNoteWrapper = styled.div`
