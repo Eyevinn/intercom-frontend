@@ -27,7 +27,9 @@ import { Checkbox } from "../checkbox/checkbox.tsx";
 import { TUserSettings } from "../user-settings/types.ts";
 import { RemoveIcon } from "../../assets/icons/icon.tsx";
 
-type FormValues = TJoinProductionOptions;
+type FormValues = TJoinProductionOptions & {
+  audiooutput: string;
+};
 
 const NameWrapper = styled.div`
   display: flex;
@@ -269,7 +271,15 @@ export const JoinProduction = ({
       payload: {
         id: uuid,
         callState: {
-          joinProductionOptions: options,
+          joinProductionOptions: {
+            productionId: options.productionId,
+            lineId: options.lineId,
+            username: options.username,
+            audioinput: options.audioinput,
+            lineUsedForProgramOutput: options.lineUsedForProgramOutput,
+            isProgramUser: options.isProgramUser,
+          },
+          audiooutput: payload.audiooutput,
           mediaStreamInput: null,
           dominantSpeaker: null,
           audioLevelAboveThreshold: false,

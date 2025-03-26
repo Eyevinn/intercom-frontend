@@ -8,6 +8,7 @@ import { TUseAudioInputValues } from "./use-audio-input";
 
 type SymphonyRtcConnectionComponentProps = {
   joinProductionOptions: TJoinProductionOptions | null;
+  audiooutput: string | undefined;
   inputAudioStream: TUseAudioInputValues;
   callId: string;
   dispatch: React.Dispatch<TGlobalStateAction>;
@@ -15,6 +16,7 @@ type SymphonyRtcConnectionComponentProps = {
 
 export const SymphonyRtcConnectionComponent = ({
   joinProductionOptions,
+  audiooutput,
   inputAudioStream,
   callId,
   dispatch,
@@ -29,6 +31,7 @@ export const SymphonyRtcConnectionComponent = ({
     inputAudioStream,
     sdpOffer,
     joinProductionOptions,
+    audiooutput,
     sessionId,
     callId,
   });

@@ -19,6 +19,7 @@ type TRtcConnectionOptions = {
   inputAudioStream: TUseAudioInputValues;
   sdpOffer: string | null;
   joinProductionOptions: TJoinProductionOptions | null;
+  audiooutput: string | undefined;
   sessionId: string | null;
   callId: string;
 };
@@ -27,6 +28,7 @@ type TEstablishConnection = {
   rtcPeerConnection: RTCPeerConnection;
   sdpOffer: string;
   joinProductionOptions: TJoinProductionOptions;
+  audiooutput: string | undefined;
   sessionId: string;
   callId: string;
   dispatch: Dispatch<TGlobalStateAction>;
@@ -51,6 +53,7 @@ const establishConnection = ({
   rtcPeerConnection,
   sdpOffer,
   joinProductionOptions,
+  audiooutput,
   sessionId,
   callId,
   dispatch,
@@ -63,6 +66,10 @@ const establishConnection = ({
 
     if (selectedStream && selectedStream.getAudioTracks().length !== 0) {
       const audioElement = new Audio();
+
+      // Add a unique identifier
+      const lineId = joinProductionOptions.lineId || "unknown";
+      audioElement.id = `rtc-audio-${lineId}-${Date.now()}`;
 
       audioElement.controls = false;
       audioElement.autoplay = true;
@@ -81,8 +88,8 @@ const establishConnection = ({
       audioElement.srcObject = selectedStream;
 
       setAudioElements((prevArray) => [audioElement, ...prevArray]);
-      if (joinProductionOptions.audiooutput) {
-        audioElement.setSinkId(joinProductionOptions.audiooutput).catch((e) => {
+      if (audiooutput) {
+        audioElement.setSinkId(audiooutput).catch((e) => {
           dispatch({
             type: "ERROR",
             payload: {
@@ -281,6 +288,7 @@ export const useRtcConnection = ({
   inputAudioStream,
   sdpOffer,
   joinProductionOptions,
+  audiooutput,
   sessionId,
   callId,
 }: TRtcConnectionOptions) => {
@@ -368,6 +376,7 @@ export const useRtcConnection = ({
       rtcPeerConnection,
       sdpOffer,
       joinProductionOptions,
+      audiooutput,
       sessionId,
       callId,
       dispatch,
@@ -385,6 +394,7 @@ export const useRtcConnection = ({
 
       rtcPeerConnection.close();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     sdpOffer,
     inputAudioStream,
