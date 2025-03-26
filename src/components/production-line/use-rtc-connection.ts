@@ -7,13 +7,13 @@ import {
   useState,
 } from "react";
 import { useNavigate } from "react-router-dom";
-import { noop } from "../../helpers";
 import { API } from "../../api/api.ts";
-import { TJoinProductionOptions } from "./types.ts";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { TGlobalStateAction } from "../../global-state/global-state-actions.ts";
-import { TUseAudioInputValues } from "./use-audio-input.ts";
+import { noop } from "../../helpers";
 import { startRtcStatInterval } from "./rtc-stat-interval.ts";
+import { TJoinProductionOptions } from "./types.ts";
+import { TUseAudioInputValues } from "./use-audio-input.ts";
 
 type TRtcConnectionOptions = {
   inputAudioStream: TUseAudioInputValues;
@@ -57,15 +57,30 @@ const establishConnection = ({
   setAudioElements,
   setNoStreamError,
 }: TEstablishConnection): { teardown: () => void } => {
-  const onRtcTrack = ({ streams }: RTCTrackEvent) => {
-    // We can count on there being only a single stream per event for now.
+  const onRtcTrack = async ({ streams }: RTCTrackEvent) => {
     const selectedStream = streams[0];
 
     if (selectedStream && selectedStream.getAudioTracks().length !== 0) {
-      const audioElement = new Audio();
+      console.log(
+        "Received track from call",
+        joinProductionOptions.lineId,
+        callId
+      );
+      console.log(
+        "Stream ID:",
+        joinProductionOptions.lineId,
+        selectedStream.id
+      );
+      console.log(
+        "Track ID(s):",
+        joinProductionOptions.lineId,
+        selectedStream.getTracks().map((t) => t.id)
+      );
 
+      const audioElement = new Audio();
       audioElement.controls = false;
-      audioElement.autoplay = true;
+      audioElement.autoplay = false; // manually trigger playback
+
       audioElement.onerror = () => {
         dispatch({
           type: "ERROR",
@@ -78,11 +93,21 @@ const establishConnection = ({
         });
       };
 
-      audioElement.srcObject = selectedStream;
-
-      setAudioElements((prevArray) => [audioElement, ...prevArray]);
+      // 💡 Set sinkId BEFORE assigning srcObject
       if (joinProductionOptions.audiooutput) {
-        audioElement.setSinkId(joinProductionOptions.audiooutput).catch((e) => {
+        console.log(
+          "sinkId before:",
+          joinProductionOptions.lineId,
+          audioElement.sinkId
+        );
+        try {
+          await audioElement.setSinkId(joinProductionOptions.audiooutput);
+          console.log(
+            "sinkId after:",
+            joinProductionOptions.lineId,
+            audioElement.sinkId
+          );
+        } catch (e) {
           dispatch({
             type: "ERROR",
             payload: {
@@ -93,15 +118,34 @@ const establishConnection = ({
                   : new Error("Error assigning audio sink."),
             },
           });
-        });
+        }
       }
+
+      // ✅ Now set stream and play
+      audioElement.srcObject = selectedStream;
+
+      try {
+        await audioElement.play();
+        console.log(
+          "Audio playback started for call",
+          joinProductionOptions.lineId
+        );
+      } catch (e) {
+        console.error(
+          "Error during audio playback for call",
+          joinProductionOptions.lineId,
+          e
+        );
+      }
+
+      setAudioElements((prevArray) => [audioElement, ...prevArray]);
     } else if (selectedStream && selectedStream.getAudioTracks().length === 0) {
       setNoStreamError(true);
       dispatch({
         type: "ERROR",
         payload: {
           callId,
-          error: new Error("Stream-error: No MediaStreamTracks avaliable"),
+          error: new Error("Stream-error: No MediaStreamTracks available"),
         },
       });
     } else {
@@ -110,7 +154,7 @@ const establishConnection = ({
         type: "ERROR",
         payload: {
           callId,
-          error: new Error("Stream-error: No MediaStream avaliable"),
+          error: new Error("Stream-error: No MediaStream available"),
         },
       });
     }

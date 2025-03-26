@@ -1,26 +1,27 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
 import styled from "@emotion/styled";
 import { useState } from "react";
-import { ErrorPage } from "./components/router-error.tsx";
-import { useDevicePermissions } from "./hooks/use-device-permission.ts";
-import { LandingPage } from "./components/landing-page/landing-page.tsx";
-import { useInitializeGlobalStateReducer } from "./global-state/global-state-reducer.ts";
-import { GlobalStateContext } from "./global-state/context-provider.tsx";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { isValidBrowser } from "./bowser.ts";
+import { CallsPage } from "./components/calls-page/calls-page.tsx";
+import { CreateProductionPage } from "./components/create-production/create-production-page.tsx";
+import { DisplayWarning } from "./components/display-box.tsx";
 import { ErrorBanner } from "./components/error";
-import { useFetchDevices } from "./hooks/use-fetch-devices.ts";
 import {
   DisplayContainer,
   FlexContainer,
 } from "./components/generic-components.ts";
-import { DisplayWarning } from "./components/display-box.tsx";
-import { isValidBrowser } from "./bowser.ts";
-import { DisplayContainerHeader } from "./components/landing-page/display-container-header.tsx";
-import { NavigateToRootButton } from "./components/navigate-to-root-button/navigate-to-root-button.tsx";
-import { CallsPage } from "./components/calls-page/calls-page.tsx";
 import { Header } from "./components/header.tsx";
-import { useLocalUserSettings } from "./hooks/use-local-user-settings.ts";
+import { DisplayContainerHeader } from "./components/landing-page/display-container-header.tsx";
+import { LandingPage } from "./components/landing-page/landing-page.tsx";
 import { ManageProductionsPage } from "./components/manage-productions-page/manage-productions-page.tsx";
-import { CreateProductionPage } from "./components/create-production/create-production-page.tsx";
+import { NavigateToRootButton } from "./components/navigate-to-root-button/navigate-to-root-button.tsx";
+import { ProductionLineWrapper } from "./components/production-line-wrapper/production-line-wrapper.tsx";
+import { ErrorPage } from "./components/router-error.tsx";
+import { GlobalStateContext } from "./global-state/context-provider.tsx";
+import { useInitializeGlobalStateReducer } from "./global-state/global-state-reducer.ts";
+import { useDevicePermissions } from "./hooks/use-device-permission.ts";
+import { useFetchDevices } from "./hooks/use-fetch-devices.ts";
+import { useLocalUserSettings } from "./hooks/use-local-user-settings.ts";
 
 const DisplayBoxPositioningContainer = styled(FlexContainer)`
   justify-content: center;
@@ -142,6 +143,10 @@ const App = () => {
                     path="/production-calls/production/:productionId/line/:lineId"
                     element={<CallsPage />}
                     errorElement={<ErrorPage />}
+                  />
+                  <Route
+                    path="/call/:callId"
+                    element={<ProductionLineWrapper />}
                   />
                   <Route path="*" element={<NotFound />} />
                 </>
