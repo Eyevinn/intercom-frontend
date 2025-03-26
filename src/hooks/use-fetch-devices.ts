@@ -30,7 +30,6 @@ export const useFetchDevices = ({ permission, dispatch }: TUseFetchDevices) => {
                 (item) => item.deviceId
               )
             : [];
-          console.log(payload.filter((d) => d.kind === "audiooutput"));
           dispatch({
             type: "DEVICES_UPDATED",
             payload: {
