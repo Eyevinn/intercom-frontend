@@ -48,7 +48,7 @@ export const SelectDevices = ({
     defaultValues: {
       username: "",
       audioinput: joinProductionOptions.audioinput,
-      audiooutput: audiooutput || "",
+      audiooutput,
       isProgramUser: joinProductionOptions.isProgramUser,
       productionId: paramProductionId || "",
       lineId: paramLineId || undefined,
@@ -103,6 +103,7 @@ export const SelectDevices = ({
           id,
           updates: {
             joinProductionOptions: newJoinProductionOptions,
+            audiooutput: payload.audiooutput,
             mediaStreamInput: null,
             dominantSpeaker: null,
             audioLevelAboveThreshold: false,

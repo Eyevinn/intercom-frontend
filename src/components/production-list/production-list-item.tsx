@@ -98,7 +98,6 @@ export const ProductionsListItem = ({
         lineId,
         username: userSettings.username,
         audioinput: userSettings?.audioinput,
-        audiooutput: userSettings?.audiooutput,
         lineUsedForProgramOutput:
           getLineByLineId(lineId)?.programOutputLine || false,
         isProgramUser,
@@ -112,6 +111,7 @@ export const ProductionsListItem = ({
           id: uuid,
           callState: {
             joinProductionOptions: payload,
+            audiooutput: userSettings?.audiooutput,
             mediaStreamInput: null,
             dominantSpeaker: null,
             audioLevelAboveThreshold: false,
