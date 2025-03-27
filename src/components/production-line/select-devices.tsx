@@ -14,19 +14,25 @@ import { ReloadDevicesButton } from "../reload-devices-button.tsx/reload-devices
 import { DeviceButtonWrapper } from "./production-line-components";
 import { TJoinProductionOptions, TLine } from "./types";
 
-type FormValues = TJoinProductionOptions;
+type FormValues = TJoinProductionOptions & {
+  audiooutput: string;
+};
 
 export const SelectDevices = ({
   line,
   joinProductionOptions,
+  audiooutput,
   id,
+  audioElements,
   resetAudioInput,
   muteInput,
   setConnectionActive,
 }: {
   line: TLine | null;
   joinProductionOptions: TJoinProductionOptions;
+  audiooutput: string | undefined;
   id: string;
+  audioElements: HTMLAudioElement[];
   resetAudioInput: () => void;
   muteInput: () => void;
   setConnectionActive: () => void;
@@ -42,7 +48,7 @@ export const SelectDevices = ({
     defaultValues: {
       username: "",
       audioinput: joinProductionOptions.audioinput,
-      audiooutput: joinProductionOptions.audiooutput,
+      audiooutput,
       isProgramUser: joinProductionOptions.isProgramUser,
       productionId: paramProductionId || "",
       lineId: paramLineId || undefined,
@@ -60,13 +66,25 @@ export const SelectDevices = ({
   });
   const audioInputTheSame =
     joinProductionOptions?.audioinput === watchedValues[0];
-  const audioOutputTheSame =
-    joinProductionOptions?.audiooutput === watchedValues[1];
+  const audioOutputTheSame = audiooutput === watchedValues[1];
   const audioNotChanged = audioInputTheSame && audioOutputTheSame;
 
   // Reset connection and re-connect to production-line
   const onSubmit: SubmitHandler<FormValues> = async (payload) => {
-    if (joinProductionOptions && !audioNotChanged) {
+    if (joinProductionOptions && audioInputTheSame && !audioOutputTheSame) {
+      audioElements.forEach((audioElement) => {
+        audioElement.setSinkId(payload.audiooutput || "");
+      });
+      dispatch({
+        type: "UPDATE_CALL",
+        payload: {
+          id,
+          updates: {
+            audiooutput: payload.audiooutput,
+          },
+        },
+      });
+    } else if (joinProductionOptions && !audioNotChanged) {
       setConnectionActive();
       resetAudioInput();
       muteInput();
@@ -85,6 +103,7 @@ export const SelectDevices = ({
           id,
           updates: {
             joinProductionOptions: newJoinProductionOptions,
+            audiooutput: payload.audiooutput,
             mediaStreamInput: null,
             dominantSpeaker: null,
             audioLevelAboveThreshold: false,
@@ -96,6 +115,7 @@ export const SelectDevices = ({
       });
     }
   };
+
   return (
     <FormContainer>
       {devices &&
@@ -128,7 +148,7 @@ export const SelectDevices = ({
             <FormSelect
               // eslint-disable-next-line
               {...register(`audiooutput`)}
-              defaultValue={joinProductionOptions.audiooutput}
+              defaultValue={audiooutput || ""}
             >
               {devices.output.map((device) => (
                 <option key={device.deviceId} value={device.deviceId}>

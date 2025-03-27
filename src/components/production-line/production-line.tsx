@@ -75,6 +75,7 @@ export const ProductionLine = ({
   const [open, setOpen] = useState<boolean>(!isMobile);
   const {
     joinProductionOptions,
+    audiooutput,
     dominantSpeaker,
     audioLevelAboveThreshold,
     connectionState,
@@ -89,7 +90,6 @@ export const ProductionLine = ({
 
   const [inputAudioStream, resetAudioInput] = useAudioInput({
     audioInputId: joinProductionOptions?.audioinput ?? null,
-    audioOutputId: joinProductionOptions?.audiooutput ?? null,
   });
 
   const line = useLinePolling({ callId: id, joinProductionOptions });
@@ -357,6 +357,7 @@ export const ProductionLine = ({
       {connectionActive && (
         <SymphonyRtcConnectionComponent
           joinProductionOptions={joinProductionOptions}
+          audiooutput={audiooutput || undefined}
           inputAudioStream={inputAudioStream}
           callId={id}
           dispatch={dispatch}
@@ -420,7 +421,9 @@ export const ProductionLine = ({
                         <SelectDevices
                           line={line}
                           joinProductionOptions={joinProductionOptions}
+                          audiooutput={audiooutput || undefined}
                           id={id}
+                          audioElements={audioElements || []}
                           resetAudioInput={resetAudioInput}
                           muteInput={() => muteInput(true)}
                           setConnectionActive={() => setConnectionActive(false)}
