@@ -134,13 +134,29 @@ export const LoaderWrapper = styled.div`
   height: 2rem;
 `;
 
-export const CallWrapper = styled.div`
+export const CallWrapper = styled.div<{ isSomeoneSpeaking: boolean }>`
   display: flex;
   justify-content: center;
   align-items: center;
   flex-direction: column;
   margin: 0 0 2rem 0;
   min-width: 20rem;
+  background-color: transparent;
+  border-radius: 0.5rem;
+  animation: ${({ isSomeoneSpeaking }) =>
+    isSomeoneSpeaking ? "pulsate 1.5s ease-in-out infinite" : "none"};
+
+  @keyframes pulsate {
+    0% {
+      background-color: transparent;
+    }
+    50% {
+      background-color: rgba(255, 0, 68, 0.23);
+    }
+    100% {
+      background-color: transparent;
+    }
+  }
 `;
 
 export const CallContainer = styled(ProductionItemWrapper)<{

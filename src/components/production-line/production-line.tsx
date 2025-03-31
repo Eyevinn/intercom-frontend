@@ -41,6 +41,7 @@ import { useLinePolling } from "./use-line-polling.ts";
 import { useMuteInput } from "./use-mute-input.tsx";
 import { UserControls } from "./user-controls.tsx";
 import { UserList } from "./user-list.tsx";
+import { useActiveParticipant } from "./use-active-participant.tsx";
 
 type TProductionLine = {
   id: string;
@@ -87,6 +88,7 @@ export const ProductionLine = ({
   } = callState;
 
   const increaseVolumeTimeoutRef = useRef<number | null>(null);
+  const { activeParticipant } = useActiveParticipant(audioLevelAboveThreshold);
 
   const [inputAudioStream, resetAudioInput] = useAudioInput({
     audioInputId: joinProductionOptions?.audioinput ?? null,
@@ -96,6 +98,9 @@ export const ProductionLine = ({
   const isProgramOutputLine = line && line.programOutputLine;
   const isProgramUser =
     joinProductionOptions && joinProductionOptions.isProgramUser;
+  const isSelfDominantSpeaker =
+    line?.participants.find((p) => p.sessionId === callState.sessionId)
+      ?.endpointId === dominantSpeaker;
 
   const { production, error: fetchProductionError } = useFetchProduction(
     joinProductionOptions
@@ -339,7 +344,11 @@ export const ProductionLine = ({
   // TODO detect if browser back button is pressed and run exit();
 
   return (
-    <CallWrapper>
+    <CallWrapper
+      isSomeoneSpeaking={
+        !isProgramOutputLine && !isSelfDominantSpeaker && activeParticipant
+      }
+    >
       {joinProductionOptions &&
         loading &&
         (!connectionError ? (
