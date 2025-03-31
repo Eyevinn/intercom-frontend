@@ -20,6 +20,7 @@ export const useMuteInput = ({
     (mute: boolean) => {
       if (inputAudioStream && inputAudioStream !== "no-device") {
         inputAudioStream.getTracks().forEach((t) => {
+          console.log("t.enabled:", t.enabled, ". mute:", mute);
           if (isProgramOutputLine && !isProgramUser) {
             // eslint-disable-next-line no-param-reassign
             t.enabled = false;

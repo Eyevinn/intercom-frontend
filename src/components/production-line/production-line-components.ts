@@ -141,6 +141,7 @@ export const CallWrapper = styled.div`
   flex-direction: column;
   margin: 0 0 2rem 0;
   min-width: 20rem;
+  background-color: red;
 `;
 
 export const CallContainer = styled(ProductionItemWrapper)<{

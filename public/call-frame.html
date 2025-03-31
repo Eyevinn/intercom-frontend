@@ -1,0 +1,46 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Call Frame</title>
+  <script>
+    // Extract query parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const callId = urlParams.get('callId');
+    const optionsJson = urlParams.get('options');
+    let joinProductionOptions = {};
+    
+    try {
+      if (optionsJson) {
+        joinProductionOptions = JSON.parse(decodeURIComponent(optionsJson));
+      }
+    } catch (e) {
+      console.error('Failed to parse options:', e);
+    }
+    
+    // Make these available to the React app
+    window.CALL_FRAME_DATA = {
+      callId,
+      joinProductionOptions
+    };
+    
+    // Listen for messages from parent
+    window.addEventListener('message', (event) => {
+      if (event.data.type === 'UPDATE_OPTIONS') {
+        // Update options and notify the React app
+        const customEvent = new CustomEvent('optionsUpdate', {
+          detail: event.data.options
+        });
+        window.dispatchEvent(customEvent);
+      }
+    });
+  </script>
+</head>
+<body>
+  <div id="root"></div>
+
+  
+  <script src="/call-frame-bundle.js"></script>
+</body>
+</html>  -->

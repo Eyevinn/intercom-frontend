@@ -56,6 +56,8 @@ export const Header: FC = () => {
             type: "REMOVE_CALL",
             payload: { id: callId },
           });
+          // Remove from localStorage
+          localStorage.removeItem(`callState-${callId}`);
         }
       });
     }

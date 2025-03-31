@@ -1,0 +1,33 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Call Frame</title>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="module">
+    // Extract query parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const callId = urlParams.get('callId');
+    const optionsJson = urlParams.get('options');
+    let joinProductionOptions = {};
+    
+    try {
+      if (optionsJson) {
+        joinProductionOptions = JSON.parse(decodeURIComponent(optionsJson));
+      }
+    } catch (e) {
+      console.error('Failed to parse options:', e);
+    }
+    
+    // Make these available to the React app
+    window.CALL_FRAME_DATA = {
+      callId,
+      joinProductionOptions
+    };
+  </script>
+  <script type="module" src="/src/call-frame-entry.tsx"></script>
+</body>
+</html>  -->

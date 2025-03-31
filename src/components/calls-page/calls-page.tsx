@@ -10,10 +10,11 @@ import { VerifyDecision } from "../verify-decision/verify-decision";
 import { ModalConfirmationText } from "../modal/modal-confirmation-text";
 import { MicMuted, MicUnmuted } from "../../assets/icons/icon";
 import { useGlobalHotkeys } from "../production-line/use-line-hotkeys";
-import { ProductionLine } from "../production-line/production-line";
+// import { ProductionLine } from "../production-line/production-line";
 import { PageHeader } from "../page-layout/page-header";
 import { isMobile } from "../../bowser";
 import { useAudioCue } from "../production-line/use-audio-cue";
+// import { ProductionLine } from "../production-line/production-line";
 
 const Container = styled.div`
   display: flex;
@@ -77,6 +78,9 @@ export const CallsPage = () => {
   const [{ calls, selectedProductionId }, dispatch] = useGlobalState();
   const [shouldReduceVolume, setShouldReduceVolume] = useState(false);
   const [isSomeoneSpeaking, setIsSomeoneSpeaking] = useState(false);
+  const [iframeHeights, setIframeHeights] = useState<Record<string, number>>(
+    {}
+  );
 
   const { productionId: paramProductionId, lineId: paramLineId } = useParams();
   const navigate = useNavigate();
@@ -177,6 +181,77 @@ export const CallsPage = () => {
     }
   };
 
+  useEffect(() => {
+    // When calls state changes, update localStorage for each call
+    Object.entries(calls).forEach(([callId, callState]) => {
+      localStorage.setItem(`callState-${callId}`, JSON.stringify(callState));
+    });
+
+    // Listen for messages from iframes
+    const handleMessage = (event: MessageEvent) => {
+      if (event.origin !== window.location.origin) return;
+
+      const { type, data } = event.data;
+
+      if (type === "RTC_STATE_UPDATE" && data.callId) {
+        console.log(
+          `[CallsPage] Received RTC state update from iframe for call ${data.callId}`
+        );
+
+        // Update the global state with the connection state from the iframe
+        dispatch({
+          type: "UPDATE_CALL",
+          payload: {
+            id: data.callId,
+            updates: {
+              connectionState: data.connectionState,
+              audioElements: data.audioElements,
+              sessionId: data.sessionId,
+            },
+          },
+        });
+      }
+
+      if (type === "IFRAME_EXIT" && data.callId) {
+        console.log(
+          `[CallsPage] Iframe requested exit for call ${data.callId}`
+        );
+
+        // Remove the call from the global state
+        dispatch({
+          type: "REMOVE_CALL",
+          payload: { id: data.callId },
+        });
+
+        // Remove from localStorage
+        localStorage.removeItem(`callState-${data.callId}`);
+
+        if (isSingleCall) {
+          navigate("/");
+        }
+
+        // The iframe will be removed from the DOM when the calls state updates
+        // since we're mapping over Object.entries(calls) to render the iframes
+      }
+
+      if (type === "IFRAME_RESIZE" && data.callId && data.height) {
+        console.log(
+          `[CallsPage] Received resize request for call ${data.callId}: ${data.height}px`
+        );
+        setIframeHeights((prev) => ({
+          ...prev,
+          [data.callId]: data.height,
+        }));
+      }
+    };
+
+    window.addEventListener("message", handleMessage);
+
+    return () => {
+      window.removeEventListener("message", handleMessage);
+    };
+  }, [calls, dispatch, isSingleCall, navigate]);
+
   return (
     <>
       <PageHeader
@@ -247,21 +322,49 @@ export const CallsPage = () => {
           )}
           {Object.entries(calls)
             .toReversed()
-            .map(
-              ([callId, callState]) =>
-                callId &&
-                callState.joinProductionOptions && (
-                  <ProductionLine
-                    key={callId}
-                    id={callId}
-                    shouldReduceVolume={shouldReduceVolume}
-                    callState={callState}
-                    isSingleCall={isSingleCall}
-                    customGlobalMute={customGlobalMute}
-                    masterInputMute={isMasterInputMuted}
-                  />
-                )
-            )}
+            // .map(
+            //   ([callId, callState]) =>
+            //     callId &&
+            //     callState.joinProductionOptions && (
+            //       <ProductionLine
+            //         key={callId}
+            //         id={callId}
+            //         shouldReduceVolume={shouldReduceVolume}
+            //         callState={callState}
+            //         isSingleCall={isSingleCall}
+            //         customGlobalMute={customGlobalMute}
+            //         masterInputMute={isMasterInputMuted}
+            //       />
+            //     )
+            // )
+            .map(([callId, callState]) => {
+              if (!callId || !callState.joinProductionOptions) return null;
+
+              // ✅ Save callState to localStorage before rendering the iframe
+              localStorage.setItem(
+                `callState-${callId}`,
+                JSON.stringify(callState)
+              );
+
+              console.log(`callState-${callId}`, JSON.stringify(callState));
+
+              return (
+                <iframe
+                  key={callId}
+                  src={`/call/${callId}`}
+                  style={{
+                    width: "fit-content",
+                    height: iframeHeights[callId]
+                      ? `${iframeHeights[callId]}px`
+                      : "500px", // Default height until we get a message
+                    border: "none",
+                    overflow: "hidden",
+                  }}
+                  title={`Call-${callId}`}
+                  allow="microphone; camera; autoplay; speaker-selection"
+                />
+              );
+            })}
         </CallsContainer>
       </Container>
     </>

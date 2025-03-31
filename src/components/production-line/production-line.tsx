@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { isMobile, isTablet } from "../../bowser.ts";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { CallState } from "../../global-state/types.ts";
@@ -31,7 +31,6 @@ import {
 } from "./production-line-components.ts";
 import { SelectDevices } from "./select-devices.tsx";
 import { ShareLineButton } from "./share-line-button.tsx";
-import { SymphonyRtcConnectionComponent } from "./symphony-rtc-connection-component.tsx";
 import { useAudioCue } from "./use-audio-cue.ts";
 import { useAudioInput } from "./use-audio-input.ts";
 import { useCheckBadLineData } from "./use-check-bad-line-data.ts";
@@ -41,28 +40,28 @@ import { useLinePolling } from "./use-line-polling.ts";
 import { useMuteInput } from "./use-mute-input.tsx";
 import { UserControls } from "./user-controls.tsx";
 import { UserList } from "./user-list.tsx";
+// import { useCallState } from '../../state/call-state';
+// import IframeCall from '../iframe-call';
 
 type TProductionLine = {
   id: string;
   callState: CallState;
-  isSingleCall: boolean;
   customGlobalMute: string;
   masterInputMute: boolean;
   shouldReduceVolume: boolean;
+  setConnectionActive: () => void;
 };
 
 export const ProductionLine = ({
   id,
   callState,
-  isSingleCall,
   customGlobalMute,
   masterInputMute,
   shouldReduceVolume,
+  setConnectionActive,
 }: TProductionLine) => {
   const { productionId: paramProductionId, lineId: paramLineId } = useParams();
   const [, dispatch] = useGlobalState();
-  const navigate = useNavigate();
-  const [connectionActive, setConnectionActive] = useState(true);
   const [isInputMuted, setIsInputMuted] = useState(true);
   const [isOutputMuted, setIsOutputMuted] = useState(false);
   const [confirmExitModalOpen, setConfirmExitModalOpen] = useState(false);
@@ -87,6 +86,10 @@ export const ProductionLine = ({
   } = callState;
 
   const increaseVolumeTimeoutRef = useRef<number | null>(null);
+
+  // useEffect(() => {
+  //   console.log("production line connectionState", connectionState);
+  // }, [connectionState]);
 
   const [inputAudioStream, resetAudioInput] = useAudioInput({
     audioInputId: joinProductionOptions?.audioinput ?? null,
@@ -208,17 +211,28 @@ export const ProductionLine = ({
   const { playEnterSound, playExitSound } = useAudioCue();
 
   const exit = useCallback(() => {
-    setConnectionActive(false);
+    setConnectionActive();
     playExitSound();
-    dispatch({
-      type: "REMOVE_CALL",
-      payload: { id },
-    });
+    // dispatch({
+    //   type: "REMOVE_CALL",
+    //   payload: { id },
+    // });
 
-    if (isSingleCall) {
-      navigate("/");
+    // If we're in an iframe, notify the parent window that we're exiting
+    if (window.parent !== window) {
+      window.parent.postMessage(
+        {
+          type: "IFRAME_EXIT",
+          data: { callId: id },
+        },
+        "*"
+      );
     }
-  }, [dispatch, id, playExitSound, isSingleCall, navigate]);
+
+    // if (isSingleCall) {
+    //   navigate("/");
+    // }
+  }, [id, playExitSound, setConnectionActive]);
 
   useLineHotkeys({
     muteInput,
@@ -227,11 +241,11 @@ export const ProductionLine = ({
     customKeyPress: savedHotkeys?.pushToTalkHotkey || "t",
   });
 
-  useEffect(() => {
-    if (joinProductionOptions) {
-      setConnectionActive(true);
-    }
-  }, [joinProductionOptions]);
+  // useEffect(() => {
+  //   if (joinProductionOptions) {
+  //     setConnectionActive(true);
+  //   }
+  // }, [joinProductionOptions]);
 
   useEffect(() => {
     if (
@@ -338,6 +352,10 @@ export const ProductionLine = ({
 
   // TODO detect if browser back button is pressed and run exit();
 
+  useEffect(() => {
+    console.log("production line mounted");
+  }, []);
+
   return (
     <CallWrapper>
       {joinProductionOptions &&
@@ -354,7 +372,7 @@ export const ProductionLine = ({
             />
           </ConnectionErrorWrapper>
         ))}
-      {connectionActive && (
+      {/* {connectionActive && (
         <SymphonyRtcConnectionComponent
           joinProductionOptions={joinProductionOptions}
           audiooutput={audiooutput || undefined}
@@ -362,7 +380,7 @@ export const ProductionLine = ({
           callId={id}
           dispatch={dispatch}
         />
-      )}
+      )} */}
       {!connectionError && !loading && (
         <CallContainer isProgramLine={line?.programOutputLine}>
           {line && (
@@ -426,7 +444,7 @@ export const ProductionLine = ({
                           audioElements={audioElements || []}
                           resetAudioInput={resetAudioInput}
                           muteInput={() => muteInput(true)}
-                          setConnectionActive={() => setConnectionActive(false)}
+                          setConnectionActive={() => setConnectionActive()}
                         />
                       </CollapsableSection>
                       {inputAudioStream &&

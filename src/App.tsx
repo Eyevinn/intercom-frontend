@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import styled from "@emotion/styled";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ErrorPage } from "./components/router-error.tsx";
 import { useDevicePermissions } from "./hooks/use-device-permission.ts";
 import { LandingPage } from "./components/landing-page/landing-page.tsx";
@@ -21,6 +21,7 @@ import { Header } from "./components/header.tsx";
 import { useLocalUserSettings } from "./hooks/use-local-user-settings.ts";
 import { ManageProductionsPage } from "./components/manage-productions-page/manage-productions-page.tsx";
 import { CreateProductionPage } from "./components/create-production/create-production-page.tsx";
+import { ProductionLineWrapper } from "./components/production-line/production-line-wrapper.tsx";
 
 const DisplayBoxPositioningContainer = styled(FlexContainer)`
   justify-content: center;
@@ -53,6 +54,12 @@ const App = () => {
   const initializedGlobalState = useInitializeGlobalStateReducer();
   const [{ devices, userSettings }, dispatch] = initializedGlobalState;
   const [apiError, setApiError] = useState(false);
+  const [isInIframe, setIsInIframe] = useState(false);
+
+  // Check if we're in an iframe
+  useEffect(() => {
+    setIsInIframe(window !== window.parent);
+  }, []);
 
   useFetchDevices({
     dispatch,
@@ -64,10 +71,12 @@ const App = () => {
   return (
     <GlobalStateContext.Provider value={initializedGlobalState}>
       <BrowserRouter>
-        <Header />
-        <ErrorBanner />
+        {/* Only render the Header if we're not in an iframe */}
+        {!isInIframe && <Header />}
 
-        {!isValidBrowser && !unsupportedContinue && (
+        {!isInIframe && <ErrorBanner />}
+
+        {!isValidBrowser && !unsupportedContinue && !isInIframe && (
           <DisplayBoxPositioningContainer>
             <DisplayWarning
               text={
@@ -89,7 +98,7 @@ const App = () => {
         )}
         {continueToApp && (
           <>
-            {denied && (
+            {denied && !isInIframe && (
               <DisplayBoxPositioningContainer>
                 <DisplayWarning
                   text="To use this application it has to be granted access to audio devices. Reload browser and/or reset permissions to try
@@ -98,7 +107,7 @@ const App = () => {
                 />
               </DisplayBoxPositioningContainer>
             )}
-            {!permission && !denied && (
+            {!permission && !denied && !isInIframe && (
               <DisplayBoxPositioningContainer>
                 <DisplayWarning
                   text="To use this application it has to be granted access to audio devices."
@@ -106,7 +115,7 @@ const App = () => {
                 />
               </DisplayBoxPositioningContainer>
             )}
-            {apiError && (
+            {apiError && !isInIframe && (
               <DisplayBoxPositioningContainer>
                 <DisplayWarning
                   text="The server is not available. Reload page to try again."
@@ -142,6 +151,10 @@ const App = () => {
                     path="/production-calls/production/:productionId/line/:lineId"
                     element={<CallsPage />}
                     errorElement={<ErrorPage />}
+                  />
+                  <Route
+                    path="/call/:callId"
+                    element={<ProductionLineWrapper />}
                   />
                   <Route path="*" element={<NotFound />} />
                 </>

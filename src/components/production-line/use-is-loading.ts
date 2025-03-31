@@ -9,6 +9,7 @@ export const useIsLoading = ({ connectionState }: TProps) => {
   const [connectionError, setConnectionError] = useState<boolean>(false);
 
   useEffect(() => {
+    console.log("connectionState", connectionState);
     if (connectionState === "connected") {
       setLoading(false);
     } else if (connectionState === "failed") {

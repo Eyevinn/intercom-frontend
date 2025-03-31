@@ -131,6 +131,7 @@ export const ProductionsListItem = ({
           },
         },
       });
+      console.log("payload", userSettings?.audiooutput, payload);
       dispatch({
         type: "SELECT_PRODUCTION_ID",
         payload: payload.productionId,
@@ -237,6 +238,7 @@ export const ProductionsListItem = ({
                       setModalLineId(l.id);
                       setIsModalOpen(true);
                     } else {
+                      console.log("l", l);
                       goToProduction(l.id);
                     }
                   }}

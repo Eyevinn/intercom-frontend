@@ -12,6 +12,7 @@ type SymphonyRtcConnectionComponentProps = {
   inputAudioStream: TUseAudioInputValues;
   callId: string;
   dispatch: React.Dispatch<TGlobalStateAction>;
+  isIframe?: boolean;
 };
 
 export const SymphonyRtcConnectionComponent = ({
@@ -20,6 +21,7 @@ export const SymphonyRtcConnectionComponent = ({
   inputAudioStream,
   callId,
   dispatch,
+  isIframe = false,
 }: SymphonyRtcConnectionComponentProps) => {
   const { sessionId, sdpOffer } = useEstablishSession({
     joinProductionOptions,
@@ -38,7 +40,11 @@ export const SymphonyRtcConnectionComponent = ({
 
   useHeartbeat({ sessionId });
 
+  // Update local state
   useEffect(() => {
+    console.log("[SymphonyRtcConnection] connectionState:", connectionState);
+
+    // Update local state
     dispatch({
       type: "UPDATE_CALL",
       payload: {
@@ -48,31 +54,54 @@ export const SymphonyRtcConnectionComponent = ({
         },
       },
     });
-  }, [callId, connectionState, dispatch]);
 
-  useEffect(() => {
-    dispatch({
-      type: "UPDATE_CALL",
-      payload: {
-        id: callId,
-        updates: {
-          audioElements,
+    // If we're in an iframe, send update to parent
+    if (isIframe) {
+      window.parent.postMessage(
+        {
+          type: "RTC_STATE_UPDATE",
+          data: {
+            callId,
+            connectionState,
+            // Don't send audioElements as they contain DOM elements
+            sessionId,
+          },
         },
-      },
-    });
-  }, [audioElements, callId, dispatch]);
+        "*"
+      );
+    }
+  }, [callId, connectionState, sessionId, dispatch, isIframe]);
 
+  // Update audioElements in state separately
   useEffect(() => {
-    dispatch({
-      type: "UPDATE_CALL",
-      payload: {
-        id: callId,
-        updates: {
-          sessionId,
+    if (audioElements) {
+      dispatch({
+        type: "UPDATE_CALL",
+        payload: {
+          id: callId,
+          updates: {
+            audioElements,
+          },
         },
-      },
-    });
-  }, [sessionId, callId, dispatch]);
+      });
+
+      // For iframe, we can't send the actual DOM elements
+      // Instead, we could send metadata about the audio elements if needed
+      if (isIframe) {
+        // Send only the count or other serializable metadata
+        window.parent.postMessage(
+          {
+            type: "AUDIO_ELEMENTS_UPDATE",
+            data: {
+              callId,
+              audioElementsCount: audioElements.length,
+            },
+          },
+          "*"
+        );
+      }
+    }
+  }, [audioElements, callId, dispatch, isIframe]);
 
   return null;
 };
