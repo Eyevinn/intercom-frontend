@@ -1,17 +1,22 @@
-import { useCallback, useEffect, useState, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useNavigate, useParams } from "react-router-dom";
 import { isBrowserFirefox, isMobile, isTablet } from "../../bowser.ts";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { CallState } from "../../global-state/types.ts";
+import { useWebSocket } from "../../hooks/use-websocket.ts";
+import logger from "../../utils/logger.ts";
+import { ConnectToWsModal } from "../calls-page/connect-to-modal.tsx";
 import { DisplayWarning } from "../display-box.tsx";
 import { FlexContainer } from "../generic-components.ts";
+import { PrimaryButton } from "../landing-page/form-elements.tsx";
 import { useFetchProduction } from "../landing-page/use-fetch-production.ts";
 import { Spinner } from "../loader/loader.tsx";
 import {
   InnerDiv,
   ProductionLines,
 } from "../production-list/production-list-components.ts";
+import { ConfirmationModal } from "../verify-decision/confirmation-modal.tsx";
 import { CallHeaderComponent } from "./call-header.tsx";
 import { CollapsableSection } from "./collapsable-section.tsx";
 import { ExitCallButton } from "./exit-call-button.tsx";
@@ -30,21 +35,19 @@ import {
 import { SelectDevices } from "./select-devices.tsx";
 import { ShareLineButton } from "./share-line-button.tsx";
 import { SymphonyRtcConnectionComponent } from "./symphony-rtc-connection-component.tsx";
+import { useActiveParticipant } from "./use-active-participant.tsx";
 import { useAudioCue } from "./use-audio-cue.ts";
 import { useAudioInput } from "./use-audio-input.ts";
 import { useCheckBadLineData } from "./use-check-bad-line-data.ts";
 import { useIsLoading } from "./use-is-loading.ts";
 import { useLineHotkeys, useSpeakerHotkeys } from "./use-line-hotkeys.ts";
 import { useLinePolling } from "./use-line-polling.ts";
+import { useMasterInputMute } from "./use-master-input-mute.ts";
 import { useMuteInput } from "./use-mute-input.tsx";
+import { useUpdateCallDevice } from "./use-update-call-device.tsx";
+import { useVolumeReducer } from "./use-volume-reducer.tsx";
 import { UserControls } from "./user-controls.tsx";
 import { UserList } from "./user-list.tsx";
-import { useActiveParticipant } from "./use-active-participant.tsx";
-import { useVolumeReducer } from "./use-volume-reducer.tsx";
-import { useMasterInputMute } from "./use-master-input-mute.ts";
-import logger from "../../utils/logger.ts";
-import { useUpdateCallDevice } from "./use-update-call-device.tsx";
-import { ConfirmationModal } from "../verify-decision/confirmation-modal.tsx";
 
 type TProductionLine = {
   id: string;
@@ -77,6 +80,8 @@ export const ProductionLine = ({
   const [userId, setUserId] = useState("");
   const [userName, setUserName] = useState("");
   const [open, setOpen] = useState<boolean>(!isMobile);
+  const [connectToWsModalOpen, setConnectToWsModalOpen] =
+    useState<boolean>(false);
   const {
     joinProductionOptions,
     audiooutput,
@@ -92,6 +97,63 @@ export const ProductionLine = ({
   const { isActiveParticipant } = useActiveParticipant(
     audioLevelAboveThreshold
   );
+
+  const muteOutput = useCallback(() => {
+    if (!audioElements) return;
+
+    audioElements.forEach((singleElement: HTMLAudioElement) => {
+      // eslint-disable-next-line no-param-reassign
+      singleElement.muted = !isOutputMuted;
+    });
+    setIsOutputMuted(!isOutputMuted);
+  }, [audioElements, isOutputMuted]);
+
+  const { connect } = useWebSocket({
+    onAction: (action) => {
+      console.log("Received action from WebSocket:", action);
+      switch (action) {
+        case "toggle_input_mute":
+          // Toggle input mute
+          console.log("Should toggle input mute");
+          setIsInputMuted((prev) => !prev);
+          break;
+        case "toggle_output_mute":
+          // Toggle output mute
+          console.log("Should toggle output mute");
+          muteOutput();
+          break;
+        case "increase_volume": {
+          // Increase volume
+          console.log("Should increase volume");
+          const newValue = Math.min(value + 0.05, 1);
+          setValue(newValue);
+          audioElements?.forEach((audioElement) => {
+            // eslint-disable-next-line no-param-reassign
+            audioElement.volume = newValue;
+          });
+          break;
+        }
+        case "decrease_volume": {
+          // Decrease volume
+          console.log("Should decrease volume");
+          const decreasedValue = Math.max(value - 0.05, 0);
+          setValue(decreasedValue);
+          audioElements?.forEach((audioElement) => {
+            // eslint-disable-next-line no-param-reassign
+            audioElement.volume = decreasedValue;
+          });
+          break;
+        }
+        case "push_to_talk":
+          // Push to talk
+          console.log("Should push to talk");
+          break;
+        default:
+          console.log("Unknown action:", action);
+          break;
+      }
+    },
+  });
 
   const [inputAudioStream, audioInputError, resetAudioInput] = useAudioInput({
     audioInputId: joinProductionOptions?.audioinput ?? null,
@@ -261,16 +323,6 @@ export const ProductionLine = ({
     }
   }, [connectionState, playEnterSound]);
 
-  const muteOutput = useCallback(() => {
-    if (!audioElements) return;
-
-    audioElements.forEach((singleElement: HTMLAudioElement) => {
-      // eslint-disable-next-line no-param-reassign
-      singleElement.muted = !isOutputMuted;
-    });
-    setIsOutputMuted(!isOutputMuted);
-  }, [audioElements, isOutputMuted]);
-
   useSpeakerHotkeys({
     muteOutput,
     isOutputMuted,
@@ -326,6 +378,11 @@ export const ProductionLine = ({
     }
   };
 
+  const handleConnect = (url: string) => {
+    connect(url);
+    setConnectToWsModalOpen(false);
+  };
+
   // TODO detect if browser back button is pressed and run exit();
 
   return (
@@ -334,6 +391,9 @@ export const ProductionLine = ({
         !isProgramOutputLine && !isSelfDominantSpeaker && isActiveParticipant
       }
     >
+      <PrimaryButton onClick={() => setConnectToWsModalOpen(true)}>
+        Connect to websocket
+      </PrimaryButton>
       {joinProductionOptions &&
         loading &&
         (!connectionError ? (
@@ -499,6 +559,11 @@ export const ProductionLine = ({
                   lineId={line?.id}
                 />
               )}
+              <ConnectToWsModal
+                isOpen={connectToWsModalOpen}
+                handleConnect={handleConnect}
+                onClose={() => setConnectToWsModalOpen(false)}
+              />
             </InnerDiv>
           </ProductionLines>
         </CallContainer>
