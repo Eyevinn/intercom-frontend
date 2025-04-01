@@ -3,19 +3,19 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useGlobalState } from "../../global-state/context-provider";
 import { JoinProduction } from "../landing-page/join-production";
+import { UserSettingsButton } from "../landing-page/user-settings-button";
 import { Modal } from "../modal/modal";
-import { useGlobalHotkeys } from "../production-line/use-line-hotkeys";
 import { PageHeader } from "../page-layout/page-header";
 import { useAudioCue } from "../production-line/use-audio-cue";
-import { usePreventPullToRefresh } from "./use-prevent-pull-to-refresh";
-import { UserSettingsButton } from "../landing-page/user-settings-button";
+import { useGlobalHotkeys } from "../production-line/use-line-hotkeys";
 import { UserSettings } from "../user-settings/user-settings";
-import { HeaderActions } from "./header-actions";
-import { useSpeakerDetection } from "./use-speaker-detection";
-import { ProductionLines } from "./production-lines";
-import { useGlobalMuteHotkey } from "./use-global-mute-hotkey";
-import { useCallsNavigation } from "./use-calls-navigation";
 import { ConfirmationModal } from "../verify-decision/confirmation-modal";
+import { HeaderActions } from "./header-actions";
+import { ProductionLines } from "./production-lines";
+import { useCallsNavigation } from "./use-calls-navigation";
+import { useGlobalMuteHotkey } from "./use-global-mute-hotkey";
+import { usePreventPullToRefresh } from "./use-prevent-pull-to-refresh";
+import { useSpeakerDetection } from "./use-speaker-detection";
 
 const Container = styled.div`
   display: flex;
