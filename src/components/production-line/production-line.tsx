@@ -4,8 +4,11 @@ import { useNavigate, useParams } from "react-router-dom";
 import { isMobile, isTablet } from "../../bowser.ts";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { CallState } from "../../global-state/types.ts";
+import { useWebSocket } from "../../hooks/use-websocket.ts";
+import { ConnectToWsModal } from "../calls-page/connect-to-modal.tsx";
 import { DisplayWarning } from "../display-box.tsx";
 import { FlexContainer } from "../generic-components.ts";
+import { PrimaryButton } from "../landing-page/form-elements.tsx";
 import { useFetchProduction } from "../landing-page/use-fetch-production.ts";
 import { Spinner } from "../loader/loader.tsx";
 import {
@@ -73,6 +76,8 @@ export const ProductionLine = ({
   const [userId, setUserId] = useState("");
   const [userName, setUserName] = useState("");
   const [open, setOpen] = useState<boolean>(!isMobile);
+  const [connectToWsModalOpen, setConnectToWsModalOpen] =
+    useState<boolean>(false);
   const {
     joinProductionOptions,
     audiooutput,
@@ -85,6 +90,63 @@ export const ProductionLine = ({
     dataChannel,
     isRemotelyMuted,
   } = callState;
+
+  const muteOutput = useCallback(() => {
+    if (!audioElements) return;
+
+    audioElements.forEach((singleElement: HTMLAudioElement) => {
+      // eslint-disable-next-line no-param-reassign
+      singleElement.muted = !isOutputMuted;
+    });
+    setIsOutputMuted(!isOutputMuted);
+  }, [audioElements, isOutputMuted]);
+
+  const { connect } = useWebSocket({
+    onAction: (action) => {
+      console.log("Received action from WebSocket:", action);
+      switch (action) {
+        case "toggle_input_mute":
+          // Toggle input mute
+          console.log("Should toggle input mute");
+          setIsInputMuted((prev) => !prev);
+          break;
+        case "toggle_output_mute":
+          // Toggle output mute
+          console.log("Should toggle output mute");
+          muteOutput();
+          break;
+        case "increase_volume": {
+          // Increase volume
+          console.log("Should increase volume");
+          const newValue = Math.min(value + 0.05, 1);
+          setValue(newValue);
+          audioElements?.forEach((audioElement) => {
+            // eslint-disable-next-line no-param-reassign
+            audioElement.volume = newValue;
+          });
+          break;
+        }
+        case "decrease_volume": {
+          // Decrease volume
+          console.log("Should decrease volume");
+          const decreasedValue = Math.max(value - 0.05, 0);
+          setValue(decreasedValue);
+          audioElements?.forEach((audioElement) => {
+            // eslint-disable-next-line no-param-reassign
+            audioElement.volume = decreasedValue;
+          });
+          break;
+        }
+        case "push_to_talk":
+          // Push to talk
+          console.log("Should push to talk");
+          break;
+        default:
+          console.log("Unknown action:", action);
+          break;
+      }
+    },
+  });
 
   const increaseVolumeTimeoutRef = useRef<number | null>(null);
 
@@ -266,20 +328,14 @@ export const ProductionLine = ({
   ]);
 
   useEffect(() => {
+    console.log("isOutputMuted", isOutputMuted);
+  }, [isOutputMuted]);
+
+  useEffect(() => {
     if (connectionState === "connected") {
       playEnterSound();
     }
   }, [connectionState, playEnterSound]);
-
-  const muteOutput = useCallback(() => {
-    if (!audioElements) return;
-
-    audioElements.forEach((singleElement: HTMLAudioElement) => {
-      // eslint-disable-next-line no-param-reassign
-      singleElement.muted = !isOutputMuted;
-    });
-    setIsOutputMuted(!isOutputMuted);
-  }, [audioElements, isOutputMuted]);
 
   useSpeakerHotkeys({
     muteOutput,
@@ -336,10 +392,18 @@ export const ProductionLine = ({
     }
   };
 
+  const handleConnect = (url: string) => {
+    connect(url);
+    setConnectToWsModalOpen(false);
+  };
+
   // TODO detect if browser back button is pressed and run exit();
 
   return (
     <CallWrapper>
+      <PrimaryButton onClick={() => setConnectToWsModalOpen(true)}>
+        Connect to websocket
+      </PrimaryButton>
       {joinProductionOptions &&
         loading &&
         (!connectionError ? (
@@ -492,6 +556,11 @@ export const ProductionLine = ({
                   lineId={line?.id}
                 />
               )}
+              <ConnectToWsModal
+                isOpen={connectToWsModalOpen}
+                handleConnect={handleConnect}
+                onClose={() => setConnectToWsModalOpen(false)}
+              />
             </InnerDiv>
           </ProductionLines>
         </CallContainer>

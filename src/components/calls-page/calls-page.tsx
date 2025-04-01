@@ -1,19 +1,19 @@
 import styled from "@emotion/styled";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useGlobalState } from "../../global-state/context-provider";
-import { JoinProduction } from "../landing-page/join-production";
-import { PrimaryButton, SecondaryButton } from "../landing-page/form-elements";
-import { DisplayContainerHeader } from "../landing-page/display-container-header";
-import { Modal } from "../modal/modal";
-import { VerifyDecision } from "../verify-decision/verify-decision";
-import { ModalConfirmationText } from "../modal/modal-confirmation-text";
 import { MicMuted, MicUnmuted } from "../../assets/icons/icon";
-import { useGlobalHotkeys } from "../production-line/use-line-hotkeys";
-import { ProductionLine } from "../production-line/production-line";
-import { PageHeader } from "../page-layout/page-header";
 import { isMobile } from "../../bowser";
+import { useGlobalState } from "../../global-state/context-provider";
+import { DisplayContainerHeader } from "../landing-page/display-container-header";
+import { PrimaryButton, SecondaryButton } from "../landing-page/form-elements";
+import { JoinProduction } from "../landing-page/join-production";
+import { Modal } from "../modal/modal";
+import { ModalConfirmationText } from "../modal/modal-confirmation-text";
+import { PageHeader } from "../page-layout/page-header";
+import { ProductionLine } from "../production-line/production-line";
 import { useAudioCue } from "../production-line/use-audio-cue";
+import { useGlobalHotkeys } from "../production-line/use-line-hotkeys";
+import { VerifyDecision } from "../verify-decision/verify-decision";
 
 const Container = styled.div`
   display: flex;
@@ -89,6 +89,14 @@ export const CallsPage = () => {
       callState.joinProductionOptions?.lineUsedForProgramOutput &&
       !callState.joinProductionOptions.isProgramUser
   );
+
+  // const {connect} = useWebSocket({onAction: (action) => {
+  //   switch (action) {
+  //     case 'toggle_global_mute':
+  //       setIsMasterInputMuted((prev) => !prev);
+  //       break;
+  //   }
+  // }})
 
   useEffect(() => {
     if (isProgramOutputAdded) {
