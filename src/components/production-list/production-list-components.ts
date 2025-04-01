@@ -167,7 +167,7 @@ export const DeleteButton = styled(SecondaryButton)`
 export const ManageButtons = styled.div`
   display: flex;
   justify-content: flex-end;
-  margin-top: 1rem;
+  margin: 1rem 0 1rem 0;
 `;
 
 export const AddLineSectionForm = styled.form`
