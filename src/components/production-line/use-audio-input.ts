@@ -1,20 +1,23 @@
-import { useCallback, useEffect, useState } from "react";
+import { Dispatch, useCallback, useEffect, useState } from "react";
 import { noop } from "../../helpers";
 import { TJoinProductionOptions } from "./types.ts";
+import { TGlobalStateAction } from "../../global-state/global-state-actions.ts";
 
 type TGetMediaDevicesOptions = {
   audioInputId: TJoinProductionOptions["audioinput"] | null;
+  dispatch: Dispatch<TGlobalStateAction>;
 };
 
 export type TUseAudioInputValues = MediaStream | "no-device" | null;
 
 type TUseAudioInput = (
   options: TGetMediaDevicesOptions
-) => [TUseAudioInputValues, () => void];
+) => [TUseAudioInputValues, boolean, () => void];
 
 // A hook for fetching the user selected audio input as a MediaStream
-export const useAudioInput: TUseAudioInput = ({ audioInputId }) => {
+export const useAudioInput: TUseAudioInput = ({ audioInputId, dispatch }) => {
   const [audioInput, setAudioInput] = useState<TUseAudioInputValues>(null);
+  const [audioInputError, setAudioInputError] = useState<boolean>(false);
 
   useEffect(() => {
     let aborted = false;
@@ -45,13 +48,22 @@ export const useAudioInput: TUseAudioInput = ({ audioInputId }) => {
           });
 
           setAudioInput(stream);
+        })
+        .catch(() => {
+          setAudioInputError(true);
+          dispatch({
+            type: "ERROR",
+            payload: {
+              error: new Error("Selected devices are not available"),
+            },
+          });
         });
     });
 
     return () => {
       aborted = true;
     };
-  }, [audioInputId]);
+  }, [audioInputId, dispatch]);
 
   // Reset function to set audioInput to null
   const reset = useCallback(() => {
@@ -61,5 +73,5 @@ export const useAudioInput: TUseAudioInput = ({ audioInputId }) => {
     setAudioInput(null);
   }, [audioInput]);
 
-  return [audioInput, reset];
+  return [audioInput, audioInputError, reset];
 };

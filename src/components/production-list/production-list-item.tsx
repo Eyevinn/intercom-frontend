@@ -4,11 +4,8 @@ import { TBasicProductionResponse } from "../../api/api";
 import {
   ChevronDownIcon,
   ChevronUpIcon,
-  TVIcon,
-  UserIcon,
   UsersIcon,
 } from "../../assets/icons/icon";
-import { isMobile } from "../../bowser";
 import { useGlobalState } from "../../global-state/context-provider";
 import { AudioFeedModal } from "../audio-feed-modal/audio-feed-modal";
 import {
@@ -25,24 +22,20 @@ import {
   HeaderIcon,
   HeaderTexts,
   HeaderWrapper,
-  IconWrapper,
   Id,
   InnerDiv,
   Lineblock,
-  LineBlockParticipant,
-  LineBlockParticipants,
-  LineBlockTexts,
-  LineBlockTitle,
-  LineBlockTitleWrapper,
   ParticipantCount,
-  ParticipantExpandBtn,
-  PersonText,
   ProductionItemWrapper,
   ProductionLines,
   ProductionName,
   SpinnerWrapper,
 } from "./production-list-components";
 import { CopyButton } from "../copy-button/copy-button";
+import { LineBlock } from "./line-block";
+import { useFetchDevices } from "../../hooks/use-fetch-devices";
+import { useDevicePermissions } from "../../hooks/use-device-permission";
+import { isBrowserSafari } from "../../bowser";
 
 type ProductionsListItemProps = {
   production: TBasicProductionResponse;
@@ -60,9 +53,17 @@ export const ProductionsListItem = ({
   const [isProgramUser, setIsProgramUser] = useState<boolean>(false);
   const navigate = useNavigate();
 
-  const [showFullUserList, setShowFullUserList] = useState<boolean>(false);
   const [selectedLine, setSelectedLine] = useState<TLine | null>();
   const [lineRemoveId, setLineRemoveId] = useState<string>("");
+
+  const { permission } = useDevicePermissions({
+    continueToApp: true,
+  });
+
+  const [refresh] = useFetchDevices({
+    dispatch,
+    permission,
+  });
 
   const {
     loading: deleteLineLoading,
@@ -92,8 +93,29 @@ export const ProductionsListItem = ({
     return production.lines?.find((l) => l.id === lineId);
   };
 
-  const goToProduction = (lineId: string) => {
-    if (userSettings?.username) {
+  const goToProduction = async (lineId: string) => {
+    const updatedDevices = await refresh();
+
+    const inputDeviceExists = updatedDevices.input.some(
+      (device) => device.deviceId === userSettings?.audioinput
+    );
+
+    const outputDeviceExists = updatedDevices.output.some(
+      (device) => device.deviceId === userSettings?.audiooutput
+    );
+
+    if (!inputDeviceExists || (!outputDeviceExists && !isBrowserSafari)) {
+      dispatch({
+        type: "ERROR",
+        payload: {
+          error: new Error("Selected devices are not available"),
+        },
+      });
+      // Maybe show an error message or select default devices
+      navigate(
+        `/production-calls/production/${production.productionId}/line/${lineId}`
+      );
+    } else if (userSettings?.username) {
       const payload = {
         productionId: production.productionId,
         lineId,
@@ -169,60 +191,7 @@ export const ProductionsListItem = ({
               key={`line-${l.id}-${l.name}`}
               isProgramOutput={l.programOutputLine}
             >
-              <LineBlockTexts>
-                <LineBlockTitleWrapper>
-                  {l.programOutputLine && (
-                    <IconWrapper>
-                      <TVIcon />
-                    </IconWrapper>
-                  )}
-                  <LineBlockTitle title={l.name}>
-                    {l.name.length > 40 ? `${l.name.slice(0, 40)}...` : l.name}
-                  </LineBlockTitle>
-                  {l.participants.length > 4 && (
-                    <ParticipantExpandBtn
-                      type="button"
-                      title={showFullUserList ? "Hide users" : "Show all users"}
-                      onClick={() => setShowFullUserList(!showFullUserList)}
-                    >
-                      <PersonText>
-                        {showFullUserList ? "hide" : "show"}{" "}
-                        {isMobile ? "" : "full list"}
-                      </PersonText>
-                      {showFullUserList ? (
-                        <ChevronUpIcon />
-                      ) : (
-                        <ChevronDownIcon />
-                      )}
-                    </ParticipantExpandBtn>
-                  )}
-                  {managementMode && (
-                    <CopyButton
-                      url={`${window.location.origin}/production-calls/production/${production.productionId}/line/${l.id}`}
-                      className="production-list-item"
-                    />
-                  )}
-                </LineBlockTitleWrapper>
-                <LineBlockParticipants>
-                  {(showFullUserList
-                    ? l.participants
-                    : l.participants.slice(0, 4)
-                  ).map((participant) => (
-                    <LineBlockParticipant
-                      key={`participant-${participant.sessionId}`}
-                    >
-                      <UserIcon />
-                      <PersonText>{participant.name}</PersonText>
-                    </LineBlockParticipant>
-                  ))}
-                  {l.participants.length > 4 && !showFullUserList && (
-                    <LineBlockParticipant>
-                      <UsersIcon />
-                      <PersonText>{`+${l.participants.length - 4} other user${l.participants.length - 4 > 1 ? "s" : ""}`}</PersonText>
-                    </LineBlockParticipant>
-                  )}
-                </LineBlockParticipants>
-              </LineBlockTexts>
+              <LineBlock line={l} />
               {managementMode ? (
                 <DeleteButton
                   type="button"

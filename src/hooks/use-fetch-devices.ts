@@ -1,4 +1,4 @@
-import { Dispatch, useEffect, useState } from "react";
+import { Dispatch, useEffect, useCallback } from "react";
 import { TGlobalStateAction } from "../global-state/global-state-actions";
 import { uniqBy } from "../helpers";
 
@@ -8,46 +8,55 @@ type TUseFetchDevices = {
 };
 
 export const useFetchDevices = ({ permission, dispatch }: TUseFetchDevices) => {
-  const [refreshState, setRefreshState] = useState<boolean>(false);
-
-  const refresh = () => setRefreshState(!refreshState);
-
-  useEffect(() => {
-    if (permission) {
-      window.navigator.mediaDevices
-        .enumerateDevices()
-        .then((payload) => {
-          const outputDevices = payload
-            ? uniqBy(
-                payload.filter((d) => d.kind === "audiooutput"),
-                (item) => item.deviceId
-              )
-            : [];
-
-          const inputDevices = payload
-            ? uniqBy(
-                payload.filter((d) => d.kind === "audioinput"),
-                (item) => item.deviceId
-              )
-            : [];
-          dispatch({
-            type: "DEVICES_UPDATED",
-            payload: {
-              input: inputDevices,
-              output: outputDevices,
-            },
-          });
-        })
-        .catch((payload) => {
-          dispatch({
-            type: "ERROR",
-            payload,
-          });
-        });
+  // Create a function that returns a promise
+  const refresh = useCallback(async () => {
+    if (!permission) {
+      return { input: [], output: [] };
     }
 
-    return () => {};
-  }, [dispatch, permission, refreshState]);
+    try {
+      const devices = await window.navigator.mediaDevices.enumerateDevices();
+
+      const outputDevices = devices
+        ? uniqBy(
+            devices.filter((d) => d.kind === "audiooutput"),
+            (item) => item.deviceId
+          )
+        : [];
+
+      const inputDevices = devices
+        ? uniqBy(
+            devices.filter((d) => d.kind === "audioinput"),
+            (item) => item.deviceId
+          )
+        : [];
+
+      const result = {
+        input: inputDevices,
+        output: outputDevices,
+      };
+
+      dispatch({
+        type: "DEVICES_UPDATED",
+        payload: result,
+      });
+
+      return result;
+    } catch (error) {
+      dispatch({
+        type: "ERROR",
+        payload: {
+          error: error as Error,
+        },
+      });
+      throw error;
+    }
+  }, [dispatch, permission]);
+
+  // Initial fetch on mount or when permission changes
+  useEffect(() => {
+    refresh().catch(console.error);
+  }, [permission, refresh]);
 
   return [refresh];
 };

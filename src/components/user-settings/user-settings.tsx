@@ -58,8 +58,8 @@ export const UserSettings: FC<UserSettingsProps> = (props) => {
   } = useForm<TUserSettings>({
     defaultValues: {
       username: userSettings?.username,
-      audioinput: userSettings?.audioinput || "default",
-      audiooutput: userSettings?.audiooutput || "default",
+      audioinput: userSettings?.audioinput,
+      audiooutput: userSettings?.audiooutput,
     },
     resetOptions: {
       keepDirtyValues: true, // user-interacted input will be retained
