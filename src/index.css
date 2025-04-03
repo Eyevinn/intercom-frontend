@@ -157,6 +157,11 @@ html {
   height: 100%;
 }
 
+html,
+body {
+  overscroll-behavior: contain;
+}
+
 *,
 *:before,
 *:after {

@@ -14,6 +14,7 @@ import { ProductionLine } from "../production-line/production-line";
 import { PageHeader } from "../page-layout/page-header";
 import { isMobile } from "../../bowser";
 import { useAudioCue } from "../production-line/use-audio-cue";
+import { usePreventPullToRefresh } from "./use-prevent-pull-to-refresh";
 
 const Container = styled.div`
   display: flex;
@@ -89,6 +90,8 @@ export const CallsPage = () => {
       callState.joinProductionOptions?.lineUsedForProgramOutput &&
       !callState.joinProductionOptions.isProgramUser
   );
+
+  usePreventPullToRefresh();
 
   useEffect(() => {
     if (isProgramOutputAdded) {
