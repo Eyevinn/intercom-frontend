@@ -2,18 +2,15 @@ import styled from "@emotion/styled";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useGlobalState } from "../../global-state/context-provider";
+import { useCallList } from "../../hooks/use-call-list";
+import { useWebSocket } from "../../hooks/use-websocket";
+import { PrimaryButton } from "../landing-page/form-elements";
 import { JoinProduction } from "../landing-page/join-production";
 import { UserSettingsButton } from "../landing-page/user-settings-button";
 import { Modal } from "../modal/modal";
 import { PageHeader } from "../page-layout/page-header";
 import { useAudioCue } from "../production-line/use-audio-cue";
 import { useGlobalHotkeys } from "../production-line/use-line-hotkeys";
-import { UserSettings } from "../user-settings/user-settings";
-import { ConfirmationModal } from "../verify-decision/confirmation-modal";
-import { HeaderActions } from "./header-actions";
-import { ProductionLines } from "./production-lines";
-import { useCallsNavigation } from "./use-calls-navigation";
-import { useGlobalMuteHotkey } from "./use-global-mute-hotkey";
 import { usePreventPullToRefresh } from "./use-prevent-pull-to-refresh";
 import { useSpeakerDetection } from "./use-speaker-detection";
 
@@ -35,12 +32,54 @@ const CallsContainer = styled.div`
   }
 `;
 
+const AddCallContainer = styled.div`
+  display: flex;
+
+  button {
+    display: flex;
+    align-items: center;
+  }
+`;
+
+const MuteAllCallsBtn = styled(PrimaryButton)`
+  background: rgba(50, 56, 59, 1);
+  color: #6fd84f;
+  border: 0.2rem solid #6d6d6d;
+  &.mute {
+    svg {
+      fill: #f96c6c;
+    }
+  }
+
+  padding: 1rem;
+  margin-right: 1rem;
+  display: flex;
+  align-items: center;
+  color: white;
+
+  svg {
+    fill: #6fd84f;
+    width: 3rem;
+  }
+`;
+
+const HeaderButtons = styled.div`
+  display: flex;
+  gap: 1rem;
+`;
+
 export const CallsPage = () => {
   const [productionId, setProductionId] = useState<string | null>(null);
   const [addCallActive, setAddCallActive] = useState(false);
   const [confirmExitModalOpen, setConfirmExitModalOpen] = useState(false);
   const [isMasterInputMuted, setIsMasterInputMuted] = useState(true);
-  const [{ calls, selectedProductionId }, dispatch] = useGlobalState();
+  const [{ calls, selectedProductionId, websocket }, dispatch] =
+    useGlobalState();
+  const { registerCallList } = useCallList({
+    websocket,
+    globalMute: isMasterInputMuted,
+    numberOfCalls: Object.values(calls).length,
+  });
   const [showSettings, setShowSettings] = useState<boolean>(false);
 
   const { productionId: paramProductionId, lineId: paramLineId } = useParams();
@@ -69,8 +108,66 @@ export const CallsPage = () => {
     calls,
     initialHotkey: "p",
   });
-
   usePreventPullToRefresh();
+
+  let muteToggleTimeout: NodeJS.Timeout | null = null;
+
+  const handleToggleGlobalMute = () => {
+    if (muteToggleTimeout) return;
+    setIsMasterInputMuted((prev) => !prev);
+    muteToggleTimeout = setTimeout(() => {
+      muteToggleTimeout = null;
+    }, 300);
+  };
+
+  const callActionHandlers = useRef<Record<string, Record<string, () => void>>>(
+    {}
+  );
+
+  const { connect, isConnected } = useWebSocket({
+    onAction: (action) => {
+      Object.values(callActionHandlers.current).forEach((handlers) => {
+        switch (action) {
+          case "toggle_input_mute":
+            handlers.toggleInputMute?.();
+            break;
+          case "toggle_output_mute":
+            handlers.toggleOutputMute?.();
+            break;
+          case "increase_volume":
+            handlers.increaseVolume?.();
+            break;
+          case "decrease_volume":
+            handlers.decreaseVolume?.();
+            break;
+          case "push_to_talk":
+            handlers.pushToTalk?.();
+            break;
+          case "toggle_global_mute":
+            handleToggleGlobalMute();
+            break;
+          default:
+            console.warn("Unknown action:", action);
+        }
+      });
+    },
+    dispatch,
+  });
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (
+        websocket &&
+        websocket.readyState === WebSocket.CLOSED &&
+        websocket.url
+      ) {
+        console.log("Reconnecting WebSocket to", websocket.url);
+        connect(websocket.url);
+      }
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [websocket, connect]);
 
   useEffect(() => {
     if (selectedProductionId) {
@@ -167,14 +264,43 @@ export const CallsPage = () => {
               className="calls-page"
             />
           )}
-          <ProductionLines
-            calls={calls}
-            shouldReduceVolume={shouldReduceVolume}
-            isSingleCall={isSingleCall}
-            customGlobalMute={customGlobalMute}
-            isMasterInputMuted={isMasterInputMuted}
-            setAddCallActive={setAddCallActive}
-          />
+          {Object.entries(calls)
+            .toReversed()
+            .map(([callId, callState]) => {
+              if (!callActionHandlers.current[callId]) {
+                callActionHandlers.current[callId] = {};
+              }
+
+              return (
+                <ProductionLine
+                  key={callId}
+                  id={callId}
+                  callState={callState}
+                  isSingleCall={isSingleCall}
+                  customGlobalMute={customGlobalMute}
+                  masterInputMute={isMasterInputMuted}
+                  shouldReduceVolume={shouldReduceVolume}
+                  registerCallState={registerCallList}
+                  onToggleInputMute={(handler) => {
+                    callActionHandlers.current[callId].toggleInputMute =
+                      handler;
+                  }}
+                  onToggleOutputMute={(handler) => {
+                    callActionHandlers.current[callId].toggleOutputMute =
+                      handler;
+                  }}
+                  onIncreaseVolume={(handler) => {
+                    callActionHandlers.current[callId].increaseVolume = handler;
+                  }}
+                  onDecreaseVolume={(handler) => {
+                    callActionHandlers.current[callId].decreaseVolume = handler;
+                  }}
+                  onPushToTalk={(handler) => {
+                    callActionHandlers.current[callId].pushToTalk = handler;
+                  }}
+                />
+              );
+            })}
         </CallsContainer>
       </Container>
     </>

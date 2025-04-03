@@ -1,5 +1,5 @@
-import { CallState, DevicesState } from "./types.ts";
 import { TUserSettings } from "../components/user-settings/types.ts";
+import { CallState, DevicesState } from "./types.ts";
 
 export type TGlobalStateAction =
   | TPublishError
@@ -11,7 +11,8 @@ export type TGlobalStateAction =
   | TSelectProductionId
   | TAddCallState
   | TUpdateCallState
-  | TRemoveCallState;
+  | TRemoveCallState
+  | TSetWebSocket;
 
 export type TPublishError = {
   type: "ERROR";
@@ -58,4 +59,9 @@ export type TRemoveCallState = {
 export type TUpdateUserSettings = {
   type: "UPDATE_USER_SETTINGS";
   payload: TUserSettings | null;
+};
+
+export type TSetWebSocket = {
+  type: "SET_WEBSOCKET";
+  payload: WebSocket | null;
 };

@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Dispatch, useCallback, useEffect, useRef, useState } from "react";
+import { TGlobalStateAction } from "../global-state/global-state-actions";
 
 type WebSocketAction =
   | "toggle_input_mute"
@@ -9,10 +10,11 @@ type WebSocketAction =
   | "push_to_talk";
 
 interface UseWebSocketProps {
+  dispatch: Dispatch<TGlobalStateAction>;
   onAction: (action: WebSocketAction) => void;
 }
 
-export function useWebSocket({ onAction }: UseWebSocketProps) {
+export function useWebSocket({ dispatch, onAction }: UseWebSocketProps) {
   const socketRef = useRef<WebSocket | null>(null);
   const [isConnected, setIsConnected] = useState<boolean>(false);
 
@@ -23,6 +25,7 @@ export function useWebSocket({ onAction }: UseWebSocketProps) {
       ws.onopen = () => {
         console.log("WebSocket connected YAY");
         setIsConnected(true);
+        dispatch({ type: "SET_WEBSOCKET", payload: ws });
       };
 
       ws.onmessage = (event: MessageEvent) => {
@@ -48,7 +51,7 @@ export function useWebSocket({ onAction }: UseWebSocketProps) {
 
       socketRef.current = ws;
     },
-    [onAction]
+    [onAction, dispatch]
   );
 
   useEffect(() => {
