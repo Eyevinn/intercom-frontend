@@ -78,7 +78,6 @@ export const CallsPage = () => {
   const [{ calls, selectedProductionId }, dispatch] = useGlobalState();
   const [shouldReduceVolume, setShouldReduceVolume] = useState(false);
   const [isSomeoneSpeaking, setIsSomeoneSpeaking] = useState(false);
-  const [failedToConnect, setFailedToConnect] = useState(false);
 
   const { productionId: paramProductionId, lineId: paramLineId } = useParams();
   const navigate = useNavigate();
@@ -156,13 +155,6 @@ export const CallsPage = () => {
       navigate("/");
     }
   }, [isEmpty, paramProductionId, paramLineId, navigate]);
-
-  useEffect(() => {
-    if (failedToConnect) {
-      setAddCallActive(true);
-      setFailedToConnect(false);
-    }
-  }, [failedToConnect]);
 
   useGlobalHotkeys({
     muteInput: setIsMasterInputMuted,
@@ -270,7 +262,7 @@ export const CallsPage = () => {
                     isSingleCall={isSingleCall}
                     customGlobalMute={customGlobalMute}
                     masterInputMute={isMasterInputMuted}
-                    setFailedToConnect={() => setFailedToConnect(true)}
+                    setFailedToConnect={() => setAddCallActive(true)}
                   />
                 )
             )}

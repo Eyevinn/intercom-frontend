@@ -152,7 +152,7 @@ export const JoinProduction = ({
     continueToApp: true,
   });
 
-  const [refresh] = useFetchDevices({
+  const [getUpdatedDevices] = useFetchDevices({
     dispatch,
     permission,
   });
@@ -219,7 +219,7 @@ export const JoinProduction = ({
 
   const onSubmit: SubmitHandler<FormValues> = async (payload) => {
     // Wait for devices to refresh and get the updated devices
-    const updatedDevices = await refresh();
+    const updatedDevices = await getUpdatedDevices();
 
     const inputDeviceExists = updatedDevices.input.some(
       (device) => device.deviceId === payload.audioinput

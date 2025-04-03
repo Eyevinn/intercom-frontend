@@ -60,7 +60,7 @@ export const ProductionsListItem = ({
     continueToApp: true,
   });
 
-  const [refresh] = useFetchDevices({
+  const [getUpdatedDevices] = useFetchDevices({
     dispatch,
     permission,
   });
@@ -94,7 +94,7 @@ export const ProductionsListItem = ({
   };
 
   const goToProduction = async (lineId: string) => {
-    const updatedDevices = await refresh();
+    const updatedDevices = await getUpdatedDevices();
 
     const inputDeviceExists = updatedDevices.input.some(
       (device) => device.deviceId === userSettings?.audioinput

@@ -9,7 +9,7 @@ type TUseFetchDevices = {
 
 export const useFetchDevices = ({ permission, dispatch }: TUseFetchDevices) => {
   // Create a function that returns a promise
-  const refresh = useCallback(async () => {
+  const getUpdatedDevices = useCallback(async () => {
     if (!permission) {
       return { input: [], output: [] };
     }
@@ -55,8 +55,8 @@ export const useFetchDevices = ({ permission, dispatch }: TUseFetchDevices) => {
 
   // Initial fetch on mount or when permission changes
   useEffect(() => {
-    refresh().catch(console.error);
-  }, [permission, refresh]);
+    getUpdatedDevices().catch(console.error);
+  }, [permission, getUpdatedDevices]);
 
-  return [refresh];
+  return [getUpdatedDevices];
 };

@@ -32,7 +32,7 @@ export const ReloadDevicesButton = () => {
     continueToApp: true,
   });
 
-  const [refresh] = useFetchDevices({
+  const [getUpdatedDevices] = useFetchDevices({
     dispatch,
     permission,
   });
@@ -56,7 +56,7 @@ export const ReloadDevicesButton = () => {
       setFirefoxWarningModalOpen(true);
     } else {
       setDeviceRefresh(true);
-      refresh();
+      getUpdatedDevices();
     }
   };
 
