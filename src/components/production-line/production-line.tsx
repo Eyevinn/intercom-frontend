@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useNavigate, useParams } from "react-router-dom";
 import { isMobile, isTablet } from "../../bowser.ts";
@@ -88,7 +88,9 @@ export const ProductionLine = ({
   } = callState;
 
   const increaseVolumeTimeoutRef = useRef<number | null>(null);
-  const { activeParticipant } = useActiveParticipant(audioLevelAboveThreshold);
+  const { isActiveParticipant } = useActiveParticipant(
+    audioLevelAboveThreshold
+  );
 
   const [inputAudioStream, resetAudioInput] = useAudioInput({
     audioInputId: joinProductionOptions?.audioinput ?? null,
@@ -98,9 +100,13 @@ export const ProductionLine = ({
   const isProgramOutputLine = line && line.programOutputLine;
   const isProgramUser =
     joinProductionOptions && joinProductionOptions.isProgramUser;
-  const isSelfDominantSpeaker =
-    line?.participants.find((p) => p.sessionId === callState.sessionId)
-      ?.endpointId === dominantSpeaker;
+
+  const isSelfDominantSpeaker = useMemo(
+    () =>
+      line?.participants.find((p) => p.sessionId === callState.sessionId)
+        ?.endpointId === dominantSpeaker,
+    [line?.participants, callState.sessionId, dominantSpeaker]
+  );
 
   const { production, error: fetchProductionError } = useFetchProduction(
     joinProductionOptions
@@ -346,7 +352,7 @@ export const ProductionLine = ({
   return (
     <CallWrapper
       isSomeoneSpeaking={
-        !isProgramOutputLine && !isSelfDominantSpeaker && activeParticipant
+        !isProgramOutputLine && !isSelfDominantSpeaker && isActiveParticipant
       }
     >
       {joinProductionOptions &&
