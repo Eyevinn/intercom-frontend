@@ -4,12 +4,7 @@ import { useCopyLinks } from "./use-copy-links";
 
 const IconWrapper = styled.div<{
   isCopied: boolean;
-  buttonSize: string;
-  marginLeft: string;
 }>`
-  width: ${({ buttonSize }) => buttonSize};
-  height: ${({ buttonSize }) => buttonSize};
-  margin-left: ${({ marginLeft }) => marginLeft};
   display: flex;
   padding: 0.5rem;
   border-radius: 0.5rem;
@@ -30,6 +25,18 @@ const IconWrapper = styled.div<{
     background: rgba(0, 0, 0, 0.3);
   }
 
+  &.production-list-item {
+    width: 3rem;
+    height: 3rem;
+    margin-left: 0;
+  }
+
+  &.share-line-link-modal {
+    width: 4rem;
+    height: 4rem;
+    margin-left: 1rem;
+  }
+
   svg {
     fill: #59cbe8;
   }
@@ -37,25 +44,25 @@ const IconWrapper = styled.div<{
 
 export const CopyButton = ({
   url,
-  buttonSize,
-  marginLeft,
+  className,
 }: {
   url: string;
-  buttonSize: string;
-  marginLeft: string;
+  className: string;
 }) => {
   const { isCopied, handleCopyUrlToClipboard } = useCopyLinks();
+
+  const handleCopy = () => {
+    if (isCopied) return;
+
+    handleCopyUrlToClipboard(url);
+  };
 
   return (
     <IconWrapper
       title="Copy URL"
       isCopied={isCopied}
-      buttonSize={buttonSize}
-      marginLeft={marginLeft}
-      onClick={() => {
-        if (isCopied) return;
-        handleCopyUrlToClipboard(url);
-      }}
+      onClick={handleCopy}
+      className={className}
     >
       {isCopied ? <CheckIcon /> : <CopyIcon />}
     </IconWrapper>

@@ -199,8 +199,7 @@ export const ProductionsListItem = ({
                   {managementMode && (
                     <CopyButton
                       url={`${window.location.origin}/production-calls/production/${production.productionId}/line/${l.id}`}
-                      buttonSize="3rem"
-                      marginLeft="0"
+                      className="production-list-item"
                     />
                   )}
                 </LineBlockTitleWrapper>

@@ -4,12 +4,17 @@ import { useCopyLinks } from "./use-copy-links";
 import { TProduction } from "../production-line/types";
 import { CheckIcon } from "../../assets/icons/icon";
 
-const CopyToClipboardWrapper = styled.div<{
-  flexDirection: "row" | "row-reverse";
-}>`
+const CopyToClipboardWrapper = styled.div`
   display: flex;
-  flex-direction: ${({ flexDirection }) => flexDirection};
   align-items: center;
+
+  &.manage-production-page {
+    flex-direction: row-reverse;
+  }
+
+  &.create-production-page {
+    flex-direction: row;
+  }
 
   svg {
     width: 4rem;
@@ -21,26 +26,24 @@ const CopyToClipboardWrapper = styled.div<{
 
 export const CopyAllLinksButton = ({
   production,
-  flexDirection,
+  className,
 }: {
   production: TProduction;
-  flexDirection: "row" | "row-reverse";
+  className: string;
 }) => {
   const { isCopied, handleCopyUrlToClipboard } = useCopyLinks();
 
+  const handleCopy = () => {
+    handleCopyUrlToClipboard(
+      production.lines.map((item) => {
+        return ` ${item.name}: ${window.location.origin}/production-calls/production/${production.productionId}/line/${item.id}`;
+      })
+    );
+  };
+
   return (
-    <CopyToClipboardWrapper flexDirection={flexDirection}>
-      <PrimaryButton
-        type="button"
-        onClick={() =>
-          handleCopyUrlToClipboard(
-            production.lines.map((item) => {
-              return ` ${item.name}: ${window.location.origin}/production-calls/production/${production.productionId}/line/${item.id}`;
-            })
-          )
-        }
-        disabled={isCopied}
-      >
+    <CopyToClipboardWrapper className={className}>
+      <PrimaryButton type="button" onClick={handleCopy} disabled={isCopied}>
         Copy Links
       </PrimaryButton>
       {isCopied && <CheckIcon />}

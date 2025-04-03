@@ -246,7 +246,10 @@ export const CreateProductionPage = () => {
             The production ID is: {createdProductionId.toString()}
           </ProductionConfirmation>
           {!productionFetchError && production && (
-            <CopyAllLinksButton production={production} flexDirection="row" />
+            <CopyAllLinksButton
+              production={production}
+              className="create-production-page"
+            />
           )}
           {productionFetchError && (
             <FetchErrorMessage>

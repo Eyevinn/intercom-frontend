@@ -92,7 +92,7 @@ export const ShareLineLinkModal = ({
         </ModalTextItalic>
         <Wrapper>
           <FormInput value={url} readOnly />
-          <CopyButton url={url} buttonSize="4rem" marginLeft="1rem" />
+          <CopyButton url={url} className="share-line-link-modal" />
         </Wrapper>
         <RefreshButtonWrapper>
           <StyledRefreshBtn onClick={onRefresh}>

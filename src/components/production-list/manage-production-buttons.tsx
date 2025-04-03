@@ -145,7 +145,10 @@ export const ManageProductionButtons: FC<ManageProductionButtonsProps> = (
           )}
         </DeleteButton>
       </ManageButtons>
-      <CopyAllLinksButton production={production} flexDirection="row-reverse" />
+      <CopyAllLinksButton
+        production={production}
+        className="manage-production-page"
+      />
       {addLineOpen && (
         <AddLineSectionForm>
           <FormLabel>
