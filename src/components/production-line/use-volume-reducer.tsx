@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { TLine } from "./types";
 
 export const useVolumeReducer = ({
@@ -12,16 +12,16 @@ export const useVolumeReducer = ({
   shouldReduceVolume: boolean;
   value: number;
 }) => {
-  const [hasReduced, setHasReduced] = useState(false);
   const increaseVolumeTimeoutRef = useRef<number | null>(null);
+  const hasReducedRef = useRef(false);
 
   useEffect(() => {
     // Reduce volume by 80%
     const volumeChangeFactor = 0.2;
 
     if (line?.programOutputLine) {
-      if (shouldReduceVolume && !hasReduced) {
-        setHasReduced(true);
+      if (shouldReduceVolume && !hasReducedRef.current) {
+        hasReducedRef.current = true;
 
         audioElements?.forEach((audioElement) => {
           // eslint-disable-next-line no-param-reassign
@@ -29,13 +29,13 @@ export const useVolumeReducer = ({
         });
       }
 
-      if (!shouldReduceVolume && hasReduced) {
+      if (!shouldReduceVolume && hasReducedRef.current) {
         increaseVolumeTimeoutRef.current = window.setTimeout(() => {
           audioElements?.forEach((audioElement) => {
             // eslint-disable-next-line no-param-reassign
             audioElement.volume = value;
           });
-          setHasReduced(false);
+          hasReducedRef.current = false;
         }, 2000);
       }
     }
@@ -45,11 +45,5 @@ export const useVolumeReducer = ({
         window.clearTimeout(increaseVolumeTimeoutRef.current);
       }
     };
-  }, [
-    shouldReduceVolume,
-    hasReduced,
-    value,
-    audioElements,
-    line?.programOutputLine,
-  ]);
+  }, [audioElements, line?.programOutputLine, shouldReduceVolume, value]);
 };

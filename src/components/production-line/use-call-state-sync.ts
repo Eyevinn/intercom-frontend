@@ -18,19 +18,38 @@ export const useCallStateSync = ({
   dispatch,
   stateUpdates,
 }: UseCallStateSyncProps) => {
-  // Create an effect for each state property that needs to be synced
-  Object.entries(stateUpdates).forEach(([key, value]) => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    useEffect(() => {
+  // Individual effects for each property
+  useEffect(() => {
+    if (stateUpdates.connectionState !== null) {
       dispatch({
         type: "UPDATE_CALL",
         payload: {
           id: callId,
-          updates: {
-            [key]: value,
-          },
+          updates: { connectionState: stateUpdates.connectionState },
         },
       });
-    }, [value]); // eslint-disable-line react-hooks/exhaustive-deps
-  });
+    }
+  }, [stateUpdates.connectionState, callId, dispatch]);
+
+  useEffect(() => {
+    dispatch({
+      type: "UPDATE_CALL",
+      payload: {
+        id: callId,
+        updates: { audioElements: stateUpdates.audioElements },
+      },
+    });
+  }, [stateUpdates.audioElements, callId, dispatch]);
+
+  useEffect(() => {
+    if (stateUpdates.sessionId !== null) {
+      dispatch({
+        type: "UPDATE_CALL",
+        payload: {
+          id: callId,
+          updates: { sessionId: stateUpdates.sessionId },
+        },
+      });
+    }
+  }, [stateUpdates.sessionId, callId, dispatch]);
 };
