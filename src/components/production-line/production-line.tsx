@@ -4,11 +4,9 @@ import { useNavigate, useParams } from "react-router-dom";
 import { isMobile, isTablet } from "../../bowser.ts";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { CallState } from "../../global-state/types.ts";
-import { useWebSocket } from "../../hooks/use-websocket.ts";
-import { ConnectToWsModal } from "../calls-page/connect-to-modal.tsx";
+import { usePushToTalk } from "../../hooks/use-push-to-talk.ts";
 import { DisplayWarning } from "../display-box.tsx";
 import { FlexContainer } from "../generic-components.ts";
-import { PrimaryButton } from "../landing-page/form-elements.tsx";
 import { useFetchProduction } from "../landing-page/use-fetch-production.ts";
 import { Spinner } from "../loader/loader.tsx";
 import {
@@ -52,6 +50,19 @@ type TProductionLine = {
   customGlobalMute: string;
   masterInputMute: boolean;
   shouldReduceVolume: boolean;
+  registerCallState?: (
+    callId: string,
+    data: {
+      isInputMuted: boolean;
+      isOutputMuted: boolean;
+      volume: number;
+    }
+  ) => void;
+  onToggleInputMute?: (handler: () => void) => void;
+  onToggleOutputMute?: (handler: () => void) => void;
+  onIncreaseVolume?: (handler: () => void) => void;
+  onDecreaseVolume?: (handler: () => void) => void;
+  onPushToTalk?: (handler: () => void) => void;
 };
 
 export const ProductionLine = ({
@@ -61,6 +72,12 @@ export const ProductionLine = ({
   customGlobalMute,
   masterInputMute,
   shouldReduceVolume,
+  registerCallState,
+  onToggleInputMute,
+  onToggleOutputMute,
+  onIncreaseVolume,
+  onDecreaseVolume,
+  onPushToTalk,
 }: TProductionLine) => {
   const { productionId: paramProductionId, lineId: paramLineId } = useParams();
   const [, dispatch] = useGlobalState();
@@ -76,8 +93,6 @@ export const ProductionLine = ({
   const [userId, setUserId] = useState("");
   const [userName, setUserName] = useState("");
   const [open, setOpen] = useState<boolean>(!isMobile);
-  const [connectToWsModalOpen, setConnectToWsModalOpen] =
-    useState<boolean>(false);
   const {
     joinProductionOptions,
     audiooutput,
@@ -101,53 +116,6 @@ export const ProductionLine = ({
     setIsOutputMuted(!isOutputMuted);
   }, [audioElements, isOutputMuted]);
 
-  const { connect } = useWebSocket({
-    onAction: (action) => {
-      console.log("Received action from WebSocket:", action);
-      switch (action) {
-        case "toggle_input_mute":
-          // Toggle input mute
-          console.log("Should toggle input mute");
-          setIsInputMuted((prev) => !prev);
-          break;
-        case "toggle_output_mute":
-          // Toggle output mute
-          console.log("Should toggle output mute");
-          muteOutput();
-          break;
-        case "increase_volume": {
-          // Increase volume
-          console.log("Should increase volume");
-          const newValue = Math.min(value + 0.05, 1);
-          setValue(newValue);
-          audioElements?.forEach((audioElement) => {
-            // eslint-disable-next-line no-param-reassign
-            audioElement.volume = newValue;
-          });
-          break;
-        }
-        case "decrease_volume": {
-          // Decrease volume
-          console.log("Should decrease volume");
-          const decreasedValue = Math.max(value - 0.05, 0);
-          setValue(decreasedValue);
-          audioElements?.forEach((audioElement) => {
-            // eslint-disable-next-line no-param-reassign
-            audioElement.volume = decreasedValue;
-          });
-          break;
-        }
-        case "push_to_talk":
-          // Push to talk
-          console.log("Should push to talk");
-          break;
-        default:
-          console.log("Unknown action:", action);
-          break;
-      }
-    },
-  });
-
   const increaseVolumeTimeoutRef = useRef<number | null>(null);
 
   const [inputAudioStream, resetAudioInput] = useAudioInput({
@@ -164,6 +132,68 @@ export const ProductionLine = ({
       ? parseInt(joinProductionOptions.productionId, 10)
       : null
   );
+
+  useEffect(() => {
+    registerCallState?.(id, {
+      isInputMuted,
+      isOutputMuted,
+      volume: value,
+    });
+  }, [id, isInputMuted, isOutputMuted, value, registerCallState]);
+
+  const { muteInput, inputMute } = useMuteInput({
+    inputAudioStream,
+    isProgramOutputLine,
+    isProgramUser,
+    id,
+  });
+
+  const { triggerPushToTalk } = usePushToTalk({ muteInput });
+
+  useEffect(() => {
+    if (onToggleInputMute) {
+      onToggleInputMute(() => setIsInputMuted((prev) => !prev));
+    }
+    if (onToggleOutputMute) {
+      onToggleOutputMute(() => muteOutput());
+    }
+    if (onIncreaseVolume) {
+      onIncreaseVolume(() => {
+        const newVal = Math.min(value + 0.05, 1);
+        setValue(newVal);
+        audioElements?.forEach((el) => {
+          const element = el;
+          element.volume = newVal;
+        });
+      });
+    }
+    if (onDecreaseVolume) {
+      onDecreaseVolume(() => {
+        const newVal = Math.max(value - 0.05, 0);
+        setValue(newVal);
+        audioElements?.forEach((el) => {
+          const element = el;
+          element.volume = newVal;
+        });
+      });
+    }
+    if (onPushToTalk) {
+      onPushToTalk(() => {
+        triggerPushToTalk();
+      });
+    }
+  }, [
+    onToggleInputMute,
+    onToggleOutputMute,
+    onIncreaseVolume,
+    onDecreaseVolume,
+    onPushToTalk,
+    value,
+    audioElements,
+    muteOutput,
+    id,
+    triggerPushToTalk,
+  ]);
 
   useEffect(() => {
     if (audioElements) {
@@ -244,13 +274,6 @@ export const ProductionLine = ({
     setValue(newValue);
   });
 
-  const { muteInput, inputMute } = useMuteInput({
-    inputAudioStream,
-    isProgramOutputLine,
-    isProgramUser,
-    id,
-  });
-
   useEffect(() => {
     setIsInputMuted(inputMute);
   }, [inputMute]);
@@ -328,10 +351,6 @@ export const ProductionLine = ({
   ]);
 
   useEffect(() => {
-    console.log("isOutputMuted", isOutputMuted);
-  }, [isOutputMuted]);
-
-  useEffect(() => {
     if (connectionState === "connected") {
       playEnterSound();
     }
@@ -392,18 +411,10 @@ export const ProductionLine = ({
     }
   };
 
-  const handleConnect = (url: string) => {
-    connect(url);
-    setConnectToWsModalOpen(false);
-  };
-
   // TODO detect if browser back button is pressed and run exit();
 
   return (
     <CallWrapper>
-      <PrimaryButton onClick={() => setConnectToWsModalOpen(true)}>
-        Connect to websocket
-      </PrimaryButton>
       {joinProductionOptions &&
         loading &&
         (!connectionError ? (
@@ -556,11 +567,6 @@ export const ProductionLine = ({
                   lineId={line?.id}
                 />
               )}
-              <ConnectToWsModal
-                isOpen={connectToWsModalOpen}
-                handleConnect={handleConnect}
-                onClose={() => setConnectToWsModalOpen(false)}
-              />
             </InnerDiv>
           </ProductionLines>
         </CallContainer>

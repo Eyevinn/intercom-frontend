@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
 import styled from "@emotion/styled";
-import { PrimaryButton } from "../landing-page/form-elements";
+import { useEffect } from "react";
 import { isMobile } from "../../bowser";
+import { usePushToTalk } from "../../hooks/use-push-to-talk";
+import { PrimaryButton } from "../landing-page/form-elements";
 
 type TLongPressToTalkButton = {
   muteInput: (input: boolean) => void;
@@ -38,52 +39,27 @@ export const LongPressToTalkButton = ({
   muteInput,
   text = "Push To Talk",
 }: TLongPressToTalkButton) => {
-  const [isToggled, setIsToggled] = useState(false);
-  const [longPressTimeout, setLongPressTimeout] =
-    useState<ReturnType<typeof setTimeout>>();
+  const { isTalking, handleLongPressStart, handleLongPressEnd } = usePushToTalk(
+    { muteInput }
+  );
 
   useEffect(() => {
-    return () => {
-      if (longPressTimeout) {
-        clearTimeout(longPressTimeout);
-      }
-    };
-  }, [longPressTimeout]);
-
-  const toggleMuteAfterTimeout = (e: React.PointerEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    e.currentTarget.setPointerCapture(e.pointerId);
-
-    let timeoutId: NodeJS.Timeout;
-
-    switch (e.type) {
-      case "pointerdown":
-        timeoutId = setTimeout(() => {
-          muteInput(false);
-          setIsToggled(true);
-        }, 300);
-        setLongPressTimeout(timeoutId);
-        break;
-      case "pointerup":
-        setIsToggled(false);
-        muteInput(true);
-        clearTimeout(longPressTimeout);
-        break;
-      default:
-        console.error(`Invalid event type received: ${e.type}`);
-    }
-  };
+    console.log("isTalking", isTalking);
+  }, [isTalking]);
 
   return (
     <Button
-      className={`${isMobile ? "mobile" : ""} ${isToggled ? "active-btn" : ""}`}
+      className={`${isMobile ? "mobile" : ""} ${isTalking ? "active-btn" : ""}`}
       type="button"
       onPointerDown={(e) => {
-        toggleMuteAfterTimeout(e);
+        e.preventDefault();
+        e.stopPropagation();
+        handleLongPressStart();
       }}
       onPointerUp={(e) => {
-        toggleMuteAfterTimeout(e);
+        e.preventDefault();
+        e.stopPropagation();
+        handleLongPressEnd();
       }}
     >
       <span
