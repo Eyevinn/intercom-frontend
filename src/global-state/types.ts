@@ -41,4 +41,5 @@ export type TGlobalState = {
   devices: DevicesState;
   selectedProductionId: string | null;
   apiError: Error | false;
+  websocket: WebSocket | null;
 };
