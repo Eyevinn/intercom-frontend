@@ -22,6 +22,7 @@ export const isValidBrowser = browser.satisfies({
 });
 
 export const isBrowserFirefox = browserName.toLowerCase() === "firefox";
+export const isBrowserSafari = browserName.toLowerCase() === "safari";
 
 // Used because iPads have platform as desktop and browser as Safari
 const detectIpad = (): boolean => {

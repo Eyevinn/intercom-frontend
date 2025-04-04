@@ -262,6 +262,7 @@ export const CallsPage = () => {
                     isSingleCall={isSingleCall}
                     customGlobalMute={customGlobalMute}
                     masterInputMute={isMasterInputMuted}
+                    setFailedToConnect={() => setAddCallActive(true)}
                   />
                 )
             )}

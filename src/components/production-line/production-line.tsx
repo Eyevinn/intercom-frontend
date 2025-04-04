@@ -50,6 +50,7 @@ type TProductionLine = {
   customGlobalMute: string;
   masterInputMute: boolean;
   shouldReduceVolume: boolean;
+  setFailedToConnect: () => void;
 };
 
 export const ProductionLine = ({
@@ -59,6 +60,7 @@ export const ProductionLine = ({
   customGlobalMute,
   masterInputMute,
   shouldReduceVolume,
+  setFailedToConnect,
 }: TProductionLine) => {
   const { productionId: paramProductionId, lineId: paramLineId } = useParams();
   const [, dispatch] = useGlobalState();
@@ -92,9 +94,32 @@ export const ProductionLine = ({
     audioLevelAboveThreshold
   );
 
-  const [inputAudioStream, resetAudioInput] = useAudioInput({
+  const [inputAudioStream, audioInputError, resetAudioInput] = useAudioInput({
     audioInputId: joinProductionOptions?.audioinput ?? null,
+    dispatch,
   });
+
+  useEffect(() => {
+    if (audioInputError) {
+      setConnectionActive(false);
+      setFailedToConnect();
+      dispatch({
+        type: "REMOVE_CALL",
+        payload: { id },
+      });
+
+      if (isSingleCall) {
+        navigate("/");
+      }
+    }
+  }, [
+    audioInputError,
+    dispatch,
+    id,
+    isSingleCall,
+    navigate,
+    setFailedToConnect,
+  ]);
 
   const line = useLinePolling({ callId: id, joinProductionOptions });
   const isProgramOutputLine = line && line.programOutputLine;

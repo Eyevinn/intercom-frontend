@@ -22,10 +22,12 @@ import {
   ButtonWrapper,
   ResponsiveFormContainer,
 } from "../user-settings/user-settings.tsx";
-import { isMobile } from "../../bowser.ts";
+import { isBrowserSafari, isMobile } from "../../bowser.ts";
 import { Checkbox } from "../checkbox/checkbox.tsx";
 import { TUserSettings } from "../user-settings/types.ts";
 import { RemoveIcon } from "../../assets/icons/icon.tsx";
+import { useFetchDevices } from "../../hooks/use-fetch-devices.ts";
+import { useDevicePermissions } from "../../hooks/use-device-permission.ts";
 
 type FormValues = TJoinProductionOptions & {
   audiooutput: string;
@@ -121,7 +123,6 @@ export const JoinProduction = ({
     handleSubmit,
     reset,
     setValue,
-    getValues,
     control,
   } = useForm<FormValues>({
     defaultValues: {
@@ -129,8 +130,8 @@ export const JoinProduction = ({
         preSelected?.preSelectedProductionId || addAdditionalCallId || "",
       lineId: preSelected?.preSelectedLineId || undefined,
       username: userSettings?.username,
-      audioinput: userSettings?.audioinput || "default",
-      audiooutput: userSettings?.audiooutput || "default",
+      audioinput: userSettings?.audioinput,
+      audiooutput: userSettings?.audiooutput,
       lineUsedForProgramOutput: false,
     },
     resetOptions: {
@@ -146,6 +147,15 @@ export const JoinProduction = ({
   } = useFetchProduction(joinProductionId);
 
   useNavigateToProduction(joinProductionOptions);
+
+  const { permission } = useDevicePermissions({
+    continueToApp: true,
+  });
+
+  const [getUpdatedDevices] = useFetchDevices({
+    dispatch,
+    permission,
+  });
 
   // this will update whenever lineId changes
   const selectedLineId = useWatch({ name: "lineId", control });
@@ -189,20 +199,8 @@ export const JoinProduction = ({
   useEffect(() => {
     if (!devices.input?.length) {
       setValue("audioinput", "no-device", { shouldValidate: true });
-    } else if (
-      !devices.input?.find(
-        (device) => device.deviceId === getValues("audioinput")
-      )
-    ) {
-      setValue("audioinput", "default", { shouldValidate: true });
     }
-    if (
-      !devices.output?.find(
-        (device) => device.deviceId === getValues("audiooutput")
-      )
-    )
-      setValue("audiooutput", "default", { shouldValidate: true });
-  }, [devices, getValues, setValue, userSettings]);
+  }, [devices, setValue]);
 
   // If user selects a production from the productionlist
   useEffect(() => {
@@ -219,87 +217,107 @@ export const JoinProduction = ({
     min: 1,
   });
 
-  const onSubmit: SubmitHandler<FormValues> = (payload) => {
-    const selectedLine = production?.lines.find(
-      (line) => line.id === payload.lineId
+  const onSubmit: SubmitHandler<FormValues> = async (payload) => {
+    // Wait for devices to refresh and get the updated devices
+    const updatedDevices = await getUpdatedDevices();
+
+    const inputDeviceExists = updatedDevices.input.some(
+      (device) => device.deviceId === payload.audioinput
     );
 
-    const options: TJoinProductionOptions = {
-      ...payload,
-      lineUsedForProgramOutput: selectedLine?.programOutputLine || false,
-      isProgramUser,
-    };
+    const outputDeviceExists = updatedDevices.output.some(
+      (device) => device.deviceId === payload.audiooutput
+    );
 
-    if (updateUserSettings) {
-      const newUserSettings: TUserSettings = {
-        username: payload.username,
-        audioinput: payload.audioinput,
-        audiooutput: payload.audiooutput,
+    if (!inputDeviceExists || (!outputDeviceExists && !isBrowserSafari)) {
+      dispatch({
+        type: "ERROR",
+        payload: {
+          error: new Error("Selected devices are not available"),
+        },
+      });
+    } else {
+      const selectedLine = production?.lines.find(
+        (line) => line.id === payload.lineId
+      );
+
+      const options: TJoinProductionOptions = {
+        ...payload,
+        lineUsedForProgramOutput: selectedLine?.programOutputLine || false,
+        isProgramUser,
       };
 
-      if (payload.username) {
-        writeToStorage("username", payload.username);
+      if (updateUserSettings) {
+        const newUserSettings: TUserSettings = {
+          username: payload.username,
+          audioinput: payload.audioinput,
+          audiooutput: payload.audiooutput,
+        };
+
+        if (payload.username) {
+          writeToStorage("username", payload.username);
+        }
+
+        if (payload.audioinput) {
+          writeToStorage("audioinput", payload.audioinput);
+        }
+
+        if (payload.audiooutput) {
+          writeToStorage("audiooutput", payload.audiooutput);
+        }
+
+        dispatch({
+          type: "UPDATE_USER_SETTINGS",
+          payload: newUserSettings,
+        });
       }
 
-      if (payload.audioinput) {
-        writeToStorage("audioinput", payload.audioinput);
-      }
-
-      if (payload.audiooutput) {
-        writeToStorage("audiooutput", payload.audiooutput);
+      if (closeAddCallView) {
+        closeAddCallView();
       }
 
       dispatch({
-        type: "UPDATE_USER_SETTINGS",
-        payload: newUserSettings,
+        type: "SELECT_PRODUCTION_ID",
+        payload: payload.productionId,
       });
-    }
 
-    if (closeAddCallView) {
-      closeAddCallView();
-    }
+      const uuid = globalThis.crypto.randomUUID();
 
-    dispatch({
-      type: "SELECT_PRODUCTION_ID",
-      payload: payload.productionId,
-    });
-
-    const uuid = globalThis.crypto.randomUUID();
-
-    dispatch({
-      type: "ADD_CALL",
-      payload: {
-        id: uuid,
-        callState: {
-          joinProductionOptions: {
-            productionId: options.productionId,
-            lineId: options.lineId,
-            username: options.username,
-            audioinput: options.audioinput,
-            lineUsedForProgramOutput: options.lineUsedForProgramOutput,
-            isProgramUser: options.isProgramUser,
-          },
-          audiooutput: payload.audiooutput,
-          mediaStreamInput: null,
-          dominantSpeaker: null,
-          audioLevelAboveThreshold: false,
-          connectionState: null,
-          audioElements: null,
-          sessionId: null,
-          dataChannel: null,
-          isRemotelyMuted: false,
-          hotkeys: {
-            muteHotkey: "m",
-            speakerHotkey: "n",
-            pushToTalkHotkey: "t",
-            increaseVolumeHotkey: "u",
-            decreaseVolumeHotkey: "d",
-            globalMuteHotkey: customGlobalMute,
+      dispatch({
+        type: "ADD_CALL",
+        payload: {
+          id: uuid,
+          callState: {
+            joinProductionOptions: {
+              productionId: options.productionId,
+              lineId: options.lineId,
+              username: options.username,
+              audioinput: options.audioinput,
+              lineUsedForProgramOutput: options.lineUsedForProgramOutput,
+              isProgramUser: options.isProgramUser,
+            },
+            audiooutput: payload.audiooutput,
+            mediaStreamInput: null,
+            dominantSpeaker: null,
+            audioLevelAboveThreshold: false,
+            connectionState: null,
+            audioElements: null,
+            sessionId: null,
+            dataChannel: null,
+            isRemotelyMuted: false,
+            hotkeys: {
+              muteHotkey: "m",
+              speakerHotkey: "n",
+              pushToTalkHotkey: "t",
+              increaseVolumeHotkey: "u",
+              decreaseVolumeHotkey: "d",
+              globalMuteHotkey: customGlobalMute,
+            },
           },
         },
-      },
-    });
-    setJoinProductionOptions(options);
+      });
+      setJoinProductionOptions(options);
+    }
   };
 
   return (

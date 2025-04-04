@@ -14,6 +14,7 @@ import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { TGlobalStateAction } from "../../global-state/global-state-actions.ts";
 import { TUseAudioInputValues } from "./use-audio-input.ts";
 import { startRtcStatInterval } from "./rtc-stat-interval.ts";
+import { isBrowserSafari } from "../../bowser.ts";
 
 type TRtcConnectionOptions = {
   inputAudioStream: TUseAudioInputValues;
@@ -88,7 +89,7 @@ const establishConnection = ({
       audioElement.srcObject = selectedStream;
 
       setAudioElements((prevArray) => [audioElement, ...prevArray]);
-      if (audiooutput) {
+      if (audiooutput && !isBrowserSafari) {
         audioElement.setSinkId(audiooutput).catch((e) => {
           dispatch({
             type: "ERROR",
