@@ -31,7 +31,6 @@ import {
   ProductionName,
   SpinnerWrapper,
 } from "./production-list-components";
-import { CopyButton } from "../copy-button/copy-button";
 import { LineBlock } from "./line-block";
 import { useFetchDevices } from "../../hooks/use-fetch-devices";
 import { useDevicePermissions } from "../../hooks/use-device-permission";
@@ -191,7 +190,11 @@ export const ProductionsListItem = ({
               key={`line-${l.id}-${l.name}`}
               isProgramOutput={l.programOutputLine}
             >
-              <LineBlock line={l} />
+              <LineBlock
+                managementMode={managementMode}
+                line={l}
+                production={production}
+              />
               {managementMode ? (
                 <DeleteButton
                   type="button"

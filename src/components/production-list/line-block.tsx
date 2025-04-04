@@ -20,8 +20,18 @@ import {
 
 import { isMobile } from "../../bowser";
 import { TLine } from "../production-line/types";
+import { CopyButton } from "../copy-button/copy-button";
+import { TBasicProductionResponse } from "../../api/api";
 
-export const LineBlock = ({ line }: { line: TLine }) => {
+export const LineBlock = ({
+  managementMode,
+  line,
+  production,
+}: {
+  managementMode: boolean;
+  line: TLine;
+  production: TBasicProductionResponse;
+}) => {
   const [showFullUserList, setShowFullUserList] = useState<boolean>(false);
   return (
     <LineBlockTexts>
@@ -45,6 +55,12 @@ export const LineBlock = ({ line }: { line: TLine }) => {
             </PersonText>
             {showFullUserList ? <ChevronUpIcon /> : <ChevronDownIcon />}
           </ParticipantExpandBtn>
+        )}
+        {managementMode && (
+          <CopyButton
+            url={`${window.location.origin}/production-calls/production/${production.productionId}/line/${line.id}`}
+            className="production-list-item"
+          />
         )}
       </LineBlockTitleWrapper>
       <LineBlockParticipants>
