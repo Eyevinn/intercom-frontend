@@ -101,12 +101,14 @@ export const ProductionLine = ({
   const isProgramUser =
     joinProductionOptions && joinProductionOptions.isProgramUser;
 
-  const isSelfDominantSpeaker = useMemo(
+  const lineParticipant = useMemo(
     () =>
       line?.participants.find((p) => p.sessionId === callState.sessionId)
-        ?.endpointId === dominantSpeaker,
-    [line?.participants, callState.sessionId, dominantSpeaker]
+        ?.endpointId,
+    [line?.participants, callState.sessionId]
   );
+
+  const isSelfDominantSpeaker = lineParticipant === dominantSpeaker;
 
   const { production, error: fetchProductionError } = useFetchProduction(
     joinProductionOptions
