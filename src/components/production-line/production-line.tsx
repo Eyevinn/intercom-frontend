@@ -63,6 +63,7 @@ type TProductionLine = {
       volume: number;
     }
   ) => void;
+  deregisterCall?: (callId: string) => void;
   onToggleInputMute?: (handler: () => void) => void;
   onToggleOutputMute?: (handler: () => void) => void;
   onIncreaseVolume?: (handler: () => void) => void;
@@ -79,6 +80,7 @@ export const ProductionLine = ({
   shouldReduceVolume,
   setFailedToConnect,
   registerCallState,
+  deregisterCall,
   onToggleInputMute,
   onToggleOutputMute,
   onIncreaseVolume,
@@ -319,11 +321,12 @@ export const ProductionLine = ({
       type: "REMOVE_CALL",
       payload: { id },
     });
+    deregisterCall?.(id);
 
     if (isSingleCall) {
       navigate("/");
     }
-  }, [dispatch, id, playExitSound, isSingleCall, navigate]);
+  }, [dispatch, id, playExitSound, isSingleCall, navigate, deregisterCall]);
 
   useLineHotkeys({
     muteInput,

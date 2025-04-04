@@ -45,13 +45,15 @@ export const ConnectToWSButton = ({
     });
   };
 
+  console.log("isConnected", isConnected);
+
   return (
     <>
       <ConnectButton
         isConnected={isConnected}
         onClick={isConnected ? handleDisconnect : () => setIsOpen(true)}
       >
-        {isConnected ? "Connected" : "Connect to Companion"}
+        {isConnected ? "Companion" : "Connect to Companion"}
         {isConnected && <CheckIcon />}
       </ConnectButton>
       <ConnectToWsModal
