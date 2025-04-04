@@ -75,7 +75,7 @@ export const CallsPage = () => {
   const [isMasterInputMuted, setIsMasterInputMuted] = useState(true);
   const [{ calls, selectedProductionId, websocket }, dispatch] =
     useGlobalState();
-  const { registerCallList } = useCallList({
+  const { registerCallList, deregisterCall } = useCallList({
     websocket,
     globalMute: isMasterInputMuted,
     numberOfCalls: Object.values(calls).length,
@@ -194,6 +194,7 @@ export const CallsPage = () => {
             type: "REMOVE_CALL",
             payload: { id: callId },
           });
+          deregisterCall(callId);
         }
       });
     }
@@ -264,43 +265,40 @@ export const CallsPage = () => {
               className="calls-page"
             />
           )}
-          {Object.entries(calls)
-            .toReversed()
-            .map(([callId, callState]) => {
-              if (!callActionHandlers.current[callId]) {
-                callActionHandlers.current[callId] = {};
-              }
+          {Object.entries(calls).map(([callId, callState]) => {
+            if (!callActionHandlers.current[callId]) {
+              callActionHandlers.current[callId] = {};
+            }
 
-              return (
-                <ProductionLine
-                  key={callId}
-                  id={callId}
-                  callState={callState}
-                  isSingleCall={isSingleCall}
-                  customGlobalMute={customGlobalMute}
-                  masterInputMute={isMasterInputMuted}
-                  shouldReduceVolume={shouldReduceVolume}
-                  registerCallState={registerCallList}
-                  onToggleInputMute={(handler) => {
-                    callActionHandlers.current[callId].toggleInputMute =
-                      handler;
-                  }}
-                  onToggleOutputMute={(handler) => {
-                    callActionHandlers.current[callId].toggleOutputMute =
-                      handler;
-                  }}
-                  onIncreaseVolume={(handler) => {
-                    callActionHandlers.current[callId].increaseVolume = handler;
-                  }}
-                  onDecreaseVolume={(handler) => {
-                    callActionHandlers.current[callId].decreaseVolume = handler;
-                  }}
-                  onPushToTalk={(handler) => {
-                    callActionHandlers.current[callId].pushToTalk = handler;
-                  }}
-                />
-              );
-            })}
+            return (
+              <ProductionLine
+                key={callId}
+                id={callId}
+                callState={callState}
+                isSingleCall={isSingleCall}
+                customGlobalMute={customGlobalMute}
+                masterInputMute={isMasterInputMuted}
+                shouldReduceVolume={shouldReduceVolume}
+                registerCallState={registerCallList}
+                deregisterCall={deregisterCall}
+                onToggleInputMute={(handler) => {
+                  callActionHandlers.current[callId].toggleInputMute = handler;
+                }}
+                onToggleOutputMute={(handler) => {
+                  callActionHandlers.current[callId].toggleOutputMute = handler;
+                }}
+                onIncreaseVolume={(handler) => {
+                  callActionHandlers.current[callId].increaseVolume = handler;
+                }}
+                onDecreaseVolume={(handler) => {
+                  callActionHandlers.current[callId].decreaseVolume = handler;
+                }}
+                onPushToTalk={(handler) => {
+                  callActionHandlers.current[callId].pushToTalk = handler;
+                }}
+              />
+            );
+          })}
         </CallsContainer>
       </Container>
     </>
