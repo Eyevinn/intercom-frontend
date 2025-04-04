@@ -1,6 +1,7 @@
 import { Dispatch, useEffect, useCallback } from "react";
 import { TGlobalStateAction } from "../global-state/global-state-actions";
 import { uniqBy } from "../helpers";
+import logger from "../utils/logger";
 
 type TUseFetchDevices = {
   permission: boolean;
@@ -55,7 +56,7 @@ export const useFetchDevices = ({ permission, dispatch }: TUseFetchDevices) => {
 
   // Initial fetch on mount or when permission changes
   useEffect(() => {
-    getUpdatedDevices().catch(console.error);
+    getUpdatedDevices().catch(logger.red);
   }, [permission, getUpdatedDevices]);
 
   return [getUpdatedDevices];

@@ -3,6 +3,7 @@ import { TJoinProductionOptions } from "./types.ts";
 import { noop } from "../../helpers.ts";
 import { API } from "../../api/api.ts";
 import { TGlobalStateAction } from "../../global-state/global-state-actions.ts";
+import logger from "../../utils/logger.ts";
 
 type TUseGetRtcOfferOptions = {
   joinProductionOptions: TJoinProductionOptions | null;
@@ -64,7 +65,7 @@ export const useEstablishSession = ({
       if (sessionId) {
         API.deleteAudioSession({
           sessionId,
-        }).catch(console.error);
+        }).catch(logger.red);
       }
     },
     [sessionId, joinProductionOptions]

@@ -4,6 +4,7 @@ import { ShareIcon } from "../../assets/icons/icon";
 import { PrimaryButton } from "../landing-page/form-elements";
 import { ShareLineLinkModal } from "./share-line-link-modal";
 import { useShareLine } from "./use-share-line";
+import logger from "../../utils/logger";
 
 type TShareLineBtnProps = {
   isMinified?: boolean;
@@ -54,7 +55,7 @@ export const ShareLineButton = ({
       const res = await shareLine();
       setUrl(res.url);
     } catch (error) {
-      console.error("Error sharing:", error);
+      logger.red(`Error sharing: ${error}`);
     }
   };
 

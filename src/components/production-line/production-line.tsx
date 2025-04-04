@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, useMemo } from "react";
+import { useCallback, useEffect, useState, useMemo } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useNavigate, useParams } from "react-router-dom";
 import { isMobile, isTablet } from "../../bowser.ts";
@@ -42,6 +42,9 @@ import { useMuteInput } from "./use-mute-input.tsx";
 import { UserControls } from "./user-controls.tsx";
 import { UserList } from "./user-list.tsx";
 import { useActiveParticipant } from "./use-active-participant.tsx";
+import { useVolumeReducer } from "./use-volume-reducer.tsx";
+import { useMasterInputMute } from "./use-master-input-mute.ts";
+import logger from "../../utils/logger.ts";
 
 type TProductionLine = {
   id: string;
@@ -70,7 +73,6 @@ export const ProductionLine = ({
   const [isOutputMuted, setIsOutputMuted] = useState(false);
   const [confirmExitModalOpen, setConfirmExitModalOpen] = useState(false);
   const [value, setValue] = useState(0.75);
-  const [hasReduced, setHasReduced] = useState(false);
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [muteError, setMuteError] = useState(false);
   const [userId, setUserId] = useState("");
@@ -88,8 +90,6 @@ export const ProductionLine = ({
     dataChannel,
     isRemotelyMuted,
   } = callState;
-
-  const increaseVolumeTimeoutRef = useRef<number | null>(null);
   const { isActiveParticipant } = useActiveParticipant(
     audioLevelAboveThreshold
   );
@@ -141,6 +141,13 @@ export const ProductionLine = ({
       : null
   );
 
+  useVolumeReducer({
+    line,
+    audioElements,
+    shouldReduceVolume,
+    value,
+  });
+
   useEffect(() => {
     if (audioElements) {
       audioElements.forEach((audioElement) => {
@@ -171,44 +178,6 @@ export const ProductionLine = ({
       });
     }
   }, [audioElements, value]);
-
-  useEffect(() => {
-    // Reduce volume by 80%
-    const volumeChangeFactor = 0.2;
-
-    if (line?.programOutputLine) {
-      if (shouldReduceVolume && !hasReduced) {
-        setHasReduced(true);
-
-        audioElements?.forEach((audioElement) => {
-          // eslint-disable-next-line no-param-reassign
-          audioElement.volume = value * volumeChangeFactor;
-        });
-      }
-
-      if (!shouldReduceVolume && hasReduced) {
-        increaseVolumeTimeoutRef.current = window.setTimeout(() => {
-          audioElements?.forEach((audioElement) => {
-            // eslint-disable-next-line no-param-reassign
-            audioElement.volume = value;
-          });
-          setHasReduced(false);
-        }, 2000);
-      }
-    }
-
-    return () => {
-      if (increaseVolumeTimeoutRef.current) {
-        window.clearTimeout(increaseVolumeTimeoutRef.current);
-      }
-    };
-  }, [
-    shouldReduceVolume,
-    hasReduced,
-    value,
-    audioElements,
-    line?.programOutputLine,
-  ]);
 
   useHotkeys(savedHotkeys?.increaseVolumeHotkey || "u", () => {
     const newValue = Math.min(value + 0.05, 1);
@@ -271,37 +240,14 @@ export const ProductionLine = ({
     }
   }, [joinProductionOptions]);
 
-  useEffect(() => {
-    if (
-      inputAudioStream &&
-      inputAudioStream !== "no-device" &&
-      !isProgramOutputLine
-    ) {
-      inputAudioStream.getTracks().forEach((t) => {
-        // eslint-disable-next-line no-param-reassign
-        t.enabled = !masterInputMute;
-      });
-      muteInput(masterInputMute);
-    }
-    if (masterInputMute && !isProgramOutputLine) {
-      dispatch({
-        type: "UPDATE_CALL",
-        payload: {
-          id,
-          updates: {
-            isRemotelyMuted: false,
-          },
-        },
-      });
-    }
-  }, [
-    dispatch,
-    id,
+  useMasterInputMute({
     inputAudioStream,
     isProgramOutputLine,
     masterInputMute,
     muteInput,
-  ]);
+    dispatch,
+    id,
+  });
 
   useEffect(() => {
     if (connectionState === "connected") {
@@ -370,7 +316,7 @@ export const ProductionLine = ({
       setConfirmModalOpen(false);
     } else {
       setMuteError(true);
-      console.error("Data channel is not open.");
+      logger.red("Data channel is not open.");
     }
   };
 

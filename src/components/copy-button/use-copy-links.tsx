@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from "react";
+import logger from "../../utils/logger";
 
 export const useCopyLinks = () => {
   const [isCopied, setIsCopied] = useState<boolean>(false);
@@ -29,7 +30,7 @@ export const useCopyLinks = () => {
           }, 1500);
         })
         .catch((err) => {
-          console.error("Failed to copy text: ", err);
+          logger.red(`Failed to copy text: ${err}`);
         });
     }
   };

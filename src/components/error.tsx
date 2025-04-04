@@ -2,6 +2,7 @@ import styled from "@emotion/styled";
 import { FC, useEffect, useState } from "react";
 import { errorColour } from "../css-helpers/defaults";
 import { useGlobalState } from "../global-state/context-provider";
+import logger from "../utils/logger";
 
 const ErrorDisplay = styled.div`
   width: 100%;
@@ -37,7 +38,7 @@ export const ErrorBanner: FC = () => {
     if (error.callErrors) {
       Object.entries(error.callErrors).forEach(([, singleError]) => {
         if (singleError && !displayedMessages.has(singleError.message)) {
-          console.error(`Error:`, singleError.message); // Display only unique errors
+          logger.red(`Error: ${singleError.message}`); // Display only unique errors
           displayedMessages.add(singleError.message);
         }
       });

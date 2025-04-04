@@ -21,7 +21,9 @@ const globalReducer: Reducer<TGlobalState, TGlobalStateAction> = (
   action
 ): TGlobalState => {
   // Simple Debug
-  // console.log(action.type, action.payload);
+  // logger.cyan(
+  //   `Global state action: ${action.type}, payload: ${action.payload}`
+  // );
   switch (action.type) {
     case "ERROR": {
       const { callId, error } = action.payload;

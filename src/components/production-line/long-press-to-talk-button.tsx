@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import styled from "@emotion/styled";
 import { PrimaryButton } from "../landing-page/form-elements";
 import { isMobile } from "../../bowser";
+import logger from "../../utils/logger";
 
 type TLongPressToTalkButton = {
   muteInput: (input: boolean) => void;
@@ -71,7 +72,7 @@ export const LongPressToTalkButton = ({
         clearTimeout(longPressTimeout);
         break;
       default:
-        console.error(`Invalid event type received: ${e.type}`);
+        logger.red(`Invalid event type received: ${e.type}`);
     }
   };
 
