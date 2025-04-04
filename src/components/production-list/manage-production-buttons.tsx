@@ -26,6 +26,7 @@ import {
   RemoveIconWrapper,
   SpinnerWrapper,
 } from "./production-list-components";
+import { CopyAllLinksButton } from "../copy-button/copy-all-links-button";
 
 interface ManageProductionButtonsProps {
   production: TBasicProductionResponse;
@@ -144,6 +145,10 @@ export const ManageProductionButtons: FC<ManageProductionButtonsProps> = (
           )}
         </DeleteButton>
       </ManageButtons>
+      <CopyAllLinksButton
+        production={production}
+        className="manage-production-page"
+      />
       {addLineOpen && (
         <AddLineSectionForm>
           <FormLabel>

@@ -1,9 +1,10 @@
 import styled from "@emotion/styled";
-import { useEffect, useRef, useState } from "react";
-import { CheckIcon, CopyIcon, RefreshIcon } from "../../assets/icons/icon";
+import { useEffect, useRef } from "react";
+import { RefreshIcon } from "../../assets/icons/icon";
 import { FormInput } from "../landing-page/form-elements";
 import { Modal } from "../modal/modal";
 import { StyledRefreshBtn } from "../reload-devices-button.tsx/reload-devices-button";
+import { CopyButton } from "../copy-button/copy-button";
 
 type TShareLineLinkModalProps = {
   url: string;
@@ -16,35 +17,6 @@ const Wrapper = styled.div`
   display: flex;
   flex-direction: row;
   align-items: flex-start;
-`;
-
-const IconWrapper = styled.div<{ isCopied: boolean }>`
-  width: 4rem;
-  height: 4rem;
-  margin-left: 1rem;
-  display: flex;
-  padding: 0.5rem;
-  border-radius: 0.5rem;
-  transition:
-    transform 0.1s ease,
-    background 0.2s ease;
-
-  ${({ isCopied }) =>
-    !isCopied &&
-    `
-    &:active {
-    transform: scale(0.95);
-    background: rgba(0, 0, 0, 0.4);
-  }
-  `}
-
-  &:hover {
-    background: rgba(0, 0, 0, 0.3);
-  }
-
-  svg {
-    fill: #59cbe8;
-  }
 `;
 
 const ModalHeader = styled.h1`
@@ -88,7 +60,6 @@ export const ShareLineLinkModal = ({
   onRefresh,
   onClose,
 }: TShareLineLinkModalProps) => {
-  const [isCopied, setIsCopied] = useState<boolean>(false);
   const modalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -104,29 +75,6 @@ export const ShareLineLinkModal = ({
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [onClose]);
-
-  useEffect(() => {
-    if (isCopied) {
-      const timeout = setTimeout(() => {
-        setIsCopied(false);
-      }, 1500);
-      return () => clearTimeout(timeout);
-    }
-    return undefined;
-  }, [isCopied]);
-
-  const handleCopyUrlToClipboard = (input: string) => {
-    if (input !== null) {
-      navigator.clipboard
-        .writeText(input)
-        .then(() => {
-          setIsCopied(true);
-        })
-        .catch((err) => {
-          console.error("Failed to copy text: ", err);
-        });
-    }
-  };
 
   return (
     <Modal onClose={onClose}>
@@ -144,15 +92,7 @@ export const ShareLineLinkModal = ({
         </ModalTextItalic>
         <Wrapper>
           <FormInput value={url} readOnly />
-          <IconWrapper
-            isCopied={isCopied}
-            onClick={() => {
-              if (isCopied) return;
-              handleCopyUrlToClipboard(url);
-            }}
-          >
-            {isCopied ? <CheckIcon /> : <CopyIcon />}
-          </IconWrapper>
+          <CopyButton url={url} className="share-line-link-modal" />
         </Wrapper>
         <RefreshButtonWrapper>
           <StyledRefreshBtn onClick={onRefresh}>

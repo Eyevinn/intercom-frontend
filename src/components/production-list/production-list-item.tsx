@@ -42,6 +42,7 @@ import {
   ProductionName,
   SpinnerWrapper,
 } from "./production-list-components";
+import { CopyButton } from "../copy-button/copy-button";
 
 type ProductionsListItemProps = {
   production: TBasicProductionResponse;
@@ -194,6 +195,12 @@ export const ProductionsListItem = ({
                         <ChevronDownIcon />
                       )}
                     </ParticipantExpandBtn>
+                  )}
+                  {managementMode && (
+                    <CopyButton
+                      url={`${window.location.origin}/production-calls/production/${production.productionId}/line/${l.id}`}
+                      className="production-list-item"
+                    />
                   )}
                 </LineBlockTitleWrapper>
                 <LineBlockParticipants>

@@ -27,6 +27,7 @@ import { ResponsiveFormContainer } from "../user-settings/user-settings.tsx";
 import { isMobile } from "../../bowser.ts";
 import { Checkbox } from "../checkbox/checkbox.tsx";
 import { FormValues, useCreateProduction } from "./use-create-production.tsx";
+import { CopyAllLinksButton } from "../copy-button/copy-all-links-button.tsx";
 
 const HeaderWrapper = styled.div`
   display: flex;
@@ -58,16 +59,6 @@ const ProductionConfirmation = styled.div`
   color: #1a1a1a;
 `;
 
-const CopyToClipboardWrapper = styled.div`
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-`;
-
-const CopyConfirmation = styled.p`
-  padding-left: 1rem;
-`;
-
 const FetchErrorMessage = styled.div`
   background: ${errorColour};
   color: ${darkText};
@@ -83,7 +74,6 @@ export const CreateProductionPage = () => {
   const [, dispatch] = useGlobalState();
   const [createNewProduction, setCreateNewProduction] =
     useState<FormValues | null>(null);
-  const [copiedUrl, setCopiedUrl] = useState<boolean>(false);
   const {
     formState: { errors },
     control,
@@ -132,34 +122,6 @@ export const CreateProductionPage = () => {
       });
     }
   }, [createdProductionId, dispatch, reset]);
-
-  useEffect(() => {
-    let timeout: number | null = null;
-    if (copiedUrl) {
-      timeout = window.setTimeout(() => {
-        setCopiedUrl(false);
-      }, 1500);
-    }
-    return () => {
-      if (timeout !== null) {
-        window.clearTimeout(timeout);
-      }
-    };
-  }, [copiedUrl]);
-
-  const handleCopyProdUrlsToClipboard = (input: string[]) => {
-    if (input !== null) {
-      navigator.clipboard
-        .writeText(input.join("\n"))
-        .then(() => {
-          setCopiedUrl(true);
-          console.log("Text copied to clipboard");
-        })
-        .catch((err) => {
-          console.error("Failed to copy text: ", err);
-        });
-    }
-  };
 
   return (
     <ResponsiveFormContainer className={isMobile ? "" : "desktop"}>
@@ -284,22 +246,10 @@ export const CreateProductionPage = () => {
             The production ID is: {createdProductionId.toString()}
           </ProductionConfirmation>
           {!productionFetchError && production && (
-            <CopyToClipboardWrapper>
-              <PrimaryButton
-                type="button"
-                onClick={() =>
-                  handleCopyProdUrlsToClipboard(
-                    production.lines.map((item) => {
-                      return ` ${item.name}: ${window.location.origin}/production-calls/production/${production.productionId}/line/${item.id}`;
-                    })
-                  )
-                }
-                disabled={copiedUrl}
-              >
-                Copy Links
-              </PrimaryButton>
-              {copiedUrl && <CopyConfirmation>Copied</CopyConfirmation>}
-            </CopyToClipboardWrapper>
+            <CopyAllLinksButton
+              production={production}
+              className="create-production-page"
+            />
           )}
           {productionFetchError && (
             <FetchErrorMessage>
