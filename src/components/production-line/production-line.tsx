@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useNavigate, useParams } from "react-router-dom";
 import { isMobile, isTablet } from "../../bowser.ts";
@@ -41,6 +41,7 @@ import { useLinePolling } from "./use-line-polling.ts";
 import { useMuteInput } from "./use-mute-input.tsx";
 import { UserControls } from "./user-controls.tsx";
 import { UserList } from "./user-list.tsx";
+import { useActiveParticipant } from "./use-active-participant.tsx";
 
 type TProductionLine = {
   id: string;
@@ -87,6 +88,9 @@ export const ProductionLine = ({
   } = callState;
 
   const increaseVolumeTimeoutRef = useRef<number | null>(null);
+  const { isActiveParticipant } = useActiveParticipant(
+    audioLevelAboveThreshold
+  );
 
   const [inputAudioStream, resetAudioInput] = useAudioInput({
     audioInputId: joinProductionOptions?.audioinput ?? null,
@@ -96,6 +100,15 @@ export const ProductionLine = ({
   const isProgramOutputLine = line && line.programOutputLine;
   const isProgramUser =
     joinProductionOptions && joinProductionOptions.isProgramUser;
+
+  const lineParticipant = useMemo(
+    () =>
+      line?.participants.find((p) => p.sessionId === callState.sessionId)
+        ?.endpointId,
+    [line?.participants, callState.sessionId]
+  );
+
+  const isSelfDominantSpeaker = lineParticipant === dominantSpeaker;
 
   const { production, error: fetchProductionError } = useFetchProduction(
     joinProductionOptions
@@ -339,7 +352,11 @@ export const ProductionLine = ({
   // TODO detect if browser back button is pressed and run exit();
 
   return (
-    <CallWrapper>
+    <CallWrapper
+      isSomeoneSpeaking={
+        !isProgramOutputLine && !isSelfDominantSpeaker && isActiveParticipant
+      }
+    >
       {joinProductionOptions &&
         loading &&
         (!connectionError ? (
