@@ -3,6 +3,7 @@ import { noop } from "../../helpers.ts";
 import { API } from "../../api/api.ts";
 import { TJoinProductionOptions, TLine } from "./types.ts";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
+import logger from "../../utils/logger.ts";
 
 type TProps = {
   callId: string;
@@ -23,7 +24,9 @@ export const useLinePolling = ({ callId, joinProductionOptions }: TProps) => {
       API.fetchProductionLine(productionId, lineId)
         .then((l) => setLine(l))
         .catch(() => {
-          console.error();
+          logger.red(
+            `Error fetching production line ${productionId}/${lineId}. For call-id: ${callId}`
+          );
           dispatch({
             type: "ERROR",
             payload: {

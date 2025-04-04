@@ -1,8 +1,9 @@
 import { useRouteError } from "react-router-dom";
+import logger from "../utils/logger";
 
 export const ErrorPage = () => {
   const error = useRouteError();
-  console.error(error);
+  logger.red(`Error: ${error}`);
 
   if (error instanceof Error) {
     return (
