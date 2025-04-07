@@ -55,13 +55,15 @@ type TProductionLine = {
   masterInputMute: boolean;
   shouldReduceVolume: boolean;
   setFailedToConnect: () => void;
+  isSettingGlobalMute?: boolean;
   registerCallState?: (
     callId: string,
     data: {
       isInputMuted: boolean;
       isOutputMuted: boolean;
       volume: number;
-    }
+    },
+    isGlobalMute?: boolean
   ) => void;
   deregisterCall?: (callId: string) => void;
   onToggleInputMute?: (handler: () => void) => void;
@@ -79,6 +81,7 @@ export const ProductionLine = ({
   masterInputMute,
   shouldReduceVolume,
   setFailedToConnect,
+  isSettingGlobalMute,
   registerCallState,
   deregisterCall,
   onToggleInputMute,
@@ -114,16 +117,6 @@ export const ProductionLine = ({
   const { isActiveParticipant } = useActiveParticipant(
     audioLevelAboveThreshold
   );
-
-  const muteOutput = useCallback(() => {
-    if (!audioElements) return;
-
-    audioElements.forEach((singleElement: HTMLAudioElement) => {
-      // eslint-disable-next-line no-param-reassign
-      singleElement.muted = !isOutputMuted;
-    });
-    setIsOutputMuted(!isOutputMuted);
-  }, [audioElements, isOutputMuted]);
 
   const [inputAudioStream, audioInputError, resetAudioInput] = useAudioInput({
     audioInputId: joinProductionOptions?.audioinput ?? null,
@@ -195,51 +188,6 @@ export const ProductionLine = ({
   });
 
   const { triggerPushToTalk } = usePushToTalk({ muteInput });
-
-  useEffect(() => {
-    if (onToggleInputMute) {
-      onToggleInputMute(() => setIsInputMuted((prev) => !prev));
-    }
-    if (onToggleOutputMute) {
-      onToggleOutputMute(() => muteOutput());
-    }
-    if (onIncreaseVolume) {
-      onIncreaseVolume(() => {
-        const newVal = Math.min(value + 0.05, 1);
-        setValue(newVal);
-        audioElements?.forEach((el) => {
-          const element = el;
-          element.volume = newVal;
-        });
-      });
-    }
-    if (onDecreaseVolume) {
-      onDecreaseVolume(() => {
-        const newVal = Math.max(value - 0.05, 0);
-        setValue(newVal);
-        audioElements?.forEach((el) => {
-          const element = el;
-          element.volume = newVal;
-        });
-      });
-    }
-    if (onPushToTalk) {
-      onPushToTalk(() => {
-        triggerPushToTalk();
-      });
-    }
-  }, [
-    onToggleInputMute,
-    onToggleOutputMute,
-    onIncreaseVolume,
-    onDecreaseVolume,
-    onPushToTalk,
-    value,
-    audioElements,
-    muteOutput,
-    id,
-    triggerPushToTalk,
-  ]);
 
   useEffect(() => {
     if (audioElements) {
@@ -345,20 +293,74 @@ export const ProductionLine = ({
     inputAudioStream,
     isProgramOutputLine,
     masterInputMute,
-    muteInput,
     dispatch,
     id,
+    muteInput,
+    isOutputMuted,
+    value,
+    isSettingGlobalMute,
   });
-
-  useEffect(() => {
-    console.log("isOutputMuted", isOutputMuted);
-  }, [isOutputMuted]);
 
   useEffect(() => {
     if (connectionState === "connected") {
       playEnterSound();
     }
   }, [connectionState, playEnterSound]);
+
+  const muteOutput = useCallback(() => {
+    if (!audioElements) return;
+
+    audioElements.forEach((singleElement: HTMLAudioElement) => {
+      // eslint-disable-next-line no-param-reassign
+      singleElement.muted = !isOutputMuted;
+    });
+    setIsOutputMuted(!isOutputMuted);
+  }, [audioElements, isOutputMuted]);
+
+  useEffect(() => {
+    if (onToggleInputMute) {
+      onToggleInputMute(() => setIsInputMuted((prev) => !prev));
+    }
+    if (onToggleOutputMute) {
+      onToggleOutputMute(() => muteOutput());
+    }
+    if (onIncreaseVolume) {
+      onIncreaseVolume(() => {
+        const newVal = Math.min(value + 0.05, 1);
+        setValue(newVal);
+        audioElements?.forEach((el) => {
+          const element = el;
+          element.volume = newVal;
+        });
+      });
+    }
+    if (onDecreaseVolume) {
+      onDecreaseVolume(() => {
+        const newVal = Math.max(value - 0.05, 0);
+        setValue(newVal);
+        audioElements?.forEach((el) => {
+          const element = el;
+          element.volume = newVal;
+        });
+      });
+    }
+    if (onPushToTalk) {
+      onPushToTalk(() => {
+        triggerPushToTalk();
+      });
+    }
+  }, [
+    onToggleInputMute,
+    onToggleOutputMute,
+    onIncreaseVolume,
+    onDecreaseVolume,
+    onPushToTalk,
+    value,
+    audioElements,
+    muteOutput,
+    id,
+    triggerPushToTalk,
+  ]);
 
   useSpeakerHotkeys({
     muteOutput,
