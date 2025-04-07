@@ -54,8 +54,8 @@ type TProductionLine = {
   customGlobalMute: string;
   masterInputMute: boolean;
   shouldReduceVolume: boolean;
-  setFailedToConnect: () => void;
   isSettingGlobalMute?: boolean;
+  setFailedToConnect: () => void;
   registerCallState?: (
     callId: string,
     data: {
@@ -80,8 +80,8 @@ export const ProductionLine = ({
   customGlobalMute,
   masterInputMute,
   shouldReduceVolume,
-  setFailedToConnect,
   isSettingGlobalMute,
+  setFailedToConnect,
   registerCallState,
   deregisterCall,
   onToggleInputMute,
@@ -296,9 +296,10 @@ export const ProductionLine = ({
     dispatch,
     id,
     muteInput,
+    registerCallState,
+    isSettingGlobalMute,
     isOutputMuted,
     value,
-    isSettingGlobalMute,
   });
 
   useEffect(() => {
@@ -317,6 +318,7 @@ export const ProductionLine = ({
     setIsOutputMuted(!isOutputMuted);
   }, [audioElements, isOutputMuted]);
 
+  // TODO: Move to seperate hook
   useEffect(() => {
     if (onToggleInputMute) {
       onToggleInputMute(() => setIsInputMuted((prev) => !prev));

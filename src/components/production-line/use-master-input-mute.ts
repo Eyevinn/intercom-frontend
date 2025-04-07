@@ -32,7 +32,7 @@ export const useMasterInputMute = ({
   registerCallState,
   isSettingGlobalMute,
   isOutputMuted,
-  value
+  value,
 }: UseMasterInputMuteProps) => {
   useEffect(() => {
     if (
@@ -51,12 +51,11 @@ export const useMasterInputMute = ({
         id,
         {
           isInputMuted: masterInputMute,
-          isOutputMuted: isOutputMuted,
+          isOutputMuted,
           volume: value,
         },
         isSettingGlobalMute
       );
-
     }
     if (masterInputMute && !isProgramOutputLine) {
       dispatch({
@@ -76,5 +75,9 @@ export const useMasterInputMute = ({
     isProgramOutputLine,
     masterInputMute,
     muteInput,
+    isSettingGlobalMute,
+    registerCallState,
+    isOutputMuted,
+    value,
   ]);
 };
