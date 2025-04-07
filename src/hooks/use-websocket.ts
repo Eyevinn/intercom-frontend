@@ -11,7 +11,7 @@ type WebSocketAction =
 
 interface UseWebSocketProps {
   dispatch: Dispatch<TGlobalStateAction>;
-  onAction: (action: WebSocketAction) => void;
+  onAction: (action: WebSocketAction, index?: number) => void;
 }
 
 export function useWebSocket({ dispatch, onAction }: UseWebSocketProps) {
@@ -32,7 +32,7 @@ export function useWebSocket({ dispatch, onAction }: UseWebSocketProps) {
         try {
           const data = JSON.parse(event.data);
           if (data.action) {
-            onAction(data.action);
+            onAction(data.action, data.index);
           }
         } catch (e) {
           console.error("Error parsing WebSocket message:", e);
