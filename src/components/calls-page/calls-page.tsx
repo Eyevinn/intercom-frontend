@@ -81,6 +81,7 @@ export const CallsPage = () => {
     numberOfCalls: Object.values(calls).length,
   });
   const [showSettings, setShowSettings] = useState<boolean>(false);
+  const [isSettingGlobalMute, setIsSettingGlobalMute] = useState(false);
 
   const { productionId: paramProductionId, lineId: paramLineId } = useParams();
   const navigate = useCallsNavigation({
@@ -115,9 +116,13 @@ export const CallsPage = () => {
   const handleToggleGlobalMute = () => {
     if (muteToggleTimeout) return;
     setIsMasterInputMuted((prev) => !prev);
+    setIsSettingGlobalMute(true);
     muteToggleTimeout = setTimeout(() => {
       muteToggleTimeout = null;
     }, 300);
+    setTimeout(() => {
+      setIsSettingGlobalMute(false);
+    }, 1000);
   };
 
   const callActionHandlers = useRef<Record<string, Record<string, () => void>>>(
@@ -307,6 +312,8 @@ export const CallsPage = () => {
                 customGlobalMute={customGlobalMute}
                 masterInputMute={isMasterInputMuted}
                 shouldReduceVolume={shouldReduceVolume}
+                setFailedToConnect={() => setAddCallActive(true)}
+                isSettingGlobalMute={isSettingGlobalMute}
                 registerCallState={registerCallList}
                 deregisterCall={deregisterCall}
                 onToggleInputMute={(handler) => {

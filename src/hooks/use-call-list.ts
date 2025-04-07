@@ -11,6 +11,7 @@ type UseCallListProps = {
   globalMute: boolean;
   numberOfCalls: number;
 };
+
 export function useCallList({
   websocket,
   globalMute,
@@ -43,9 +44,9 @@ export function useCallList({
       websocket.readyState === WebSocket.OPEN &&
       serialized !== lastSentCallsState.current
     ) {
+      console.log("Sending CALLS_STATE_UPDATE");
       websocket.send(serialized);
       lastSentCallsState.current = serialized;
-      console.log("Sent CALLS_STATE_UPDATE: ", payload);
     }
   }, [websocket]);
 
@@ -56,48 +57,52 @@ export function useCallList({
   }, [globalMute, numberOfCalls, sendCallsStateUpdate]);
 
   const registerCallList = useCallback(
-    (callId: string, data: CallData) => {
+    (callId: string, data: CallData, isGlobalMute = false) => {
       const prev = callLineStates.current[callId];
+      const isNewCall = prev === undefined;
+
+      callLineStates.current[callId] = data;
+
+      if (isGlobalMute) {
+        console.log("isGlobalMute", isGlobalMute);
+      }
+
+      if (isNewCall) {
+        return;
+      }
+
       const hasChanged =
-        !prev ||
         prev.isInputMuted !== data.isInputMuted ||
         prev.isOutputMuted !== data.isOutputMuted ||
         prev.volume !== data.volume;
 
       if (!hasChanged) return;
 
-      callLineStates.current[callId] = data;
-
       const entries = Object.entries(callLineStates.current);
       const index = entries.findIndex(([id]) => id === callId) + 1;
 
-      if (websocket && websocket.readyState === WebSocket.OPEN) {
+      if (
+        websocket &&
+        websocket.readyState === WebSocket.OPEN &&
+        !isGlobalMute
+      ) {
+        console.log("Sending CALL_UPDATE");
         websocket.send(
           JSON.stringify({
-            type: "CALL_STATE_UPDATE",
+            type: "CALL_UPDATE",
             callId,
             index,
             ...data,
           })
         );
-        console.log("Sent CALL_STATE_UPDATE: ", {
-          callId,
-          index,
-          ...data,
-        });
       }
     },
     [websocket]
   );
 
-  const deregisterCall = useCallback(
-    (callId: string) => {
-      delete callLineStates.current[callId];
-
-      sendCallsStateUpdate();
-    },
-    [sendCallsStateUpdate]
-  );
+  const deregisterCall = useCallback((callId: string) => {
+    delete callLineStates.current[callId];
+  }, []);
 
   return { registerCallList, deregisterCall };
 }
