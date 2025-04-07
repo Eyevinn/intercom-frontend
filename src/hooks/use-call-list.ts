@@ -44,7 +44,6 @@ export function useCallList({
       websocket.readyState === WebSocket.OPEN &&
       serialized !== lastSentCallsState.current
     ) {
-      console.log("Sending CALLS_STATE_UPDATE");
       websocket.send(serialized);
       lastSentCallsState.current = serialized;
     }
@@ -82,7 +81,6 @@ export function useCallList({
         websocket.readyState === WebSocket.OPEN &&
         !isGlobalMute
       ) {
-        console.log("Sending CALL_UPDATE");
         websocket.send(
           JSON.stringify({
             type: "CALL_UPDATE",

@@ -4,6 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { isBrowserFirefox, isMobile, isTablet } from "../../bowser.ts";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { CallState } from "../../global-state/types.ts";
+import { useCallActionHandlers } from "../../hooks/use-call-action-handlers.ts";
 import { usePushToTalk } from "../../hooks/use-push-to-talk.ts";
 import logger from "../../utils/logger.ts";
 import { DisplayWarning } from "../display-box.tsx";
@@ -180,15 +181,6 @@ export const ProductionLine = ({
     });
   }, [id, isInputMuted, isOutputMuted, value, registerCallState]);
 
-  const { muteInput, inputMute } = useMuteInput({
-    inputAudioStream,
-    isProgramOutputLine,
-    isProgramUser,
-    id,
-  });
-
-  const { triggerPushToTalk } = usePushToTalk({ muteInput });
-
   useEffect(() => {
     if (audioElements) {
       audioElements.forEach((audioElement) => {
@@ -199,6 +191,15 @@ export const ProductionLine = ({
       });
     }
   }, [audioElements]);
+
+  const { muteInput, inputMute } = useMuteInput({
+    inputAudioStream,
+    isProgramOutputLine,
+    isProgramUser,
+    id,
+  });
+
+  const { triggerPushToTalk } = usePushToTalk({ muteInput });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = parseFloat(e.target.value);
@@ -318,51 +319,19 @@ export const ProductionLine = ({
     setIsOutputMuted(!isOutputMuted);
   }, [audioElements, isOutputMuted]);
 
-  // TODO: Move to seperate hook
-  useEffect(() => {
-    if (onToggleInputMute) {
-      onToggleInputMute(() => setIsInputMuted((prev) => !prev));
-    }
-    if (onToggleOutputMute) {
-      onToggleOutputMute(() => muteOutput());
-    }
-    if (onIncreaseVolume) {
-      onIncreaseVolume(() => {
-        const newVal = Math.min(value + 0.05, 1);
-        setValue(newVal);
-        audioElements?.forEach((el) => {
-          const element = el;
-          element.volume = newVal;
-        });
-      });
-    }
-    if (onDecreaseVolume) {
-      onDecreaseVolume(() => {
-        const newVal = Math.max(value - 0.05, 0);
-        setValue(newVal);
-        audioElements?.forEach((el) => {
-          const element = el;
-          element.volume = newVal;
-        });
-      });
-    }
-    if (onPushToTalk) {
-      onPushToTalk(() => {
-        triggerPushToTalk();
-      });
-    }
-  }, [
+  useCallActionHandlers({
     onToggleInputMute,
     onToggleOutputMute,
     onIncreaseVolume,
     onDecreaseVolume,
     onPushToTalk,
     value,
+    setValue,
+    setIsInputMuted,
     audioElements,
     muteOutput,
-    id,
     triggerPushToTalk,
-  ]);
+  });
 
   useSpeakerHotkeys({
     muteOutput,
