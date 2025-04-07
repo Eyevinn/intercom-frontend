@@ -37,6 +37,11 @@ const Loading = styled.div`
     border-top: 0.4rem solid #595959;
   }
 
+  &.companion-loader {
+    width: 1.8rem;
+    height: 1.8rem;
+  }
+
   &.production-list {
     height: 2rem;
     width: 2rem;
