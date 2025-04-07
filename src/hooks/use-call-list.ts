@@ -57,15 +57,11 @@ export function useCallList({
   }, [globalMute, numberOfCalls, sendCallsStateUpdate]);
 
   const registerCallList = useCallback(
-    (callId: string, data: CallData, isGlobalMute = false) => {
+    (callId: string, data: CallData, isGlobalMute?: boolean) => {
       const prev = callLineStates.current[callId];
       const isNewCall = prev === undefined;
 
       callLineStates.current[callId] = data;
-
-      if (isGlobalMute) {
-        console.log("isGlobalMute", isGlobalMute);
-      }
 
       if (isNewCall) {
         return;
