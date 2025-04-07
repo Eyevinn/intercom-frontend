@@ -123,33 +123,61 @@ export const CallsPage = () => {
   const callActionHandlers = useRef<Record<string, Record<string, () => void>>>(
     {}
   );
+  const callIndexMap = useRef<Record<number, string>>({});
+
+  useEffect(() => {
+    callIndexMap.current = {};
+    Object.keys(calls).forEach((callId, i) => {
+      callIndexMap.current[i + 1] = callId;
+    });
+  }, [calls]);
 
   const { connect, isConnected } = useWebSocket({
-    onAction: (action) => {
-      Object.values(callActionHandlers.current).forEach((handlers) => {
-        switch (action) {
-          case "toggle_input_mute":
-            handlers.toggleInputMute?.();
-            break;
-          case "toggle_output_mute":
-            handlers.toggleOutputMute?.();
-            break;
-          case "increase_volume":
-            handlers.increaseVolume?.();
-            break;
-          case "decrease_volume":
-            handlers.decreaseVolume?.();
-            break;
-          case "push_to_talk":
-            handlers.pushToTalk?.();
-            break;
-          case "toggle_global_mute":
-            handleToggleGlobalMute();
-            break;
-          default:
-            console.warn("Unknown action:", action);
-        }
-      });
+    onAction: (action, index) => {
+      if (action === "toggle_global_mute") {
+        handleToggleGlobalMute();
+        return;
+      }
+
+      if (typeof index !== "number") {
+        console.warn(
+          "Missing or invalid index for call-specific action:",
+          action
+        );
+        return;
+      }
+
+      const callId = callIndexMap.current[index];
+      if (!callId) {
+        console.warn("No callId found for index:", index);
+        return;
+      }
+
+      const handlers = callActionHandlers.current[callId];
+      if (!handlers) {
+        console.warn("No handlers registered for callId:", callId);
+        return;
+      }
+
+      switch (action) {
+        case "toggle_input_mute":
+          handlers.toggleInputMute?.();
+          break;
+        case "toggle_output_mute":
+          handlers.toggleOutputMute?.();
+          break;
+        case "increase_volume":
+          handlers.increaseVolume?.();
+          break;
+        case "decrease_volume":
+          handlers.decreaseVolume?.();
+          break;
+        case "push_to_talk":
+          handlers.pushToTalk?.();
+          break;
+        default:
+          console.warn("Unknown call-specific action:", action);
+      }
     },
     dispatch,
   });
