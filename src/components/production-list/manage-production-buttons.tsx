@@ -6,7 +6,7 @@ import { TBasicProductionResponse } from "../../api/api";
 import { RemoveIcon } from "../../assets/icons/icon";
 import { useGlobalState } from "../../global-state/context-provider";
 import { Checkbox } from "../checkbox/checkbox";
-import { ListItemWrapper } from "../create-production/create-production-page";
+import { ListItemWrapper } from "../generic-components";
 import {
   FormInput,
   FormLabel,
