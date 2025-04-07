@@ -1,8 +1,9 @@
 import styled from "@emotion/styled";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CheckIcon } from "../../assets/icons/icon";
 import { useGlobalState } from "../../global-state/context-provider";
 import { PrimaryButton } from "../landing-page/form-elements";
+import { Spinner } from "../loader/loader";
 import { ConnectToWsModal } from "./connect-to-ws-modal";
 
 const ConnectButton = styled(PrimaryButton)<{ isConnected: boolean }>`
@@ -28,6 +29,7 @@ export const ConnectToWSButton = ({
 }: ConnectToWSButtonProps) => {
   const [{ websocket }, dispatch] = useGlobalState();
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [isReconnecting, setIsReconnecting] = useState<boolean>(false);
 
   const handleConnect = (url: string) => {
     connect(url);
@@ -45,7 +47,23 @@ export const ConnectToWSButton = ({
     });
   };
 
-  console.log("isConnected", isConnected);
+  useEffect(() => {
+    if (websocket && websocket.readyState === WebSocket.CLOSED) {
+      setIsReconnecting(true);
+    } else {
+      setIsReconnecting(false);
+    }
+  }, [websocket]);
+
+  const renderButtonContent = () => {
+    if (isConnected) {
+      return "Companion";
+    }
+    if (isReconnecting) {
+      return "Reconnecting...";
+    }
+    return "Connect to Companion";
+  };
 
   return (
     <>
@@ -53,8 +71,9 @@ export const ConnectToWSButton = ({
         isConnected={isConnected}
         onClick={isConnected ? handleDisconnect : () => setIsOpen(true)}
       >
-        {isConnected ? "Companion" : "Connect to Companion"}
+        {renderButtonContent()}
         {isConnected && <CheckIcon />}
+        {isReconnecting && <Spinner className="companion-loader" />}
       </ConnectButton>
       <ConnectToWsModal
         isOpen={isOpen}
