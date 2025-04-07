@@ -1,5 +1,6 @@
 import { Dispatch, useCallback, useEffect, useRef, useState } from "react";
 import { TGlobalStateAction } from "../global-state/global-state-actions";
+import logger from "../utils/logger";
 
 type WebSocketAction =
   | "toggle_input_mute"
@@ -23,7 +24,6 @@ export function useWebSocket({ dispatch, onAction }: UseWebSocketProps) {
       const ws = new WebSocket(url);
 
       ws.onopen = () => {
-        console.log("WebSocket connected YAY");
         setIsConnected(true);
         dispatch({ type: "SET_WEBSOCKET", payload: ws });
       };
@@ -35,17 +35,17 @@ export function useWebSocket({ dispatch, onAction }: UseWebSocketProps) {
             onAction(data.action, data.index);
           }
         } catch (e) {
-          console.error("Error parsing WebSocket message:", e);
+          logger.red(`Error parsing WebSocket message: ${e}`);
         }
       };
 
       ws.onerror = (error) => {
-        console.error("WebSocket error:", error);
+        logger.red(`WebSocket error: ${error}`);
         setIsConnected(false);
       };
 
       ws.onclose = () => {
-        console.log("WebSocket disconnected");
+        logger.yellow("WebSocket connection closed");
         setIsConnected(false);
       };
 
