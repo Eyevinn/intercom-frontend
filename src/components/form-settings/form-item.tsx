@@ -1,7 +1,9 @@
+import React from "react";
 import { ErrorMessage } from "@hookform/error-message";
 import { FieldErrors } from "react-hook-form";
 import {
   DecorativeLabel,
+  FormLabel,
   StyledWarningMessage,
 } from "../landing-page/form-elements";
 import {
@@ -14,44 +16,49 @@ import { TUserSettings } from "../user-settings/types";
 
 export const FormItem = ({
   label,
-  productionLabel,
   fieldName,
-  className,
-  productionFetchError,
   errors,
-  errorMessage,
+  productionLabel,
+  productionFetchError,
+  errorClassName,
   children,
 }: {
   label: string;
+  fieldName?: string;
+  errors?: FieldErrors<TUserSettings | FormValues>;
   productionLabel?: string;
-  fieldName: string;
-  className: string;
-  productionFetchError: Error | null;
-  errors: FieldErrors<TUserSettings | FormValues>;
-  errorMessage: string;
+  productionFetchError?: Error | null;
+  errorClassName?: string;
   children: React.ReactNode;
 }) => {
+  const Wrapper = productionLabel ? React.Fragment : FormLabel;
+
   return (
     <>
-      {productionLabel ? (
-        <NameWrapper>
-          <ProductionName>{label}</ProductionName>
-          <ProductionName className={className}>
-            {productionLabel}
-          </ProductionName>
-        </NameWrapper>
-      ) : (
-        <DecorativeLabel>{label}</DecorativeLabel>
-      )}
-      {children}
+      <Wrapper>
+        {productionLabel ? (
+          <NameWrapper>
+            <ProductionName>{label}</ProductionName>
+            <ProductionName className="name">{productionLabel}</ProductionName>
+          </NameWrapper>
+        ) : (
+          <DecorativeLabel>{label}</DecorativeLabel>
+        )}
+        {children}
+      </Wrapper>
       {productionFetchError && (
-        <FetchErrorMessage>{errorMessage}</FetchErrorMessage>
+        <FetchErrorMessage>
+          The production ID could not be fetched. {productionFetchError.name}{" "}
+          {productionFetchError.message}.
+        </FetchErrorMessage>
       )}
-      <ErrorMessage
-        errors={errors}
-        name={fieldName}
-        as={StyledWarningMessage}
-      />
+      {fieldName && (
+        <ErrorMessage
+          errors={errors}
+          name={fieldName}
+          as={<StyledWarningMessage className={errorClassName || ""} />}
+        />
+      )}
     </>
   );
 };

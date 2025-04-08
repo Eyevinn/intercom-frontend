@@ -1,29 +1,22 @@
-import { ErrorMessage } from "@hookform/error-message";
 import { useForm, useWatch } from "react-hook-form";
 import { useEffect, useState } from "react";
 import {
-  DecorativeLabel,
   FormInput,
   FormSelect,
   StyledWarningMessage,
-  FormLabel,
   PrimaryButton,
 } from "../landing-page/form-elements";
 import { TUserSettings } from "../user-settings/types";
 import { TJoinProductionOptions } from "../production-line/types";
 import { Checkbox } from "../checkbox/checkbox";
 import { FormInputWithLoader } from "../landing-page/form-input-with-loader";
-import {
-  NameWrapper,
-  FetchErrorMessage,
-  CheckboxWrapper,
-} from "../landing-page/join-production-components";
-import { ProductionName } from "../production-list/production-list-components";
+import { CheckboxWrapper } from "../landing-page/join-production-components";
 import { ReloadDevicesButton } from "../reload-devices-button.tsx/reload-devices-button";
 import { useFetchProduction } from "../landing-page/use-fetch-production";
 import { ButtonWrapper } from "../generic-components";
 import { useGlobalState } from "../../global-state/context-provider";
 import { useSubmitForm } from "./use-submit-form";
+import { FormItem } from "./form-item";
 
 type FormValues = TJoinProductionOptions & {
   audiooutput: string;
@@ -165,13 +158,13 @@ export const FormSettings = ({
   return (
     <>
       {!preSelected && isJoinProduction && (
-        <>
-          <NameWrapper>
-            <ProductionName>Production name</ProductionName>
-            <ProductionName className="name">
-              {production?.name || "Enter a production ID"}
-            </ProductionName>
-          </NameWrapper>
+        <FormItem
+          label="Production Name"
+          productionLabel={production?.name || "Enter a production ID"}
+          fieldName="productionId"
+          productionFetchError={productionFetchError}
+          errors={errors}
+        >
           <FormInputWithLoader
             onChange={(ev) => {
               onChange(ev);
@@ -188,21 +181,9 @@ export const FormSettings = ({
             type="number"
             loading={loading}
           />
-          {productionFetchError && (
-            <FetchErrorMessage>
-              The production ID could not be fetched.{" "}
-              {productionFetchError.name} {productionFetchError.message}.
-            </FetchErrorMessage>
-          )}
-          <ErrorMessage
-            errors={errors}
-            name="productionId"
-            as={StyledWarningMessage}
-          />
-        </>
+        </FormItem>
       )}
-      <FormLabel>
-        <DecorativeLabel>Username</DecorativeLabel>
+      <FormItem label="Username" fieldName="username" errors={errors}>
         <FormInput
           // eslint-disable-next-line
           {...register(`username`, {
@@ -211,10 +192,8 @@ export const FormSettings = ({
           })}
           placeholder="Username"
         />
-      </FormLabel>
-      <ErrorMessage errors={errors} name="username" as={StyledWarningMessage} />
-      <FormLabel>
-        <DecorativeLabel>Input</DecorativeLabel>
+      </FormItem>
+      <FormItem label="Input">
         <FormSelect
           // eslint-disable-next-line
           {...register(`audioinput`)}
@@ -229,9 +208,8 @@ export const FormSettings = ({
             <option value="no-device">No device available</option>
           )}
         </FormSelect>
-      </FormLabel>
-      <FormLabel>
-        <DecorativeLabel>Output</DecorativeLabel>
+      </FormItem>
+      <FormItem label="Output">
         {devices.output && devices.output.length > 0 ? (
           <FormSelect
             // eslint-disable-next-line
@@ -248,11 +226,9 @@ export const FormSettings = ({
             Controlled by operating system
           </StyledWarningMessage>
         )}
-      </FormLabel>
+      </FormItem>
       {!preSelected && isJoinProduction && (
-        <FormLabel>
-          <DecorativeLabel>Line</DecorativeLabel>
-
+        <FormItem label="Line">
           <FormSelect
             // eslint-disable-next-line
             {...register(`lineId`, {
@@ -281,7 +257,7 @@ export const FormSettings = ({
               Please enter a production id
             </StyledWarningMessage>
           )}
-        </FormLabel>
+        </FormItem>
       )}
       {isProgramOutputLine && isJoinProduction && (
         <>

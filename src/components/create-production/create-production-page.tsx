@@ -5,13 +5,9 @@ import {
   useForm,
 } from "react-hook-form";
 import { useEffect, useState } from "react";
-import { ErrorMessage } from "@hookform/error-message";
 import { DisplayContainerHeader } from "../landing-page/display-container-header.tsx";
 import {
-  DecorativeLabel,
   FormInput,
-  FormLabel,
-  StyledWarningMessage,
   PrimaryButton,
   SecondaryButton,
 } from "../landing-page/form-elements.tsx";
@@ -36,6 +32,7 @@ import {
   ProductionConfirmation,
   FetchErrorMessage,
 } from "./create-production-components.ts";
+import { FormItem } from "../form-settings/form-item.tsx";
 
 export const CreateProductionPage = () => {
   const [, dispatch] = useGlobalState();
@@ -96,8 +93,11 @@ export const CreateProductionPage = () => {
         <NavigateToRootButton />
         <DisplayContainerHeader>Create Production</DisplayContainerHeader>
       </HeaderWrapper>
-      <FormLabel>
-        <DecorativeLabel>Production Name</DecorativeLabel>
+      <FormItem
+        label="Production Name"
+        fieldName="productionName"
+        errors={errors}
+      >
         <FormInput
           // eslint-disable-next-line
           {...register(`productionName`, {
@@ -107,14 +107,8 @@ export const CreateProductionPage = () => {
           autoComplete="off"
           placeholder="Production Name"
         />
-      </FormLabel>
-      <ErrorMessage
-        errors={errors}
-        name="productionName"
-        as={StyledWarningMessage}
-      />
-      <FormLabel>
-        <DecorativeLabel>Line</DecorativeLabel>
+      </FormItem>
+      <FormItem label="Line" fieldName="defaultLine" errors={errors}>
         <FormInput
           // eslint-disable-next-line
           {...register(`defaultLine`, {
@@ -139,16 +133,14 @@ export const CreateProductionPage = () => {
             </CheckboxWrapper>
           )}
         />
-      </FormLabel>
-      <ErrorMessage
-        errors={errors}
-        name="defaultLine"
-        as={StyledWarningMessage}
-      />
+      </FormItem>
       {fields.map((field, index) => (
         <div key={field.id}>
-          <FormLabel>
-            <DecorativeLabel>Line</DecorativeLabel>
+          <FormItem
+            label="Line"
+            fieldName={`lines.${index}.name`}
+            errors={errors}
+          >
             <ListItemWrapper>
               <FormInput
                 // eslint-disable-next-line
@@ -182,12 +174,7 @@ export const CreateProductionPage = () => {
                 />
               )}
             </ListItemWrapper>
-          </FormLabel>
-          <ErrorMessage
-            errors={errors}
-            name={`lines.${index}.name`}
-            as={StyledWarningMessage}
-          />
+          </FormItem>
         </div>
       ))}
       <FlexContainer>
