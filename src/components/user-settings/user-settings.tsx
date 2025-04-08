@@ -2,7 +2,7 @@ import { FC } from "react";
 import { useGlobalState } from "../../global-state/context-provider";
 import { DisplayContainerHeader } from "../landing-page/display-container-header";
 import { isMobile } from "../../bowser";
-import { FormSettings } from "../form-settings/form-settings";
+import { UserSettingsForm } from "../user-settings-form/user-settings-form";
 import { ResponsiveFormContainer } from "../generic-components";
 
 interface UserSettingsProps {
@@ -24,7 +24,7 @@ export const UserSettings: FC<UserSettingsProps> = (props) => {
     <ResponsiveFormContainer className={isMobile ? "" : "desktop"}>
       <DisplayContainerHeader>User Settings</DisplayContainerHeader>
       {devices && (
-        <FormSettings
+        <UserSettingsForm
           buttonText={buttonText || "Save"}
           defaultValues={defaultValues}
           onSave={onSave}

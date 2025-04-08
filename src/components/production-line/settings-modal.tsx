@@ -10,7 +10,7 @@ import {
 import { useUpdateGlobalHotkey } from "./use-update-global-hotkey";
 import { useCheckForDuplicateHotkey } from "./use-check-for-duplicate-hotkey";
 import { Hotkeys } from "./types";
-import { FormItem } from "../form-settings/form-item";
+import { FormItem } from "../user-settings-form/form-item";
 import {
   ModalOverlay,
   ModalContent,

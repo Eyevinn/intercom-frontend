@@ -22,7 +22,7 @@ type FormValues = TJoinProductionOptions & {
   audiooutput: string;
 };
 
-export const FormSettings = ({
+export const UserSettingsForm = ({
   isJoinProduction,
   preSelected,
   buttonText,

@@ -9,7 +9,7 @@ import {
   HeaderText,
   HeaderExitButton,
 } from "./join-production-components.ts";
-import { FormSettings } from "../form-settings/form-settings.tsx";
+import { UserSettingsForm } from "../user-settings-form/user-settings-form.tsx";
 import { ResponsiveFormContainer } from "../generic-components.ts";
 
 type TProps = {
@@ -62,7 +62,7 @@ export const JoinProduction = ({
         )}
       </HeaderWrapper>
       {devices && (
-        <FormSettings
+        <UserSettingsForm
           isJoinProduction
           preSelected={preSelected}
           buttonText="Join"

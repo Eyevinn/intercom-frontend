@@ -1,6 +1,6 @@
 import { SubmitHandler } from "react-hook-form";
 import { useGlobalState } from "../../global-state/context-provider";
-import { useStartConnect } from "../../hooks/use-start-connect";
+import { useInitiateProductionCall } from "../../hooks/use-initiate-production-call";
 import { useStorage } from "../accessing-local-storage/access-local-storage";
 import { TUserSettings } from "../user-settings/types";
 import { TJoinProductionOptions, TProduction } from "../production-line/types";
@@ -32,7 +32,7 @@ export const useSubmitForm = ({
 }) => {
   const [, dispatch] = useGlobalState();
   const { writeToStorage } = useStorage();
-  const { startConnect } = useStartConnect({
+  const { initiateProductionCall } = useInitiateProductionCall({
     dispatch,
   });
 
@@ -53,7 +53,7 @@ export const useSubmitForm = ({
         audiooutput: payload.audiooutput,
       };
 
-      startConnect({
+      initiateProductionCall({
         payload: callPayload,
         customGlobalMute,
       });

@@ -32,7 +32,7 @@ import {
   ProductionConfirmation,
   FetchErrorMessage,
 } from "./create-production-components.ts";
-import { FormItem } from "../form-settings/form-item.tsx";
+import { FormItem } from "../user-settings-form/form-item.tsx";
 
 export const CreateProductionPage = () => {
   const [, dispatch] = useGlobalState();
