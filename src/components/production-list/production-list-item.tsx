@@ -32,9 +32,7 @@ import {
   SpinnerWrapper,
 } from "./production-list-components";
 import { LineBlock } from "./line-block";
-import { useFetchDevices } from "../../hooks/use-fetch-devices";
-import { useDevicePermissions } from "../../hooks/use-device-permission";
-import { isBrowserSafari } from "../../bowser";
+import { useStartConnect } from "../../hooks/use-start-connect";
 
 type ProductionsListItemProps = {
   production: TBasicProductionResponse;
@@ -55,13 +53,8 @@ export const ProductionsListItem = ({
   const [selectedLine, setSelectedLine] = useState<TLine | null>();
   const [lineRemoveId, setLineRemoveId] = useState<string>("");
 
-  const { permission } = useDevicePermissions({
-    continueToApp: true,
-  });
-
-  const [getUpdatedDevices] = useFetchDevices({
+  const { startConnect } = useStartConnect({
     dispatch,
-    permission,
   });
 
   const {
@@ -93,28 +86,7 @@ export const ProductionsListItem = ({
   };
 
   const goToProduction = async (lineId: string) => {
-    const updatedDevices = await getUpdatedDevices();
-
-    const inputDeviceExists = updatedDevices.input.some(
-      (device) => device.deviceId === userSettings?.audioinput
-    );
-
-    const outputDeviceExists = updatedDevices.output.some(
-      (device) => device.deviceId === userSettings?.audiooutput
-    );
-
-    if (!inputDeviceExists || (!outputDeviceExists && !isBrowserSafari)) {
-      dispatch({
-        type: "ERROR",
-        payload: {
-          error: new Error("Selected devices are not available"),
-        },
-      });
-      // Maybe show an error message or select default devices
-      navigate(
-        `/production-calls/production/${production.productionId}/line/${lineId}`
-      );
-    } else if (userSettings?.username) {
+    if (userSettings?.username) {
       const payload = {
         productionId: production.productionId,
         lineId,
@@ -125,41 +97,18 @@ export const ProductionsListItem = ({
         isProgramUser,
       };
 
-      const uuid = globalThis.crypto.randomUUID();
+      const callPayload = {
+        joinProductionOptions: payload,
+        audiooutput: userSettings?.audiooutput,
+      };
 
-      dispatch({
-        type: "ADD_CALL",
-        payload: {
-          id: uuid,
-          callState: {
-            joinProductionOptions: payload,
-            audiooutput: userSettings?.audiooutput,
-            mediaStreamInput: null,
-            dominantSpeaker: null,
-            audioLevelAboveThreshold: false,
-            connectionState: null,
-            audioElements: null,
-            sessionId: null,
-            dataChannel: null,
-            isRemotelyMuted: false,
-            hotkeys: {
-              muteHotkey: "m",
-              speakerHotkey: "n",
-              pushToTalkHotkey: "t",
-              increaseVolumeHotkey: "u",
-              decreaseVolumeHotkey: "d",
-              globalMuteHotkey: "p",
-            },
-          },
-        },
-      });
-      dispatch({
-        type: "SELECT_PRODUCTION_ID",
-        payload: payload.productionId,
-      });
-      navigate(
-        `/production-calls/production/${payload.productionId}/line/${lineId}`
-      );
+      const success = await startConnect({ payload: callPayload });
+
+      if (success) {
+        navigate(
+          `/production-calls/production/${payload.productionId}/line/${lineId}`
+        );
+      }
     }
   };
 

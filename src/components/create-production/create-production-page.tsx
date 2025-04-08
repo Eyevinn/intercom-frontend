@@ -5,7 +5,6 @@ import {
   useForm,
 } from "react-hook-form";
 import { useEffect, useState } from "react";
-import styled from "@emotion/styled";
 import { ErrorMessage } from "@hookform/error-message";
 import { DisplayContainerHeader } from "../landing-page/display-container-header.tsx";
 import {
@@ -18,57 +17,25 @@ import {
 } from "../landing-page/form-elements.tsx";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { Spinner } from "../loader/loader.tsx";
-import { FlexContainer } from "../generic-components.ts";
+import {
+  ButtonWrapper,
+  FlexContainer,
+  ListItemWrapper,
+  ResponsiveFormContainer,
+} from "../generic-components.ts";
 import { RemoveLineButton } from "../remove-line-button/remove-line-button.tsx";
 import { useFetchProduction } from "../landing-page/use-fetch-production.ts";
-import { darkText, errorColour } from "../../css-helpers/defaults.ts";
 import { NavigateToRootButton } from "../navigate-to-root-button/navigate-to-root-button.tsx";
-import { ResponsiveFormContainer } from "../user-settings/user-settings.tsx";
 import { isMobile } from "../../bowser.ts";
 import { Checkbox } from "../checkbox/checkbox.tsx";
 import { FormValues, useCreateProduction } from "./use-create-production.tsx";
 import { CopyAllLinksButton } from "../copy-button/copy-all-links-button.tsx";
-
-const HeaderWrapper = styled.div`
-  display: flex;
-  margin-bottom: 2rem;
-  align-items: center;
-  h2 {
-    margin: 0;
-    margin-left: 1rem;
-  }
-`;
-
-export const ListItemWrapper = styled.div`
-  position: relative;
-`;
-
-const ButtonWrapper = styled.div`
-  margin: 0 1rem 1rem 0;
-  :last-of-type {
-    margin: 0 0 1rem;
-  }
-`;
-
-const ProductionConfirmation = styled.div`
-  background: #91fa8c;
-  padding: 1rem;
-  margin-bottom: 1rem;
-  border-radius: 0.5rem;
-  border: 1px solid #b2ffa1;
-  color: #1a1a1a;
-`;
-
-const FetchErrorMessage = styled.div`
-  background: ${errorColour};
-  color: ${darkText};
-  padding: 0.5rem;
-  margin: 1rem 0;
-`;
-
-const CheckboxWrapper = styled.div`
-  margin-bottom: 3rem;
-`;
+import {
+  HeaderWrapper,
+  CheckboxWrapper,
+  ProductionConfirmation,
+  FetchErrorMessage,
+} from "./create-production-components.ts";
 
 export const CreateProductionPage = () => {
   const [, dispatch] = useGlobalState();
