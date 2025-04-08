@@ -14,10 +14,12 @@ import { useGlobalHotkeys } from "../production-line/use-line-hotkeys";
 import { usePreventPullToRefresh } from "./use-prevent-pull-to-refresh";
 import { useSpeakerDetection } from "./use-speaker-detection";
 
-const Container = styled.div`
+const Container = styled.div<{ isMobile?: boolean }>`
   display: flex;
   flex-direction: column;
   flex-wrap: wrap;
+
+  margin-top: ${isMobile ? "3rem" : "0"};
 `;
 
 const CallsContainer = styled.div`
@@ -63,9 +65,11 @@ const MuteAllCallsBtn = styled(PrimaryButton)`
   }
 `;
 
-const HeaderButtons = styled.div`
+const HeaderButtons = styled.div<{ isMobile?: boolean }>`
   display: flex;
   gap: 1rem;
+
+  margin-top: ${isMobile ? "1rem" : "0"};
 `;
 
 export const CallsPage = () => {
@@ -278,7 +282,7 @@ export const CallsPage = () => {
         />
       </PageHeader>
       <Container>
-        {isFirstConnection && (
+        {isEmpty && paramProductionId && paramLineId && (
           <JoinProduction
             preSelected={{
               preSelectedProductionId: paramProductionId,
