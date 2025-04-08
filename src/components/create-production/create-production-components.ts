@@ -1,5 +1,6 @@
 import styled from "@emotion/styled";
 import { darkText, errorColour } from "../../css-helpers/defaults";
+import { FlexContainer } from "../generic-components";
 
 export const HeaderWrapper = styled.div`
   display: flex;
@@ -36,4 +37,8 @@ export const FetchErrorMessage = styled.div`
 
 export const CheckboxWrapper = styled.div`
   margin-bottom: 3rem;
+`;
+
+export const ButtonContainer = styled(FlexContainer)`
+  gap: 1rem;
 `;

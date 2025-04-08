@@ -6,16 +6,9 @@ import {
 } from "react-hook-form";
 import { useEffect, useState } from "react";
 import { DisplayContainerHeader } from "../landing-page/display-container-header.tsx";
-import {
-  FormInput,
-  PrimaryButton,
-  SecondaryButton,
-} from "../landing-page/form-elements.tsx";
+import { FormInput } from "../landing-page/form-elements.tsx";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
-import { Spinner } from "../loader/loader.tsx";
 import {
-  ButtonWrapper,
-  FlexContainer,
   ListItemWrapper,
   ResponsiveFormContainer,
 } from "../generic-components.ts";
@@ -33,6 +26,7 @@ import {
   FetchErrorMessage,
 } from "./create-production-components.ts";
 import { FormItem } from "../user-settings-form/form-item.tsx";
+import { CreateProductionButtons } from "./create-production-buttons.tsx";
 
 export const CreateProductionPage = () => {
   const [, dispatch] = useGlobalState();
@@ -142,16 +136,26 @@ export const CreateProductionPage = () => {
             errors={errors}
           >
             <ListItemWrapper>
-              <FormInput
-                // eslint-disable-next-line
-                {...register(`lines.${index}.name`, {
-                  required: "Line name is required",
-                  minLength: 1,
-                })}
-                className={index === fields.length - 1 ? "additional-line" : ""}
-                autoComplete="off"
-                placeholder="Line Name"
-              />
+              <>
+                <FormInput
+                  // eslint-disable-next-line
+                  {...register(`lines.${index}.name`, {
+                    required: "Line name is required",
+                    minLength: 1,
+                  })}
+                  className={
+                    index === fields.length - 1 ? "additional-line" : ""
+                  }
+                  autoComplete="off"
+                  placeholder="Line Name"
+                />
+                {index === fields.length - 1 && (
+                  <RemoveLineButton
+                    isCreatingLine
+                    removeLine={() => remove(index)}
+                  />
+                )}
+              </>
               <Controller
                 name={`lines.${index}.programOutputLine`}
                 control={control}
@@ -167,33 +171,15 @@ export const CreateProductionPage = () => {
                   </CheckboxWrapper>
                 )}
               />
-              {index === fields.length - 1 && (
-                <RemoveLineButton
-                  isCreatingLine
-                  removeLine={() => remove(index)}
-                />
-              )}
             </ListItemWrapper>
           </FormItem>
         </div>
       ))}
-      <FlexContainer>
-        <ButtonWrapper>
-          <SecondaryButton type="button" onClick={() => append({ name: "" })}>
-            Add Line
-          </SecondaryButton>
-        </ButtonWrapper>
-        <ButtonWrapper>
-          <PrimaryButton
-            type="submit"
-            className={loading ? "with-loader" : ""}
-            onClick={handleSubmit(onSubmit)}
-          >
-            Create Production
-            {loading && <Spinner className="create-production" />}
-          </PrimaryButton>
-        </ButtonWrapper>
-      </FlexContainer>
+      <CreateProductionButtons
+        loading={loading}
+        handleAddLine={() => append({ name: "" })}
+        handleSubmit={handleSubmit(onSubmit)}
+      />
       {createdProductionId !== null && (
         <>
           <ProductionConfirmation>
