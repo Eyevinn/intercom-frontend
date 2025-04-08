@@ -34,6 +34,7 @@ export const useMasterInputMute = ({
   isOutputMuted,
   value,
 }: UseMasterInputMuteProps) => {
+  /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
     if (
       inputAudioStream &&
@@ -69,15 +70,13 @@ export const useMasterInputMute = ({
       });
     }
   }, [
-    dispatch,
-    id,
     inputAudioStream,
     isProgramOutputLine,
     masterInputMute,
     muteInput,
-    isSettingGlobalMute,
+    id,
     registerCallState,
-    isOutputMuted,
-    value,
+    isSettingGlobalMute,
+    dispatch,
   ]);
 };
