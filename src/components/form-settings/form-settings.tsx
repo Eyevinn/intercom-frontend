@@ -70,7 +70,6 @@ export const FormSettings = ({
     reset,
     setValue,
     control,
-    getValues,
   } = useForm<FormValues | TUserSettings>({
     defaultValues,
     resetOptions: {
@@ -211,12 +210,6 @@ export const FormSettings = ({
             minLength: 1,
           })}
           placeholder="Username"
-          onChange={(e) => {
-            console.log("value", e.target.value);
-            console.log("getValues", getValues(`username`));
-            // onChange(e);
-            // if (onSave) onSave();
-          }}
         />
       </FormLabel>
       <ErrorMessage errors={errors} name="username" as={StyledWarningMessage} />
