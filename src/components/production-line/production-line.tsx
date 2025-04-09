@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState, useMemo } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useNavigate, useParams } from "react-router-dom";
-import { isMobile, isTablet } from "../../bowser.ts";
+import { isBrowserFirefox, isMobile, isTablet } from "../../bowser.ts";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { CallState } from "../../global-state/types.ts";
 import { DisplayWarning } from "../display-box.tsx";
@@ -405,18 +405,22 @@ export const ProductionLine = ({
                             <LongPressToTalkButton muteInput={muteInput} />
                           </LongPressWrapper>
                         )}
-                      <CollapsableSection title="Devices">
-                        <SelectDevices
-                          line={line}
-                          joinProductionOptions={joinProductionOptions}
-                          audiooutput={audiooutput || undefined}
-                          id={id}
-                          audioElements={audioElements || []}
-                          resetAudioInput={resetAudioInput}
-                          muteInput={() => muteInput(true)}
-                          setConnectionActive={() => setConnectionActive(false)}
-                        />
-                      </CollapsableSection>
+                      {isBrowserFirefox && (
+                        <CollapsableSection title="Devices">
+                          <SelectDevices
+                            line={line}
+                            joinProductionOptions={joinProductionOptions}
+                            audiooutput={audiooutput || undefined}
+                            id={id}
+                            audioElements={audioElements || []}
+                            resetAudioInput={resetAudioInput}
+                            muteInput={() => muteInput(true)}
+                            setConnectionActive={() =>
+                              setConnectionActive(false)
+                            }
+                          />
+                        </CollapsableSection>
+                      )}
                       {inputAudioStream &&
                         inputAudioStream !== "no-device" &&
                         !isMobile &&

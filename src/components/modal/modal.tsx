@@ -20,7 +20,7 @@ const ModalContent = styled.div`
   border-radius: 0.8rem;
   border: solid 0.1rem #868686;
   box-shadow: 0 0.2rem 2rem rgba(123, 123, 123, 0.1);
-  width: 40rem;
+  width: fit-content;
   max-width: 90%;
   animation: slideIn 0.3s ease-out;
 `;

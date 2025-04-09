@@ -22,6 +22,7 @@ type TProps = {
   closeAddCallView?: () => void;
   className?: string;
   updateUserSettings?: boolean;
+  isFirstConnection?: string;
 };
 
 export const JoinProduction = ({
@@ -31,6 +32,7 @@ export const JoinProduction = ({
   closeAddCallView,
   className,
   updateUserSettings = false,
+  isFirstConnection,
 }: TProps) => {
   const [joinProductionOptions, setJoinProductionOptions] =
     useState<TJoinProductionOptions | null>(null);
@@ -74,6 +76,7 @@ export const JoinProduction = ({
           customGlobalMute={customGlobalMute}
           closeAddCallView={closeAddCallView}
           updateUserSettings={updateUserSettings}
+          isFirstConnection={isFirstConnection}
         />
       )}
     </ResponsiveFormContainer>

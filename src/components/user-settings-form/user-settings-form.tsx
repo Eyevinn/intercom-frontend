@@ -22,6 +22,7 @@ import { ButtonWrapper } from "../generic-components";
 import { useGlobalState } from "../../global-state/context-provider";
 import { useSubmitForm } from "./use-submit-form";
 import { FormItem } from "./form-item";
+import { isBrowserFirefox } from "../../bowser";
 
 type FormValues = TJoinProductionOptions & {
   audiooutput: string;
@@ -40,6 +41,7 @@ export const UserSettingsForm = ({
   closeAddCallView,
   updateUserSettings,
   onSave,
+  isFirstConnection,
 }: {
   isJoinProduction?: boolean;
   preSelected?: {
@@ -58,6 +60,7 @@ export const UserSettingsForm = ({
   closeAddCallView?: () => void;
   updateUserSettings?: boolean;
   onSave?: () => void;
+  isFirstConnection?: string;
 }) => {
   const [joinProductionId, setJoinProductionId] = useState<null | number>(null);
   const [isProgramOutputLine, setIsProgramOutputLine] = useState(false);
@@ -107,6 +110,9 @@ export const UserSettingsForm = ({
     updateUserSettings,
     onSave,
   });
+
+  const isSettingsConfig = !isJoinProduction;
+  const isSupportedBrowser = isBrowserFirefox && isJoinProduction;
 
   useEffect(() => {
     if (production && isJoinProduction) {
@@ -204,40 +210,44 @@ export const UserSettingsForm = ({
           placeholder="Username"
         />
       </FormItem>
-      <FormItem label="Input">
-        <FormSelect
-          // eslint-disable-next-line
-          {...register(`audioinput`)}
-        >
-          {devices.input && devices.input.length > 0 ? (
-            devices.input.map((device) => (
-              <option key={device.deviceId} value={device.deviceId}>
-                {device.label}
-              </option>
-            ))
-          ) : (
-            <option value="no-device">No device available</option>
-          )}
-        </FormSelect>
-      </FormItem>
-      <FormItem label="Output">
-        {devices.output && devices.output.length > 0 ? (
-          <FormSelect
-            // eslint-disable-next-line
-            {...register(`audiooutput`)}
-          >
-            {devices.output.map((device) => (
-              <option key={device.deviceId} value={device.deviceId}>
-                {device.label}
-              </option>
-            ))}
-          </FormSelect>
-        ) : (
-          <StyledWarningMessage>
-            Controlled by operating system
-          </StyledWarningMessage>
-        )}
-      </FormItem>
+      {(isFirstConnection || isSupportedBrowser || isSettingsConfig) && (
+        <>
+          <FormItem label="Input">
+            <FormSelect
+              // eslint-disable-next-line
+              {...register(`audioinput`)}
+            >
+              {devices.input && devices.input.length > 0 ? (
+                devices.input.map((device) => (
+                  <option key={device.deviceId} value={device.deviceId}>
+                    {device.label}
+                  </option>
+                ))
+              ) : (
+                <option value="no-device">No device available</option>
+              )}
+            </FormSelect>
+          </FormItem>
+          <FormItem label="Output">
+            {devices.output && devices.output.length > 0 ? (
+              <FormSelect
+                // eslint-disable-next-line
+                {...register(`audiooutput`)}
+              >
+                {devices.output.map((device) => (
+                  <option key={device.deviceId} value={device.deviceId}>
+                    {device.label}
+                  </option>
+                ))}
+              </FormSelect>
+            ) : (
+              <StyledWarningMessage>
+                Controlled by operating system
+              </StyledWarningMessage>
+            )}
+          </FormItem>
+        </>
+      )}
       {!preSelected && isJoinProduction && (
         <FormItem label="Line">
           <FormSelect

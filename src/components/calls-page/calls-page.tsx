@@ -15,6 +15,8 @@ import { PageHeader } from "../page-layout/page-header";
 import { isMobile } from "../../bowser";
 import { useAudioCue } from "../production-line/use-audio-cue";
 import { usePreventPullToRefresh } from "./use-prevent-pull-to-refresh";
+import { UserSettingsButton } from "../landing-page/user-settings-button";
+import { UserSettings } from "../user-settings/user-settings";
 
 const Container = styled.div`
   display: flex;
@@ -78,12 +80,14 @@ export const CallsPage = () => {
   const [{ calls, selectedProductionId }, dispatch] = useGlobalState();
   const [shouldReduceVolume, setShouldReduceVolume] = useState(false);
   const [isSomeoneSpeaking, setIsSomeoneSpeaking] = useState(false);
+  const [showSettings, setShowSettings] = useState<boolean>(false);
 
   const { productionId: paramProductionId, lineId: paramLineId } = useParams();
   const navigate = useNavigate();
 
   const isEmpty = Object.values(calls).length === 0;
   const isSingleCall = Object.values(calls).length === 1;
+  const isFirstConnection = isEmpty && paramProductionId && paramLineId;
 
   const isProgramOutputAdded = Object.entries(calls).some(
     ([, callState]) =>
@@ -182,6 +186,9 @@ export const CallsPage = () => {
 
   return (
     <>
+      {!isFirstConnection && (
+        <UserSettingsButton onClick={() => setShowSettings(!showSettings)} />
+      )}
       <PageHeader
         title={!isEmpty ? "Calls" : ""}
         hasNavigateToRoot
@@ -202,6 +209,15 @@ export const CallsPage = () => {
             <VerifyDecision
               confirm={runExitAllCalls}
               abort={() => setConfirmExitModalOpen(false)}
+            />
+          </Modal>
+        )}
+        {showSettings && (
+          <Modal onClose={() => setShowSettings(false)}>
+            <UserSettings
+              buttonText="Save"
+              isCallsPage
+              onSave={() => setShowSettings(false)}
             />
           </Modal>
         )}
@@ -229,7 +245,7 @@ export const CallsPage = () => {
         </HeaderButtons>
       </PageHeader>
       <Container>
-        {isEmpty && paramProductionId && paramLineId && (
+        {isFirstConnection && (
           <JoinProduction
             preSelected={{
               preSelectedProductionId: paramProductionId,
@@ -237,6 +253,7 @@ export const CallsPage = () => {
             }}
             customGlobalMute={customGlobalMute}
             updateUserSettings
+            isFirstConnection={isFirstConnection || undefined}
           />
         )}
         <CallsContainer>

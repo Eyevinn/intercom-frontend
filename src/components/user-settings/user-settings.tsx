@@ -7,11 +7,12 @@ import { ResponsiveFormContainer } from "../generic-components";
 
 interface UserSettingsProps {
   buttonText?: string;
+  isCallsPage?: boolean;
   onSave?: () => void;
 }
 
 export const UserSettings: FC<UserSettingsProps> = (props) => {
-  const { buttonText, onSave } = props;
+  const { buttonText, isCallsPage, onSave } = props;
   const [{ devices, userSettings }] = useGlobalState();
 
   const defaultValues = {
@@ -21,7 +22,9 @@ export const UserSettings: FC<UserSettingsProps> = (props) => {
   };
 
   return (
-    <ResponsiveFormContainer className={isMobile ? "" : "desktop"}>
+    <ResponsiveFormContainer
+      className={isMobile || isCallsPage ? "" : "desktop"}
+    >
       <DisplayContainerHeader>User Settings</DisplayContainerHeader>
       {devices && (
         <UserSettingsForm
