@@ -310,7 +310,10 @@ export const UserSettingsForm = ({
           type="button"
           disabled={isJoinProduction ? !isValid : false}
           onClick={
-            isFirstConnection || isSupportedBrowser || addAdditionalCallId
+            isFirstConnection ||
+            isSupportedBrowser ||
+            addAdditionalCallId ||
+            isBrowserFirefox
               ? handleSubmit(onSubmit)
               : () => setConfirmModalOpen(true)
           }
