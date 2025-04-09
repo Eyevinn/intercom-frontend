@@ -19,7 +19,6 @@ import { ExitCallModal } from "./exit-call-modal.tsx";
 import { HotkeysComponent } from "./hotkeys-component.tsx";
 import { LongPressToTalkButton } from "./long-press-to-talk-button.tsx";
 import { MinifiedUserControls } from "./minified-user-controls.tsx";
-import { MuteRemoteParticipantModal } from "./mute-remote-participant-modal.tsx";
 import {
   ButtonWrapper,
   CallContainer,
@@ -46,6 +45,7 @@ import { useVolumeReducer } from "./use-volume-reducer.tsx";
 import { useMasterInputMute } from "./use-master-input-mute.ts";
 import logger from "../../utils/logger.ts";
 import { useUpdateCallDevice } from "./use-update-call-device.tsx";
+import { ConfirmModal } from "../confirm-modal/confirm-modal.tsx";
 
 type TProductionLine = {
   id: string;
@@ -474,9 +474,17 @@ export const ProductionLine = ({
                   </ListWrapper>
                   <ListWrapper>
                     {confirmModalOpen && (
-                      <MuteRemoteParticipantModal
-                        userName={userName}
-                        muteError={muteError}
+                      <ConfirmModal
+                        firstString={
+                          muteError
+                            ? "Something went wrong, Please try again"
+                            : `Are you sure you want to mute ${userName}?`
+                        }
+                        secondString={
+                          muteError
+                            ? ""
+                            : `This will mute ${userName} for everyone in the call.`
+                        }
                         confirm={muteParticipant}
                         onClose={() => setConfirmModalOpen(false)}
                         abort={() => setConfirmModalOpen(false)}

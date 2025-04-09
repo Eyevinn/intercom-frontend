@@ -23,6 +23,7 @@ import { useGlobalState } from "../../global-state/context-provider";
 import { useSubmitForm } from "./use-submit-form";
 import { FormItem } from "./form-item";
 import { isBrowserFirefox } from "../../bowser";
+import { ConfirmModal } from "../confirm-modal/confirm-modal";
 
 type FormValues = TJoinProductionOptions & {
   audiooutput: string;
@@ -64,6 +65,7 @@ export const UserSettingsForm = ({
 }) => {
   const [joinProductionId, setJoinProductionId] = useState<null | number>(null);
   const [isProgramOutputLine, setIsProgramOutputLine] = useState(false);
+  const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const {
     formState: { errors, isValid },
     register,
@@ -305,13 +307,27 @@ export const UserSettingsForm = ({
       <ButtonWrapper>
         <ReloadDevicesButton />
         <PrimaryButton
-          type="submit"
+          type="button"
           disabled={isJoinProduction ? !isValid : false}
-          onClick={handleSubmit(onSubmit)}
+          onClick={
+            isFirstConnection || isSupportedBrowser || addAdditionalCallId
+              ? handleSubmit(onSubmit)
+              : () => setConfirmModalOpen(true)
+          }
         >
           {buttonText}
         </PrimaryButton>
       </ButtonWrapper>
+
+      {confirmModalOpen && (
+        <ConfirmModal
+          firstString="Are you sure you want to update your settings?"
+          secondString="This will update the devices for all current calls."
+          confirm={handleSubmit(onSubmit)}
+          onClose={() => setConfirmModalOpen(false)}
+          abort={() => setConfirmModalOpen(false)}
+        />
+      )}
     </>
   );
 };
