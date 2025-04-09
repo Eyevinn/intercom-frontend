@@ -13,7 +13,7 @@ export const useMuteInput = ({
   inputAudioStream: TUseAudioInputValues;
   id: string;
 }) => {
-  const [inputMute, setInputMute] = useState(true);
+  const [isInputMuted, setIsInputMuted] = useState(true);
   const [, dispatch] = useGlobalState();
 
   const muteInput = useCallback(
@@ -28,7 +28,7 @@ export const useMuteInput = ({
             t.enabled = !mute;
           }
         });
-        setInputMute(mute);
+        setIsInputMuted(mute);
       }
       if (mute) {
         dispatch({
@@ -44,5 +44,5 @@ export const useMuteInput = ({
     },
     [dispatch, id, inputAudioStream, isProgramOutputLine, isProgramUser]
   );
-  return { muteInput, inputMute };
+  return { muteInput, isInputMuted };
 };

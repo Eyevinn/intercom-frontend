@@ -45,6 +45,7 @@ import { useActiveParticipant } from "./use-active-participant.tsx";
 import { useVolumeReducer } from "./use-volume-reducer.tsx";
 import { useMasterInputMute } from "./use-master-input-mute.ts";
 import logger from "../../utils/logger.ts";
+import { useUpdateCallDevice } from "./use-update-call-device.tsx";
 
 type TProductionLine = {
   id: string;
@@ -69,7 +70,6 @@ export const ProductionLine = ({
   const [, dispatch] = useGlobalState();
   const navigate = useNavigate();
   const [connectionActive, setConnectionActive] = useState(true);
-  const [isInputMuted, setIsInputMuted] = useState(true);
   const [isOutputMuted, setIsOutputMuted] = useState(false);
   const [confirmExitModalOpen, setConfirmExitModalOpen] = useState(false);
   const [value, setValue] = useState(0.75);
@@ -189,16 +189,23 @@ export const ProductionLine = ({
     setValue(newValue);
   });
 
-  const { muteInput, inputMute } = useMuteInput({
+  const { muteInput, isInputMuted } = useMuteInput({
     inputAudioStream,
     isProgramOutputLine,
     isProgramUser,
     id,
   });
 
-  useEffect(() => {
-    setIsInputMuted(inputMute);
-  }, [inputMute]);
+  // Update call device when the user changes the audio settings on Chrome or Edge
+  useUpdateCallDevice({
+    id,
+    joinProductionOptions,
+    audiooutput,
+    audioElements,
+    resetAudioInput,
+    setConnectionActive,
+    muteInput,
+  });
 
   useEffect(() => {
     if (!confirmModalOpen) {

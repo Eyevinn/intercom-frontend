@@ -30,7 +30,7 @@ export const useSubmitForm = ({
   updateUserSettings?: boolean;
   onSave?: () => void;
 }) => {
-  const [, dispatch] = useGlobalState();
+  const [{ userSettings }, dispatch] = useGlobalState();
   const { writeToStorage } = useStorage();
   const { initiateProductionCall } = useInitiateProductionCall({
     dispatch,
@@ -44,13 +44,14 @@ export const useSubmitForm = ({
 
       const options: TJoinProductionOptions = {
         ...payload,
+        audioinput: payload?.audioinput || userSettings?.audioinput,
         lineUsedForProgramOutput: selectedLine?.programOutputLine || false,
         isProgramUser: isProgramUser || false,
       };
 
       const callPayload = {
         joinProductionOptions: options,
-        audiooutput: payload.audiooutput,
+        audiooutput: payload.audiooutput || userSettings?.audiooutput,
       };
 
       initiateProductionCall({
