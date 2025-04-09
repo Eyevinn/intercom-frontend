@@ -43,9 +43,10 @@ export function usePushToTalk({ muteInput }: UsePushToTalkOptions) {
     isTalking,
     handleLongPressStart,
     handleLongPressEnd,
+    startTalking,
+    stopTalking,
     triggerPushToTalk: () => {
       startTalking();
-      setTimeout(stopTalking, 300);
     },
   };
 }

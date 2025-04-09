@@ -7,11 +7,13 @@ interface UseCallActionHandlersProps {
   onToggleOutputMute?: (handler: () => void) => void;
   onIncreaseVolume?: (handler: () => void) => void;
   onDecreaseVolume?: (handler: () => void) => void;
-  onPushToTalk?: (handler: () => void) => void;
+  onPushToTalkStart?: (handler: () => void) => void;
+  onPushToTalkStop?: (handler: () => void) => void;
   setValue: (value: number) => void;
   setIsInputMuted: (value: (prev: boolean) => boolean) => void;
   muteOutput: () => void;
-  triggerPushToTalk: () => void;
+  startTalking: () => void;
+  stopTalking: () => void;
 }
 
 export function useCallActionHandlers({
@@ -21,11 +23,13 @@ export function useCallActionHandlers({
   onToggleOutputMute,
   onIncreaseVolume,
   onDecreaseVolume,
-  onPushToTalk,
+  onPushToTalkStart,
+  onPushToTalkStop,
   setValue,
   setIsInputMuted,
   muteOutput,
-  triggerPushToTalk,
+  startTalking,
+  stopTalking,
 }: UseCallActionHandlersProps) {
   useEffect(() => {
     if (onToggleInputMute) {
@@ -54,9 +58,14 @@ export function useCallActionHandlers({
         });
       });
     }
-    if (onPushToTalk) {
-      onPushToTalk(() => {
-        triggerPushToTalk();
+    if (onPushToTalkStart) {
+      onPushToTalkStart(() => {
+        startTalking();
+      });
+    }
+    if (onPushToTalkStop) {
+      onPushToTalkStop(() => {
+        stopTalking();
       });
     }
   }, [
@@ -64,12 +73,14 @@ export function useCallActionHandlers({
     onToggleOutputMute,
     onIncreaseVolume,
     onDecreaseVolume,
-    onPushToTalk,
+    onPushToTalkStart,
+    onPushToTalkStop,
+    startTalking,
+    stopTalking,
     value,
     setValue,
     setIsInputMuted,
     audioElements,
     muteOutput,
-    triggerPushToTalk,
   ]);
 }

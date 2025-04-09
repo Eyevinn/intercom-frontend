@@ -8,7 +8,8 @@ type WebSocketAction =
   | "toggle_global_mute"
   | "increase_volume"
   | "decrease_volume"
-  | "push_to_talk";
+  | "push_to_talk_start"
+  | "push_to_talk_stop";
 
 interface UseWebSocketProps {
   dispatch: Dispatch<TGlobalStateAction>;

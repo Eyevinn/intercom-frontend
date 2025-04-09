@@ -71,7 +71,8 @@ type TProductionLine = {
   onToggleOutputMute?: (handler: () => void) => void;
   onIncreaseVolume?: (handler: () => void) => void;
   onDecreaseVolume?: (handler: () => void) => void;
-  onPushToTalk?: (handler: () => void) => void;
+  onPushToTalkStart?: (handler: () => void) => void;
+  onPushToTalkStop?: (handler: () => void) => void;
 };
 
 export const ProductionLine = ({
@@ -89,7 +90,8 @@ export const ProductionLine = ({
   onToggleOutputMute,
   onIncreaseVolume,
   onDecreaseVolume,
-  onPushToTalk,
+  onPushToTalkStart,
+  onPushToTalkStop,
 }: TProductionLine) => {
   const { productionId: paramProductionId, lineId: paramLineId } = useParams();
   const [, dispatch] = useGlobalState();
@@ -199,7 +201,13 @@ export const ProductionLine = ({
     id,
   });
 
-  const { triggerPushToTalk } = usePushToTalk({ muteInput });
+  const {
+    startTalking,
+    stopTalking,
+    isTalking,
+    handleLongPressStart,
+    handleLongPressEnd,
+  } = usePushToTalk({ muteInput });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = parseFloat(e.target.value);
@@ -324,13 +332,15 @@ export const ProductionLine = ({
     onToggleOutputMute,
     onIncreaseVolume,
     onDecreaseVolume,
-    onPushToTalk,
+    onPushToTalkStart,
+    onPushToTalkStop,
     value,
     setValue,
     setIsInputMuted,
     audioElements,
     muteOutput,
-    triggerPushToTalk,
+    startTalking,
+    stopTalking,
   });
 
   useSpeakerHotkeys({
@@ -433,6 +443,9 @@ export const ProductionLine = ({
             <MinifiedUserControls
               muteOutput={muteOutput}
               muteInput={() => muteInput(!isInputMuted)}
+              onStartTalking={handleLongPressStart}
+              onStopTalking={handleLongPressEnd}
+              isTalking={isTalking}
               line={line}
               joinProductionOptions={joinProductionOptions}
               isOutputMuted={isOutputMuted}
@@ -470,7 +483,11 @@ export const ProductionLine = ({
                         inputAudioStream !== "no-device" &&
                         !line?.programOutputLine && (
                           <LongPressWrapper>
-                            <LongPressToTalkButton muteInput={muteInput} />
+                            <LongPressToTalkButton
+                              onStartTalking={handleLongPressStart}
+                              onStopTalking={handleLongPressEnd}
+                              isTalking={isTalking}
+                            />
                           </LongPressWrapper>
                         )}
                       {isBrowserFirefox && (

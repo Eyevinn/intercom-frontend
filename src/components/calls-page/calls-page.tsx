@@ -181,8 +181,11 @@ export const CallsPage = () => {
         case "decrease_volume":
           handlers.decreaseVolume?.();
           break;
-        case "push_to_talk":
-          handlers.pushToTalk?.();
+        case "push_to_talk_start":
+          handlers.pushToTalkStart?.();
+          break;
+        case "push_to_talk_stop":
+          handlers.pushToTalkStop?.();
           break;
         default:
           console.warn("Unknown call-specific action:", action);
@@ -332,8 +335,11 @@ export const CallsPage = () => {
                 onDecreaseVolume={(handler) => {
                   callActionHandlers.current[callId].decreaseVolume = handler;
                 }}
-                onPushToTalk={(handler) => {
-                  callActionHandlers.current[callId].pushToTalk = handler;
+                onPushToTalkStart={(handler) => {
+                  callActionHandlers.current[callId].pushToTalkStart = handler;
+                }}
+                onPushToTalkStop={(handler) => {
+                  callActionHandlers.current[callId].pushToTalkStop = handler;
                 }}
               />
             );

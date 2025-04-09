@@ -1,10 +1,11 @@
 import styled from "@emotion/styled";
 import { isMobile } from "../../bowser";
-import { usePushToTalk } from "../../hooks/use-push-to-talk";
 import { PrimaryButton } from "../landing-page/form-elements";
 
 type TLongPressToTalkButton = {
-  muteInput: (input: boolean) => void;
+  isTalking: boolean;
+  onStartTalking?: () => void;
+  onStopTalking?: () => void;
 };
 
 const Button = styled(PrimaryButton)`
@@ -34,12 +35,10 @@ const Button = styled(PrimaryButton)`
 `;
 
 export const LongPressToTalkButton = ({
-  muteInput,
+  isTalking,
+  onStartTalking,
+  onStopTalking,
 }: TLongPressToTalkButton) => {
-  const { isTalking, handleLongPressStart, handleLongPressEnd } = usePushToTalk(
-    { muteInput }
-  );
-
   return (
     <Button
       className={`${isMobile ? "mobile" : ""} ${isTalking ? "active-btn" : ""}`}
@@ -47,12 +46,12 @@ export const LongPressToTalkButton = ({
       onPointerDown={(e) => {
         e.preventDefault();
         e.stopPropagation();
-        handleLongPressStart();
+        onStartTalking?.();
       }}
       onPointerUp={(e) => {
         e.preventDefault();
         e.stopPropagation();
-        handleLongPressEnd();
+        onStopTalking?.();
       }}
     >
       <span
