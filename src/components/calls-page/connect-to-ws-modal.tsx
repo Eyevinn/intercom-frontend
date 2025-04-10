@@ -40,6 +40,13 @@ export const ConnectToWsModal = ({
 
   if (!isOpen) return null;
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleConnect(url);
+    }
+  };
+
   return (
     <Modal onClose={onClose}>
       <ModalHeader>Connect to WebSocket</ModalHeader>
@@ -52,6 +59,7 @@ export const ConnectToWsModal = ({
         className="border p-2 rounded"
         value={url}
         onChange={(e) => setUrl(e.target.value)}
+        onKeyDown={handleKeyDown}
       />
       <ButtonWrapper>
         <SecondaryButton onClick={onClose}>Cancel</SecondaryButton>
