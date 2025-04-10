@@ -7,6 +7,8 @@ import {
 } from "../landing-page/form-elements";
 import { Modal } from "../modal/modal";
 
+const { WS_URL } = import.meta.env;
+
 const ButtonWrapper = styled.div`
   display: flex;
   justify-content: space-between;
@@ -34,7 +36,7 @@ export const ConnectToWsModal = ({
   handleConnect,
   onClose,
 }: ConnectToWsModalProps) => {
-  const [url, setUrl] = useState<string>("ws://localhost:12345");
+  const [url, setUrl] = useState<string>(WS_URL || "");
 
   if (!isOpen) return null;
 
@@ -46,7 +48,7 @@ export const ConnectToWsModal = ({
       </ModalText>
       <FormInput
         type="text"
-        placeholder="ws://localhost:12345"
+        placeholder="ws://url:port"
         className="border p-2 rounded"
         value={url}
         onChange={(e) => setUrl(e.target.value)}
