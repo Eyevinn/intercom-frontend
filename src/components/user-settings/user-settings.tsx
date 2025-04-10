@@ -1,18 +1,18 @@
 import { FC } from "react";
 import { useGlobalState } from "../../global-state/context-provider";
 import { DisplayContainerHeader } from "../landing-page/display-container-header";
-import { isMobile } from "../../bowser";
 import { UserSettingsForm } from "../user-settings-form/user-settings-form";
 import { ResponsiveFormContainer } from "../generic-components";
 
 interface UserSettingsProps {
   buttonText?: string;
-  isCallsPage?: boolean;
+  className?: string;
+  needsConfirmation?: boolean;
   onSave?: () => void;
 }
 
 export const UserSettings: FC<UserSettingsProps> = (props) => {
-  const { buttonText, isCallsPage, onSave } = props;
+  const { buttonText, className, onSave, needsConfirmation } = props;
   const [{ devices, userSettings }] = useGlobalState();
 
   const defaultValues = {
@@ -22,9 +22,7 @@ export const UserSettings: FC<UserSettingsProps> = (props) => {
   };
 
   return (
-    <ResponsiveFormContainer
-      className={isMobile || isCallsPage ? "" : "desktop"}
-    >
+    <ResponsiveFormContainer className={className}>
       <DisplayContainerHeader>User Settings</DisplayContainerHeader>
       {devices && (
         <UserSettingsForm
@@ -32,6 +30,7 @@ export const UserSettings: FC<UserSettingsProps> = (props) => {
           defaultValues={defaultValues}
           onSave={onSave}
           updateUserSettings
+          needsConfirmation={needsConfirmation}
         />
       )}
     </ResponsiveFormContainer>

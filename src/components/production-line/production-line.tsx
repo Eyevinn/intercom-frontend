@@ -15,7 +15,6 @@ import {
 import { CallHeaderComponent } from "./call-header.tsx";
 import { CollapsableSection } from "./collapsable-section.tsx";
 import { ExitCallButton } from "./exit-call-button.tsx";
-import { ExitCallModal } from "./exit-call-modal.tsx";
 import { HotkeysComponent } from "./hotkeys-component.tsx";
 import { LongPressToTalkButton } from "./long-press-to-talk-button.tsx";
 import { MinifiedUserControls } from "./minified-user-controls.tsx";
@@ -45,7 +44,7 @@ import { useVolumeReducer } from "./use-volume-reducer.tsx";
 import { useMasterInputMute } from "./use-master-input-mute.ts";
 import logger from "../../utils/logger.ts";
 import { useUpdateCallDevice } from "./use-update-call-device.tsx";
-import { ConfirmModal } from "../confirm-modal/confirm-modal.tsx";
+import { ConfirmationModal } from "../verify-decision/confirmation-modal.tsx";
 
 type TProductionLine = {
   id: string;
@@ -462,10 +461,11 @@ export const ProductionLine = ({
                             resetOnExit={() => setConfirmExitModalOpen(true)}
                           />
                           {confirmExitModalOpen && (
-                            <ExitCallModal
-                              exit={exit}
-                              onClose={() => setConfirmExitModalOpen(false)}
-                              abort={() => setConfirmExitModalOpen(false)}
+                            <ConfirmationModal
+                              title="Confirm"
+                              description="Are you sure you want to leave all calls?"
+                              onCancel={() => setConfirmExitModalOpen(false)}
+                              onConfirm={exit}
                             />
                           )}
                         </ButtonWrapper>
@@ -474,20 +474,20 @@ export const ProductionLine = ({
                   </ListWrapper>
                   <ListWrapper>
                     {confirmModalOpen && (
-                      <ConfirmModal
-                        firstString={
+                      <ConfirmationModal
+                        title="Confirm"
+                        description={
                           muteError
                             ? "Something went wrong, Please try again"
                             : `Are you sure you want to mute ${userName}?`
                         }
-                        secondString={
+                        confirmationText={
                           muteError
                             ? ""
                             : `This will mute ${userName} for everyone in the call.`
                         }
-                        confirm={muteParticipant}
-                        onClose={() => setConfirmModalOpen(false)}
-                        abort={() => setConfirmModalOpen(false)}
+                        onConfirm={muteParticipant}
+                        onCancel={() => setConfirmModalOpen(false)}
                       />
                     )}
                   </ListWrapper>

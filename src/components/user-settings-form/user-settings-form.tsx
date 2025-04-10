@@ -23,7 +23,7 @@ import { useGlobalState } from "../../global-state/context-provider";
 import { useSubmitForm } from "./use-submit-form";
 import { FormItem } from "./form-item";
 import { isBrowserFirefox } from "../../bowser";
-import { ConfirmModal } from "../confirm-modal/confirm-modal";
+import { ConfirmationModal } from "../verify-decision/confirmation-modal";
 
 type FormValues = TJoinProductionOptions & {
   audiooutput: string;
@@ -43,6 +43,7 @@ export const UserSettingsForm = ({
   updateUserSettings,
   onSave,
   isFirstConnection,
+  needsConfirmation,
 }: {
   isJoinProduction?: boolean;
   preSelected?: {
@@ -62,6 +63,7 @@ export const UserSettingsForm = ({
   updateUserSettings?: boolean;
   onSave?: () => void;
   isFirstConnection?: string;
+  needsConfirmation?: boolean;
 }) => {
   const [joinProductionId, setJoinProductionId] = useState<null | number>(null);
   const [isProgramOutputLine, setIsProgramOutputLine] = useState(false);
@@ -310,10 +312,7 @@ export const UserSettingsForm = ({
           type="button"
           disabled={isJoinProduction ? !isValid : false}
           onClick={
-            isFirstConnection ||
-            isSupportedBrowser ||
-            addAdditionalCallId ||
-            isBrowserFirefox
+            !needsConfirmation || isBrowserFirefox
               ? handleSubmit(onSubmit)
               : () => setConfirmModalOpen(true)
           }
@@ -323,12 +322,12 @@ export const UserSettingsForm = ({
       </ButtonWrapper>
 
       {confirmModalOpen && (
-        <ConfirmModal
-          firstString="Are you sure you want to update your settings?"
-          secondString="This will update the devices for all current calls."
-          confirm={handleSubmit(onSubmit)}
-          onClose={() => setConfirmModalOpen(false)}
-          abort={() => setConfirmModalOpen(false)}
+        <ConfirmationModal
+          title="Confirm"
+          description="Are you sure you want to update your settings?"
+          confirmationText="This will update the devices for all current calls."
+          onConfirm={handleSubmit(onSubmit)}
+          onCancel={() => setConfirmModalOpen(false)}
         />
       )}
     </>
