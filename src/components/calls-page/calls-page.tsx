@@ -65,11 +65,9 @@ const MuteAllCallsBtn = styled(PrimaryButton)`
   }
 `;
 
-const HeaderButtons = styled.div<{ isMobile?: boolean }>`
+const HeaderButtons = styled.div`
   display: flex;
   gap: 1rem;
-
-  margin-top: ${isMobile ? "1rem" : "0"};
 `;
 
 export const CallsPage = () => {
@@ -77,7 +75,8 @@ export const CallsPage = () => {
   const [addCallActive, setAddCallActive] = useState(false);
   const [confirmExitModalOpen, setConfirmExitModalOpen] = useState(false);
   const [isMasterInputMuted, setIsMasterInputMuted] = useState(true);
-  const [{ calls, selectedProductionId, websocket }, dispatch] =
+  const [customGlobalMute, setCustomGlobalMute] = useState("p");
+  const [{ calls, selectedProductionId, websocket, error }, dispatch] =
     useGlobalState();
   const { registerCallList, deregisterCall } = useCallList({
     websocket,
@@ -86,6 +85,7 @@ export const CallsPage = () => {
   });
   const [showSettings, setShowSettings] = useState<boolean>(false);
   const [isSettingGlobalMute, setIsSettingGlobalMute] = useState(false);
+  const [isReconnecting, setIsReconnecting] = useState(false);
 
   const { productionId: paramProductionId, lineId: paramLineId } = useParams();
   const navigate = useCallsNavigation({
@@ -115,16 +115,19 @@ export const CallsPage = () => {
   });
   usePreventPullToRefresh();
 
-  let muteToggleTimeout: NodeJS.Timeout | null = null;
+  const muteToggleTimeoutRef = useRef<number | null>(null);
 
   const handleToggleGlobalMute = () => {
-    if (muteToggleTimeout) return;
+    if (muteToggleTimeoutRef.current !== null) return;
+
     setIsMasterInputMuted((prev) => !prev);
     setIsSettingGlobalMute(true);
-    muteToggleTimeout = setTimeout(() => {
-      muteToggleTimeout = null;
+
+    muteToggleTimeoutRef.current = window.setTimeout(() => {
+      muteToggleTimeoutRef.current = null;
     }, 300);
-    setTimeout(() => {
+
+    window.setTimeout(() => {
       setIsSettingGlobalMute(false);
     }, 1000);
   };
@@ -140,6 +143,12 @@ export const CallsPage = () => {
       callIndexMap.current[i + 1] = callId;
     });
   }, [calls]);
+
+  useEffect(() => {
+    if (error) {
+      setIsReconnecting(false);
+    }
+  }, [error]);
 
   const { connect, isConnected } = useWebSocket({
     onAction: (action, index) => {
@@ -195,19 +204,39 @@ export const CallsPage = () => {
   });
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      if (
-        websocket &&
-        websocket.readyState === WebSocket.CLOSED &&
-        websocket.url
-      ) {
-        console.log("Reconnecting WebSocket to", websocket.url);
-        connect(websocket.url);
-      }
-    }, 3000);
+    if (isConnected && isReconnecting) {
+      setIsReconnecting(false);
+    }
+  }, [isConnected, isReconnecting]);
 
-    return () => clearInterval(interval);
-  }, [websocket, connect]);
+  useEffect(() => {
+    let interval: number | null = null;
+    let timeout: number | null = null;
+
+    const shouldAttemptReconnect =
+      websocket !== null &&
+      websocket.readyState === WebSocket.CLOSED &&
+      websocket.url &&
+      !isConnected;
+
+    if (shouldAttemptReconnect) {
+      setIsReconnecting(true);
+
+      interval = window.setInterval(() => {
+        connect(websocket.url);
+      }, 3000);
+
+      timeout = window.setTimeout(() => {
+        if (interval) window.clearInterval(interval);
+        setIsReconnecting(false);
+      }, 5000);
+    }
+
+    return () => {
+      if (interval) window.clearInterval(interval);
+      if (timeout) window.clearTimeout(timeout);
+    };
+  }, [websocket, connect, isConnected]);
 
   useEffect(() => {
     if (selectedProductionId) {
