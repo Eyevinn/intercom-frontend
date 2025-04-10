@@ -10,7 +10,12 @@ import { TUserSettings } from "../user-settings/types";
 import { TJoinProductionOptions } from "../production-line/types";
 import { Checkbox } from "../checkbox/checkbox";
 import { FormInputWithLoader } from "../landing-page/form-input-with-loader";
-import { CheckboxWrapper } from "../landing-page/join-production-components";
+import {
+  CheckboxWrapper,
+  FetchErrorMessage,
+  NameWrapper,
+  ProductionName,
+} from "../landing-page/join-production-components";
 import { ReloadDevicesButton } from "../reload-devices-button.tsx/reload-devices-button";
 import { useFetchProduction } from "../landing-page/use-fetch-production";
 import { ButtonWrapper } from "../generic-components";
@@ -158,13 +163,13 @@ export const UserSettingsForm = ({
   return (
     <>
       {!preSelected && isJoinProduction && (
-        <FormItem
-          label="Production Name"
-          productionLabel={production?.name || "Enter a production ID"}
-          fieldName="productionId"
-          productionFetchError={productionFetchError}
-          errors={errors}
-        >
+        <FormItem fieldName="productionId" errors={errors}>
+          <NameWrapper>
+            <ProductionName>Production Name</ProductionName>
+            <ProductionName className="name">
+              {production?.name || "Enter a production ID"}
+            </ProductionName>
+          </NameWrapper>
           <FormInputWithLoader
             onChange={(ev) => {
               onChange(ev);
@@ -181,6 +186,12 @@ export const UserSettingsForm = ({
             type="number"
             loading={loading}
           />
+          {productionFetchError && (
+            <FetchErrorMessage>
+              The production ID could not be fetched.{" "}
+              {productionFetchError.name} {productionFetchError.message}.
+            </FetchErrorMessage>
+          )}
         </FormItem>
       )}
       <FormItem label="Username" fieldName="username" errors={errors}>
