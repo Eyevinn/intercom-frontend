@@ -22,6 +22,8 @@ export function useWebSocket({ dispatch, onAction }: UseWebSocketProps) {
 
   const connect = useCallback(
     (url: string) => {
+      dispatch({ type: "SET_WEBSOCKET", payload: null });
+
       const ws = new WebSocket(url);
 
       ws.onopen = () => {
@@ -40,8 +42,13 @@ export function useWebSocket({ dispatch, onAction }: UseWebSocketProps) {
         }
       };
 
-      ws.onerror = (error) => {
-        logger.red(`WebSocket error: ${error}`);
+      ws.onerror = () => {
+        dispatch({
+          type: "ERROR",
+          payload: {
+            error: new Error("Could not connect to the WebSocket server"),
+          },
+        });
         setIsConnected(false);
       };
 
