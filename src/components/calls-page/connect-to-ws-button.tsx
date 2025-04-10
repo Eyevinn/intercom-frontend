@@ -1,7 +1,6 @@
 import styled from "@emotion/styled";
 import { useState } from "react";
 import { CheckIcon } from "../../assets/icons/icon";
-import { useGlobalState } from "../../global-state/context-provider";
 import { PrimaryButton } from "../landing-page/form-elements";
 import { Spinner } from "../loader/loader";
 import { ConnectToWsModal } from "./connect-to-ws-modal";
@@ -32,30 +31,20 @@ interface ConnectToWSButtonProps {
   isConnected: boolean;
   isReconnecting: boolean;
   connect: (url: string) => void;
+  disconnect: () => void;
 }
 
 export const ConnectToWSButton = ({
   isConnected,
   isReconnecting,
   connect,
+  disconnect,
 }: ConnectToWSButtonProps) => {
-  const [{ websocket }, dispatch] = useGlobalState();
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const handleConnect = (url: string) => {
     connect(url);
     setIsOpen(false);
-  };
-
-  const handleDisconnect = () => {
-    if (websocket && websocket.readyState === WebSocket.OPEN) {
-      websocket.close();
-    }
-
-    dispatch({
-      type: "SET_WEBSOCKET",
-      payload: null,
-    });
   };
 
   const renderButtonContent = () => {
@@ -72,13 +61,12 @@ export const ConnectToWSButton = ({
     <ConnectWebSocketWrapper>
       <ConnectButton
         isConnected={isConnected}
-        onClick={isConnected ? handleDisconnect : () => setIsOpen(true)}
+        onClick={isConnected ? disconnect : () => setIsOpen(true)}
       >
         {renderButtonContent()}
         {isConnected && <CheckIcon />}
         {isReconnecting && <Spinner className="companion-loader" />}
       </ConnectButton>
-
       <ConnectToWsModal
         isOpen={isOpen}
         handleConnect={handleConnect}

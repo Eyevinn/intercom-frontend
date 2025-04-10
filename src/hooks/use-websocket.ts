@@ -62,15 +62,23 @@ export function useWebSocket({ dispatch, onAction }: UseWebSocketProps) {
     [onAction, dispatch]
   );
 
+  const disconnect = () => {
+    socketRef.current?.close();
+    setIsConnected(false);
+    dispatch({ type: "SET_WEBSOCKET", payload: null });
+  };
+
   useEffect(() => {
     return () => {
       if (socketRef.current) {
-        socketRef.current.close();
+        socketRef.current?.close();
+        socketRef.current = null;
       }
     };
   }, []);
 
   return {
+    disconnect,
     connect,
     isConnected,
   };

@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 import { useGlobalState } from "../../global-state/context-provider";
 import { useCallList } from "../../hooks/use-call-list";
 import { useWebSocket } from "../../hooks/use-websocket";
+import logger from "../../utils/logger";
 import { PrimaryButton } from "../landing-page/form-elements";
 import { JoinProduction } from "../landing-page/join-production";
 import { UserSettingsButton } from "../landing-page/user-settings-button";
@@ -14,12 +15,10 @@ import { useGlobalHotkeys } from "../production-line/use-line-hotkeys";
 import { usePreventPullToRefresh } from "./use-prevent-pull-to-refresh";
 import { useSpeakerDetection } from "./use-speaker-detection";
 
-const Container = styled.div<{ isMobile?: boolean }>`
+const Container = styled.div`
   display: flex;
   flex-direction: column;
   flex-wrap: wrap;
-
-  margin-top: ${isMobile ? "3rem" : "0"};
 `;
 
 const CallsContainer = styled.div`
@@ -150,7 +149,7 @@ export const CallsPage = () => {
     }
   }, [error]);
 
-  const { connect, isConnected } = useWebSocket({
+  const { connect, disconnect, isConnected } = useWebSocket({
     onAction: (action, index) => {
       if (action === "toggle_global_mute") {
         handleToggleGlobalMute();
@@ -197,7 +196,8 @@ export const CallsPage = () => {
           handlers.pushToTalkStop?.();
           break;
         default:
-          console.warn("Unknown call-specific action:", action);
+          logger.yellow(`Unknown action: ${action}`);
+          break;
       }
     },
     dispatch,
@@ -224,7 +224,7 @@ export const CallsPage = () => {
 
       interval = window.setInterval(() => {
         connect(websocket.url);
-      }, 3000);
+      }, 1000);
 
       timeout = window.setTimeout(() => {
         if (interval) window.clearInterval(interval);
