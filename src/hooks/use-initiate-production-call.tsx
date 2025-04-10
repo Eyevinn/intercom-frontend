@@ -6,7 +6,7 @@ import { useFetchDevices } from "./use-fetch-devices";
 import { useDevicePermissions } from "./use-device-permission";
 import logger from "../utils/logger";
 
-export const useStartConnect = ({
+export const useInitiateProductionCall = ({
   dispatch,
 }: {
   dispatch: Dispatch<TGlobalStateAction>;
@@ -20,7 +20,7 @@ export const useStartConnect = ({
     permission,
   });
 
-  const startConnect = useCallback(
+  const initiateProductionCall = useCallback(
     async ({
       payload,
       customGlobalMute,
@@ -88,7 +88,7 @@ export const useStartConnect = ({
         });
         return true;
       } catch (error) {
-        logger.red(`Error in startConnect: ${error}`);
+        logger.red(`Error to initiate production call: ${error}`);
         dispatch({
           type: "ERROR",
           payload: {
@@ -101,5 +101,5 @@ export const useStartConnect = ({
     [dispatch, getUpdatedDevices]
   );
 
-  return { startConnect };
+  return { initiateProductionCall };
 };

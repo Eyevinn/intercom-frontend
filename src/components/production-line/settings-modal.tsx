@@ -1,73 +1,24 @@
-import styled from "@emotion/styled";
 import React, { useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { ErrorMessage } from "@hookform/error-message";
 import {
   PrimaryButton,
-  FormLabel,
   FormInput,
   FormContainer,
-  DecorativeLabel,
   StyledWarningMessage,
-  ActionButton,
 } from "../landing-page/form-elements";
 import { useUpdateGlobalHotkey } from "./use-update-global-hotkey";
 import { useCheckForDuplicateHotkey } from "./use-check-for-duplicate-hotkey";
 import { Hotkeys } from "./types";
-
-const ModalOverlay = styled.div`
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(0, 0, 0, 0.5);
-  z-index: 100;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-`;
-
-const ModalContent = styled.div`
-  background: #383838;
-  border-radius: 0.5rem;
-  padding: 2rem;
-  width: 80%;
-  max-width: 40rem;
-  box-shadow: 0 0.4rem 0.8rem rgba(0, 0, 0, 0.2);
-  color: white;
-`;
-
-const ModalHeader = styled.h2`
-  font-size: 2rem;
-  margin-bottom: 2rem;
-  font-weight: 600;
-`;
-
-const ModalCloseButton = styled.button`
-  background: none;
-  border: none;
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  cursor: pointer;
-  font-size: 1.6rem;
-`;
-
-const CancelButton = styled(ActionButton)`
-  background: #d6d3d1;
-
-  &:disabled {
-    background: rgba(214, 211, 209, 0.8);
-  }
-`;
-
-const ButtonDiv = styled.div`
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  margin-top: 3rem;
-`;
+import { FormItem } from "../user-settings-form/form-item";
+import {
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalCloseButton,
+  CancelButton,
+  ButtonDiv,
+} from "./settings-modal-components";
 
 type TSettingsModalProps = {
   isOpen: boolean;
@@ -227,10 +178,16 @@ export const SettingsModal = ({
 
   const renderFormInput = (
     field: keyof Hotkeys,
+    label: string,
     formError: boolean,
     formWarning: string
   ) => (
-    <>
+    <FormItem
+      label={label}
+      fieldName={field}
+      errors={errors}
+      errorClassName="error-message"
+    >
       <FormInput
         // eslint-disable-next-line
         {...register(field, {
@@ -247,11 +204,6 @@ export const SettingsModal = ({
         })}
         placeholder="Enter hotkey"
       />
-      <ErrorMessage
-        errors={errors}
-        name={field}
-        as={<StyledWarningMessage className="error-message" />}
-      />
       {formError && formWarning && (
         <ErrorMessage
           errors={{ [field]: { message: formWarning } }}
@@ -259,7 +211,7 @@ export const SettingsModal = ({
           as={StyledWarningMessage}
         />
       )}
-    </>
+    </FormItem>
   );
 
   return (
@@ -268,64 +220,52 @@ export const SettingsModal = ({
         <ModalCloseButton onClick={onClose}>X</ModalCloseButton>
         <ModalHeader>Hotkey settings for line: {lineName}</ModalHeader>
         <FormContainer>
-          {(programOutPutLine ? isProgramUser : !isProgramUser) && (
-            <FormLabel>
-              <DecorativeLabel>Toggle mute: </DecorativeLabel>
-              {renderFormInput(
-                "muteHotkey",
-                !errors.muteHotkey,
-                warning.muteHotkey
-              )}
-            </FormLabel>
-          )}
+          {(programOutPutLine ? isProgramUser : !isProgramUser) &&
+            renderFormInput(
+              "muteHotkey",
+              "Toggle mute",
+              !errors.muteHotkey,
+              warning.muteHotkey
+            )}
           {!(programOutPutLine && isProgramUser) && (
             <>
-              <FormLabel>
-                <DecorativeLabel>Toggle speaker: </DecorativeLabel>
-                {renderFormInput(
-                  "speakerHotkey",
-                  !errors.speakerHotkey,
-                  warning.speakerHotkey
-                )}
-              </FormLabel>
-              {!programOutPutLine && (
-                <FormLabel>
-                  <DecorativeLabel>Toggle push to talk: </DecorativeLabel>
-                  {renderFormInput(
-                    "pushToTalkHotkey",
-                    !errors.pushToTalkHotkey,
-                    warning.pushToTalkHotkey
-                  )}
-                </FormLabel>
+              {renderFormInput(
+                "speakerHotkey",
+                "Toggle speaker",
+                !errors.speakerHotkey,
+                warning.speakerHotkey
               )}
-              <FormLabel>
-                <DecorativeLabel>Increase volume:</DecorativeLabel>
-                {renderFormInput(
-                  "increaseVolumeHotkey",
-                  !errors.increaseVolumeHotkey,
-                  warning.increaseVolumeHotkey
+
+              {!programOutPutLine &&
+                renderFormInput(
+                  "pushToTalkHotkey",
+                  "Toggle push to talk",
+                  !errors.pushToTalkHotkey,
+                  warning.pushToTalkHotkey
                 )}
-              </FormLabel>
-              <FormLabel>
-                <DecorativeLabel>Decrease volume:</DecorativeLabel>
-                {renderFormInput(
-                  "decreaseVolumeHotkey",
-                  !errors.decreaseVolumeHotkey,
-                  warning.decreaseVolumeHotkey
-                )}
-              </FormLabel>
+
+              {renderFormInput(
+                "increaseVolumeHotkey",
+                "Increase volume",
+                !errors.increaseVolumeHotkey,
+                warning.increaseVolumeHotkey
+              )}
+
+              {renderFormInput(
+                "decreaseVolumeHotkey",
+                "Decrease volume",
+                !errors.decreaseVolumeHotkey,
+                warning.decreaseVolumeHotkey
+              )}
             </>
           )}
-          {!programOutPutLine && (
-            <FormLabel>
-              <DecorativeLabel>Toggle mute all microphones: </DecorativeLabel>
-              {renderFormInput(
-                "globalMuteHotkey",
-                !errors.globalMuteHotkey,
-                warning.globalMuteHotkey
-              )}
-            </FormLabel>
-          )}
+          {!programOutPutLine &&
+            renderFormInput(
+              "globalMuteHotkey",
+              "Toggle mute all microphones",
+              !errors.globalMuteHotkey,
+              warning.globalMuteHotkey
+            )}
           <ButtonDiv>
             <CancelButton type="button" onClick={onClose}>
               Cancel

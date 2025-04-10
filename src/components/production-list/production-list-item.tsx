@@ -32,7 +32,7 @@ import {
   SpinnerWrapper,
 } from "./production-list-components";
 import { LineBlock } from "./line-block";
-import { useStartConnect } from "../../hooks/use-start-connect";
+import { useInitiateProductionCall } from "../../hooks/use-initiate-production-call";
 
 type ProductionsListItemProps = {
   production: TBasicProductionResponse;
@@ -53,7 +53,7 @@ export const ProductionsListItem = ({
   const [selectedLine, setSelectedLine] = useState<TLine | null>();
   const [lineRemoveId, setLineRemoveId] = useState<string>("");
 
-  const { startConnect } = useStartConnect({
+  const { initiateProductionCall } = useInitiateProductionCall({
     dispatch,
   });
 
@@ -102,7 +102,7 @@ export const ProductionsListItem = ({
         audiooutput: userSettings?.audiooutput,
       };
 
-      const success = await startConnect({ payload: callPayload });
+      const success = await initiateProductionCall({ payload: callPayload });
 
       if (success) {
         navigate(
