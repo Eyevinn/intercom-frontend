@@ -25,8 +25,22 @@ export function useWebSocket({ dispatch, onAction }: UseWebSocketProps) {
       dispatch({ type: "SET_WEBSOCKET", payload: null });
 
       const ws = new WebSocket(url);
+      socketRef.current = ws;
+
+      const timeout = setTimeout(() => {
+        if (ws.readyState !== WebSocket.OPEN) {
+          dispatch({
+            type: "ERROR",
+            payload: {
+              error: new Error("Could not connect to the WebSocket server"),
+            },
+          });
+          ws.close();
+        }
+      }, 3000);
 
       ws.onopen = () => {
+        clearTimeout(timeout);
         setIsConnected(true);
         dispatch({ type: "SET_WEBSOCKET", payload: ws });
       };
@@ -43,6 +57,7 @@ export function useWebSocket({ dispatch, onAction }: UseWebSocketProps) {
       };
 
       ws.onerror = () => {
+        clearTimeout(timeout);
         dispatch({
           type: "ERROR",
           payload: {
@@ -53,6 +68,7 @@ export function useWebSocket({ dispatch, onAction }: UseWebSocketProps) {
       };
 
       ws.onclose = () => {
+        clearTimeout(timeout);
         logger.yellow("WebSocket connection closed");
         setIsConnected(false);
       };
