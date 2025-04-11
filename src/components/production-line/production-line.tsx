@@ -168,6 +168,13 @@ export const ProductionLine = ({
       : null
   );
 
+  const { muteInput, isInputMuted, setIsInputMuted } = useMuteInput({
+    inputAudioStream,
+    isProgramOutputLine,
+    isProgramUser,
+    id,
+  });
+
   useVolumeReducer({
     line,
     audioElements,
@@ -176,11 +183,13 @@ export const ProductionLine = ({
   });
 
   useEffect(() => {
-    registerCallState?.(id, {
-      isInputMuted,
-      isOutputMuted,
-      volume: value,
-    });
+    if (registerCallState) {
+      registerCallState(id, {
+        isInputMuted,
+        isOutputMuted,
+        volume: value,
+      });
+    }
   }, [id, isInputMuted, isOutputMuted, value, registerCallState]);
 
   useEffect(() => {
@@ -193,13 +202,6 @@ export const ProductionLine = ({
       });
     }
   }, [audioElements]);
-
-  const { muteInput, inputMute } = useMuteInput({
-    inputAudioStream,
-    isProgramOutputLine,
-    isProgramUser,
-    id,
-  });
 
   const {
     startTalking,
@@ -237,13 +239,6 @@ export const ProductionLine = ({
   useHotkeys(savedHotkeys?.decreaseVolumeHotkey || "d", () => {
     const newValue = Math.max(value - 0.05, 0);
     setValue(newValue);
-  });
-
-  const { muteInput, isInputMuted } = useMuteInput({
-    inputAudioStream,
-    isProgramOutputLine,
-    isProgramUser,
-    id,
   });
 
   // Update call device when the user changes the audio settings on Chrome or Edge

@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
-import { TUseAudioInputValues } from "./use-audio-input";
 import { useGlobalState } from "../../global-state/context-provider";
+import { TUseAudioInputValues } from "./use-audio-input";
 
 export const useMuteInput = ({
   isProgramOutputLine,
@@ -44,5 +44,5 @@ export const useMuteInput = ({
     },
     [dispatch, id, inputAudioStream, isProgramOutputLine, isProgramUser]
   );
-  return { muteInput, isInputMuted };
+  return { muteInput, isInputMuted, setIsInputMuted };
 };

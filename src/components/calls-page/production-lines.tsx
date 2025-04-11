@@ -1,5 +1,8 @@
-import { ProductionLine } from "../production-line/production-line";
+import { useEffect } from "react";
+import { useGlobalState } from "../../global-state/context-provider";
 import { CallState } from "../../global-state/types";
+import { useWebsocketReconnect } from "../../hooks/use-websocket-reconnect";
+import { ProductionLine } from "../production-line/production-line";
 
 type ProductionLinesProps = {
   calls: Record<string, CallState>;
@@ -7,7 +10,15 @@ type ProductionLinesProps = {
   isSingleCall: boolean;
   customGlobalMute: string;
   isMasterInputMuted: boolean;
+  isReconnecting: boolean;
+  isConnected: boolean;
+  callActionHandlers: React.MutableRefObject<
+    Record<string, Record<string, () => void>>
+  >;
+  isSettingGlobalMute?: boolean;
   setAddCallActive: (addCallActive: boolean) => void;
+  setIsReconnecting: (isReconnecting: boolean) => void;
+  connect: (url: string) => void;
 };
 
 export const ProductionLines = ({
@@ -16,12 +27,35 @@ export const ProductionLines = ({
   isSingleCall,
   customGlobalMute,
   isMasterInputMuted,
+  isReconnecting,
+  isConnected,
+  callActionHandlers,
+  isSettingGlobalMute,
   setAddCallActive,
-}: ProductionLinesProps) => (
-  <>
-    {Object.entries(calls)
-      .toReversed()
-      .map(
+  setIsReconnecting,
+  connect,
+}: ProductionLinesProps) => {
+  const [{ error }] = useGlobalState();
+  const handlerRef = callActionHandlers.current;
+
+  useEffect(() => {
+    if (error) {
+      setIsReconnecting(false);
+    }
+  }, [error, setIsReconnecting]);
+
+  const { deregisterCall, registerCallList } = useWebsocketReconnect({
+    calls,
+    isMasterInputMuted,
+    isReconnecting,
+    isConnected,
+    setIsReconnecting,
+    connect,
+  });
+
+  return (
+    <>
+      {Object.entries(calls).map(
         ([callId, callState]) =>
           callId &&
           callState.joinProductionOptions && (
@@ -34,8 +68,36 @@ export const ProductionLines = ({
               customGlobalMute={customGlobalMute}
               masterInputMute={isMasterInputMuted}
               setFailedToConnect={() => setAddCallActive(true)}
+              isSettingGlobalMute={isSettingGlobalMute}
+              registerCallState={registerCallList}
+              deregisterCall={deregisterCall}
+              onToggleInputMute={(handler) => {
+                if (!handlerRef[callId]) handlerRef[callId] = {};
+                handlerRef[callId].toggleInputMute = handler;
+              }}
+              onToggleOutputMute={(handler) => {
+                if (!handlerRef[callId]) handlerRef[callId] = {};
+                handlerRef[callId].toggleOutputMute = handler;
+              }}
+              onIncreaseVolume={(handler) => {
+                if (!handlerRef[callId]) handlerRef[callId] = {};
+                handlerRef[callId].increaseVolume = handler;
+              }}
+              onDecreaseVolume={(handler) => {
+                if (!handlerRef[callId]) handlerRef[callId] = {};
+                handlerRef[callId].decreaseVolume = handler;
+              }}
+              onPushToTalkStart={(handler) => {
+                if (!handlerRef[callId]) handlerRef[callId] = {};
+                handlerRef[callId].pushToTalkStart = handler;
+              }}
+              onPushToTalkStop={(handler) => {
+                if (!handlerRef[callId]) handlerRef[callId] = {};
+                handlerRef[callId].pushToTalkStop = handler;
+              }}
             />
           )
       )}
-  </>
-);
+    </>
+  );
+};
