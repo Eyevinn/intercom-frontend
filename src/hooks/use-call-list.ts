@@ -22,9 +22,14 @@ export function useCallList({
 
   const globalMuteRef = useRef(globalMute);
   const numberOfCallsRef = useRef(numberOfCalls);
+  const hasRegisteredCallRef = useRef(false);
 
   const sendCallsStateUpdate = useCallback(() => {
     const entries = Object.entries(callLineStates.current);
+
+    if (entries.length === 0 || !hasRegisteredCallRef.current) {
+      return;
+    }
 
     const payload = {
       type: "CALLS_STATE_UPDATE",
@@ -52,15 +57,19 @@ export function useCallList({
   useEffect(() => {
     globalMuteRef.current = globalMute;
     numberOfCallsRef.current = numberOfCalls;
-    sendCallsStateUpdate();
+    if (hasRegisteredCallRef.current) {
+      sendCallsStateUpdate();
+    }
   }, [globalMute, numberOfCalls, sendCallsStateUpdate]);
 
   const registerCallList = useCallback(
-    (callId: string, data: CallData, isGlobalMute?: boolean) => {
+    (callId: string, data: CallData, isSettingGlobalMute?: boolean) => {
       const prev = callLineStates.current[callId];
       const isNewCall = prev === undefined;
 
       callLineStates.current[callId] = data;
+
+      hasRegisteredCallRef.current = true;
 
       if (isNewCall) {
         return;
@@ -79,7 +88,7 @@ export function useCallList({
       if (
         websocket &&
         websocket.readyState === WebSocket.OPEN &&
-        !isGlobalMute
+        !isSettingGlobalMute
       ) {
         websocket.send(
           JSON.stringify({
@@ -98,5 +107,5 @@ export function useCallList({
     delete callLineStates.current[callId];
   }, []);
 
-  return { registerCallList, deregisterCall };
+  return { registerCallList, deregisterCall, sendCallsStateUpdate };
 }
