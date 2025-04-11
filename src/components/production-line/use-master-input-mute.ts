@@ -5,19 +5,36 @@ interface UseMasterInputMuteProps {
   inputAudioStream: MediaStream | "no-device" | null;
   isProgramOutputLine: boolean | null | undefined;
   masterInputMute: boolean;
-  muteInput: (mute: boolean) => void;
   dispatch: React.Dispatch<TGlobalStateAction>;
   id: string;
+  muteInput: (mute: boolean) => void;
+  registerCallState?: (
+    callId: string,
+    data: {
+      isInputMuted: boolean;
+      isOutputMuted: boolean;
+      volume: number;
+    },
+    isGlobalMute?: boolean
+  ) => void;
+  isSettingGlobalMute?: boolean;
+  isOutputMuted: boolean;
+  value: number;
 }
 
 export const useMasterInputMute = ({
   inputAudioStream,
   isProgramOutputLine,
   masterInputMute,
-  muteInput,
   dispatch,
   id,
+  muteInput,
+  registerCallState,
+  isSettingGlobalMute,
+  isOutputMuted,
+  value,
 }: UseMasterInputMuteProps) => {
+  /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
     if (
       inputAudioStream &&
@@ -28,7 +45,18 @@ export const useMasterInputMute = ({
         // eslint-disable-next-line no-param-reassign
         t.enabled = !masterInputMute;
       });
+
       muteInput(masterInputMute);
+
+      registerCallState?.(
+        id,
+        {
+          isInputMuted: masterInputMute,
+          isOutputMuted,
+          volume: value,
+        },
+        isSettingGlobalMute
+      );
     }
     if (masterInputMute && !isProgramOutputLine) {
       dispatch({
@@ -42,11 +70,13 @@ export const useMasterInputMute = ({
       });
     }
   }, [
-    dispatch,
-    id,
     inputAudioStream,
     isProgramOutputLine,
     masterInputMute,
     muteInput,
+    id,
+    registerCallState,
+    isSettingGlobalMute,
+    dispatch,
   ]);
 };

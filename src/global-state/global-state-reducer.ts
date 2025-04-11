@@ -14,6 +14,7 @@ const initialGlobalState: TGlobalState = {
   selectedProductionId: null,
   calls: {},
   apiError: false,
+  websocket: null,
 };
 
 const globalReducer: Reducer<TGlobalState, TGlobalStateAction> = (
@@ -114,6 +115,11 @@ const globalReducer: Reducer<TGlobalState, TGlobalStateAction> = (
       return {
         ...state,
         userSettings: action.payload,
+      };
+    case "SET_WEBSOCKET":
+      return {
+        ...state,
+        websocket: action.payload,
       };
     default:
       return state;

@@ -1,9 +1,12 @@
-import { useCallback, useEffect, useState, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useNavigate, useParams } from "react-router-dom";
 import { isBrowserFirefox, isMobile, isTablet } from "../../bowser.ts";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { CallState } from "../../global-state/types.ts";
+import { useCallActionHandlers } from "../../hooks/use-call-action-handlers.ts";
+import { usePushToTalk } from "../../hooks/use-push-to-talk.ts";
+import logger from "../../utils/logger.ts";
 import { DisplayWarning } from "../display-box.tsx";
 import { FlexContainer } from "../generic-components.ts";
 import { useFetchProduction } from "../landing-page/use-fetch-production.ts";
@@ -12,6 +15,7 @@ import {
   InnerDiv,
   ProductionLines,
 } from "../production-list/production-list-components.ts";
+import { ConfirmationModal } from "../verify-decision/confirmation-modal.tsx";
 import { CallHeaderComponent } from "./call-header.tsx";
 import { CollapsableSection } from "./collapsable-section.tsx";
 import { ExitCallButton } from "./exit-call-button.tsx";
@@ -30,21 +34,19 @@ import {
 import { SelectDevices } from "./select-devices.tsx";
 import { ShareLineButton } from "./share-line-button.tsx";
 import { SymphonyRtcConnectionComponent } from "./symphony-rtc-connection-component.tsx";
+import { useActiveParticipant } from "./use-active-participant.tsx";
 import { useAudioCue } from "./use-audio-cue.ts";
 import { useAudioInput } from "./use-audio-input.ts";
 import { useCheckBadLineData } from "./use-check-bad-line-data.ts";
 import { useIsLoading } from "./use-is-loading.ts";
 import { useLineHotkeys, useSpeakerHotkeys } from "./use-line-hotkeys.ts";
 import { useLinePolling } from "./use-line-polling.ts";
+import { useMasterInputMute } from "./use-master-input-mute.ts";
 import { useMuteInput } from "./use-mute-input.tsx";
+import { useUpdateCallDevice } from "./use-update-call-device.tsx";
+import { useVolumeReducer } from "./use-volume-reducer.tsx";
 import { UserControls } from "./user-controls.tsx";
 import { UserList } from "./user-list.tsx";
-import { useActiveParticipant } from "./use-active-participant.tsx";
-import { useVolumeReducer } from "./use-volume-reducer.tsx";
-import { useMasterInputMute } from "./use-master-input-mute.ts";
-import logger from "../../utils/logger.ts";
-import { useUpdateCallDevice } from "./use-update-call-device.tsx";
-import { ConfirmationModal } from "../verify-decision/confirmation-modal.tsx";
 
 type TProductionLine = {
   id: string;
@@ -53,7 +55,24 @@ type TProductionLine = {
   customGlobalMute: string;
   masterInputMute: boolean;
   shouldReduceVolume: boolean;
+  isSettingGlobalMute?: boolean;
   setFailedToConnect: () => void;
+  registerCallState?: (
+    callId: string,
+    data: {
+      isInputMuted: boolean;
+      isOutputMuted: boolean;
+      volume: number;
+    },
+    isGlobalMute?: boolean
+  ) => void;
+  deregisterCall?: (callId: string) => void;
+  onToggleInputMute?: (handler: () => void) => void;
+  onToggleOutputMute?: (handler: () => void) => void;
+  onIncreaseVolume?: (handler: () => void) => void;
+  onDecreaseVolume?: (handler: () => void) => void;
+  onPushToTalkStart?: (handler: () => void) => void;
+  onPushToTalkStop?: (handler: () => void) => void;
 };
 
 export const ProductionLine = ({
@@ -63,7 +82,16 @@ export const ProductionLine = ({
   customGlobalMute,
   masterInputMute,
   shouldReduceVolume,
+  isSettingGlobalMute,
   setFailedToConnect,
+  registerCallState,
+  deregisterCall,
+  onToggleInputMute,
+  onToggleOutputMute,
+  onIncreaseVolume,
+  onDecreaseVolume,
+  onPushToTalkStart,
+  onPushToTalkStop,
 }: TProductionLine) => {
   const { productionId: paramProductionId, lineId: paramLineId } = useParams();
   const [, dispatch] = useGlobalState();
@@ -140,12 +168,29 @@ export const ProductionLine = ({
       : null
   );
 
+  const { muteInput, isInputMuted, setIsInputMuted } = useMuteInput({
+    inputAudioStream,
+    isProgramOutputLine,
+    isProgramUser,
+    id,
+  });
+
   useVolumeReducer({
     line,
     audioElements,
     shouldReduceVolume,
     value,
   });
+
+  useEffect(() => {
+    if (registerCallState) {
+      registerCallState(id, {
+        isInputMuted,
+        isOutputMuted,
+        volume: value,
+      });
+    }
+  }, [id, isInputMuted, isOutputMuted, value, registerCallState]);
 
   useEffect(() => {
     if (audioElements) {
@@ -157,6 +202,14 @@ export const ProductionLine = ({
       });
     }
   }, [audioElements]);
+
+  const {
+    startTalking,
+    stopTalking,
+    isTalking,
+    handleLongPressStart,
+    handleLongPressEnd,
+  } = usePushToTalk({ muteInput });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = parseFloat(e.target.value);
@@ -186,13 +239,6 @@ export const ProductionLine = ({
   useHotkeys(savedHotkeys?.decreaseVolumeHotkey || "d", () => {
     const newValue = Math.max(value - 0.05, 0);
     setValue(newValue);
-  });
-
-  const { muteInput, isInputMuted } = useMuteInput({
-    inputAudioStream,
-    isProgramOutputLine,
-    isProgramUser,
-    id,
   });
 
   // Update call device when the user changes the audio settings on Chrome or Edge
@@ -227,11 +273,12 @@ export const ProductionLine = ({
       type: "REMOVE_CALL",
       payload: { id },
     });
+    deregisterCall?.(id);
 
     if (isSingleCall) {
       navigate("/");
     }
-  }, [dispatch, id, playExitSound, isSingleCall, navigate]);
+  }, [dispatch, id, playExitSound, isSingleCall, navigate, deregisterCall]);
 
   useLineHotkeys({
     muteInput,
@@ -250,9 +297,13 @@ export const ProductionLine = ({
     inputAudioStream,
     isProgramOutputLine,
     masterInputMute,
-    muteInput,
     dispatch,
     id,
+    muteInput,
+    registerCallState,
+    isSettingGlobalMute,
+    isOutputMuted,
+    value,
   });
 
   useEffect(() => {
@@ -270,6 +321,22 @@ export const ProductionLine = ({
     });
     setIsOutputMuted(!isOutputMuted);
   }, [audioElements, isOutputMuted]);
+
+  useCallActionHandlers({
+    onToggleInputMute,
+    onToggleOutputMute,
+    onIncreaseVolume,
+    onDecreaseVolume,
+    onPushToTalkStart,
+    onPushToTalkStop,
+    value,
+    setValue,
+    setIsInputMuted,
+    audioElements,
+    muteOutput,
+    startTalking,
+    stopTalking,
+  });
 
   useSpeakerHotkeys({
     muteOutput,
@@ -371,6 +438,9 @@ export const ProductionLine = ({
             <MinifiedUserControls
               muteOutput={muteOutput}
               muteInput={() => muteInput(!isInputMuted)}
+              onStartTalking={handleLongPressStart}
+              onStopTalking={handleLongPressEnd}
+              isTalking={isTalking}
               line={line}
               joinProductionOptions={joinProductionOptions}
               isOutputMuted={isOutputMuted}
@@ -408,7 +478,11 @@ export const ProductionLine = ({
                         inputAudioStream !== "no-device" &&
                         !line?.programOutputLine && (
                           <LongPressWrapper>
-                            <LongPressToTalkButton muteInput={muteInput} />
+                            <LongPressToTalkButton
+                              onStartTalking={handleLongPressStart}
+                              onStopTalking={handleLongPressEnd}
+                              isTalking={isTalking}
+                            />
                           </LongPressWrapper>
                         )}
                       {isBrowserFirefox && (

@@ -1,7 +1,8 @@
 import styled from "@emotion/styled";
 import { MicMuted, MicUnmuted } from "../../assets/icons/icon";
-import { PrimaryButton, SecondaryButton } from "../landing-page/form-elements";
 import { isMobile } from "../../bowser";
+import { PrimaryButton, SecondaryButton } from "../landing-page/form-elements";
+import { ConnectToWSButton } from "./connect-to-ws-button";
 
 const AddCallContainer = styled.div`
   display: flex;
@@ -36,26 +37,43 @@ const MuteAllCallsBtn = styled(PrimaryButton)`
 
 const HeaderButtons = styled.div`
   display: flex;
+  gap: 1rem;
 `;
 
 type HeaderActionsProps = {
   isEmpty: boolean;
   isSingleCall: boolean;
   isMasterInputMuted: boolean;
-  setIsMasterInputMuted: (isMasterInputMuted: boolean) => void;
   addCallActive: boolean;
+  isConnected: boolean;
+  isReconnecting: boolean;
+  setIsMasterInputMuted: (isMasterInputMuted: boolean) => void;
   setAddCallActive: (addCallActive: boolean) => void;
+  connect: (url: string) => void;
+  disconnect: () => void;
 };
 export const HeaderActions = ({
   isEmpty,
   isSingleCall,
   isMasterInputMuted,
   setIsMasterInputMuted,
+  isConnected,
+  isReconnecting,
   addCallActive,
   setAddCallActive,
+  connect,
+  disconnect,
 }: HeaderActionsProps) => {
   return (
     <HeaderButtons>
+      {!isEmpty && !isMobile && (
+        <ConnectToWSButton
+          isConnected={isConnected}
+          isReconnecting={isReconnecting}
+          connect={connect}
+          disconnect={disconnect}
+        />
+      )}
       {!isEmpty && !isSingleCall && !isMobile && (
         <MuteAllCallsBtn
           type="button"

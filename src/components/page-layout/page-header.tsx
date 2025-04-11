@@ -1,9 +1,9 @@
 import styled from "@emotion/styled";
 import { FC, PropsWithChildren } from "react";
 import { DisplayContainer } from "../generic-components";
+import { DisplayContainerHeader } from "../landing-page/display-container-header";
 import { LoaderDots } from "../loader/loader";
 import { NavigateToRootButton } from "../navigate-to-root-button/navigate-to-root-button";
-import { DisplayContainerHeader } from "../landing-page/display-container-header";
 
 const HeaderContainer = styled(DisplayContainer)`
   padding: 2rem;
