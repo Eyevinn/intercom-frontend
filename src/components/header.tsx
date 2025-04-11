@@ -4,11 +4,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { HeadsetIcon } from "../assets/icons/icon.tsx";
 import { backgroundColour } from "../css-helpers/defaults.ts";
 import { useGlobalState } from "../global-state/context-provider.tsx";
-import { DisplayContainerHeader } from "./landing-page/display-container-header.tsx";
-import { ModalConfirmationText } from "./modal/modal-confirmation-text.ts";
-import { Modal } from "./modal/modal.tsx";
 import { useAudioCue } from "./production-line/use-audio-cue.ts";
-import { VerifyDecision } from "./verify-decision/verify-decision.tsx";
+import { ConfirmationModal } from "./verify-decision/confirmation-modal.tsx";
 
 const HeaderWrapper = styled.div`
   width: 100%;
@@ -80,16 +77,13 @@ export const Header: FC = () => {
         </HomeButton>
       </HeaderWrapper>
       {confirmExitModalOpen && (
-        <Modal onClose={() => setConfirmExitModalOpen(false)}>
-          <DisplayContainerHeader>Confirm</DisplayContainerHeader>
-          <ModalConfirmationText>
-            Are you sure you want to leave all calls?
-          </ModalConfirmationText>
-          <VerifyDecision
-            confirm={runExitAllCalls}
-            abort={() => setConfirmExitModalOpen(false)}
-          />
-        </Modal>
+        <ConfirmationModal
+          title="Confirm"
+          description="Are you sure you want to leave all calls?"
+          confirmationText="This will leave all calls and return to the home page."
+          onCancel={() => setConfirmExitModalOpen(false)}
+          onConfirm={runExitAllCalls}
+        />
       )}
     </>
   );

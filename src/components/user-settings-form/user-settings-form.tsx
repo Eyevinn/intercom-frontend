@@ -22,6 +22,8 @@ import { ButtonWrapper } from "../generic-components";
 import { useGlobalState } from "../../global-state/context-provider";
 import { useSubmitForm } from "./use-submit-form";
 import { FormItem } from "./form-item";
+import { isBrowserFirefox } from "../../bowser";
+import { ConfirmationModal } from "../verify-decision/confirmation-modal";
 
 type FormValues = TJoinProductionOptions & {
   audiooutput: string;
@@ -40,6 +42,8 @@ export const UserSettingsForm = ({
   closeAddCallView,
   updateUserSettings,
   onSave,
+  isFirstConnection,
+  needsConfirmation,
 }: {
   isJoinProduction?: boolean;
   preSelected?: {
@@ -58,9 +62,12 @@ export const UserSettingsForm = ({
   closeAddCallView?: () => void;
   updateUserSettings?: boolean;
   onSave?: () => void;
+  isFirstConnection?: string;
+  needsConfirmation?: boolean;
 }) => {
   const [joinProductionId, setJoinProductionId] = useState<null | number>(null);
   const [isProgramOutputLine, setIsProgramOutputLine] = useState(false);
+  const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const {
     formState: { errors, isValid },
     register,
@@ -107,6 +114,9 @@ export const UserSettingsForm = ({
     updateUserSettings,
     onSave,
   });
+
+  const isSettingsConfig = !isJoinProduction;
+  const isSupportedBrowser = isBrowserFirefox && isJoinProduction;
 
   useEffect(() => {
     if (production && isJoinProduction) {
@@ -204,40 +214,44 @@ export const UserSettingsForm = ({
           placeholder="Username"
         />
       </FormItem>
-      <FormItem label="Input">
-        <FormSelect
-          // eslint-disable-next-line
-          {...register(`audioinput`)}
-        >
-          {devices.input && devices.input.length > 0 ? (
-            devices.input.map((device) => (
-              <option key={device.deviceId} value={device.deviceId}>
-                {device.label}
-              </option>
-            ))
-          ) : (
-            <option value="no-device">No device available</option>
-          )}
-        </FormSelect>
-      </FormItem>
-      <FormItem label="Output">
-        {devices.output && devices.output.length > 0 ? (
-          <FormSelect
-            // eslint-disable-next-line
-            {...register(`audiooutput`)}
-          >
-            {devices.output.map((device) => (
-              <option key={device.deviceId} value={device.deviceId}>
-                {device.label}
-              </option>
-            ))}
-          </FormSelect>
-        ) : (
-          <StyledWarningMessage>
-            Controlled by operating system
-          </StyledWarningMessage>
-        )}
-      </FormItem>
+      {(isFirstConnection || isSupportedBrowser || isSettingsConfig) && (
+        <>
+          <FormItem label="Input">
+            <FormSelect
+              // eslint-disable-next-line
+              {...register(`audioinput`)}
+            >
+              {devices.input && devices.input.length > 0 ? (
+                devices.input.map((device) => (
+                  <option key={device.deviceId} value={device.deviceId}>
+                    {device.label}
+                  </option>
+                ))
+              ) : (
+                <option value="no-device">No device available</option>
+              )}
+            </FormSelect>
+          </FormItem>
+          <FormItem label="Output">
+            {devices.output && devices.output.length > 0 ? (
+              <FormSelect
+                // eslint-disable-next-line
+                {...register(`audiooutput`)}
+              >
+                {devices.output.map((device) => (
+                  <option key={device.deviceId} value={device.deviceId}>
+                    {device.label}
+                  </option>
+                ))}
+              </FormSelect>
+            ) : (
+              <StyledWarningMessage>
+                Controlled by operating system
+              </StyledWarningMessage>
+            )}
+          </FormItem>
+        </>
+      )}
       {!preSelected && isJoinProduction && (
         <FormItem label="Line">
           <FormSelect
@@ -295,13 +309,27 @@ export const UserSettingsForm = ({
       <ButtonWrapper>
         <ReloadDevicesButton />
         <PrimaryButton
-          type="submit"
+          type="button"
           disabled={isJoinProduction ? !isValid : false}
-          onClick={handleSubmit(onSubmit)}
+          onClick={
+            !needsConfirmation || isBrowserFirefox
+              ? handleSubmit(onSubmit)
+              : () => setConfirmModalOpen(true)
+          }
         >
           {buttonText}
         </PrimaryButton>
       </ButtonWrapper>
+
+      {confirmModalOpen && (
+        <ConfirmationModal
+          title="Confirm"
+          description="Are you sure you want to update your settings?"
+          confirmationText="This will update the devices for all current calls."
+          onConfirm={handleSubmit(onSubmit)}
+          onCancel={() => setConfirmModalOpen(false)}
+        />
+      )}
     </>
   );
 };

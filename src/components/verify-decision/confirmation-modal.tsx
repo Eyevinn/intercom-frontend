@@ -7,17 +7,23 @@ import { VerifyDecision } from "./verify-decision";
 interface ConfirmationModalProps {
   title: string;
   description: string;
+  confirmationText?: string;
   onCancel: () => void;
   onConfirm: () => void;
 }
 
 export const ConfirmationModal: FC<ConfirmationModalProps> = (props) => {
-  const { title, description, onCancel, onConfirm } = props;
+  const { title, description, confirmationText, onCancel, onConfirm } = props;
 
   return (
     <Modal onClose={onCancel}>
       <DisplayContainerHeader>{title}</DisplayContainerHeader>
       <ModalConfirmationText>{description}</ModalConfirmationText>
+      {confirmationText && (
+        <ModalConfirmationText className="bold">
+          {confirmationText}
+        </ModalConfirmationText>
+      )}
       <VerifyDecision confirm={onConfirm} abort={onCancel} />
     </Modal>
   );

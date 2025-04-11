@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState, useMemo } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useNavigate, useParams } from "react-router-dom";
-import { isMobile, isTablet } from "../../bowser.ts";
+import { isBrowserFirefox, isMobile, isTablet } from "../../bowser.ts";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { CallState } from "../../global-state/types.ts";
 import { DisplayWarning } from "../display-box.tsx";
@@ -15,11 +15,9 @@ import {
 import { CallHeaderComponent } from "./call-header.tsx";
 import { CollapsableSection } from "./collapsable-section.tsx";
 import { ExitCallButton } from "./exit-call-button.tsx";
-import { ExitCallModal } from "./exit-call-modal.tsx";
 import { HotkeysComponent } from "./hotkeys-component.tsx";
 import { LongPressToTalkButton } from "./long-press-to-talk-button.tsx";
 import { MinifiedUserControls } from "./minified-user-controls.tsx";
-import { MuteRemoteParticipantModal } from "./mute-remote-participant-modal.tsx";
 import {
   ButtonWrapper,
   CallContainer,
@@ -45,6 +43,8 @@ import { useActiveParticipant } from "./use-active-participant.tsx";
 import { useVolumeReducer } from "./use-volume-reducer.tsx";
 import { useMasterInputMute } from "./use-master-input-mute.ts";
 import logger from "../../utils/logger.ts";
+import { useUpdateCallDevice } from "./use-update-call-device.tsx";
+import { ConfirmationModal } from "../verify-decision/confirmation-modal.tsx";
 
 type TProductionLine = {
   id: string;
@@ -69,7 +69,6 @@ export const ProductionLine = ({
   const [, dispatch] = useGlobalState();
   const navigate = useNavigate();
   const [connectionActive, setConnectionActive] = useState(true);
-  const [isInputMuted, setIsInputMuted] = useState(true);
   const [isOutputMuted, setIsOutputMuted] = useState(false);
   const [confirmExitModalOpen, setConfirmExitModalOpen] = useState(false);
   const [value, setValue] = useState(0.75);
@@ -189,16 +188,23 @@ export const ProductionLine = ({
     setValue(newValue);
   });
 
-  const { muteInput, inputMute } = useMuteInput({
+  const { muteInput, isInputMuted } = useMuteInput({
     inputAudioStream,
     isProgramOutputLine,
     isProgramUser,
     id,
   });
 
-  useEffect(() => {
-    setIsInputMuted(inputMute);
-  }, [inputMute]);
+  // Update call device when the user changes the audio settings on Chrome or Edge
+  useUpdateCallDevice({
+    id,
+    joinProductionOptions,
+    audiooutput,
+    audioElements,
+    resetAudioInput,
+    setConnectionActive,
+    muteInput,
+  });
 
   useEffect(() => {
     if (!confirmModalOpen) {
@@ -405,18 +411,22 @@ export const ProductionLine = ({
                             <LongPressToTalkButton muteInput={muteInput} />
                           </LongPressWrapper>
                         )}
-                      <CollapsableSection title="Devices">
-                        <SelectDevices
-                          line={line}
-                          joinProductionOptions={joinProductionOptions}
-                          audiooutput={audiooutput || undefined}
-                          id={id}
-                          audioElements={audioElements || []}
-                          resetAudioInput={resetAudioInput}
-                          muteInput={() => muteInput(true)}
-                          setConnectionActive={() => setConnectionActive(false)}
-                        />
-                      </CollapsableSection>
+                      {isBrowserFirefox && (
+                        <CollapsableSection title="Devices">
+                          <SelectDevices
+                            line={line}
+                            joinProductionOptions={joinProductionOptions}
+                            audiooutput={audiooutput || undefined}
+                            id={id}
+                            audioElements={audioElements || []}
+                            resetAudioInput={resetAudioInput}
+                            muteInput={() => muteInput(true)}
+                            setConnectionActive={() =>
+                              setConnectionActive(false)
+                            }
+                          />
+                        </CollapsableSection>
+                      )}
                       {inputAudioStream &&
                         inputAudioStream !== "no-device" &&
                         !isMobile &&
@@ -451,10 +461,11 @@ export const ProductionLine = ({
                             resetOnExit={() => setConfirmExitModalOpen(true)}
                           />
                           {confirmExitModalOpen && (
-                            <ExitCallModal
-                              exit={exit}
-                              onClose={() => setConfirmExitModalOpen(false)}
-                              abort={() => setConfirmExitModalOpen(false)}
+                            <ConfirmationModal
+                              title="Confirm"
+                              description="Are you sure you want to leave all calls?"
+                              onCancel={() => setConfirmExitModalOpen(false)}
+                              onConfirm={exit}
                             />
                           )}
                         </ButtonWrapper>
@@ -463,12 +474,20 @@ export const ProductionLine = ({
                   </ListWrapper>
                   <ListWrapper>
                     {confirmModalOpen && (
-                      <MuteRemoteParticipantModal
-                        userName={userName}
-                        muteError={muteError}
-                        confirm={muteParticipant}
-                        onClose={() => setConfirmModalOpen(false)}
-                        abort={() => setConfirmModalOpen(false)}
+                      <ConfirmationModal
+                        title="Confirm"
+                        description={
+                          muteError
+                            ? "Something went wrong, Please try again"
+                            : `Are you sure you want to mute ${userName}?`
+                        }
+                        confirmationText={
+                          muteError
+                            ? ""
+                            : `This will mute ${userName} for everyone in the call.`
+                        }
+                        onConfirm={muteParticipant}
+                        onCancel={() => setConfirmModalOpen(false)}
                       />
                     )}
                   </ListWrapper>
