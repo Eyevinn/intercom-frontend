@@ -56,7 +56,7 @@ export const useSpeakerDetection = ({
           shouldReduceVolumeRef.current = false;
           setShouldReduceVolume(false);
           stopTimeoutRef.current = null;
-        }, 500);
+        }, 1000);
       }
     }
 
