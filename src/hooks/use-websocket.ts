@@ -14,9 +14,16 @@ type WebSocketAction =
 interface UseWebSocketProps {
   dispatch: Dispatch<TGlobalStateAction>;
   onAction: (action: WebSocketAction, index?: number) => void;
+  onConnected?: () => void;
+  resetLastSentCallsState?: () => void;
 }
 
-export function useWebSocket({ dispatch, onAction }: UseWebSocketProps) {
+export function useWebSocket({
+  dispatch,
+  onAction,
+  onConnected,
+  resetLastSentCallsState,
+}: UseWebSocketProps) {
   const socketRef = useRef<WebSocket | null>(null);
   const [isConnected, setIsConnected] = useState<boolean>(false);
 
@@ -41,8 +48,13 @@ export function useWebSocket({ dispatch, onAction }: UseWebSocketProps) {
 
       ws.onopen = () => {
         clearTimeout(timeout);
+
         setIsConnected(true);
         dispatch({ type: "SET_WEBSOCKET", payload: ws });
+
+        if (onConnected) {
+          onConnected();
+        }
       };
 
       ws.onmessage = (event: MessageEvent) => {
@@ -75,11 +87,17 @@ export function useWebSocket({ dispatch, onAction }: UseWebSocketProps) {
 
       socketRef.current = ws;
     },
-    [onAction, dispatch]
+    [onAction, dispatch, onConnected]
   );
 
   const disconnect = () => {
     socketRef.current?.close();
+    socketRef.current = null;
+
+    if (resetLastSentCallsState) {
+      resetLastSentCallsState();
+    }
+
     setIsConnected(false);
     dispatch({ type: "SET_WEBSOCKET", payload: null });
   };

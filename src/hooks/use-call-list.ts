@@ -24,35 +24,46 @@ export function useCallList({
   const numberOfCallsRef = useRef(numberOfCalls);
   const hasRegisteredCallRef = useRef(false);
 
-  const sendCallsStateUpdate = useCallback(() => {
-    const entries = Object.entries(callLineStates.current);
+  const sendCallsStateUpdate = useCallback(
+    (force = false) => {
+      const entries = Object.entries(callLineStates.current);
+      if (entries.length === 0) return;
 
-    if (entries.length === 0 || !hasRegisteredCallRef.current) {
-      return;
-    }
+      const payload = {
+        type: "CALLS_STATE_UPDATE",
+        globalMute: globalMuteRef.current,
+        numberOfCalls: numberOfCallsRef.current,
+        calls: entries.map(([callId, state], index) => ({
+          callId,
+          index: index + 1,
+          ...state,
+        })),
+      };
 
-    const payload = {
-      type: "CALLS_STATE_UPDATE",
-      globalMute: globalMuteRef.current,
-      numberOfCalls: numberOfCallsRef.current,
-      calls: entries.map(([callId, state], index) => ({
-        callId,
-        index: index + 1,
-        ...state,
-      })),
-    };
+      const serialized = JSON.stringify(payload);
 
-    const serialized = JSON.stringify(payload);
+      if (
+        websocket &&
+        websocket.readyState === WebSocket.OPEN &&
+        (force || serialized !== lastSentCallsState.current)
+      ) {
+        websocket.send(serialized);
+        lastSentCallsState.current = serialized;
+      }
+    },
+    [websocket]
+  );
 
+  useEffect(() => {
     if (
       websocket &&
       websocket.readyState === WebSocket.OPEN &&
-      serialized !== lastSentCallsState.current
+      Object.keys(callLineStates.current).length > 0
     ) {
-      websocket.send(serialized);
-      lastSentCallsState.current = serialized;
+      hasRegisteredCallRef.current = true;
+      sendCallsStateUpdate(true);
     }
-  }, [websocket]);
+  }, [websocket, sendCallsStateUpdate]);
 
   useEffect(() => {
     globalMuteRef.current = globalMute;
@@ -68,7 +79,6 @@ export function useCallList({
       const isNewCall = prev === undefined;
 
       callLineStates.current[callId] = data;
-
       hasRegisteredCallRef.current = true;
 
       if (isNewCall) {
@@ -107,5 +117,14 @@ export function useCallList({
     delete callLineStates.current[callId];
   }, []);
 
-  return { registerCallList, deregisterCall, sendCallsStateUpdate };
+  const resetLastSentCallsState = () => {
+    lastSentCallsState.current = "";
+  };
+
+  return {
+    registerCallList,
+    deregisterCall,
+    sendCallsStateUpdate,
+    resetLastSentCallsState,
+  };
 }

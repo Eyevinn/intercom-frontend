@@ -46,11 +46,12 @@ export const CallsPage = () => {
   const [isMasterInputMuted, setIsMasterInputMuted] = useState<boolean>(true);
   const [{ calls, selectedProductionId, websocket }, dispatch] =
     useGlobalState();
-  const { deregisterCall, sendCallsStateUpdate } = useCallList({
-    websocket,
-    globalMute: isMasterInputMuted,
-    numberOfCalls: Object.values(calls).length,
-  });
+  const { deregisterCall, sendCallsStateUpdate, resetLastSentCallsState } =
+    useCallList({
+      websocket,
+      globalMute: isMasterInputMuted,
+      numberOfCalls: Object.values(calls).length,
+    });
   const [showSettings, setShowSettings] = useState<boolean>(false);
   const [isReconnecting, setIsReconnecting] = useState<boolean>(false);
   const [isSettingGlobalMute, setIsSettingGlobalMute] =
@@ -144,7 +145,7 @@ export const CallsPage = () => {
 
       const handlers = callActionHandlers.current[callId];
       if (!handlers) {
-        console.warn("No handlers registered for callId:", callId);
+        logger.yellow(`No handlers found for callId: ${callId}`);
         return;
       }
 
@@ -173,6 +174,12 @@ export const CallsPage = () => {
       }
     },
     dispatch,
+    onConnected: () => {
+      sendCallsStateUpdate();
+    },
+    resetLastSentCallsState: () => {
+      resetLastSentCallsState();
+    },
   });
 
   usePreventPullToRefresh();
