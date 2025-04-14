@@ -14,12 +14,20 @@ interface UseMasterInputMuteProps {
       isInputMuted: boolean;
       isOutputMuted: boolean;
       volume: number;
+      lineId: string;
+      lineName: string;
+      productionId: string;
+      productionName: string;
     },
     isGlobalMute?: boolean
   ) => void;
   isSettingGlobalMute?: boolean;
   isOutputMuted: boolean;
   value: number;
+  lineId?: string;
+  lineName?: string;
+  productionId?: string;
+  productionName?: string;
 }
 
 export const useMasterInputMute = ({
@@ -33,6 +41,10 @@ export const useMasterInputMute = ({
   isSettingGlobalMute,
   isOutputMuted,
   value,
+  lineId,
+  lineName,
+  productionId,
+  productionName,
 }: UseMasterInputMuteProps) => {
   /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
@@ -54,6 +66,10 @@ export const useMasterInputMute = ({
           isInputMuted: masterInputMute,
           isOutputMuted,
           volume: value,
+          lineId: lineId || "",
+          lineName: lineName || "",
+          productionId: productionId || "",
+          productionName: productionName || "",
         },
         isSettingGlobalMute
       );

@@ -2,8 +2,8 @@ import { SubmitHandler } from "react-hook-form";
 import { useGlobalState } from "../../global-state/context-provider";
 import { useInitiateProductionCall } from "../../hooks/use-initiate-production-call";
 import { useStorage } from "../accessing-local-storage/access-local-storage";
-import { TUserSettings } from "../user-settings/types";
 import { TJoinProductionOptions, TProduction } from "../production-line/types";
+import { TUserSettings } from "../user-settings/types";
 
 type FormValues = TJoinProductionOptions & {
   audiooutput: string;
@@ -18,6 +18,8 @@ export const useSubmitForm = ({
   closeAddCallView,
   updateUserSettings,
   onSave,
+  selectedLineName,
+  productionName,
 }: {
   isJoinProduction?: boolean;
   production: TProduction | null;
@@ -29,6 +31,8 @@ export const useSubmitForm = ({
   closeAddCallView?: () => void;
   updateUserSettings?: boolean;
   onSave?: () => void;
+  selectedLineName?: string;
+  productionName?: string;
 }) => {
   const [{ userSettings }, dispatch] = useGlobalState();
   const { writeToStorage } = useStorage();
@@ -47,6 +51,8 @@ export const useSubmitForm = ({
         audioinput: payload?.audioinput || userSettings?.audioinput,
         lineUsedForProgramOutput: selectedLine?.programOutputLine || false,
         isProgramUser: isProgramUser || false,
+        lineName: selectedLineName || selectedLine?.name,
+        productionName: productionName || production?.name,
       };
 
       const callPayload = {

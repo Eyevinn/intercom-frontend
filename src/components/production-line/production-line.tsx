@@ -63,6 +63,10 @@ type TProductionLine = {
       isInputMuted: boolean;
       isOutputMuted: boolean;
       volume: number;
+      lineId: string;
+      lineName: string;
+      productionId: string;
+      productionName: string;
     },
     isGlobalMute?: boolean
   ) => void;
@@ -188,9 +192,24 @@ export const ProductionLine = ({
         isInputMuted,
         isOutputMuted,
         volume: value,
+        lineId: joinProductionOptions?.lineId || line?.id || "",
+        lineName: joinProductionOptions?.lineName || line?.name || "",
+        productionId:
+          joinProductionOptions?.productionId || production?.productionId || "",
+        productionName:
+          joinProductionOptions?.productionName || production?.name || "",
       });
     }
-  }, [id, isInputMuted, isOutputMuted, value, registerCallState]);
+  }, [
+    id,
+    isInputMuted,
+    isOutputMuted,
+    value,
+    registerCallState,
+    joinProductionOptions,
+    line,
+    production,
+  ]);
 
   useEffect(() => {
     if (audioElements) {
@@ -304,6 +323,10 @@ export const ProductionLine = ({
     isSettingGlobalMute,
     isOutputMuted,
     value,
+    lineId: joinProductionOptions?.lineId || line?.id,
+    lineName: joinProductionOptions?.lineName || line?.name,
+    productionId: production?.productionId,
+    productionName: joinProductionOptions?.productionName || production?.name,
   });
 
   useEffect(() => {

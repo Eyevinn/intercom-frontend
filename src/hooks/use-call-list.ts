@@ -4,6 +4,10 @@ type CallData = {
   isInputMuted: boolean;
   isOutputMuted: boolean;
   volume: number;
+  lineId: string;
+  lineName: string;
+  productionId: string;
+  productionName: string;
 };
 
 type UseCallListProps = {
