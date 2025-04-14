@@ -16,6 +16,10 @@ export const useVolumeReducer = ({
   const hasReducedRef = useRef(false);
 
   useEffect(() => {
+    console.log("HOOK - shouldReduceVolume", shouldReduceVolume);
+  }, [shouldReduceVolume]);
+
+  useEffect(() => {
     // Reduce volume by 80%
     const volumeChangeFactor = 0.2;
 
@@ -26,6 +30,10 @@ export const useVolumeReducer = ({
         audioElements?.forEach((audioElement) => {
           // eslint-disable-next-line no-param-reassign
           audioElement.volume = value * volumeChangeFactor;
+          console.log(
+            "HOOK - audioElement.volume * volumeChangeFactor",
+            audioElement.volume
+          );
         });
       }
 
@@ -34,6 +42,7 @@ export const useVolumeReducer = ({
           audioElements?.forEach((audioElement) => {
             // eslint-disable-next-line no-param-reassign
             audioElement.volume = value;
+            console.log("HOOK - audioElement.volume", audioElement.volume);
           });
           hasReducedRef.current = false;
         }, 2000);

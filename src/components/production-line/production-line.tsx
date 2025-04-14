@@ -140,6 +140,10 @@ export const ProductionLine = ({
       : null
   );
 
+  useEffect(() => {
+    console.log("PL - shouldReduceVolume", shouldReduceVolume);
+  }, [shouldReduceVolume]);
+
   useVolumeReducer({
     line,
     audioElements,
@@ -399,7 +403,7 @@ export const ProductionLine = ({
                         isOutputMuted={isOutputMuted}
                         isInputMuted={isInputMuted}
                         inputAudioStream={inputAudioStream}
-                        value={value}
+                        value={value} // !! This
                         muteOutput={muteOutput}
                         muteInput={() => muteInput(!isInputMuted)}
                         handleInputChange={handleInputChange}
