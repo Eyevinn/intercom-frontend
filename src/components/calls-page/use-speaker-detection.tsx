@@ -39,6 +39,7 @@ export const useSpeakerDetection = ({
       // if (!shouldReduceVolume && startTimeoutRef.current === null) {
       if (!shouldReduceVolumeRef.current && startTimeoutRef.current === null) {
         startTimeoutRef.current = window.setTimeout(() => {
+          shouldReduceVolumeRef.current = true;
           setShouldReduceVolume(true);
           startTimeoutRef.current = null;
         }, 1000);
@@ -52,6 +53,7 @@ export const useSpeakerDetection = ({
       // if (shouldReduceVolume && stopTimeoutRef.current === null) {
       if (shouldReduceVolumeRef.current && stopTimeoutRef.current === null) {
         stopTimeoutRef.current = window.setTimeout(() => {
+          shouldReduceVolumeRef.current = false;
           setShouldReduceVolume(false);
           stopTimeoutRef.current = null;
         }, 500);
