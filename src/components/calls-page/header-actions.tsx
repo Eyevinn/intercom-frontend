@@ -45,33 +45,33 @@ type HeaderActionsProps = {
   isSingleCall: boolean;
   isMasterInputMuted: boolean;
   addCallActive: boolean;
-  isConnected: boolean;
-  isReconnecting: boolean;
+  isWSConnected: boolean;
+  isWSReconnecting: boolean;
   setIsMasterInputMuted: (isMasterInputMuted: boolean) => void;
   setAddCallActive: (addCallActive: boolean) => void;
-  connect: (url: string) => void;
-  disconnect: () => void;
+  wsConnect: (url: string) => void;
+  wsDisconnect: () => void;
 };
 export const HeaderActions = ({
   isEmpty,
   isSingleCall,
   isMasterInputMuted,
   setIsMasterInputMuted,
-  isConnected,
-  isReconnecting,
+  isWSConnected,
+  isWSReconnecting,
   addCallActive,
   setAddCallActive,
-  connect,
-  disconnect,
+  wsConnect,
+  wsDisconnect,
 }: HeaderActionsProps) => {
   return (
     <HeaderButtons>
       {!isEmpty && !isMobile && (
         <ConnectToWSButton
-          isConnected={isConnected}
-          isReconnecting={isReconnecting}
-          connect={connect}
-          disconnect={disconnect}
+          isConnected={isWSConnected}
+          isReconnecting={isWSReconnecting}
+          connect={wsConnect}
+          disconnect={wsDisconnect}
         />
       )}
       {!isEmpty && !isSingleCall && !isMobile && (

@@ -10,15 +10,15 @@ type ProductionLinesProps = {
   isSingleCall: boolean;
   customGlobalMute: string;
   isMasterInputMuted: boolean;
-  isReconnecting: boolean;
-  isConnected: boolean;
+  isWSReconnecting: boolean;
+  isWSConnected: boolean;
   callActionHandlers: React.MutableRefObject<
     Record<string, Record<string, () => void>>
   >;
   isSettingGlobalMute?: boolean;
   setAddCallActive: (addCallActive: boolean) => void;
-  setIsReconnecting: (isReconnecting: boolean) => void;
-  connect: (url: string) => void;
+  setIsWSReconnecting: (isReconnecting: boolean) => void;
+  wsConnect: (url: string) => void;
 };
 
 export const ProductionLines = ({
@@ -27,31 +27,40 @@ export const ProductionLines = ({
   isSingleCall,
   customGlobalMute,
   isMasterInputMuted,
-  isReconnecting,
-  isConnected,
+  isWSReconnecting,
+  isWSConnected,
   callActionHandlers,
   isSettingGlobalMute,
   setAddCallActive,
-  setIsReconnecting,
-  connect,
+  setIsWSReconnecting,
+  wsConnect,
 }: ProductionLinesProps) => {
   const [{ error }] = useGlobalState();
   const actionHandlerRef = callActionHandlers.current;
 
   useEffect(() => {
     if (error) {
-      setIsReconnecting(false);
+      setIsWSReconnecting(false);
     }
-  }, [error, setIsReconnecting]);
+  }, [error, setIsWSReconnecting]);
 
   const { deregisterCall, registerCallList } = useWebsocketReconnect({
     calls,
     isMasterInputMuted,
-    isReconnecting,
-    isConnected,
-    setIsReconnecting,
-    connect,
+    isWSReconnecting,
+    isWSConnected,
+    setIsWSReconnecting,
+    wsConnect,
   });
+
+  const setActionHandler = (
+    callId: string,
+    action: string,
+    handler: () => void
+  ) => {
+    if (!actionHandlerRef[callId]) actionHandlerRef[callId] = {};
+    actionHandlerRef[callId][action] = handler;
+  };
 
   return (
     <>
@@ -71,30 +80,24 @@ export const ProductionLines = ({
               isSettingGlobalMute={isSettingGlobalMute}
               registerCallState={registerCallList}
               deregisterCall={deregisterCall}
-              onToggleInputMute={(handler) => {
-                if (!actionHandlerRef[callId]) actionHandlerRef[callId] = {};
-                actionHandlerRef[callId].toggleInputMute = handler;
-              }}
-              onToggleOutputMute={(handler) => {
-                if (!actionHandlerRef[callId]) actionHandlerRef[callId] = {};
-                actionHandlerRef[callId].toggleOutputMute = handler;
-              }}
-              onIncreaseVolume={(handler) => {
-                if (!actionHandlerRef[callId]) actionHandlerRef[callId] = {};
-                actionHandlerRef[callId].increaseVolume = handler;
-              }}
-              onDecreaseVolume={(handler) => {
-                if (!actionHandlerRef[callId]) actionHandlerRef[callId] = {};
-                actionHandlerRef[callId].decreaseVolume = handler;
-              }}
-              onPushToTalkStart={(handler) => {
-                if (!actionHandlerRef[callId]) actionHandlerRef[callId] = {};
-                actionHandlerRef[callId].pushToTalkStart = handler;
-              }}
-              onPushToTalkStop={(handler) => {
-                if (!actionHandlerRef[callId]) actionHandlerRef[callId] = {};
-                actionHandlerRef[callId].pushToTalkStop = handler;
-              }}
+              onToggleInputMute={(handler) =>
+                setActionHandler(callId, "toggleInputMute", handler)
+              }
+              onToggleOutputMute={(handler) =>
+                setActionHandler(callId, "toggleOutputMute", handler)
+              }
+              onIncreaseVolume={(handler) =>
+                setActionHandler(callId, "increaseVolume", handler)
+              }
+              onDecreaseVolume={(handler) =>
+                setActionHandler(callId, "decreaseVolume", handler)
+              }
+              onPushToTalkStart={(handler) =>
+                setActionHandler(callId, "pushToTalkStart", handler)
+              }
+              onPushToTalkStop={(handler) =>
+                setActionHandler(callId, "pushToTalkStop", handler)
+              }
             />
           )
       )}

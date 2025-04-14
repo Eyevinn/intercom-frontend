@@ -25,9 +25,9 @@ export function useWebSocket({
   resetLastSentCallsState,
 }: UseWebSocketProps) {
   const socketRef = useRef<WebSocket | null>(null);
-  const [isConnected, setIsConnected] = useState<boolean>(false);
+  const [isWSConnected, setIsWSConnected] = useState<boolean>(false);
 
-  const connect = useCallback(
+  const wsConnect = useCallback(
     (url: string) => {
       dispatch({ type: "SET_WEBSOCKET", payload: null });
 
@@ -49,7 +49,7 @@ export function useWebSocket({
       ws.onopen = () => {
         clearTimeout(timeout);
 
-        setIsConnected(true);
+        setIsWSConnected(true);
         dispatch({ type: "SET_WEBSOCKET", payload: ws });
 
         if (onConnected) {
@@ -76,13 +76,13 @@ export function useWebSocket({
             error: new Error("Could not connect to the WebSocket server"),
           },
         });
-        setIsConnected(false);
+        setIsWSConnected(false);
       };
 
       ws.onclose = () => {
         clearTimeout(timeout);
         logger.yellow("WebSocket connection closed");
-        setIsConnected(false);
+        setIsWSConnected(false);
       };
 
       socketRef.current = ws;
@@ -90,7 +90,7 @@ export function useWebSocket({
     [onAction, dispatch, onConnected]
   );
 
-  const disconnect = () => {
+  const wsDisconnect = () => {
     socketRef.current?.close();
     socketRef.current = null;
 
@@ -98,7 +98,7 @@ export function useWebSocket({
       resetLastSentCallsState();
     }
 
-    setIsConnected(false);
+    setIsWSConnected(false);
     dispatch({ type: "SET_WEBSOCKET", payload: null });
   };
 
@@ -112,8 +112,8 @@ export function useWebSocket({
   }, []);
 
   return {
-    disconnect,
-    connect,
-    isConnected,
+    wsDisconnect,
+    wsConnect,
+    isWSConnected,
   };
 }

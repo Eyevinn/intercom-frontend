@@ -4,7 +4,7 @@ import { useParams } from "react-router-dom";
 import { useGlobalState } from "../../global-state/context-provider";
 import { useCallList } from "../../hooks/use-call-list";
 import { useWebSocket } from "../../hooks/use-websocket";
-import logger from "../../utils/logger";
+import { useWebsocketActions } from "../../hooks/use-websocket-actions";
 import { JoinProduction } from "../landing-page/join-production";
 import { UserSettingsButton } from "../landing-page/user-settings-button";
 import { Modal } from "../modal/modal";
@@ -122,57 +122,14 @@ export const CallsPage = () => {
     }, 1000);
   };
 
-  const { connect, disconnect, isConnected } = useWebSocket({
-    onAction: (action, index) => {
-      if (action === "toggle_global_mute") {
-        handleToggleGlobalMute();
-        return;
-      }
+  const handleAction = useWebsocketActions({
+    callIndexMap,
+    callActionHandlers,
+    handleToggleGlobalMute,
+  });
 
-      if (typeof index !== "number") {
-        console.warn(
-          "Missing or invalid index for call-specific action:",
-          action
-        );
-        return;
-      }
-
-      const callId = callIndexMap.current[index];
-      if (!callId) {
-        console.warn("No callId found for index:", index);
-        return;
-      }
-
-      const handlers = callActionHandlers.current[callId];
-      if (!handlers) {
-        logger.yellow(`No handlers found for callId: ${callId}`);
-        return;
-      }
-
-      switch (action) {
-        case "toggle_input_mute":
-          handlers.toggleInputMute?.();
-          break;
-        case "toggle_output_mute":
-          handlers.toggleOutputMute?.();
-          break;
-        case "increase_volume":
-          handlers.increaseVolume?.();
-          break;
-        case "decrease_volume":
-          handlers.decreaseVolume?.();
-          break;
-        case "push_to_talk_start":
-          handlers.pushToTalkStart?.();
-          break;
-        case "push_to_talk_stop":
-          handlers.pushToTalkStop?.();
-          break;
-        default:
-          logger.yellow(`Unknown action: ${action}`);
-          break;
-      }
-    },
+  const { wsConnect, wsDisconnect, isWSConnected } = useWebSocket({
+    onAction: handleAction,
     dispatch,
     onConnected: () => {
       sendCallsStateUpdate();
@@ -257,10 +214,10 @@ export const CallsPage = () => {
           setIsMasterInputMuted={setIsMasterInputMuted}
           addCallActive={addCallActive}
           setAddCallActive={setAddCallActive}
-          isReconnecting={isReconnecting}
-          connect={connect}
-          disconnect={disconnect}
-          isConnected={isConnected}
+          isWSReconnecting={isReconnecting}
+          wsConnect={wsConnect}
+          wsDisconnect={wsDisconnect}
+          isWSConnected={isWSConnected}
         />
       </PageHeader>
       <Container>
@@ -289,13 +246,13 @@ export const CallsPage = () => {
             isMasterInputMuted={isMasterInputMuted}
             customGlobalMute={customGlobalMute}
             isSingleCall={isSingleCall}
-            isReconnecting={isReconnecting}
-            setIsReconnecting={setIsReconnecting}
+            isWSReconnecting={isReconnecting}
+            setIsWSReconnecting={setIsReconnecting}
             callActionHandlers={callActionHandlers}
-            connect={connect}
+            wsConnect={wsConnect}
             shouldReduceVolume={shouldReduceVolume}
             calls={calls}
-            isConnected={isConnected}
+            isWSConnected={isWSConnected}
             isSettingGlobalMute={isSettingGlobalMute}
           />
         </CallsContainer>
