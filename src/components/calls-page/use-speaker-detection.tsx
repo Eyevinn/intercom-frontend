@@ -13,7 +13,6 @@ export const useSpeakerDetection = ({
   const shouldReduceVolumeRef = useRef(false);
 
   useEffect(() => {
-    console.log("isProgramOutputAdded", isProgramOutputAdded);
     if (isProgramOutputAdded) {
       setIsSomeoneSpeaking(
         Object.entries(calls).some(
@@ -36,7 +35,6 @@ export const useSpeakerDetection = ({
         stopTimeoutRef.current = null;
       }
 
-      // if (!shouldReduceVolume && startTimeoutRef.current === null) {
       if (!shouldReduceVolumeRef.current && startTimeoutRef.current === null) {
         startTimeoutRef.current = window.setTimeout(() => {
           shouldReduceVolumeRef.current = true;
@@ -50,7 +48,6 @@ export const useSpeakerDetection = ({
         startTimeoutRef.current = null;
       }
 
-      // if (shouldReduceVolume && stopTimeoutRef.current === null) {
       if (shouldReduceVolumeRef.current && stopTimeoutRef.current === null) {
         stopTimeoutRef.current = window.setTimeout(() => {
           shouldReduceVolumeRef.current = false;
