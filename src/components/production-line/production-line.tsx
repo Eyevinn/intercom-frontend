@@ -172,7 +172,7 @@ export const ProductionLine = ({
       : null
   );
 
-  const { muteInput, isInputMuted, setIsInputMuted } = useMuteInput({
+  const { muteInput, isInputMuted } = useMuteInput({
     inputAudioStream,
     isProgramOutputLine,
     isProgramUser,
@@ -354,7 +354,6 @@ export const ProductionLine = ({
     onPushToTalkStop,
     value,
     setValue,
-    setIsInputMuted,
     muteInput,
     audioElements,
     isInputMuted,

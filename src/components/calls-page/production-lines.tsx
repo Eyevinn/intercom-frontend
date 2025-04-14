@@ -36,7 +36,7 @@ export const ProductionLines = ({
   connect,
 }: ProductionLinesProps) => {
   const [{ error }] = useGlobalState();
-  const handlerRef = callActionHandlers.current;
+  const actionHandlerRef = callActionHandlers.current;
 
   useEffect(() => {
     if (error) {
@@ -72,28 +72,28 @@ export const ProductionLines = ({
               registerCallState={registerCallList}
               deregisterCall={deregisterCall}
               onToggleInputMute={(handler) => {
-                if (!handlerRef[callId]) handlerRef[callId] = {};
-                handlerRef[callId].toggleInputMute = handler;
+                if (!actionHandlerRef[callId]) actionHandlerRef[callId] = {};
+                actionHandlerRef[callId].toggleInputMute = handler;
               }}
               onToggleOutputMute={(handler) => {
-                if (!handlerRef[callId]) handlerRef[callId] = {};
-                handlerRef[callId].toggleOutputMute = handler;
+                if (!actionHandlerRef[callId]) actionHandlerRef[callId] = {};
+                actionHandlerRef[callId].toggleOutputMute = handler;
               }}
               onIncreaseVolume={(handler) => {
-                if (!handlerRef[callId]) handlerRef[callId] = {};
-                handlerRef[callId].increaseVolume = handler;
+                if (!actionHandlerRef[callId]) actionHandlerRef[callId] = {};
+                actionHandlerRef[callId].increaseVolume = handler;
               }}
               onDecreaseVolume={(handler) => {
-                if (!handlerRef[callId]) handlerRef[callId] = {};
-                handlerRef[callId].decreaseVolume = handler;
+                if (!actionHandlerRef[callId]) actionHandlerRef[callId] = {};
+                actionHandlerRef[callId].decreaseVolume = handler;
               }}
               onPushToTalkStart={(handler) => {
-                if (!handlerRef[callId]) handlerRef[callId] = {};
-                handlerRef[callId].pushToTalkStart = handler;
+                if (!actionHandlerRef[callId]) actionHandlerRef[callId] = {};
+                actionHandlerRef[callId].pushToTalkStart = handler;
               }}
               onPushToTalkStop={(handler) => {
-                if (!handlerRef[callId]) handlerRef[callId] = {};
-                handlerRef[callId].pushToTalkStop = handler;
+                if (!actionHandlerRef[callId]) actionHandlerRef[callId] = {};
+                actionHandlerRef[callId].pushToTalkStop = handler;
               }}
             />
           )

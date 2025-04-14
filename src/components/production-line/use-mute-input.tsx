@@ -44,5 +44,5 @@ export const useMuteInput = ({
     },
     [dispatch, id, inputAudioStream, isProgramOutputLine, isProgramUser]
   );
-  return { muteInput, isInputMuted, setIsInputMuted };
+  return { muteInput, isInputMuted };
 };

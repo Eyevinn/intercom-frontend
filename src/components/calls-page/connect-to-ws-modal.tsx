@@ -7,8 +7,6 @@ import {
 } from "../landing-page/form-elements";
 import { Modal } from "../modal/modal";
 
-const { WS_URL } = import.meta.env;
-
 const ButtonWrapper = styled.div`
   display: flex;
   justify-content: space-between;
@@ -36,7 +34,7 @@ export const ConnectToWsModal = ({
   handleConnect,
   onClose,
 }: ConnectToWsModalProps) => {
-  const [url, setUrl] = useState<string>(WS_URL || "");
+  const [url, setUrl] = useState<string>("");
 
   if (!isOpen) return null;
 
@@ -51,11 +49,11 @@ export const ConnectToWsModal = ({
     <Modal onClose={onClose}>
       <ModalHeader>Connect to WebSocket</ModalHeader>
       <ModalText>
-        To connect to the WebSocket server, please enter the URL:
+        To connect to the WebSocket server, please enter it&apos;s URL:
       </ModalText>
       <FormInput
         type="text"
-        placeholder="ws://url:port"
+        placeholder="ws://host:port"
         className="border p-2 rounded"
         value={url}
         onChange={(e) => setUrl(e.target.value)}

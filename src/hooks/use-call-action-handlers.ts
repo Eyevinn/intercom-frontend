@@ -11,7 +11,6 @@ interface UseCallActionHandlersProps {
   onPushToTalkStart?: (handler: () => void) => void;
   onPushToTalkStop?: (handler: () => void) => void;
   setValue: (value: number) => void;
-  setIsInputMuted: (value: (prev: boolean) => boolean) => void;
   muteInput: (mute: boolean) => void;
   muteOutput: () => void;
   startTalking: () => void;
@@ -29,7 +28,6 @@ export function useCallActionHandlers({
   onPushToTalkStart,
   onPushToTalkStop,
   setValue,
-  setIsInputMuted,
   muteInput,
   muteOutput,
   startTalking,
@@ -83,7 +81,6 @@ export function useCallActionHandlers({
     stopTalking,
     value,
     setValue,
-    setIsInputMuted,
     audioElements,
     muteOutput,
     muteInput,
