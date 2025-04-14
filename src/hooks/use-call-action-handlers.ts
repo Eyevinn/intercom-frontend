@@ -3,6 +3,7 @@ import { useEffect } from "react";
 interface UseCallActionHandlersProps {
   value: number;
   audioElements: HTMLAudioElement[] | null;
+  isInputMuted: boolean;
   onToggleInputMute?: (handler: () => void) => void;
   onToggleOutputMute?: (handler: () => void) => void;
   onIncreaseVolume?: (handler: () => void) => void;
@@ -11,6 +12,7 @@ interface UseCallActionHandlersProps {
   onPushToTalkStop?: (handler: () => void) => void;
   setValue: (value: number) => void;
   setIsInputMuted: (value: (prev: boolean) => boolean) => void;
+  muteInput: (mute: boolean) => void;
   muteOutput: () => void;
   startTalking: () => void;
   stopTalking: () => void;
@@ -19,6 +21,7 @@ interface UseCallActionHandlersProps {
 export function useCallActionHandlers({
   value,
   audioElements,
+  isInputMuted,
   onToggleInputMute,
   onToggleOutputMute,
   onIncreaseVolume,
@@ -27,13 +30,14 @@ export function useCallActionHandlers({
   onPushToTalkStop,
   setValue,
   setIsInputMuted,
+  muteInput,
   muteOutput,
   startTalking,
   stopTalking,
 }: UseCallActionHandlersProps) {
   useEffect(() => {
     if (onToggleInputMute) {
-      onToggleInputMute(() => setIsInputMuted((prev) => !prev));
+      onToggleInputMute(() => muteInput(!isInputMuted));
     }
     if (onToggleOutputMute) {
       onToggleOutputMute(() => muteOutput());
@@ -82,5 +86,7 @@ export function useCallActionHandlers({
     setIsInputMuted,
     audioElements,
     muteOutput,
+    muteInput,
+    isInputMuted,
   ]);
 }
