@@ -44,7 +44,7 @@ export const useVolumeReducer = ({
           audioElement.volume = value;
           console.log("HOOK - audioElement.volume", audioElement.volume);
         });
-        //   hasReducedRef.current = false;
+        hasReducedRef.current = false;
         // }, 2000);
       }
     }
