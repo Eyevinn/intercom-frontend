@@ -1,10 +1,9 @@
 import styled from "@emotion/styled";
 import { useEffect, useRef } from "react";
-import { RefreshIcon } from "../../assets/icons/icon";
 import { FormInput } from "../landing-page/form-elements";
 import { Modal } from "../modal/modal";
-import { StyledRefreshBtn } from "../reload-devices-button.tsx/reload-devices-button";
 import { CopyButton } from "../copy-button/copy-button";
+import { RefreshButton } from "../refresh-button/refresh-button";
 
 type TShareLineLinkModalProps = {
   url: string;
@@ -50,11 +49,6 @@ const ModalNoteWrapper = styled.div`
   margin-top: 2rem;
 `;
 
-const RefreshButtonWrapper = styled.div`
-  display: flex;
-  justify-self: flex-end;
-`;
-
 export const ShareLineLinkModal = ({
   url,
   onRefresh,
@@ -94,12 +88,7 @@ export const ShareLineLinkModal = ({
           <FormInput value={url} readOnly />
           <CopyButton url={url} className="share-line-link-modal" />
         </Wrapper>
-        <RefreshButtonWrapper>
-          <StyledRefreshBtn onClick={onRefresh}>
-            <RefreshIcon />
-            Refresh URL
-          </StyledRefreshBtn>
-        </RefreshButtonWrapper>
+        <RefreshButton label="Refresh URL" onRefresh={onRefresh} />
       </div>
     </Modal>
   );

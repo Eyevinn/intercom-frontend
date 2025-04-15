@@ -3,8 +3,7 @@ import { useState } from "react";
 import { ShareIcon } from "../../assets/icons/icon";
 import { PrimaryButton } from "../landing-page/form-elements";
 import { ShareLineLinkModal } from "./share-line-link-modal";
-import { useShareLine } from "./use-share-line";
-import logger from "../../utils/logger";
+import { useShareUrl } from "../../hooks/use-share-url";
 
 type TShareLineBtnProps = {
   isMinified?: boolean;
@@ -45,25 +44,14 @@ export const ShareLineButton = ({
   lineId,
 }: TShareLineBtnProps) => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [url, setUrl] = useState<string>("");
 
-  const path = `/production-calls/production/${productionId}/line/${lineId}}`;
-  const shareLine = useShareLine({ path });
-
-  const shareUrl = async () => {
-    try {
-      const res = await shareLine();
-      setUrl(res.url);
-    } catch (error) {
-      logger.red(`Error sharing: ${error}`);
-    }
-  };
+  const { shareUrl, url } = useShareUrl();
 
   return (
     <div>
       <ShareButton
         onClick={() => {
-          shareUrl();
+          shareUrl({ productionId, lineId });
           setIsModalOpen(true);
         }}
       >
@@ -77,7 +65,7 @@ export const ShareLineButton = ({
       {isModalOpen && (
         <ShareLineLinkModal
           url={url}
-          onRefresh={shareUrl}
+          onRefresh={() => shareUrl({ productionId, lineId })}
           onClose={() => setIsModalOpen(false)}
         />
       )}

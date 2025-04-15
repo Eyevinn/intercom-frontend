@@ -20,8 +20,8 @@ import {
 
 import { isMobile } from "../../bowser";
 import { TLine } from "../production-line/types";
-import { CopyButton } from "../copy-button/copy-button";
 import { TBasicProductionResponse } from "../../api/api";
+import { CopySingleLink } from "./copy-single-link";
 
 export const LineBlock = ({
   managementMode,
@@ -33,6 +33,7 @@ export const LineBlock = ({
   production: TBasicProductionResponse;
 }) => {
   const [showFullUserList, setShowFullUserList] = useState<boolean>(false);
+
   return (
     <LineBlockTexts>
       <LineBlockTitleWrapper>
@@ -57,10 +58,7 @@ export const LineBlock = ({
           </ParticipantExpandBtn>
         )}
         {managementMode && (
-          <CopyButton
-            url={`${window.location.origin}/production-calls/production/${production.productionId}/line/${line.id}`}
-            className="production-list-item"
-          />
+          <CopySingleLink production={production} line={line} />
         )}
       </LineBlockTitleWrapper>
       <LineBlockParticipants>
