@@ -17,6 +17,7 @@ import { HeaderActions } from "./header-actions";
 import { ProductionLines } from "./production-lines";
 import { useCallsNavigation } from "./use-calls-navigation";
 import { useGlobalMuteHotkey } from "./use-global-mute-hotkey";
+import { useGlobalMuteToggle } from "./use-global-mute-toggle";
 import { usePreventPullToRefresh } from "./use-prevent-pull-to-refresh";
 import { useSpeakerDetection } from "./use-speaker-detection";
 
@@ -53,9 +54,7 @@ export const CallsPage = () => {
       numberOfCalls: Object.values(calls).length,
     });
   const [showSettings, setShowSettings] = useState<boolean>(false);
-  const [isReconnecting, setIsReconnecting] = useState<boolean>(false);
-  const [isSettingGlobalMute, setIsSettingGlobalMute] =
-    useState<boolean>(false);
+  const [isWSReconnecting, setIsWSReconnecting] = useState<boolean>(false);
 
   const { productionId: paramProductionId, lineId: paramLineId } = useParams();
   const navigate = useCallsNavigation({
@@ -96,31 +95,10 @@ export const CallsPage = () => {
     });
   }, [calls]);
 
-  const muteToggleTimeoutRef = useRef<number | null>(null);
-
-  const handleToggleGlobalMute = () => {
-    if (muteToggleTimeoutRef.current !== null) return;
-
-    setIsMasterInputMuted((prev) => {
-      const newMuteState = !prev;
-
-      setTimeout(() => {
-        sendCallsStateUpdate();
-      }, 0);
-
-      return newMuteState;
-    });
-
-    setIsSettingGlobalMute(true);
-
-    muteToggleTimeoutRef.current = window.setTimeout(() => {
-      muteToggleTimeoutRef.current = null;
-    }, 300);
-
-    window.setTimeout(() => {
-      setIsSettingGlobalMute(false);
-    }, 1000);
-  };
+  const { handleToggleGlobalMute, isSettingGlobalMute } = useGlobalMuteToggle({
+    setIsMasterInputMuted,
+    sendCallsStateUpdate,
+  });
 
   const handleAction = useWebsocketActions({
     callIndexMap,
@@ -214,7 +192,7 @@ export const CallsPage = () => {
           setIsMasterInputMuted={setIsMasterInputMuted}
           addCallActive={addCallActive}
           setAddCallActive={setAddCallActive}
-          isWSReconnecting={isReconnecting}
+          isWSReconnecting={isWSReconnecting}
           wsConnect={wsConnect}
           wsDisconnect={wsDisconnect}
           isWSConnected={isWSConnected}
@@ -246,8 +224,8 @@ export const CallsPage = () => {
             isMasterInputMuted={isMasterInputMuted}
             customGlobalMute={customGlobalMute}
             isSingleCall={isSingleCall}
-            isWSReconnecting={isReconnecting}
-            setIsWSReconnecting={setIsReconnecting}
+            isWSReconnecting={isWSReconnecting}
+            setIsWSReconnecting={setIsWSReconnecting}
             callActionHandlers={callActionHandlers}
             wsConnect={wsConnect}
             shouldReduceVolume={shouldReduceVolume}
