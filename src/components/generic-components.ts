@@ -1,5 +1,6 @@
 import styled from "@emotion/styled";
 import { FormContainer } from "./landing-page/form-elements";
+import { isMobile } from "../bowser";
 
 export const FlexContainer = styled.div`
   display: flex;
@@ -24,6 +25,9 @@ export const ResponsiveFormContainer = styled(FormContainer)`
   &.calls-page {
     margin: 0;
     padding: 2rem;
+    flex: 0 0 calc(25% - 2rem);
+    ${isMobile ? `flex-grow: 1;` : `flex-grow: 0;`}
+    min-width: 30rem;
   }
 `;
 
