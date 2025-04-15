@@ -117,6 +117,7 @@ export const ProductionsListItem = ({
       <HeaderWrapper onClick={() => setOpen(!open)}>
         <HeaderTexts
           open={open}
+          isProgramOutputLine={false}
           className={totalParticipants > 0 ? "active" : ""}
         >
           <ProductionName title={production.name}>

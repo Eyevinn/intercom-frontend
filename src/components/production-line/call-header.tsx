@@ -34,9 +34,10 @@ export const CallHeaderComponent = ({
     line && line.name.length > 40 ? `${line.name.slice(0, 40)}...` : line?.name;
 
   return (
-    <CallHeader onClick={setOpen}>
+    <CallHeader open={open} onClick={setOpen}>
       <HeaderTexts
         open={open}
+        isProgramOutputLine={line?.programOutputLine || false}
         className={(line?.participants.length || 0) > 0 ? "active" : ""}
       >
         {!open && line?.programOutputLine && (
@@ -55,7 +56,7 @@ export const CallHeaderComponent = ({
         <ParticipantCount>{line?.participants.length}</ParticipantCount>
       </HeaderTexts>
       {line?.programOutputLine && open && (
-        <AudioFeedIcon open>
+        <AudioFeedIcon open={open}>
           <TVIcon />
           Audio feed
         </AudioFeedIcon>

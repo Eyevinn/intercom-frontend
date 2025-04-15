@@ -45,7 +45,13 @@ export const HeaderWrapper = styled.div`
 export const HeaderTexts = styled.div`
   display: flex;
   align-items: center;
-  margin-left: ${({ open }: { open: boolean }) => (open ? "0" : "1.5rem")};
+  margin-left: ${({
+    open,
+    isProgramOutputLine,
+  }: {
+    open: boolean;
+    isProgramOutputLine: boolean;
+  }) => (!open && isProgramOutputLine ? "1.5rem" : "0")};
 
   svg {
     height: 1.5rem;
