@@ -6,6 +6,7 @@ import { Checkbox } from "../checkbox/checkbox";
 const ContentWrapper = styled.div`
   display: flex;
   flex-direction: column;
+  padding-top: 2rem;
 `;
 
 const ButtonWrapper = styled.div`
