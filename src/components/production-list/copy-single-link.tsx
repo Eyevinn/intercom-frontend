@@ -17,7 +17,6 @@ export const CopySingleLink = ({
   const { shareUrl, url } = useShareUrl();
   return (
     <>
-      {" "}
       <CopyIconWrapper
         title="Get share link"
         onClick={() => {

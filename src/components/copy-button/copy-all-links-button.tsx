@@ -39,8 +39,8 @@ export const CopyAllLinksButton = ({
       <NoteWrapper>
         <NoteTextBold>Note:</NoteTextBold>
         <NoteTextItalic>
-          Each link can only be used once. Press button again to generate new
-          links.
+          Each link can only be used once. Press the button again to generate
+          new links.
         </NoteTextItalic>
       </NoteWrapper>
       <ButtonWrapper className={className}>

@@ -28,6 +28,7 @@ export const ButtonWrapper = styled.p`
 export const NoteTextItalic = styled.p`
   font-size: 1.4rem;
   font-style: italic;
+  line-height: 1.4;
 `;
 
 export const NoteTextBold = styled.p`
@@ -35,6 +36,7 @@ export const NoteTextBold = styled.p`
   font-weight: 700;
   margin-right: 0.5rem;
   font-style: italic;
+  line-height: 1.4;
 `;
 
 export const NoteWrapper = styled.div`
