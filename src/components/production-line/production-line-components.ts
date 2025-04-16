@@ -5,7 +5,7 @@ import {
   HeaderWrapper,
   ProductionItemWrapper,
 } from "../production-list/production-list-components";
-import { isMobile } from "../../bowser";
+import { isIpad, isMobile } from "../../bowser";
 
 export const CallInfo = styled.div`
   display: flex;
@@ -177,7 +177,7 @@ export const CallContainer = styled(ProductionItemWrapper)<{
 export const CallHeader = styled(HeaderWrapper)`
   position: relative;
   margin-bottom: ${({ open }: { open: boolean }) =>
-    open && isMobile ? "2rem" : ""};
+    open && (isMobile || isIpad) ? "2rem" : ""};
 `;
 
 export const MinifiedControls = styled.div`
