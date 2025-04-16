@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 import { MicMuted, MicUnmuted } from "../../assets/icons/icon";
-import { isMobile } from "../../bowser";
+import { isMobile, isTablet } from "../../bowser";
 import { PrimaryButton, SecondaryButton } from "../landing-page/form-elements";
 import { ConnectToWSButton } from "./connect-to-ws-button";
 
@@ -66,7 +66,7 @@ export const HeaderActions = ({
 }: HeaderActionsProps) => {
   return (
     <HeaderButtons>
-      {!isEmpty && !isMobile && (
+      {!isEmpty && !isMobile && !isTablet && (
         <ConnectToWSButton
           isConnected={isWSConnected}
           isReconnecting={isWSReconnecting}
