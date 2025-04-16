@@ -6,7 +6,6 @@ import logger from "../../utils/logger";
 
 type TLongPressToTalkButton = {
   muteInput: (input: boolean) => void;
-  text?: string;
 };
 
 const Button = styled(PrimaryButton)`
@@ -37,7 +36,6 @@ const Button = styled(PrimaryButton)`
 
 export const LongPressToTalkButton = ({
   muteInput,
-  text = "Push To Talk",
 }: TLongPressToTalkButton) => {
   const [isToggled, setIsToggled] = useState(false);
   const [longPressTimeout, setLongPressTimeout] =
@@ -93,7 +91,7 @@ export const LongPressToTalkButton = ({
           width: "100%",
         }}
       >
-        {text}
+        Push To Talk
       </span>
     </Button>
   );

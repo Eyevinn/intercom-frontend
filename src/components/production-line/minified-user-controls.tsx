@@ -66,10 +66,7 @@ export const MinifiedUserControls = ({
         !line?.programOutputLine && (
           <MinifiedControlsBlock>
             <PTTWrapper>
-              <LongPressToTalkButton
-                muteInput={muteInput}
-                text="Push To Talk"
-              />
+              <LongPressToTalkButton muteInput={muteInput} />
             </PTTWrapper>
           </MinifiedControlsBlock>
         )}
