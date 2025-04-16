@@ -1,14 +1,15 @@
-import { useForm, useWatch } from "react-hook-form";
 import { useEffect, useState } from "react";
+import { useForm, useWatch } from "react-hook-form";
+import { isBrowserFirefox } from "../../bowser";
+import { useGlobalState } from "../../global-state/context-provider";
+import { Checkbox } from "../checkbox/checkbox";
+import { ButtonWrapper } from "../generic-components";
 import {
   FormInput,
   FormSelect,
-  StyledWarningMessage,
   PrimaryButton,
+  StyledWarningMessage,
 } from "../landing-page/form-elements";
-import { TUserSettings } from "../user-settings/types";
-import { TJoinProductionOptions } from "../production-line/types";
-import { Checkbox } from "../checkbox/checkbox";
 import { FormInputWithLoader } from "../landing-page/form-input-with-loader";
 import {
   CheckboxWrapper,
@@ -16,14 +17,13 @@ import {
   NameWrapper,
   ProductionName,
 } from "../landing-page/join-production-components";
-import { ReloadDevicesButton } from "../reload-devices-button.tsx/reload-devices-button";
 import { useFetchProduction } from "../landing-page/use-fetch-production";
-import { ButtonWrapper } from "../generic-components";
-import { useGlobalState } from "../../global-state/context-provider";
-import { useSubmitForm } from "./use-submit-form";
-import { FormItem } from "./form-item";
-import { isBrowserFirefox } from "../../bowser";
+import { TJoinProductionOptions } from "../production-line/types";
+import { ReloadDevicesButton } from "../reload-devices-button.tsx/reload-devices-button";
+import { TUserSettings } from "../user-settings/types";
 import { ConfirmationModal } from "../verify-decision/confirmation-modal";
+import { FormItem } from "./form-item";
+import { useSubmitForm } from "./use-submit-form";
 
 type FormValues = TJoinProductionOptions & {
   audiooutput: string;
@@ -169,6 +169,29 @@ export const UserSettingsForm = ({
       setJoinProductionId(parseInt(selectedProductionId, 10));
     }
   }, [reset, selectedProductionId, isJoinProduction]);
+
+  // Submit the form on Enter key press instead of rerendering the form
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Enter") {
+        const target = e.target as HTMLElement;
+        const tag = target.tagName.toLowerCase();
+
+        if (tag === "input" || tag === "textarea") {
+          e.preventDefault();
+
+          if (!needsConfirmation || isBrowserFirefox) {
+            handleSubmit(onSubmit)();
+          } else {
+            setConfirmModalOpen(true);
+          }
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [handleSubmit, onSubmit, needsConfirmation]);
 
   return (
     <>
