@@ -17,16 +17,27 @@ export const ProductionItemWrapper = styled.div`
 `;
 
 export const ProductionName = styled.div`
-  display: flex;
   font-size: 1.4rem;
   font-weight: bold;
   margin-right: 1rem;
   max-width: 30rem;
-  word-break: break-word;
+  min-width: 20rem;
+
+  .production-name-container {
+    display: inline-block;
+    width: 100%;
+  }
 `;
 
-export const Id = styled.p`
-  font-weight: normal;
+export const Id = styled.span`
+  display: inline;
+  margin: 0 0.2rem;
+`;
+
+export const ParticipantCountWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.1rem;
 `;
 
 export const ParticipantCount = styled.div`
@@ -43,7 +54,9 @@ export const HeaderWrapper = styled.div`
 `;
 
 export const HeaderTexts = styled.div`
+  width: 100%;
   display: flex;
+  justify-content: space-between;
   align-items: center;
   margin-left: ${({
     open,

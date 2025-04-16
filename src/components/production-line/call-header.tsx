@@ -10,6 +10,7 @@ import {
   ParticipantCount,
   HeaderIcon,
   Id,
+  ParticipantCountWrapper,
 } from "../production-list/production-list-components";
 import { AudioFeedIcon, CallHeader } from "./production-line-components";
 import { TLine, TProduction } from "./types";
@@ -48,12 +49,16 @@ export const CallHeaderComponent = ({
         <ProductionName
           title={`${production?.name} (id: ${production?.productionId}) / ${line?.name}`}
         >
-          {`${truncatedProductionName}`}
-          <Id>{`(id: ${production?.productionId})`}</Id>
-          {`/ ${truncatedLineName}`}
+          <span className="production-name-container">
+            {`${truncatedProductionName}`}
+            <Id>{`(id: ${production?.productionId})`}</Id>
+            {`/ ${truncatedLineName}`}
+          </span>
         </ProductionName>
-        <UsersIcon />
-        <ParticipantCount>{line?.participants.length}</ParticipantCount>
+        <ParticipantCountWrapper>
+          <UsersIcon />
+          <ParticipantCount>{line?.participants.length}</ParticipantCount>
+        </ParticipantCountWrapper>
       </HeaderTexts>
       {line?.programOutputLine && open && (
         <AudioFeedIcon open={open}>
