@@ -2,6 +2,22 @@ import styled from "@emotion/styled";
 import { FormContainer } from "./landing-page/form-elements";
 import { isMobile } from "../bowser";
 
+// Screen size breakpoints based on width
+export const breakpoints = {
+  tiny: 480,
+  small: 768,
+  medium: 1024,
+  large: 1440,
+};
+
+// Media query helper functions
+export const mediaQueries = {
+  isTinyScreen: `@media (max-width: ${breakpoints.tiny}px)`,
+  isSmallScreen: `@media (max-width: ${breakpoints.small}px)`,
+  isMediumScreen: `@media (max-width: ${breakpoints.medium}px)`,
+  isLargeScreen: `@media (max-width: ${breakpoints.large}px)`,
+};
+
 export const FlexContainer = styled.div`
   display: flex;
   flex-wrap: wrap;
@@ -28,6 +44,18 @@ export const ResponsiveFormContainer = styled(FormContainer)`
     flex: 0 0 calc(25% - 2rem);
     ${isMobile ? `flex-grow: 1;` : `flex-grow: 0;`}
     min-width: 30rem;
+
+    ${mediaQueries.isLargeScreen} {
+      flex: 0 0 calc(33.333% - 2rem);
+    }
+
+    ${mediaQueries.isMediumScreen} {
+      flex: 0 0 calc(50% - 2rem);
+    }
+
+    ${mediaQueries.isSmallScreen} {
+      flex: 0 0 calc(100%);
+    }
   }
 `;
 

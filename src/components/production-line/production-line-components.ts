@@ -1,5 +1,9 @@
 import styled from "@emotion/styled";
-import { DisplayContainer, FlexContainer } from "../generic-components";
+import {
+  DisplayContainer,
+  FlexContainer,
+  mediaQueries,
+} from "../generic-components";
 import { ActionButton } from "../landing-page/form-elements";
 import {
   HeaderWrapper,
@@ -143,7 +147,7 @@ export const CallWrapper = styled.div<{ isSomeoneSpeaking: boolean }>`
   margin: 0 0 2rem 0;
   flex: 0 0 calc(25% - 2rem);
   ${isMobile ? `flex-grow: 1;` : `flex-grow: 0;`}
-  min-width: 30rem;
+  min-width: 35rem;
   background-color: transparent;
   border-radius: 0.5rem;
   animation: ${({ isSomeoneSpeaking }) =>
@@ -159,6 +163,18 @@ export const CallWrapper = styled.div<{ isSomeoneSpeaking: boolean }>`
     100% {
       background-color: transparent;
     }
+  }
+
+  ${mediaQueries.isLargeScreen} {
+    flex: 0 0 calc(33.333% - 2rem);
+  }
+
+  ${mediaQueries.isMediumScreen} {
+    flex: 0 0 calc(50% - 2rem);
+  }
+
+  ${mediaQueries.isSmallScreen} {
+    flex: 0 0 calc(100%);
   }
 `;
 

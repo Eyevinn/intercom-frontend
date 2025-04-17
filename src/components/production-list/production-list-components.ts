@@ -1,6 +1,7 @@
 import styled from "@emotion/styled";
 import { isMobile } from "../../bowser";
 import { PrimaryButton, SecondaryButton } from "../landing-page/form-elements";
+import { mediaQueries } from "../generic-components";
 
 export const ProductionItemWrapper = styled.div`
   text-align: start;
@@ -14,6 +15,18 @@ export const ProductionItemWrapper = styled.div`
   border-radius: 0.5rem;
   margin: 0 2rem 2rem 0;
   cursor: pointer;
+
+  ${mediaQueries.isLargeScreen} {
+    flex: 0 0 calc(33.333% - 2rem);
+  }
+
+  ${mediaQueries.isMediumScreen} {
+    flex: 0 0 calc(50% - 2rem);
+  }
+
+  ${mediaQueries.isSmallScreen} {
+    flex: 0 0 calc(100%);
+  }
 `;
 
 export const ProductionName = styled.div`
