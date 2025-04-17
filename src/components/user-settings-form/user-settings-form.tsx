@@ -1,3 +1,4 @@
+import styled from "@emotion/styled";
 import { useEffect, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { isBrowserFirefox } from "../../bowser";
@@ -29,6 +30,13 @@ import { useSubmitForm } from "./use-submit-form";
 type FormValues = TJoinProductionOptions & {
   audiooutput: string;
 };
+
+const SubmitButton = styled(PrimaryButton)<{ shouldSubmitOnEnter?: boolean }>`
+  outline: ${({ shouldSubmitOnEnter }) =>
+    shouldSubmitOnEnter ? "2px solid #007bff" : "none"};
+  outline-offset: ${({ shouldSubmitOnEnter }) =>
+    shouldSubmitOnEnter ? "2px" : "0"};
+`;
 
 export const UserSettingsForm = ({
   isJoinProduction,
@@ -320,7 +328,7 @@ export const UserSettingsForm = ({
         {(isFirstConnection || isSupportedBrowser || isSettingsConfig) && (
           <ReloadDevicesButton />
         )}
-        <PrimaryButton
+        <SubmitButton
           type="button"
           disabled={isJoinProduction ? !isValid : false}
           onClick={
@@ -328,9 +336,10 @@ export const UserSettingsForm = ({
               ? handleSubmit(onSubmit)
               : () => setConfirmModalOpen(true)
           }
+          shouldSubmitOnEnter
         >
           {buttonText}
-        </PrimaryButton>
+        </SubmitButton>
       </ButtonWrapper>
 
       {confirmModalOpen && (

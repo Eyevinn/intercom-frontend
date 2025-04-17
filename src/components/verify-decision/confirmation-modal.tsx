@@ -38,7 +38,11 @@ export const ConfirmationModal: FC<ConfirmationModalProps> = (props) => {
           {confirmationText}
         </ModalConfirmationText>
       )}
-      <VerifyDecision confirm={onConfirm} abort={onCancel} />
+      <VerifyDecision
+        confirm={onConfirm}
+        abort={onCancel}
+        shouldSubmitOnEnter={shouldSubmitOnEnter}
+      />
     </Modal>
   );
 };
