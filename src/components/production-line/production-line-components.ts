@@ -5,6 +5,7 @@ import {
   HeaderWrapper,
   ProductionItemWrapper,
 } from "../production-list/production-list-components";
+import { isIpad, isMobile } from "../../bowser";
 
 export const CallInfo = styled.div`
   display: flex;
@@ -140,7 +141,9 @@ export const CallWrapper = styled.div<{ isSomeoneSpeaking: boolean }>`
   align-items: center;
   flex-direction: column;
   margin: 0 0 2rem 0;
-  min-width: 20rem;
+  flex: 0 0 calc(25% - 2rem);
+  ${isMobile ? `flex-grow: 1;` : `flex-grow: 0;`}
+  min-width: 30rem;
   background-color: transparent;
   border-radius: 0.5rem;
   animation: ${({ isSomeoneSpeaking }) =>
@@ -163,7 +166,7 @@ export const CallContainer = styled(ProductionItemWrapper)<{
   isProgramLine?: boolean;
 }>`
   margin: 0;
-  min-width: 30rem;
+  width: 100%;
   display: flex;
   flex-direction: column;
 
@@ -173,6 +176,8 @@ export const CallContainer = styled(ProductionItemWrapper)<{
 
 export const CallHeader = styled(HeaderWrapper)`
   position: relative;
+  margin-bottom: ${({ open }: { open: boolean }) =>
+    open && (isMobile || isIpad) ? "2rem" : ""};
 `;
 
 export const MinifiedControls = styled.div`

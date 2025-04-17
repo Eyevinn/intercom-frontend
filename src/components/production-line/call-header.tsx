@@ -10,6 +10,7 @@ import {
   ParticipantCount,
   HeaderIcon,
   Id,
+  ParticipantCountWrapper,
 } from "../production-list/production-list-components";
 import { AudioFeedIcon, CallHeader } from "./production-line-components";
 import { TLine, TProduction } from "./types";
@@ -34,9 +35,10 @@ export const CallHeaderComponent = ({
     line && line.name.length > 40 ? `${line.name.slice(0, 40)}...` : line?.name;
 
   return (
-    <CallHeader onClick={setOpen}>
+    <CallHeader open={open} onClick={setOpen}>
       <HeaderTexts
         open={open}
+        isProgramOutputLine={line?.programOutputLine || false}
         className={(line?.participants.length || 0) > 0 ? "active" : ""}
       >
         {!open && line?.programOutputLine && (
@@ -47,15 +49,19 @@ export const CallHeaderComponent = ({
         <ProductionName
           title={`${production?.name} (id: ${production?.productionId}) / ${line?.name}`}
         >
-          {`${truncatedProductionName}`}
-          <Id>{`(id: ${production?.productionId})`}</Id>
-          {`/ ${truncatedLineName}`}
+          <span className="production-name-container">
+            {`${truncatedProductionName}`}
+            <Id>{`(id: ${production?.productionId})`}</Id>
+            {`/ ${truncatedLineName}`}
+          </span>
         </ProductionName>
-        <UsersIcon />
-        <ParticipantCount>{line?.participants.length}</ParticipantCount>
+        <ParticipantCountWrapper>
+          <UsersIcon />
+          <ParticipantCount>{line?.participants.length}</ParticipantCount>
+        </ParticipantCountWrapper>
       </HeaderTexts>
       {line?.programOutputLine && open && (
-        <AudioFeedIcon open>
+        <AudioFeedIcon open={open}>
           <TVIcon />
           Audio feed
         </AudioFeedIcon>

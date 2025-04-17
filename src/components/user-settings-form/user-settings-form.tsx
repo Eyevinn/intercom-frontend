@@ -307,7 +307,9 @@ export const UserSettingsForm = ({
         </>
       )}
       <ButtonWrapper>
-        <ReloadDevicesButton />
+        {(isFirstConnection || isSupportedBrowser || isSettingsConfig) && (
+          <ReloadDevicesButton />
+        )}
         <PrimaryButton
           type="button"
           disabled={isJoinProduction ? !isValid : false}
