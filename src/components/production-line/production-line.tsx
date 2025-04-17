@@ -1,9 +1,13 @@
-import { useCallback, useEffect, useState, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useNavigate, useParams } from "react-router-dom";
 import { isBrowserFirefox, isMobile, isTablet } from "../../bowser.ts";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { CallState } from "../../global-state/types.ts";
+import { useCallActionHandlers } from "../../hooks/use-call-action-handlers.ts";
+import { CallData } from "../../hooks/use-call-list.ts";
+import { usePushToTalk } from "../../hooks/use-push-to-talk.ts";
+import logger from "../../utils/logger.ts";
 import { DisplayWarning } from "../display-box.tsx";
 import { FlexContainer } from "../generic-components.ts";
 import { useFetchProduction } from "../landing-page/use-fetch-production.ts";
@@ -12,6 +16,7 @@ import {
   InnerDiv,
   ProductionLines,
 } from "../production-list/production-list-components.ts";
+import { ConfirmationModal } from "../verify-decision/confirmation-modal.tsx";
 import { CallHeaderComponent } from "./call-header.tsx";
 import { CollapsableSection } from "./collapsable-section.tsx";
 import { ExitCallButton } from "./exit-call-button.tsx";
@@ -30,21 +35,19 @@ import {
 import { SelectDevices } from "./select-devices.tsx";
 import { ShareLineButton } from "./share-line-button.tsx";
 import { SymphonyRtcConnectionComponent } from "./symphony-rtc-connection-component.tsx";
+import { useActiveParticipant } from "./use-active-participant.tsx";
 import { useAudioCue } from "./use-audio-cue.ts";
 import { useAudioInput } from "./use-audio-input.ts";
 import { useCheckBadLineData } from "./use-check-bad-line-data.ts";
 import { useIsLoading } from "./use-is-loading.ts";
 import { useLineHotkeys, useSpeakerHotkeys } from "./use-line-hotkeys.ts";
 import { useLinePolling } from "./use-line-polling.ts";
+import { useMasterInputMute } from "./use-master-input-mute.ts";
 import { useMuteInput } from "./use-mute-input.tsx";
+import { useUpdateCallDevice } from "./use-update-call-device.tsx";
+import { useVolumeReducer } from "./use-volume-reducer.tsx";
 import { UserControls } from "./user-controls.tsx";
 import { UserList } from "./user-list.tsx";
-import { useActiveParticipant } from "./use-active-participant.tsx";
-import { useVolumeReducer } from "./use-volume-reducer.tsx";
-import { useMasterInputMute } from "./use-master-input-mute.ts";
-import logger from "../../utils/logger.ts";
-import { useUpdateCallDevice } from "./use-update-call-device.tsx";
-import { ConfirmationModal } from "../verify-decision/confirmation-modal.tsx";
 
 type TProductionLine = {
   id: string;
@@ -53,7 +56,17 @@ type TProductionLine = {
   customGlobalMute: string;
   masterInputMute: boolean;
   shouldReduceVolume: boolean;
+  isSettingGlobalMute?: boolean;
+  callActionHandlers: React.MutableRefObject<
+    Record<string, Record<string, () => void>>
+  >;
   setFailedToConnect: () => void;
+  registerCallList: (
+    callId: string,
+    data: CallData,
+    isSettingGlobalMute?: boolean
+  ) => void;
+  deregisterCall?: (callId: string) => void;
 };
 
 export const ProductionLine = ({
@@ -63,7 +76,11 @@ export const ProductionLine = ({
   customGlobalMute,
   masterInputMute,
   shouldReduceVolume,
+  isSettingGlobalMute,
+  callActionHandlers,
   setFailedToConnect,
+  registerCallList,
+  deregisterCall,
 }: TProductionLine) => {
   const { productionId: paramProductionId, lineId: paramLineId } = useParams();
   const [, dispatch] = useGlobalState();
@@ -140,12 +157,47 @@ export const ProductionLine = ({
       : null
   );
 
+  const { muteInput, isInputMuted } = useMuteInput({
+    inputAudioStream,
+    isProgramOutputLine,
+    isProgramUser,
+    id,
+  });
+
   useVolumeReducer({
     line,
     audioElements,
     shouldReduceVolume,
     value,
   });
+
+  useEffect(() => {
+    registerCallList(
+      id,
+      {
+        isInputMuted,
+        isOutputMuted,
+        volume: value,
+        lineId: joinProductionOptions?.lineId || line?.id || "",
+        lineName: joinProductionOptions?.lineName || line?.name || "",
+        productionId:
+          joinProductionOptions?.productionId || production?.productionId || "",
+        productionName:
+          joinProductionOptions?.productionName || production?.name || "",
+      },
+      isSettingGlobalMute
+    );
+  }, [
+    id,
+    isInputMuted,
+    isOutputMuted,
+    value,
+    joinProductionOptions,
+    line,
+    production,
+    isSettingGlobalMute,
+    registerCallList,
+  ]);
 
   useEffect(() => {
     if (audioElements) {
@@ -157,6 +209,14 @@ export const ProductionLine = ({
       });
     }
   }, [audioElements]);
+
+  const {
+    startTalking,
+    stopTalking,
+    isTalking,
+    handleLongPressStart,
+    handleLongPressEnd,
+  } = usePushToTalk({ muteInput });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = parseFloat(e.target.value);
@@ -186,13 +246,6 @@ export const ProductionLine = ({
   useHotkeys(savedHotkeys?.decreaseVolumeHotkey || "d", () => {
     const newValue = Math.max(value - 0.05, 0);
     setValue(newValue);
-  });
-
-  const { muteInput, isInputMuted } = useMuteInput({
-    inputAudioStream,
-    isProgramOutputLine,
-    isProgramUser,
-    id,
   });
 
   // Update call device when the user changes the audio settings on Chrome or Edge
@@ -227,11 +280,12 @@ export const ProductionLine = ({
       type: "REMOVE_CALL",
       payload: { id },
     });
+    deregisterCall?.(id);
 
     if (isSingleCall) {
       navigate("/");
     }
-  }, [dispatch, id, playExitSound, isSingleCall, navigate]);
+  }, [dispatch, id, playExitSound, isSingleCall, navigate, deregisterCall]);
 
   useLineHotkeys({
     muteInput,
@@ -250,9 +304,17 @@ export const ProductionLine = ({
     inputAudioStream,
     isProgramOutputLine,
     masterInputMute,
-    muteInput,
     dispatch,
     id,
+    muteInput,
+    registerCallState: registerCallList,
+    isSettingGlobalMute,
+    isOutputMuted,
+    value,
+    lineId: joinProductionOptions?.lineId || line?.id,
+    lineName: joinProductionOptions?.lineName || line?.name,
+    productionId: production?.productionId,
+    productionName: joinProductionOptions?.productionName || production?.name,
   });
 
   useEffect(() => {
@@ -270,6 +332,30 @@ export const ProductionLine = ({
     });
     setIsOutputMuted(!isOutputMuted);
   }, [audioElements, isOutputMuted]);
+
+  const setActionHandler = useCallback(
+    (action: string, handler: () => void) => {
+      const handlers = callActionHandlers.current;
+
+      if (!handlers[id]) {
+        handlers[id] = {};
+      }
+      handlers[id][action] = handler;
+    },
+    [callActionHandlers, id]
+  );
+
+  useCallActionHandlers({
+    value,
+    setValue,
+    isInputMuted,
+    audioElements,
+    muteInput,
+    muteOutput,
+    startTalking,
+    stopTalking,
+    setActionHandler,
+  });
 
   useSpeakerHotkeys({
     muteOutput,
@@ -371,6 +457,9 @@ export const ProductionLine = ({
             <MinifiedUserControls
               muteOutput={muteOutput}
               muteInput={() => muteInput(!isInputMuted)}
+              onStartTalking={handleLongPressStart}
+              onStopTalking={handleLongPressEnd}
+              isTalking={isTalking}
               line={line}
               joinProductionOptions={joinProductionOptions}
               isOutputMuted={isOutputMuted}
@@ -408,7 +497,11 @@ export const ProductionLine = ({
                         inputAudioStream !== "no-device" &&
                         !line?.programOutputLine && (
                           <LongPressWrapper>
-                            <LongPressToTalkButton muteInput={muteInput} />
+                            <LongPressToTalkButton
+                              onStartTalking={handleLongPressStart}
+                              onStopTalking={handleLongPressEnd}
+                              isTalking={isTalking}
+                            />
                           </LongPressWrapper>
                         )}
                       {isBrowserFirefox && (

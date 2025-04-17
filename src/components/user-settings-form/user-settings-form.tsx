@@ -75,8 +75,11 @@ export const UserSettingsForm = ({
   needsConfirmation?: boolean;
 }) => {
   const [joinProductionId, setJoinProductionId] = useState<null | number>(null);
-  const [isProgramOutputLine, setIsProgramOutputLine] = useState(false);
-  const [confirmModalOpen, setConfirmModalOpen] = useState(false);
+  const [isProgramOutputLine, setIsProgramOutputLine] =
+    useState<boolean>(false);
+  const [confirmModalOpen, setConfirmModalOpen] = useState<boolean>(false);
+  const [selectedLineName, setSelectedLineName] = useState<string>("");
+  const [productionName, setProductionName] = useState<string>("");
   const {
     formState: { errors, isValid },
     register,
@@ -122,6 +125,8 @@ export const UserSettingsForm = ({
     closeAddCallView,
     updateUserSettings,
     onSave,
+    selectedLineName,
+    productionName,
   });
 
   const isSettingsConfig = !isJoinProduction;
@@ -133,6 +138,7 @@ export const UserSettingsForm = ({
         (line) => line.id.toString() === selectedLineId
       );
       setIsProgramOutputLine(!!selectedLine?.programOutputLine);
+      setSelectedLineName(selectedLine?.name ?? "");
     }
   }, [production, selectedLineId, isJoinProduction]);
 
@@ -187,6 +193,12 @@ export const UserSettingsForm = ({
     isBrowserFirefox,
     setConfirmModalOpen,
   });
+
+  useEffect(() => {
+    if (production?.name && isJoinProduction) {
+      setProductionName(production.name);
+    }
+  }, [production?.name, isJoinProduction]);
 
   return (
     <>

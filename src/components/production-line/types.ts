@@ -7,6 +7,8 @@ export type TJoinProductionOptions = {
   audioinput?: string;
   lineUsedForProgramOutput: boolean;
   isProgramUser: boolean;
+  lineName?: string;
+  productionName?: string;
 };
 
 export type Hotkeys = {

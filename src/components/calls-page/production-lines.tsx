@@ -1,5 +1,6 @@
-import { ProductionLine } from "../production-line/production-line";
 import { CallState } from "../../global-state/types";
+import { CallData } from "../../hooks/use-call-list";
+import { ProductionLine } from "../production-line/production-line";
 
 type ProductionLinesProps = {
   calls: Record<string, CallState>;
@@ -7,7 +8,17 @@ type ProductionLinesProps = {
   isSingleCall: boolean;
   customGlobalMute: string;
   isMasterInputMuted: boolean;
+  callActionHandlers: React.MutableRefObject<
+    Record<string, Record<string, () => void>>
+  >;
+  isSettingGlobalMute: boolean;
   setAddCallActive: (addCallActive: boolean) => void;
+  registerCallList: (
+    callId: string,
+    data: CallData,
+    isSettingGlobalMute?: boolean
+  ) => void;
+  deregisterCall: (callId: string) => void;
 };
 
 export const ProductionLines = ({
@@ -16,12 +27,15 @@ export const ProductionLines = ({
   isSingleCall,
   customGlobalMute,
   isMasterInputMuted,
+  callActionHandlers,
+  isSettingGlobalMute,
   setAddCallActive,
-}: ProductionLinesProps) => (
-  <>
-    {Object.entries(calls)
-      .toReversed()
-      .map(
+  registerCallList,
+  deregisterCall,
+}: ProductionLinesProps) => {
+  return (
+    <>
+      {Object.entries(calls).map(
         ([callId, callState]) =>
           callId &&
           callState.joinProductionOptions && (
@@ -34,8 +48,13 @@ export const ProductionLines = ({
               customGlobalMute={customGlobalMute}
               masterInputMute={isMasterInputMuted}
               setFailedToConnect={() => setAddCallActive(true)}
+              isSettingGlobalMute={isSettingGlobalMute}
+              callActionHandlers={callActionHandlers}
+              registerCallList={registerCallList}
+              deregisterCall={deregisterCall}
             />
           )
       )}
-  </>
-);
+    </>
+  );
+};

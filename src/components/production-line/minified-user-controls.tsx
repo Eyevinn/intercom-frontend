@@ -18,6 +18,9 @@ import { TUseAudioInputValues } from "./use-audio-input";
 export const MinifiedUserControls = ({
   muteOutput,
   muteInput,
+  onStartTalking,
+  onStopTalking,
+  isTalking,
   line,
   joinProductionOptions,
   isOutputMuted,
@@ -28,6 +31,9 @@ export const MinifiedUserControls = ({
 }: {
   muteOutput: () => void;
   muteInput: () => void;
+  onStartTalking: () => void;
+  onStopTalking: () => void;
+  isTalking: boolean;
   line: TLine | null;
   joinProductionOptions: TJoinProductionOptions;
   isOutputMuted: boolean;
@@ -66,7 +72,11 @@ export const MinifiedUserControls = ({
         !line?.programOutputLine && (
           <MinifiedControlsBlock>
             <PTTWrapper>
-              <LongPressToTalkButton muteInput={muteInput} />
+              <LongPressToTalkButton
+                onStartTalking={onStartTalking}
+                onStopTalking={onStopTalking}
+                isTalking={isTalking}
+              />
             </PTTWrapper>
           </MinifiedControlsBlock>
         )}

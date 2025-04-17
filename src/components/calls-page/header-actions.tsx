@@ -1,7 +1,8 @@
 import styled from "@emotion/styled";
 import { MicMuted, MicUnmuted } from "../../assets/icons/icon";
+import { isMobile, isTablet } from "../../bowser";
 import { PrimaryButton, SecondaryButton } from "../landing-page/form-elements";
-import { isMobile } from "../../bowser";
+import { ConnectToWSButton } from "./connect-to-ws-button";
 
 const AddCallContainer = styled.div`
   display: flex;
@@ -36,26 +37,50 @@ const MuteAllCallsBtn = styled(PrimaryButton)`
 
 const HeaderButtons = styled.div`
   display: flex;
+  gap: 1rem;
 `;
 
 type HeaderActionsProps = {
   isEmpty: boolean;
   isSingleCall: boolean;
   isMasterInputMuted: boolean;
-  setIsMasterInputMuted: (isMasterInputMuted: boolean) => void;
   addCallActive: boolean;
+  callIndexMap: React.MutableRefObject<Record<number, string>>;
+  callActionHandlers: React.MutableRefObject<
+    Record<string, Record<string, () => void>>
+  >;
+  setIsMasterInputMuted: React.Dispatch<React.SetStateAction<boolean>>;
   setAddCallActive: (addCallActive: boolean) => void;
+  setIsSettingGlobalMute: React.Dispatch<React.SetStateAction<boolean>>;
+  sendCallsStateUpdate: () => void;
+  resetLastSentCallsState: () => void;
 };
 export const HeaderActions = ({
   isEmpty,
   isSingleCall,
   isMasterInputMuted,
   setIsMasterInputMuted,
+  callIndexMap,
+  callActionHandlers,
   addCallActive,
   setAddCallActive,
+  setIsSettingGlobalMute,
+  sendCallsStateUpdate,
+  resetLastSentCallsState,
 }: HeaderActionsProps) => {
   return (
     <HeaderButtons>
+      {!isEmpty && !isMobile && !isTablet && (
+        <ConnectToWSButton
+          setIsSettingGlobalMute={setIsSettingGlobalMute}
+          callActionHandlers={callActionHandlers}
+          callIndexMap={callIndexMap}
+          isMasterInputMuted={isMasterInputMuted}
+          setIsMasterInputMuted={setIsMasterInputMuted}
+          sendCallsStateUpdate={sendCallsStateUpdate}
+          resetLastSentCallsState={resetLastSentCallsState}
+        />
+      )}
       {!isEmpty && !isSingleCall && !isMobile && (
         <MuteAllCallsBtn
           type="button"
