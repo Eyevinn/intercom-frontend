@@ -1,21 +1,22 @@
 import styled from "@emotion/styled";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useGlobalState } from "../../global-state/context-provider";
+import { useCallList } from "../../hooks/use-call-list";
 import { JoinProduction } from "../landing-page/join-production";
+import { UserSettingsButton } from "../landing-page/user-settings-button";
 import { Modal } from "../modal/modal";
-import { useGlobalHotkeys } from "../production-line/use-line-hotkeys";
 import { PageHeader } from "../page-layout/page-header";
 import { useAudioCue } from "../production-line/use-audio-cue";
-import { usePreventPullToRefresh } from "./use-prevent-pull-to-refresh";
-import { UserSettingsButton } from "../landing-page/user-settings-button";
+import { useGlobalHotkeys } from "../production-line/use-line-hotkeys";
 import { UserSettings } from "../user-settings/user-settings";
-import { HeaderActions } from "./header-actions";
-import { useSpeakerDetection } from "./use-speaker-detection";
-import { ProductionLines } from "./production-lines";
-import { useGlobalMuteHotkey } from "./use-global-mute-hotkey";
-import { useCallsNavigation } from "./use-calls-navigation";
 import { ConfirmationModal } from "../verify-decision/confirmation-modal";
+import { HeaderActions } from "./header-actions";
+import { ProductionLines } from "./production-lines";
+import { useCallsNavigation } from "./use-calls-navigation";
+import { useGlobalMuteHotkey } from "./use-global-mute-hotkey";
+import { usePreventPullToRefresh } from "./use-prevent-pull-to-refresh";
+import { useSpeakerDetection } from "./use-speaker-detection";
 
 const Container = styled.div`
   display: flex;
@@ -37,13 +38,28 @@ const CallsContainer = styled.div`
 
 export const CallsPage = () => {
   const [productionId, setProductionId] = useState<string | null>(null);
-  const [addCallActive, setAddCallActive] = useState(false);
-  const [confirmExitModalOpen, setConfirmExitModalOpen] = useState(false);
-  const [isMasterInputMuted, setIsMasterInputMuted] = useState(true);
-  const [{ calls, selectedProductionId }, dispatch] = useGlobalState();
+  const [addCallActive, setAddCallActive] = useState<boolean>(false);
+  const [confirmExitModalOpen, setConfirmExitModalOpen] =
+    useState<boolean>(false);
+  const [isMasterInputMuted, setIsMasterInputMuted] = useState<boolean>(true);
+  const [{ calls, selectedProductionId, websocket }, dispatch] =
+    useGlobalState();
+  const {
+    deregisterCall,
+    registerCallList,
+    sendCallsStateUpdate,
+    resetLastSentCallsState,
+  } = useCallList({
+    websocket,
+    globalMute: isMasterInputMuted,
+    numberOfCalls: Object.values(calls).length,
+  });
   const [showSettings, setShowSettings] = useState<boolean>(false);
+  const [isSettingGlobalMute, setIsSettingGlobalMute] =
+    useState<boolean>(false);
 
   const { productionId: paramProductionId, lineId: paramLineId } = useParams();
+
   const navigate = useCallsNavigation({
     isEmpty: Object.values(calls).length === 0,
     paramProductionId,
@@ -69,6 +85,18 @@ export const CallsPage = () => {
     calls,
     initialHotkey: "p",
   });
+
+  const callActionHandlers = useRef<Record<string, Record<string, () => void>>>(
+    {}
+  );
+  const callIndexMap = useRef<Record<number, string>>({});
+
+  useEffect(() => {
+    callIndexMap.current = {};
+    Object.keys(calls).forEach((callId, i) => {
+      callIndexMap.current[i + 1] = callId;
+    });
+  }, [calls]);
 
   usePreventPullToRefresh();
 
@@ -97,6 +125,7 @@ export const CallsPage = () => {
             type: "REMOVE_CALL",
             payload: { id: callId },
           });
+          deregisterCall(callId);
         }
       });
     }
@@ -138,16 +167,21 @@ export const CallsPage = () => {
         )}
 
         <HeaderActions
+          setIsSettingGlobalMute={setIsSettingGlobalMute}
           isEmpty={isEmpty}
           isSingleCall={isSingleCall}
           isMasterInputMuted={isMasterInputMuted}
           setIsMasterInputMuted={setIsMasterInputMuted}
           addCallActive={addCallActive}
           setAddCallActive={setAddCallActive}
+          callIndexMap={callIndexMap}
+          callActionHandlers={callActionHandlers}
+          sendCallsStateUpdate={sendCallsStateUpdate}
+          resetLastSentCallsState={resetLastSentCallsState}
         />
       </PageHeader>
       <Container>
-        {isFirstConnection && (
+        {isEmpty && paramProductionId && paramLineId && (
           <JoinProduction
             preSelected={{
               preSelectedProductionId: paramProductionId,
@@ -168,12 +202,16 @@ export const CallsPage = () => {
             />
           )}
           <ProductionLines
-            calls={calls}
-            shouldReduceVolume={shouldReduceVolume}
-            isSingleCall={isSingleCall}
-            customGlobalMute={customGlobalMute}
-            isMasterInputMuted={isMasterInputMuted}
+            isSettingGlobalMute={isSettingGlobalMute}
             setAddCallActive={setAddCallActive}
+            isMasterInputMuted={isMasterInputMuted}
+            customGlobalMute={customGlobalMute}
+            isSingleCall={isSingleCall}
+            callActionHandlers={callActionHandlers}
+            shouldReduceVolume={shouldReduceVolume}
+            calls={calls}
+            registerCallList={registerCallList}
+            deregisterCall={deregisterCall}
           />
         </CallsContainer>
       </Container>
