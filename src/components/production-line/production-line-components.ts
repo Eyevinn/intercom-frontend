@@ -1,5 +1,9 @@
 import styled from "@emotion/styled";
-import { DisplayContainer, FlexContainer } from "../generic-components";
+import {
+  DisplayContainer,
+  FlexContainer,
+  mediaQueries,
+} from "../generic-components";
 import { ActionButton } from "../landing-page/form-elements";
 import {
   HeaderWrapper,
@@ -135,22 +139,6 @@ export const LoaderWrapper = styled.div`
   height: 2rem;
 `;
 
-// Screen size breakpoints based on width
-export const breakpoints = {
-  tiny: 480,
-  small: 768,
-  medium: 1024,
-  large: 1440,
-};
-
-// Media query helper functions
-export const mediaQueries = {
-  isTinyScreen: `@media (max-width: ${breakpoints.tiny}px)`,
-  isSmallScreen: `@media (max-width: ${breakpoints.small}px)`,
-  isMediumScreen: `@media (max-width: ${breakpoints.medium}px)`,
-  isLargeScreen: `@media (max-width: ${breakpoints.large}px)`,
-};
-
 export const CallWrapper = styled.div<{ isSomeoneSpeaking: boolean }>`
   display: flex;
   justify-content: center;
@@ -159,7 +147,7 @@ export const CallWrapper = styled.div<{ isSomeoneSpeaking: boolean }>`
   margin: 0 0 2rem 0;
   flex: 0 0 calc(25% - 2rem);
   ${isMobile ? `flex-grow: 1;` : `flex-grow: 0;`}
-  min-width: 30rem;
+  min-width: 35rem;
   background-color: transparent;
   border-radius: 0.5rem;
   animation: ${({ isSomeoneSpeaking }) =>
