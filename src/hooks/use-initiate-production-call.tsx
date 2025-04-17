@@ -1,7 +1,7 @@
 import { useCallback, Dispatch } from "react";
 import { TJoinProductionOptions } from "../components/production-line/types";
 import { TGlobalStateAction } from "../global-state/global-state-actions";
-import { isBrowserSafari, isMobile } from "../bowser";
+import { isBrowserSafari, isIpad, isMobile } from "../bowser";
 import { useFetchDevices } from "./use-fetch-devices";
 import { useDevicePermissions } from "./use-device-permission";
 import logger from "../utils/logger";
@@ -46,14 +46,12 @@ export const useInitiateProductionCall = ({
 
         if (
           !inputDeviceExists ||
-          (!outputDeviceExists && !isBrowserSafari && !isMobile)
+          (!outputDeviceExists && !isBrowserSafari && !isMobile && !isIpad)
         ) {
           dispatch({
             type: "ERROR",
             payload: {
-              error: new Error(
-                `Selected devices are not available: !inputDeviceExists: ${!inputDeviceExists}, !outputDeviceExists: ${!outputDeviceExists}, ${payload.joinProductionOptions.audioinput} and ${payload.audiooutput} safari: ${isBrowserSafari} mobile: ${isMobile}`
-              ),
+              error: new Error("Selected devices are not available"),
             },
           });
           return false;
