@@ -4,7 +4,7 @@ const deviceInfo = Bowser.parse(window.navigator.userAgent);
 const browser = Bowser.getParser(window.navigator.userAgent);
 const browserName = browser.getBrowserName();
 
-const isIOS = (): boolean => {
+export const isIOS = (): boolean => {
   const ua = window.navigator.userAgent.toLowerCase();
   return /iphone|ipod|ipad/.test(ua);
 };
