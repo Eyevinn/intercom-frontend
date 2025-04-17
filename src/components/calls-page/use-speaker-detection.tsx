@@ -10,7 +10,7 @@ export const useSpeakerDetection = ({
 }) => {
   const [isSomeoneSpeaking, setIsSomeoneSpeaking] = useState(false);
   const [shouldReduceVolume, setShouldReduceVolume] = useState(false);
-  const startTimeoutRef = useRef<number | null>(null);
+  const shouldReduceVolumeRef = useRef(false);
 
   useEffect(() => {
     if (isProgramOutputAdded) {
@@ -25,15 +25,36 @@ export const useSpeakerDetection = ({
     }
   }, [calls, isProgramOutputAdded]);
 
+  const startTimeoutRef = useRef<number | null>(null);
+  const stopTimeoutRef = useRef<number | null>(null);
+
   useEffect(() => {
     if (isSomeoneSpeaking) {
-      if (!shouldReduceVolume) {
+      if (stopTimeoutRef.current !== null) {
+        window.clearTimeout(stopTimeoutRef.current);
+        stopTimeoutRef.current = null;
+      }
+
+      if (!shouldReduceVolumeRef.current && startTimeoutRef.current === null) {
         startTimeoutRef.current = window.setTimeout(() => {
+          shouldReduceVolumeRef.current = true;
           setShouldReduceVolume(true);
+          startTimeoutRef.current = null;
         }, 1000);
       }
-    } else if (shouldReduceVolume) {
-      setShouldReduceVolume(false);
+    } else {
+      if (startTimeoutRef.current !== null) {
+        window.clearTimeout(startTimeoutRef.current);
+        startTimeoutRef.current = null;
+      }
+
+      if (shouldReduceVolumeRef.current && stopTimeoutRef.current === null) {
+        stopTimeoutRef.current = window.setTimeout(() => {
+          shouldReduceVolumeRef.current = false;
+          setShouldReduceVolume(false);
+          stopTimeoutRef.current = null;
+        }, 1000);
+      }
     }
 
     return () => {
@@ -41,8 +62,12 @@ export const useSpeakerDetection = ({
         window.clearTimeout(startTimeoutRef.current);
         startTimeoutRef.current = null;
       }
+      if (stopTimeoutRef.current !== null) {
+        window.clearTimeout(stopTimeoutRef.current);
+        stopTimeoutRef.current = null;
+      }
     };
-  }, [isSomeoneSpeaking, shouldReduceVolume]);
+  }, [isSomeoneSpeaking]);
 
   return { isSomeoneSpeaking, shouldReduceVolume };
 };
