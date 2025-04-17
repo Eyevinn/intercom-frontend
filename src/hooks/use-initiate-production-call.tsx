@@ -1,7 +1,7 @@
 import { useCallback, Dispatch } from "react";
 import { TJoinProductionOptions } from "../components/production-line/types";
 import { TGlobalStateAction } from "../global-state/global-state-actions";
-import { isBrowserSafari } from "../bowser";
+import { isBrowserSafari, isIpad, isMobile } from "../bowser";
 import { useFetchDevices } from "./use-fetch-devices";
 import { useDevicePermissions } from "./use-device-permission";
 import logger from "../utils/logger";
@@ -44,7 +44,10 @@ export const useInitiateProductionCall = ({
           (device) => device.deviceId === payload.audiooutput
         );
 
-        if (!inputDeviceExists || (!outputDeviceExists && !isBrowserSafari)) {
+        if (
+          !inputDeviceExists ||
+          (!outputDeviceExists && !isBrowserSafari && !isMobile && !isIpad)
+        ) {
           dispatch({
             type: "ERROR",
             payload: {
