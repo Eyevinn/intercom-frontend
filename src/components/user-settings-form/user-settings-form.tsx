@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { isBrowserFirefox } from "../../bowser";
 import { useGlobalState } from "../../global-state/context-provider";
+import { useSubmitOnEnter } from "../../hooks/use-submit-form-enter-press";
 import { Checkbox } from "../checkbox/checkbox";
 import { ButtonWrapper } from "../generic-components";
 import {
@@ -170,28 +171,14 @@ export const UserSettingsForm = ({
     }
   }, [reset, selectedProductionId, isJoinProduction]);
 
-  // Submit the form on Enter key press instead of rerendering the form
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Enter") {
-        const target = e.target as HTMLElement;
-        const tag = target.tagName.toLowerCase();
-
-        if (tag === "input" || tag === "textarea") {
-          e.preventDefault();
-
-          if (!needsConfirmation || isBrowserFirefox) {
-            handleSubmit(onSubmit)();
-          } else {
-            setConfirmModalOpen(true);
-          }
-        }
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [handleSubmit, onSubmit, needsConfirmation]);
+  useSubmitOnEnter<FormValues | TUserSettings>({
+    handleSubmit,
+    submitHandler: onSubmit,
+    needsConfirmation,
+    shouldSubmitOnEnter: true,
+    isBrowserFirefox,
+    setConfirmModalOpen,
+  });
 
   return (
     <>
@@ -353,6 +340,7 @@ export const UserSettingsForm = ({
           confirmationText="This will update the devices for all current calls."
           onConfirm={handleSubmit(onSubmit)}
           onCancel={() => setConfirmModalOpen(false)}
+          shouldSubmitOnEnter
         />
       )}
     </>
