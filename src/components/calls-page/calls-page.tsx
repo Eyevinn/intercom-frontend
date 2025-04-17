@@ -3,8 +3,6 @@ import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useGlobalState } from "../../global-state/context-provider";
 import { useCallList } from "../../hooks/use-call-list";
-import { useWebSocket } from "../../hooks/use-websocket";
-import { useWebsocketActions } from "../../hooks/use-websocket-actions";
 import { JoinProduction } from "../landing-page/join-production";
 import { UserSettingsButton } from "../landing-page/user-settings-button";
 import { Modal } from "../modal/modal";
@@ -17,7 +15,6 @@ import { HeaderActions } from "./header-actions";
 import { ProductionLines } from "./production-lines";
 import { useCallsNavigation } from "./use-calls-navigation";
 import { useGlobalMuteHotkey } from "./use-global-mute-hotkey";
-import { useGlobalMuteToggle } from "./use-global-mute-toggle";
 import { usePreventPullToRefresh } from "./use-prevent-pull-to-refresh";
 import { useSpeakerDetection } from "./use-speaker-detection";
 
@@ -47,16 +44,22 @@ export const CallsPage = () => {
   const [isMasterInputMuted, setIsMasterInputMuted] = useState<boolean>(true);
   const [{ calls, selectedProductionId, websocket }, dispatch] =
     useGlobalState();
-  const { deregisterCall, sendCallsStateUpdate, resetLastSentCallsState } =
-    useCallList({
-      websocket,
-      globalMute: isMasterInputMuted,
-      numberOfCalls: Object.values(calls).length,
-    });
+  const {
+    deregisterCall,
+    registerCallList,
+    sendCallsStateUpdate,
+    resetLastSentCallsState,
+  } = useCallList({
+    websocket,
+    globalMute: isMasterInputMuted,
+    numberOfCalls: Object.values(calls).length,
+  });
   const [showSettings, setShowSettings] = useState<boolean>(false);
-  const [isWSReconnecting, setIsWSReconnecting] = useState<boolean>(false);
+  const [isSettingGlobalMute, setIsSettingGlobalMute] =
+    useState<boolean>(false);
 
   const { productionId: paramProductionId, lineId: paramLineId } = useParams();
+
   const navigate = useCallsNavigation({
     isEmpty: Object.values(calls).length === 0,
     paramProductionId,
@@ -94,28 +97,6 @@ export const CallsPage = () => {
       callIndexMap.current[i + 1] = callId;
     });
   }, [calls]);
-
-  const { handleToggleGlobalMute, isSettingGlobalMute } = useGlobalMuteToggle({
-    setIsMasterInputMuted,
-    sendCallsStateUpdate,
-  });
-
-  const handleAction = useWebsocketActions({
-    callIndexMap,
-    callActionHandlers,
-    handleToggleGlobalMute,
-  });
-
-  const { wsConnect, wsDisconnect, isWSConnected } = useWebSocket({
-    onAction: handleAction,
-    dispatch,
-    onConnected: () => {
-      sendCallsStateUpdate();
-    },
-    resetLastSentCallsState: () => {
-      resetLastSentCallsState();
-    },
-  });
 
   usePreventPullToRefresh();
 
@@ -186,16 +167,17 @@ export const CallsPage = () => {
         )}
 
         <HeaderActions
+          setIsSettingGlobalMute={setIsSettingGlobalMute}
           isEmpty={isEmpty}
           isSingleCall={isSingleCall}
           isMasterInputMuted={isMasterInputMuted}
           setIsMasterInputMuted={setIsMasterInputMuted}
           addCallActive={addCallActive}
           setAddCallActive={setAddCallActive}
-          isWSReconnecting={isWSReconnecting}
-          wsConnect={wsConnect}
-          wsDisconnect={wsDisconnect}
-          isWSConnected={isWSConnected}
+          callIndexMap={callIndexMap}
+          callActionHandlers={callActionHandlers}
+          sendCallsStateUpdate={sendCallsStateUpdate}
+          resetLastSentCallsState={resetLastSentCallsState}
         />
       </PageHeader>
       <Container>
@@ -220,18 +202,16 @@ export const CallsPage = () => {
             />
           )}
           <ProductionLines
+            isSettingGlobalMute={isSettingGlobalMute}
             setAddCallActive={setAddCallActive}
             isMasterInputMuted={isMasterInputMuted}
             customGlobalMute={customGlobalMute}
             isSingleCall={isSingleCall}
-            isWSReconnecting={isWSReconnecting}
-            setIsWSReconnecting={setIsWSReconnecting}
             callActionHandlers={callActionHandlers}
-            wsConnect={wsConnect}
             shouldReduceVolume={shouldReduceVolume}
             calls={calls}
-            isWSConnected={isWSConnected}
-            isSettingGlobalMute={isSettingGlobalMute}
+            registerCallList={registerCallList}
+            deregisterCall={deregisterCall}
           />
         </CallsContainer>
       </Container>

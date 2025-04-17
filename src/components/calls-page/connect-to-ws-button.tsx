@@ -1,9 +1,14 @@
 import styled from "@emotion/styled";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CheckIcon } from "../../assets/icons/icon";
+import { useGlobalState } from "../../global-state/context-provider";
+import { useWebSocket } from "../../hooks/use-websocket";
+import { useWebsocketActions } from "../../hooks/use-websocket-actions";
+import { useWebsocketReconnect } from "../../hooks/use-websocket-reconnect";
 import { PrimaryButton } from "../landing-page/form-elements";
 import { Spinner } from "../loader/loader";
 import { ConnectToWsModal } from "./connect-to-ws-modal";
+import { useGlobalMuteToggle } from "./use-global-mute-toggle";
 
 const ConnectWebSocketWrapper = styled.div`
   display: flex;
@@ -28,45 +33,97 @@ const ConnectButton = styled(PrimaryButton)<{
 `;
 
 interface ConnectToWSButtonProps {
-  isConnected: boolean;
-  isReconnecting: boolean;
-  connect: (url: string) => void;
-  disconnect: () => void;
+  callIndexMap: React.MutableRefObject<Record<number, string>>;
+  callActionHandlers: React.MutableRefObject<
+    Record<string, Record<string, () => void>>
+  >;
+  isMasterInputMuted: boolean;
+  setIsMasterInputMuted: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsSettingGlobalMute: React.Dispatch<React.SetStateAction<boolean>>;
+  sendCallsStateUpdate: () => void;
+  resetLastSentCallsState: () => void;
 }
 
 export const ConnectToWSButton = ({
-  isConnected,
-  isReconnecting,
-  connect,
-  disconnect,
+  callIndexMap,
+  callActionHandlers,
+  isMasterInputMuted,
+  setIsMasterInputMuted,
+  setIsSettingGlobalMute,
+  sendCallsStateUpdate,
+  resetLastSentCallsState,
 }: ConnectToWSButtonProps) => {
-  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [isWSReconnecting, setIsWSReconnecting] = useState(false);
+  const [{ error, calls }, dispatch] = useGlobalState();
+
+  useEffect(() => {
+    if (error) {
+      setIsWSReconnecting(false);
+    }
+  }, [error, setIsWSReconnecting]);
+
+  useEffect(() => {
+    const indexMap = callIndexMap.current;
+    Object.keys(calls).forEach((callId, i) => {
+      indexMap[i + 1] = callId;
+    });
+  }, [calls, callIndexMap]);
+
+  const { handleToggleGlobalMute } = useGlobalMuteToggle({
+    setIsMasterInputMuted,
+    sendCallsStateUpdate,
+    setIsSettingGlobalMute,
+  });
+
+  const handleAction = useWebsocketActions({
+    callIndexMap,
+    callActionHandlers,
+    handleToggleGlobalMute,
+  });
+
+  const { wsConnect, wsDisconnect, isWSConnected } = useWebSocket({
+    onAction: handleAction,
+    dispatch,
+    onConnected: () => {
+      sendCallsStateUpdate();
+    },
+    resetLastSentCallsState: () => {
+      resetLastSentCallsState();
+    },
+  });
+
+  useWebsocketReconnect({
+    calls,
+    isMasterInputMuted,
+    isWSReconnecting,
+    isWSConnected,
+    setIsWSReconnecting,
+    wsConnect,
+  });
 
   const handleConnect = (url: string) => {
-    connect(url);
+    wsConnect(url);
     setIsOpen(false);
   };
 
   const renderButtonContent = () => {
-    if (isConnected) {
-      return "Companion";
-    }
-    if (isReconnecting) {
-      return "Reconnecting...";
-    }
+    if (isWSConnected) return "Companion";
+    if (isWSReconnecting) return "Reconnecting...";
     return "Connect to Companion";
   };
 
   return (
     <ConnectWebSocketWrapper>
       <ConnectButton
-        isConnected={isConnected}
-        onClick={isConnected ? disconnect : () => setIsOpen(true)}
+        isConnected={isWSConnected}
+        onClick={isWSConnected ? wsDisconnect : () => setIsOpen(true)}
       >
         {renderButtonContent()}
-        {isConnected && <CheckIcon />}
-        {isReconnecting && <Spinner className="companion-loader" />}
+        {isWSConnected && <CheckIcon />}
+        {isWSReconnecting && <Spinner className="companion-loader" />}
       </ConnectButton>
+
       <ConnectToWsModal
         isOpen={isOpen}
         handleConnect={handleConnect}

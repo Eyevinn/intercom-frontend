@@ -5,6 +5,7 @@ import { isBrowserFirefox, isMobile, isTablet } from "../../bowser.ts";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { CallState } from "../../global-state/types.ts";
 import { useCallActionHandlers } from "../../hooks/use-call-action-handlers.ts";
+import { CallData } from "../../hooks/use-call-list.ts";
 import { usePushToTalk } from "../../hooks/use-push-to-talk.ts";
 import logger from "../../utils/logger.ts";
 import { DisplayWarning } from "../display-box.tsx";
@@ -56,27 +57,16 @@ type TProductionLine = {
   masterInputMute: boolean;
   shouldReduceVolume: boolean;
   isSettingGlobalMute?: boolean;
+  callActionHandlers: React.MutableRefObject<
+    Record<string, Record<string, () => void>>
+  >;
   setFailedToConnect: () => void;
-  registerCallState?: (
+  registerCallList: (
     callId: string,
-    data: {
-      isInputMuted: boolean;
-      isOutputMuted: boolean;
-      volume: number;
-      lineId: string;
-      lineName: string;
-      productionId: string;
-      productionName: string;
-    },
-    isGlobalMute?: boolean
+    data: CallData,
+    isSettingGlobalMute?: boolean
   ) => void;
   deregisterCall?: (callId: string) => void;
-  onToggleInputMute?: (handler: () => void) => void;
-  onToggleOutputMute?: (handler: () => void) => void;
-  onIncreaseVolume?: (handler: () => void) => void;
-  onDecreaseVolume?: (handler: () => void) => void;
-  onPushToTalkStart?: (handler: () => void) => void;
-  onPushToTalkStop?: (handler: () => void) => void;
 };
 
 export const ProductionLine = ({
@@ -87,15 +77,10 @@ export const ProductionLine = ({
   masterInputMute,
   shouldReduceVolume,
   isSettingGlobalMute,
+  callActionHandlers,
   setFailedToConnect,
-  registerCallState,
+  registerCallList,
   deregisterCall,
-  onToggleInputMute,
-  onToggleOutputMute,
-  onIncreaseVolume,
-  onDecreaseVolume,
-  onPushToTalkStart,
-  onPushToTalkStop,
 }: TProductionLine) => {
   const { productionId: paramProductionId, lineId: paramLineId } = useParams();
   const [, dispatch] = useGlobalState();
@@ -187,8 +172,9 @@ export const ProductionLine = ({
   });
 
   useEffect(() => {
-    if (registerCallState) {
-      registerCallState(id, {
+    registerCallList(
+      id,
+      {
         isInputMuted,
         isOutputMuted,
         volume: value,
@@ -198,17 +184,19 @@ export const ProductionLine = ({
           joinProductionOptions?.productionId || production?.productionId || "",
         productionName:
           joinProductionOptions?.productionName || production?.name || "",
-      });
-    }
+      },
+      isSettingGlobalMute
+    );
   }, [
     id,
     isInputMuted,
     isOutputMuted,
     value,
-    registerCallState,
     joinProductionOptions,
     line,
     production,
+    isSettingGlobalMute,
+    registerCallList,
   ]);
 
   useEffect(() => {
@@ -319,7 +307,7 @@ export const ProductionLine = ({
     dispatch,
     id,
     muteInput,
-    registerCallState,
+    registerCallState: registerCallList,
     isSettingGlobalMute,
     isOutputMuted,
     value,
@@ -345,21 +333,28 @@ export const ProductionLine = ({
     setIsOutputMuted(!isOutputMuted);
   }, [audioElements, isOutputMuted]);
 
+  const setActionHandler = useCallback(
+    (action: string, handler: () => void) => {
+      const handlers = callActionHandlers.current;
+
+      if (!handlers[id]) {
+        handlers[id] = {};
+      }
+      handlers[id][action] = handler;
+    },
+    [callActionHandlers, id]
+  );
+
   useCallActionHandlers({
-    onToggleInputMute,
-    onToggleOutputMute,
-    onIncreaseVolume,
-    onDecreaseVolume,
-    onPushToTalkStart,
-    onPushToTalkStop,
     value,
     setValue,
-    muteInput,
-    audioElements,
     isInputMuted,
+    audioElements,
+    muteInput,
     muteOutput,
     startTalking,
     stopTalking,
+    setActionHandler,
   });
 
   useSpeakerHotkeys({

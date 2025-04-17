@@ -1,17 +1,20 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useRef } from "react";
 
 export function useGlobalMuteToggle({
   setIsMasterInputMuted,
   sendCallsStateUpdate,
+  setIsSettingGlobalMute,
 }: {
   setIsMasterInputMuted: React.Dispatch<React.SetStateAction<boolean>>;
   sendCallsStateUpdate: () => void;
+  setIsSettingGlobalMute: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
-  const [isSettingGlobalMute, setIsSettingGlobalMute] = useState(false);
   const muteToggleTimeoutRef = useRef<number | null>(null);
 
   const handleToggleGlobalMute = useCallback(() => {
     if (muteToggleTimeoutRef.current !== null) return;
+
+    setIsSettingGlobalMute(true);
 
     setIsMasterInputMuted((prev) => {
       const newMuteState = !prev;
@@ -23,8 +26,6 @@ export function useGlobalMuteToggle({
       return newMuteState;
     });
 
-    setIsSettingGlobalMute(true);
-
     muteToggleTimeoutRef.current = window.setTimeout(() => {
       muteToggleTimeoutRef.current = null;
     }, 300);
@@ -32,7 +33,7 @@ export function useGlobalMuteToggle({
     window.setTimeout(() => {
       setIsSettingGlobalMute(false);
     }, 1000);
-  }, [sendCallsStateUpdate, setIsMasterInputMuted]);
+  }, [sendCallsStateUpdate, setIsMasterInputMuted, setIsSettingGlobalMute]);
 
-  return { handleToggleGlobalMute, isSettingGlobalMute };
+  return { handleToggleGlobalMute };
 }

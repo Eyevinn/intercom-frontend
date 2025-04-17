@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef } from "react";
 
-type CallData = {
+export type CallData = {
   isInputMuted: boolean;
   isOutputMuted: boolean;
   volume: number;

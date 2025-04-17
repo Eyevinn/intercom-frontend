@@ -45,33 +45,40 @@ type HeaderActionsProps = {
   isSingleCall: boolean;
   isMasterInputMuted: boolean;
   addCallActive: boolean;
-  isWSConnected: boolean;
-  isWSReconnecting: boolean;
-  setIsMasterInputMuted: (isMasterInputMuted: boolean) => void;
+  callIndexMap: React.MutableRefObject<Record<number, string>>;
+  callActionHandlers: React.MutableRefObject<
+    Record<string, Record<string, () => void>>
+  >;
+  setIsMasterInputMuted: React.Dispatch<React.SetStateAction<boolean>>;
   setAddCallActive: (addCallActive: boolean) => void;
-  wsConnect: (url: string) => void;
-  wsDisconnect: () => void;
+  setIsSettingGlobalMute: React.Dispatch<React.SetStateAction<boolean>>;
+  sendCallsStateUpdate: () => void;
+  resetLastSentCallsState: () => void;
 };
 export const HeaderActions = ({
   isEmpty,
   isSingleCall,
   isMasterInputMuted,
   setIsMasterInputMuted,
-  isWSConnected,
-  isWSReconnecting,
+  callIndexMap,
+  callActionHandlers,
   addCallActive,
   setAddCallActive,
-  wsConnect,
-  wsDisconnect,
+  setIsSettingGlobalMute,
+  sendCallsStateUpdate,
+  resetLastSentCallsState,
 }: HeaderActionsProps) => {
   return (
     <HeaderButtons>
       {!isEmpty && !isMobile && !isTablet && (
         <ConnectToWSButton
-          isConnected={isWSConnected}
-          isReconnecting={isWSReconnecting}
-          connect={wsConnect}
-          disconnect={wsDisconnect}
+          setIsSettingGlobalMute={setIsSettingGlobalMute}
+          callActionHandlers={callActionHandlers}
+          callIndexMap={callIndexMap}
+          isMasterInputMuted={isMasterInputMuted}
+          setIsMasterInputMuted={setIsMasterInputMuted}
+          sendCallsStateUpdate={sendCallsStateUpdate}
+          resetLastSentCallsState={resetLastSentCallsState}
         />
       )}
       {!isEmpty && !isSingleCall && !isMobile && (

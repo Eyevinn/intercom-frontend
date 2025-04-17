@@ -4,86 +4,55 @@ interface UseCallActionHandlersProps {
   value: number;
   audioElements: HTMLAudioElement[] | null;
   isInputMuted: boolean;
-  onToggleInputMute?: (handler: () => void) => void;
-  onToggleOutputMute?: (handler: () => void) => void;
-  onIncreaseVolume?: (handler: () => void) => void;
-  onDecreaseVolume?: (handler: () => void) => void;
-  onPushToTalkStart?: (handler: () => void) => void;
-  onPushToTalkStop?: (handler: () => void) => void;
   setValue: (value: number) => void;
   muteInput: (mute: boolean) => void;
   muteOutput: () => void;
   startTalking: () => void;
   stopTalking: () => void;
+  setActionHandler: (action: string, handler: () => void) => void;
 }
 
 export function useCallActionHandlers({
   value,
   audioElements,
   isInputMuted,
-  onToggleInputMute,
-  onToggleOutputMute,
-  onIncreaseVolume,
-  onDecreaseVolume,
-  onPushToTalkStart,
-  onPushToTalkStop,
   setValue,
   muteInput,
   muteOutput,
   startTalking,
   stopTalking,
+  setActionHandler,
 }: UseCallActionHandlersProps) {
   useEffect(() => {
-    if (onToggleInputMute) {
-      onToggleInputMute(() => muteInput(!isInputMuted));
-    }
-    if (onToggleOutputMute) {
-      onToggleOutputMute(() => muteOutput());
-    }
-    if (onIncreaseVolume) {
-      onIncreaseVolume(() => {
-        const newVal = Math.min(value + 0.05, 1);
-        setValue(newVal);
-        audioElements?.forEach((el) => {
-          const element = el;
-          element.volume = newVal;
-        });
+    setActionHandler("toggle_input_mute", () => muteInput(!isInputMuted));
+    setActionHandler("toggle_output_mute", () => muteOutput());
+    setActionHandler("increase_volume", () => {
+      const newVal = Math.min(value + 0.05, 1);
+      setValue(newVal);
+      audioElements?.forEach((el) => {
+        const element = el;
+        element.volume = newVal;
       });
-    }
-    if (onDecreaseVolume) {
-      onDecreaseVolume(() => {
-        const newVal = Math.max(value - 0.05, 0);
-        setValue(newVal);
-        audioElements?.forEach((el) => {
-          const element = el;
-          element.volume = newVal;
-        });
+    });
+    setActionHandler("decrease_volume", () => {
+      const newVal = Math.max(value - 0.05, 0);
+      setValue(newVal);
+      audioElements?.forEach((el) => {
+        const element = el;
+        element.volume = newVal;
       });
-    }
-    if (onPushToTalkStart) {
-      onPushToTalkStart(() => {
-        startTalking();
-      });
-    }
-    if (onPushToTalkStop) {
-      onPushToTalkStop(() => {
-        stopTalking();
-      });
-    }
+    });
+    setActionHandler("push_to_talk_start", () => startTalking());
+    setActionHandler("push_to_talk_stop", () => stopTalking());
   }, [
-    onToggleInputMute,
-    onToggleOutputMute,
-    onIncreaseVolume,
-    onDecreaseVolume,
-    onPushToTalkStart,
-    onPushToTalkStop,
-    startTalking,
-    stopTalking,
     value,
     setValue,
     audioElements,
-    muteOutput,
-    muteInput,
     isInputMuted,
+    muteInput,
+    muteOutput,
+    startTalking,
+    stopTalking,
+    setActionHandler,
   ]);
 }

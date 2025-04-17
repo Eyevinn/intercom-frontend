@@ -10,7 +10,7 @@ export const useWebsocketActions = ({
   handleToggleGlobalMute: () => void;
 }) => {
   return (action: string, index?: number) => {
-    if (action === "toggle_global_mute") {
+    if (action === "toggle_global_mute" && handleToggleGlobalMute) {
       handleToggleGlobalMute();
       return;
     }
@@ -35,16 +35,7 @@ export const useWebsocketActions = ({
       return;
     }
 
-    const handlerMap: Record<string, () => void | undefined> = {
-      toggle_input_mute: handlers.toggleInputMute,
-      toggle_output_mute: handlers.toggleOutputMute,
-      increase_volume: handlers.increaseVolume,
-      decrease_volume: handlers.decreaseVolume,
-      push_to_talk_start: handlers.pushToTalkStart,
-      push_to_talk_stop: handlers.pushToTalkStop,
-    };
-
-    const handler = handlerMap[action];
+    const handler = handlers[action];
     if (handler) {
       handler();
     } else {
