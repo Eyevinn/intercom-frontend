@@ -26,6 +26,7 @@ import {
   InnerDiv,
   Lineblock,
   ParticipantCount,
+  ParticipantCountWrapper,
   ProductionItemWrapper,
   ProductionLines,
   ProductionName,
@@ -126,8 +127,10 @@ export const ProductionsListItem = ({
               : production.name}
             <Id>{`(id: ${production?.productionId})`}</Id>
           </ProductionName>
-          <UsersIcon />
-          <ParticipantCount>{totalParticipants}</ParticipantCount>
+          <ParticipantCountWrapper>
+            <UsersIcon />
+            <ParticipantCount>{totalParticipants}</ParticipantCount>
+          </ParticipantCountWrapper>
         </HeaderTexts>
         <HeaderIcon>
           {open ? <ChevronUpIcon /> : <ChevronDownIcon />}
