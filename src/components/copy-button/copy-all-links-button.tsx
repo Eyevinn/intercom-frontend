@@ -1,28 +1,15 @@
-import styled from "@emotion/styled";
 import { PrimaryButton } from "../landing-page/form-elements";
 import { useCopyLinks } from "./use-copy-links";
 import { TProduction } from "../production-line/types";
 import { CheckIcon } from "../../assets/icons/icon";
-
-const CopyToClipboardWrapper = styled.div`
-  display: flex;
-  align-items: center;
-
-  &.manage-production-page {
-    flex-direction: row-reverse;
-  }
-
-  &.create-production-page {
-    flex-direction: row;
-  }
-
-  svg {
-    width: 4rem;
-    height: 4rem;
-    padding: 1rem 0 1rem 0;
-    fill: #76e859;
-  }
-`;
+import { useShareUrl } from "../../hooks/use-share-url";
+import {
+  CopyToClipboardWrapper,
+  ButtonWrapper,
+  NoteTextBold,
+  NoteTextItalic,
+  NoteWrapper,
+} from "./copy-components";
 
 export const CopyAllLinksButton = ({
   production,
@@ -32,21 +19,36 @@ export const CopyAllLinksButton = ({
   className: string;
 }) => {
   const { isCopied, handleCopyUrlToClipboard } = useCopyLinks();
+  const { shareUrl } = useShareUrl();
 
-  const handleCopy = () => {
-    handleCopyUrlToClipboard(
-      production.lines.map((item) => {
-        return ` ${item.name}: ${window.location.origin}/production-calls/production/${production.productionId}/line/${item.id}`;
+  const handleCopy = async () => {
+    const urls = await Promise.all(
+      production.lines.map(async (item) => {
+        const generatedUrl = await shareUrl({
+          productionId: production.productionId,
+          lineId: item.id,
+        });
+        return ` ${item.name}: ${generatedUrl}`;
       })
     );
+    handleCopyUrlToClipboard(urls);
   };
 
   return (
-    <CopyToClipboardWrapper className={className}>
-      <PrimaryButton type="button" onClick={handleCopy} disabled={isCopied}>
-        Copy Links
-      </PrimaryButton>
-      {isCopied && <CheckIcon />}
+    <CopyToClipboardWrapper>
+      <NoteWrapper>
+        <NoteTextBold>Note:</NoteTextBold>
+        <NoteTextItalic>
+          Each link can only be used once. Press the button again to generate
+          new links.
+        </NoteTextItalic>
+      </NoteWrapper>
+      <ButtonWrapper className={className}>
+        <PrimaryButton type="button" onClick={handleCopy} disabled={isCopied}>
+          Copy Links
+        </PrimaryButton>
+        {isCopied && <CheckIcon />}
+      </ButtonWrapper>
     </CopyToClipboardWrapper>
   );
 };
