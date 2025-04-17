@@ -1,7 +1,7 @@
 import { useCallback, Dispatch } from "react";
 import { TJoinProductionOptions } from "../components/production-line/types";
 import { TGlobalStateAction } from "../global-state/global-state-actions";
-import { isBrowserSafari, isIOS } from "../bowser";
+import { isBrowserSafari, isMobile } from "../bowser";
 import { useFetchDevices } from "./use-fetch-devices";
 import { useDevicePermissions } from "./use-device-permission";
 import logger from "../utils/logger";
@@ -46,7 +46,7 @@ export const useInitiateProductionCall = ({
 
         if (
           !inputDeviceExists ||
-          (!outputDeviceExists && (!isBrowserSafari || !isIOS))
+          (!outputDeviceExists && (!isBrowserSafari || !isMobile))
         ) {
           dispatch({
             type: "ERROR",
