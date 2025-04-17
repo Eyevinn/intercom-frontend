@@ -46,13 +46,13 @@ export const useInitiateProductionCall = ({
 
         if (
           !inputDeviceExists ||
-          (!outputDeviceExists && (!isBrowserSafari || isMobile))
+          (!outputDeviceExists && (!isBrowserSafari || !isMobile))
         ) {
           dispatch({
             type: "ERROR",
             payload: {
               error: new Error(
-                `Selected devices are not available: ${payload.joinProductionOptions.audioinput} and ${payload.audiooutput} safari: ${isBrowserSafari} mobile: ${isMobile}`
+                `Selected devices are not available: !inputDeviceExists: ${!inputDeviceExists}, !outputDeviceExists: ${!outputDeviceExists}, ${payload.joinProductionOptions.audioinput} and ${payload.audiooutput} safari: ${isBrowserSafari} mobile: ${isMobile}`
               ),
             },
           });
