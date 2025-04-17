@@ -51,7 +51,9 @@ export const useInitiateProductionCall = ({
           dispatch({
             type: "ERROR",
             payload: {
-              error: new Error("Selected devices are not available"),
+              error: new Error(
+                `Selected devices are not available: ${payload.joinProductionOptions.audioinput} and ${payload.audiooutput} safari: ${isBrowserSafari} mobile: ${isMobile}`
+              ),
             },
           });
           return false;
