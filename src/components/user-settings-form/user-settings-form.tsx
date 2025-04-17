@@ -1,7 +1,9 @@
+import styled from "@emotion/styled";
 import { useEffect, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { isBrowserFirefox } from "../../bowser";
 import { useGlobalState } from "../../global-state/context-provider";
+import { useSubmitOnEnter } from "../../hooks/use-submit-form-enter-press";
 import { Checkbox } from "../checkbox/checkbox";
 import { ButtonWrapper } from "../generic-components";
 import {
@@ -28,6 +30,13 @@ import { useSubmitForm } from "./use-submit-form";
 type FormValues = TJoinProductionOptions & {
   audiooutput: string;
 };
+
+const SubmitButton = styled(PrimaryButton)<{ shouldSubmitOnEnter?: boolean }>`
+  outline: ${({ shouldSubmitOnEnter }) =>
+    shouldSubmitOnEnter ? "2px solid #007bff" : "none"};
+  outline-offset: ${({ shouldSubmitOnEnter }) =>
+    shouldSubmitOnEnter ? "2px" : "0"};
+`;
 
 export const UserSettingsForm = ({
   isJoinProduction,
@@ -176,6 +185,15 @@ export const UserSettingsForm = ({
     }
   }, [reset, selectedProductionId, isJoinProduction]);
 
+  useSubmitOnEnter<FormValues | TUserSettings>({
+    handleSubmit,
+    submitHandler: onSubmit,
+    needsConfirmation,
+    shouldSubmitOnEnter: true,
+    isBrowserFirefox,
+    setConfirmModalOpen,
+  });
+
   useEffect(() => {
     if (production?.name && isJoinProduction) {
       setProductionName(production.name);
@@ -322,7 +340,7 @@ export const UserSettingsForm = ({
         {(isFirstConnection || isSupportedBrowser || isSettingsConfig) && (
           <ReloadDevicesButton />
         )}
-        <PrimaryButton
+        <SubmitButton
           type="button"
           disabled={isJoinProduction ? !isValid : false}
           onClick={
@@ -330,9 +348,10 @@ export const UserSettingsForm = ({
               ? handleSubmit(onSubmit)
               : () => setConfirmModalOpen(true)
           }
+          shouldSubmitOnEnter
         >
           {buttonText}
-        </PrimaryButton>
+        </SubmitButton>
       </ButtonWrapper>
 
       {confirmModalOpen && (
@@ -342,6 +361,7 @@ export const UserSettingsForm = ({
           confirmationText="This will update the devices for all current calls."
           onConfirm={handleSubmit(onSubmit)}
           onCancel={() => setConfirmModalOpen(false)}
+          shouldSubmitOnEnter
         />
       )}
     </>

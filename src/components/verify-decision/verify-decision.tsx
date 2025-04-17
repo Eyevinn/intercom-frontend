@@ -5,6 +5,7 @@ import { RemoveButton } from "../remove-button/remove-button";
 
 type TVerifyDecision = {
   loader?: boolean;
+  shouldSubmitOnEnter?: boolean;
   confirm: () => void;
   abort: () => void;
 };
@@ -31,7 +32,12 @@ const CancelButton = styled(ActionButton)`
   }
 `;
 
-export const VerifyDecision = ({ loader, confirm, abort }: TVerifyDecision) => {
+export const VerifyDecision = ({
+  loader,
+  shouldSubmitOnEnter,
+  confirm,
+  abort,
+}: TVerifyDecision) => {
   return (
     <VerifyButtons>
       <CancelButton
@@ -47,6 +53,7 @@ export const VerifyDecision = ({ loader, confirm, abort }: TVerifyDecision) => {
         className={loader ? "submit" : ""}
         disabled={loader}
         onClick={() => confirm()}
+        shouldSubmitOnEnter={shouldSubmitOnEnter}
       >
         Yes
         {loader && <Spinner className="manage-production" />}
