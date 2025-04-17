@@ -46,7 +46,7 @@ export const useInitiateProductionCall = ({
 
         if (
           !inputDeviceExists ||
-          (!outputDeviceExists && (!isBrowserSafari || !isMobile))
+          (!outputDeviceExists && (!isBrowserSafari || isMobile))
         ) {
           dispatch({
             type: "ERROR",
