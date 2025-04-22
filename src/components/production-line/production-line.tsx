@@ -316,7 +316,6 @@ export const ProductionLine = ({
     dispatch,
     id,
     muteInput,
-    isSettingGlobalMute,
   });
 
   useEffect(() => {

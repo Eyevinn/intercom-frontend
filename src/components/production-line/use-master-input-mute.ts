@@ -8,7 +8,6 @@ interface UseMasterInputMuteProps {
   dispatch: React.Dispatch<TGlobalStateAction>;
   id: string;
   muteInput: (mute: boolean) => void;
-  isSettingGlobalMute?: boolean;
 }
 
 export const useMasterInputMute = ({
@@ -18,7 +17,6 @@ export const useMasterInputMute = ({
   dispatch,
   id,
   muteInput,
-  isSettingGlobalMute,
 }: UseMasterInputMuteProps) => {
   const lastMutedRef = useRef<boolean | null>(null);
   useEffect(() => {
@@ -57,7 +55,6 @@ export const useMasterInputMute = ({
     masterInputMute,
     muteInput,
     id,
-    isSettingGlobalMute,
     dispatch,
   ]);
 };

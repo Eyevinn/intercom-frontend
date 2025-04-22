@@ -106,6 +106,18 @@ export const CallsPage = () => {
     }
   }, [selectedProductionId]);
 
+  useEffect(() => {
+    if (isSettingGlobalMute && Object.keys(calls).length > 0) {
+      const timeout = setTimeout(() => {
+        sendCallsStateUpdate(true);
+      }, 100);
+
+      return () => clearTimeout(timeout);
+    }
+
+    return undefined;
+  }, [isMasterInputMuted, isSettingGlobalMute, calls, sendCallsStateUpdate]);
+
   useGlobalHotkeys({
     muteInput: setIsMasterInputMuted,
     isInputMuted: isMasterInputMuted,
