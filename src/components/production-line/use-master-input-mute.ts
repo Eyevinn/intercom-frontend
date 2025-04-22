@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { TGlobalStateAction } from "../../global-state/global-state-actions";
+import { CallData } from "../../hooks/use-call-list";
 
 interface UseMasterInputMuteProps {
   inputAudioStream: MediaStream | "no-device" | null;
@@ -8,17 +9,9 @@ interface UseMasterInputMuteProps {
   dispatch: React.Dispatch<TGlobalStateAction>;
   id: string;
   muteInput: (mute: boolean) => void;
-  registerCallState?: (
+  registerCallList?: (
     callId: string,
-    data: {
-      isInputMuted: boolean;
-      isOutputMuted: boolean;
-      volume: number;
-      lineId: string;
-      lineName: string;
-      productionId: string;
-      productionName: string;
-    },
+    data: CallData,
     isGlobalMute?: boolean
   ) => void;
   isSettingGlobalMute?: boolean;
@@ -28,6 +21,7 @@ interface UseMasterInputMuteProps {
   lineName?: string;
   productionId?: string;
   productionName?: string;
+  isProgramUser?: boolean | null | undefined;
 }
 
 export const useMasterInputMute = ({
@@ -37,7 +31,7 @@ export const useMasterInputMute = ({
   dispatch,
   id,
   muteInput,
-  registerCallState,
+  registerCallList,
   isSettingGlobalMute,
   isOutputMuted,
   value,
@@ -45,6 +39,7 @@ export const useMasterInputMute = ({
   lineName,
   productionId,
   productionName,
+  isProgramUser,
 }: UseMasterInputMuteProps) => {
   const lastMutedRef = useRef<boolean | null>(null);
   /* eslint-disable react-hooks/exhaustive-deps */
@@ -66,7 +61,7 @@ export const useMasterInputMute = ({
 
       muteInput(masterInputMute);
 
-      registerCallState?.(
+      registerCallList?.(
         id,
         {
           isInputMuted: masterInputMute,
@@ -76,6 +71,8 @@ export const useMasterInputMute = ({
           lineName: lineName || "",
           productionId: productionId || "",
           productionName: productionName || "",
+          isProgramOutputLine: isProgramOutputLine || false,
+          isProgramUser: isProgramUser || false,
         },
         isSettingGlobalMute
       );
@@ -98,7 +95,7 @@ export const useMasterInputMute = ({
     masterInputMute,
     muteInput,
     id,
-    registerCallState,
+    registerCallList,
     isSettingGlobalMute,
     dispatch,
   ]);

@@ -8,6 +8,8 @@ export type CallData = {
   lineName: string;
   productionId: string;
   productionName: string;
+  isProgramOutputLine: boolean;
+  isProgramUser: boolean;
 };
 
 type UseCallListProps = {
@@ -93,7 +95,8 @@ export function useCallList({
 
       const hasChanged =
         prev.isInputMuted !== data.isInputMuted ||
-        prev.isOutputMuted !== data.isOutputMuted ||
+        (prev.isOutputMuted !== data.isOutputMuted &&
+          !data.isProgramOutputLine) ||
         prev.volume !== data.volume;
 
       if (!hasChanged) return;

@@ -4,6 +4,8 @@ interface UseCallActionHandlersProps {
   value: number;
   audioElements: HTMLAudioElement[] | null;
   isInputMuted: boolean;
+  isProgramOutputLine: boolean | null | undefined;
+  isProgramUser: boolean | null | undefined;
   setValue: (value: number) => void;
   muteInput: (mute: boolean) => void;
   muteOutput: () => void;
@@ -16,6 +18,8 @@ export function useCallActionHandlers({
   value,
   audioElements,
   isInputMuted,
+  isProgramOutputLine,
+  isProgramUser,
   setValue,
   muteInput,
   muteOutput,
@@ -24,8 +28,20 @@ export function useCallActionHandlers({
   setActionHandler,
 }: UseCallActionHandlersProps) {
   useEffect(() => {
-    setActionHandler("toggle_input_mute", () => muteInput(!isInputMuted));
-    setActionHandler("toggle_output_mute", () => muteOutput());
+    setActionHandler("toggle_input_mute", () => {
+      if (isProgramOutputLine && !isProgramUser) {
+        return;
+      }
+
+      muteInput(!isInputMuted);
+    });
+    setActionHandler("toggle_output_mute", () => {
+      if (isProgramOutputLine && isProgramUser) {
+        return;
+      }
+
+      muteOutput();
+    });
     setActionHandler("increase_volume", () => {
       const newVal = Math.min(value + 0.05, 1);
       setValue(newVal);
@@ -54,5 +70,7 @@ export function useCallActionHandlers({
     startTalking,
     stopTalking,
     setActionHandler,
+    isProgramOutputLine,
+    isProgramUser,
   ]);
 }
