@@ -47,10 +47,9 @@ export const useMasterInputMute = ({
   productionName,
 }: UseMasterInputMuteProps) => {
   const lastMutedRef = useRef<boolean | null>(null);
-
+  /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
-    const shouldMute = masterInputMute;
-    const alreadySet = lastMutedRef.current === shouldMute;
+    const alreadySet = lastMutedRef.current === masterInputMute;
 
     if (
       inputAudioStream &&
@@ -58,19 +57,19 @@ export const useMasterInputMute = ({
       !isProgramOutputLine &&
       !alreadySet
     ) {
-      lastMutedRef.current = shouldMute;
+      lastMutedRef.current = masterInputMute;
 
       inputAudioStream.getTracks().forEach((t) => {
         // eslint-disable-next-line no-param-reassign
-        t.enabled = !shouldMute;
+        t.enabled = !masterInputMute;
       });
 
-      muteInput(shouldMute);
+      muteInput(masterInputMute);
 
       registerCallState?.(
         id,
         {
-          isInputMuted: shouldMute,
+          isInputMuted: masterInputMute,
           isOutputMuted,
           volume: value,
           lineId: lineId || "",
@@ -81,7 +80,7 @@ export const useMasterInputMute = ({
         isSettingGlobalMute
       );
 
-      if (shouldMute) {
+      if (masterInputMute) {
         dispatch({
           type: "UPDATE_CALL",
           payload: {
@@ -102,11 +101,5 @@ export const useMasterInputMute = ({
     registerCallState,
     isSettingGlobalMute,
     dispatch,
-    isOutputMuted,
-    value,
-    lineId,
-    lineName,
-    productionId,
-    productionName,
   ]);
 };
