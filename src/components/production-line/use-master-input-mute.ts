@@ -80,7 +80,7 @@ export const useMasterInputMute = ({
         isSettingGlobalMute
       );
 
-      if (masterInputMute) {
+      if (masterInputMute && !isProgramOutputLine) {
         dispatch({
           type: "UPDATE_CALL",
           payload: {
