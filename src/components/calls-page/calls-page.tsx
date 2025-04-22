@@ -151,6 +151,7 @@ export const CallsPage = () => {
           <ConfirmationModal
             title="Confirm"
             description="Are you sure you want to leave all calls?"
+            confirmationText="This will leave all calls and return to the home page."
             onCancel={() => setConfirmExitModalOpen(false)}
             onConfirm={runExitAllCalls}
           />

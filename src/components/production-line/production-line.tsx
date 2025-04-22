@@ -556,7 +556,7 @@ export const ProductionLine = ({
                           {confirmExitModalOpen && (
                             <ConfirmationModal
                               title="Confirm"
-                              description="Are you sure you want to leave all calls?"
+                              description={`Are you sure you want to leave ${line?.name}?`}
                               onCancel={() => setConfirmExitModalOpen(false)}
                               onConfirm={exit}
                             />
