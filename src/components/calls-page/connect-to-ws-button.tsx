@@ -22,10 +22,13 @@ const ConnectButton = styled(PrimaryButton)<{
   isConnected: boolean;
 }>`
   background: ${({ isConnected }) => (isConnected ? "#73d16d" : "")};
+  border: 0.2rem solid
+    ${({ isConnected }) => (isConnected ? "#73d16d" : "rgba(89, 203, 232, 1)")};
   text-align: center;
   padding: 1rem;
   align-items: center;
   display: flex;
+  margin-right: 1rem;
 
   svg {
     fill: #482307;
