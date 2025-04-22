@@ -184,6 +184,11 @@ export const ProductionLine = ({
           joinProductionOptions?.productionId || production?.productionId || "",
         productionName:
           joinProductionOptions?.productionName || production?.name || "",
+        isProgramOutputLine:
+          joinProductionOptions?.lineUsedForProgramOutput ||
+          isProgramOutputLine ||
+          false,
+        isProgramUser: joinProductionOptions?.isProgramUser || false,
       },
       isSettingGlobalMute
     );
@@ -197,6 +202,8 @@ export const ProductionLine = ({
     production,
     isSettingGlobalMute,
     registerCallList,
+    isProgramOutputLine,
+    isProgramUser,
   ]);
 
   useEffect(() => {
@@ -302,19 +309,14 @@ export const ProductionLine = ({
 
   useMasterInputMute({
     inputAudioStream,
-    isProgramOutputLine,
+    isProgramOutputLine:
+      joinProductionOptions?.lineUsedForProgramOutput ||
+      line?.programOutputLine,
     masterInputMute,
     dispatch,
     id,
     muteInput,
-    registerCallState: registerCallList,
     isSettingGlobalMute,
-    isOutputMuted,
-    value,
-    lineId: joinProductionOptions?.lineId || line?.id,
-    lineName: joinProductionOptions?.lineName || line?.name,
-    productionId: production?.productionId,
-    productionName: joinProductionOptions?.productionName || production?.name,
   });
 
   useEffect(() => {
@@ -349,6 +351,8 @@ export const ProductionLine = ({
     value,
     setValue,
     isInputMuted,
+    isProgramOutputLine,
+    isProgramUser,
     audioElements,
     muteInput,
     muteOutput,

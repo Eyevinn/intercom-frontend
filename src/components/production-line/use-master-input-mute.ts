@@ -8,26 +8,7 @@ interface UseMasterInputMuteProps {
   dispatch: React.Dispatch<TGlobalStateAction>;
   id: string;
   muteInput: (mute: boolean) => void;
-  registerCallState?: (
-    callId: string,
-    data: {
-      isInputMuted: boolean;
-      isOutputMuted: boolean;
-      volume: number;
-      lineId: string;
-      lineName: string;
-      productionId: string;
-      productionName: string;
-    },
-    isGlobalMute?: boolean
-  ) => void;
   isSettingGlobalMute?: boolean;
-  isOutputMuted: boolean;
-  value: number;
-  lineId?: string;
-  lineName?: string;
-  productionId?: string;
-  productionName?: string;
 }
 
 export const useMasterInputMute = ({
@@ -37,17 +18,9 @@ export const useMasterInputMute = ({
   dispatch,
   id,
   muteInput,
-  registerCallState,
   isSettingGlobalMute,
-  isOutputMuted,
-  value,
-  lineId,
-  lineName,
-  productionId,
-  productionName,
 }: UseMasterInputMuteProps) => {
   const lastMutedRef = useRef<boolean | null>(null);
-  /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
     const alreadySet = lastMutedRef.current === masterInputMute;
 
@@ -65,20 +38,6 @@ export const useMasterInputMute = ({
       });
 
       muteInput(masterInputMute);
-
-      registerCallState?.(
-        id,
-        {
-          isInputMuted: masterInputMute,
-          isOutputMuted,
-          volume: value,
-          lineId: lineId || "",
-          lineName: lineName || "",
-          productionId: productionId || "",
-          productionName: productionName || "",
-        },
-        isSettingGlobalMute
-      );
 
       if (masterInputMute && !isProgramOutputLine) {
         dispatch({
@@ -98,7 +57,6 @@ export const useMasterInputMute = ({
     masterInputMute,
     muteInput,
     id,
-    registerCallState,
     isSettingGlobalMute,
     dispatch,
   ]);
