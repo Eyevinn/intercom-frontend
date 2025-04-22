@@ -1,6 +1,5 @@
 import { useEffect, useRef } from "react";
 import { TGlobalStateAction } from "../../global-state/global-state-actions";
-import { CallData } from "../../hooks/use-call-list";
 
 interface UseMasterInputMuteProps {
   inputAudioStream: MediaStream | "no-device" | null;
@@ -9,19 +8,7 @@ interface UseMasterInputMuteProps {
   dispatch: React.Dispatch<TGlobalStateAction>;
   id: string;
   muteInput: (mute: boolean) => void;
-  registerCallList?: (
-    callId: string,
-    data: CallData,
-    isGlobalMute?: boolean
-  ) => void;
   isSettingGlobalMute?: boolean;
-  isOutputMuted: boolean;
-  value: number;
-  lineId?: string;
-  lineName?: string;
-  productionId?: string;
-  productionName?: string;
-  isProgramUser?: boolean | null | undefined;
 }
 
 export const useMasterInputMute = ({
@@ -31,18 +18,9 @@ export const useMasterInputMute = ({
   dispatch,
   id,
   muteInput,
-  registerCallList,
   isSettingGlobalMute,
-  isOutputMuted,
-  value,
-  lineId,
-  lineName,
-  productionId,
-  productionName,
-  isProgramUser,
 }: UseMasterInputMuteProps) => {
   const lastMutedRef = useRef<boolean | null>(null);
-  /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
     const alreadySet = lastMutedRef.current === masterInputMute;
 
@@ -60,22 +38,6 @@ export const useMasterInputMute = ({
       });
 
       muteInput(masterInputMute);
-
-      registerCallList?.(
-        id,
-        {
-          isInputMuted: masterInputMute,
-          isOutputMuted,
-          volume: value,
-          lineId: lineId || "",
-          lineName: lineName || "",
-          productionId: productionId || "",
-          productionName: productionName || "",
-          isProgramOutputLine: isProgramOutputLine || false,
-          isProgramUser: isProgramUser || false,
-        },
-        isSettingGlobalMute
-      );
 
       if (masterInputMute && !isProgramOutputLine) {
         dispatch({
@@ -95,7 +57,6 @@ export const useMasterInputMute = ({
     masterInputMute,
     muteInput,
     id,
-    registerCallList,
     isSettingGlobalMute,
     dispatch,
   ]);

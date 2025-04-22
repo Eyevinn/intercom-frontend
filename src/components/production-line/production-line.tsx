@@ -316,15 +316,7 @@ export const ProductionLine = ({
     dispatch,
     id,
     muteInput,
-    registerCallList,
     isSettingGlobalMute,
-    isOutputMuted,
-    value,
-    lineId: joinProductionOptions?.lineId || line?.id,
-    lineName: joinProductionOptions?.lineName || line?.name,
-    productionId: production?.productionId,
-    productionName: joinProductionOptions?.productionName || production?.name,
-    isProgramUser: joinProductionOptions?.isProgramUser,
   });
 
   useEffect(() => {
