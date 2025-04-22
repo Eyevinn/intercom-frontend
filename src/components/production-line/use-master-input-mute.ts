@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { TGlobalStateAction } from "../../global-state/global-state-actions";
 
 interface UseMasterInputMuteProps {
@@ -46,24 +46,31 @@ export const useMasterInputMute = ({
   productionId,
   productionName,
 }: UseMasterInputMuteProps) => {
-  /* eslint-disable react-hooks/exhaustive-deps */
+  const lastMutedRef = useRef<boolean | null>(null);
+
   useEffect(() => {
+    const shouldMute = masterInputMute;
+    const alreadySet = lastMutedRef.current === shouldMute;
+
     if (
       inputAudioStream &&
       inputAudioStream !== "no-device" &&
-      !isProgramOutputLine
+      !isProgramOutputLine &&
+      !alreadySet
     ) {
+      lastMutedRef.current = shouldMute;
+
       inputAudioStream.getTracks().forEach((t) => {
         // eslint-disable-next-line no-param-reassign
-        t.enabled = !masterInputMute;
+        t.enabled = !shouldMute;
       });
 
-      muteInput(masterInputMute);
+      muteInput(shouldMute);
 
       registerCallState?.(
         id,
         {
-          isInputMuted: masterInputMute,
+          isInputMuted: shouldMute,
           isOutputMuted,
           volume: value,
           lineId: lineId || "",
@@ -73,17 +80,18 @@ export const useMasterInputMute = ({
         },
         isSettingGlobalMute
       );
-    }
-    if (masterInputMute && !isProgramOutputLine) {
-      dispatch({
-        type: "UPDATE_CALL",
-        payload: {
-          id,
-          updates: {
-            isRemotelyMuted: false,
+
+      if (shouldMute) {
+        dispatch({
+          type: "UPDATE_CALL",
+          payload: {
+            id,
+            updates: {
+              isRemotelyMuted: false,
+            },
           },
-        },
-      });
+        });
+      }
     }
   }, [
     inputAudioStream,
@@ -94,5 +102,11 @@ export const useMasterInputMute = ({
     registerCallState,
     isSettingGlobalMute,
     dispatch,
+    isOutputMuted,
+    value,
+    lineId,
+    lineName,
+    productionId,
+    productionName,
   ]);
 };
