@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { TGlobalStateAction } from "../../global-state/global-state-actions";
 
 interface UseMasterInputMuteProps {
@@ -46,13 +46,19 @@ export const useMasterInputMute = ({
   productionId,
   productionName,
 }: UseMasterInputMuteProps) => {
+  const lastMutedRef = useRef<boolean | null>(null);
   /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
+    const alreadySet = lastMutedRef.current === masterInputMute;
+
     if (
       inputAudioStream &&
       inputAudioStream !== "no-device" &&
-      !isProgramOutputLine
+      !isProgramOutputLine &&
+      !alreadySet
     ) {
+      lastMutedRef.current = masterInputMute;
+
       inputAudioStream.getTracks().forEach((t) => {
         // eslint-disable-next-line no-param-reassign
         t.enabled = !masterInputMute;
@@ -73,17 +79,18 @@ export const useMasterInputMute = ({
         },
         isSettingGlobalMute
       );
-    }
-    if (masterInputMute && !isProgramOutputLine) {
-      dispatch({
-        type: "UPDATE_CALL",
-        payload: {
-          id,
-          updates: {
-            isRemotelyMuted: false,
+
+      if (masterInputMute && !isProgramOutputLine) {
+        dispatch({
+          type: "UPDATE_CALL",
+          payload: {
+            id,
+            updates: {
+              isRemotelyMuted: false,
+            },
           },
-        },
-      });
+        });
+      }
     }
   }, [
     inputAudioStream,

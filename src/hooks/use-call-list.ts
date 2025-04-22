@@ -33,26 +33,28 @@ export function useCallList({
       const entries = Object.entries(callLineStates.current);
       if (entries.length === 0) return;
 
+      const callsPayload = entries.map(([callId, state], index) => ({
+        callId,
+        index: index + 1,
+        ...state,
+      }));
+
+      const serializedCalls = JSON.stringify(callsPayload);
+
+      if (!force && serializedCalls === lastSentCallsState.current) return;
+
       const payload = {
         type: "CALLS_STATE_UPDATE",
         globalMute: globalMuteRef.current,
         numberOfCalls: numberOfCallsRef.current,
-        calls: entries.map(([callId, state], index) => ({
-          callId,
-          index: index + 1,
-          ...state,
-        })),
+        calls: callsPayload,
       };
 
       const serialized = JSON.stringify(payload);
 
-      if (
-        websocket &&
-        websocket.readyState === WebSocket.OPEN &&
-        (force || serialized !== lastSentCallsState.current)
-      ) {
+      if (websocket && websocket.readyState === WebSocket.OPEN) {
         websocket.send(serialized);
-        lastSentCallsState.current = serialized;
+        lastSentCallsState.current = serializedCalls;
       }
     },
     [websocket]
