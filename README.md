@@ -63,17 +63,17 @@ Build local Docker image
 docker build -t intercom-frontend:dev
 ```
 
-Run container on port 8080 and with intercom manager on https://intercom-manager.dev.eyevinn.technology/
+Run container on port 8000 and with intercom manager on https://<intercom-manager-url>/
 
 ```
-docker run --rm -d -p 8080:8080 \
-  -e PORT=8080 \
-  -e MANAGER_URL=https://intercom-manager.dev.eyevinn.technology/ \
+docker run --rm -d -p 8000:8000 \
+  -e PORT=8000 \
+  -e MANAGER_URL=https://<intercom-manager-url>/ \
   --name=frontend \
   intercom-frontend:dev
 ```
 
-Then the app is available at http://localhost:8080/
+Then the app is available at http://localhost:8000/
 
 Stop container
 
