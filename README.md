@@ -48,21 +48,14 @@ export VITE_BACKEND_URL=https://<instance>.eyevinn-intercom-manager.auto.prod.os
 export OSC_ACCESS_TOKEN=<personal-access-token>
 ```
 
-To obtain the service access token you need your Open Source Cloud personal access token. You find that one in the settings menu in the [user interface](https://app.osaas.io). Get the service access token with the following HTTP request using curl.
+The `<personal-access-token>` is found in the settings menu in the [user interface](https://app.osaas.io). To get the service access token you run the following command in your terminal.
 
 ```bash
-% curl -X 'POST' \
-  'https://token.svc.prod.osaas.io/servicetoken' \
-  -H 'accept: application/json' \
-  -H "x-pat-jwt: Bearer $OSC_ACCESS_TOKEN" \
-  -H 'Content-Type: application/json' \
-  -d '{
-  "serviceId": "eyevinn-intercom-manager"
-}'
-{"serviceId":"eyevinn-intercom-manager","token":"<service-access-token>","expiry":1718315617}
+% npx -y @osaas/cli service-access-token eyevinn-intercom-manager
+<service-access-token>
 ```
 
-Then you start the dev server with the `VITE_BACKEND_API_KEY` environment variable set. Either on the comand line or stored in the shell with `export VITE_BACKEND_API_KEY=<service-access-token>`. The token expires after a while so you might need to refresh the token using the same curl command line above.
+Then you start the dev server with the `VITE_BACKEND_API_KEY` environment variable set. Either on the comand line or stored in the shell with `export VITE_BACKEND_API_KEY=<service-access-token>`. The token expires after a while so you might need to refresh the token using the same command above.
 
 ```bash
 % VITE_BACKEND_API_KEY=<service-access-token> yarn dev
