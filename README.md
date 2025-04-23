@@ -1,12 +1,19 @@
-# Open Intercom Client
+# Eyevinn Open Intercom Client
 
-Low latency, web based, open source, high quality, voice-over-ip intercom solution.
+[![Slack](https://slack.osaas.io/badge.svg)](https://slack.osaas.io)
+[![Badge OSC](https://img.shields.io/badge/Evaluate-24243B?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iMTIiIGZpbGw9InVybCgjcGFpbnQwX2xpbmVhcl8yODIxXzMxNjcyKSIvPgo8Y2lyY2xlIGN4PSIxMiIgY3k9IjEyIiByPSI3IiBzdHJva2U9ImJsYWNrIiBzdHJva2Utd2lkdGg9IjIiLz4KPGRlZnM%2BCjxsaW5lYXJHcmFkaWVudCBpZD0icGFpbnQwX2xpbmVhcl8yODIxXzMxNjcyIiB4MT0iMTIiIHkxPSIwIiB4Mj0iMTIiIHkyPSIyNCIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPgo8c3RvcCBzdG9wLWNvbG9yPSIjQzE4M0ZGIi8%2BCjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzREQzlGRiIvPgo8L2xpbmVhckdyYWRpZW50Pgo8L2RlZnM%2BCjwvc3ZnPgo%3D)](https://app.osaas.io/browse/eyevinn-intercom-manager)
 
-User interface for the [Open Intercom Server](https://github.com/Eyevinn/intercom-manager/)
+Eyevinn Open Intercom is a low latency, web based, open source, high quality, voice-over-ip intercom solution.
+It is designed to be used in broadcast and media production environments, where low latency and high quality audio are critical.
+The solution is built on top of WebRTC technology and provides a user-friendly interface for managing intercom channels and users.
 
-Supported by [Eyevinn Technology](https://eyevinn.se)
+## Requirements
 
-Hosted solution with support available in [Open Source Cloud](https://www.osaas.io/use-cases/intercom).
+- [Open Intercom Manager](https://github.com/Eyevinn/intercom-manager/) running and reachable
+
+## Hosted Solution
+
+Available as an open web service in [Eyevinn Open Source Cloud](https://www.osaas.io). Read this [documentation to quickly get started](https://docs.osaas.io/osaas.wiki/Service%3A-Intercom.html) with the hosted solution.
 
 ## Get Started
 
