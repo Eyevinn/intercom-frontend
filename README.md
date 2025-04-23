@@ -75,7 +75,7 @@ Build local Docker image
 docker build -t intercom-frontend:dev
 ```
 
-Run container on port 8000 and with intercom manager on https://<intercom-manager-url>/
+Run container on port 8000 and with intercom manager on `https://<intercom-manager-url>/`
 
 ```
 docker run --rm -d -p 8000:8000 \
