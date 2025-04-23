@@ -3,6 +3,7 @@ import { MicMuted, MicUnmuted } from "../../assets/icons/icon";
 import { isMobile, isTablet } from "../../bowser";
 import { PrimaryButton, SecondaryButton } from "../landing-page/form-elements";
 import { ConnectToWSButton } from "./connect-to-ws-button";
+import { useGlobalMuteToggle } from "./use-global-mute-toggle";
 
 const AddCallContainer = styled.div`
   display: flex;
@@ -68,23 +69,27 @@ export const HeaderActions = ({
   sendCallsStateUpdate,
   resetLastSentCallsState,
 }: HeaderActionsProps) => {
+  const { handleToggleGlobalMute } = useGlobalMuteToggle({
+    setIsMasterInputMuted,
+    setIsSettingGlobalMute,
+  });
+
   return (
     <HeaderButtons>
       {!isEmpty && !isMobile && !isTablet && (
         <ConnectToWSButton
-          setIsSettingGlobalMute={setIsSettingGlobalMute}
           callActionHandlers={callActionHandlers}
           callIndexMap={callIndexMap}
           isMasterInputMuted={isMasterInputMuted}
-          setIsMasterInputMuted={setIsMasterInputMuted}
           sendCallsStateUpdate={sendCallsStateUpdate}
           resetLastSentCallsState={resetLastSentCallsState}
+          handleToggleGlobalMute={handleToggleGlobalMute}
         />
       )}
       {!isEmpty && !isSingleCall && !isMobile && (
         <MuteAllCallsBtn
           type="button"
-          onClick={() => setIsMasterInputMuted(!isMasterInputMuted)}
+          onClick={handleToggleGlobalMute}
           className={isMasterInputMuted ? "mute" : ""}
         >
           {isMasterInputMuted ? "Unmute All" : "Mute All"}

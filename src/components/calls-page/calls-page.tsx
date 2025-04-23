@@ -17,6 +17,7 @@ import { useCallsNavigation } from "./use-calls-navigation";
 import { useGlobalMuteHotkey } from "./use-global-mute-hotkey";
 import { usePreventPullToRefresh } from "./use-prevent-pull-to-refresh";
 import { useSpeakerDetection } from "./use-speaker-detection";
+import { useSendWSCallStateUpdate } from "./use-send-ws-callstate-update";
 
 const Container = styled.div`
   display: flex;
@@ -76,6 +77,11 @@ export const CallsPage = () => {
       !callState.joinProductionOptions.isProgramUser
   );
 
+  const callActionHandlers = useRef<Record<string, Record<string, () => void>>>(
+    {}
+  );
+  const callIndexMap = useRef<Record<number, string>>({});
+
   const { shouldReduceVolume } = useSpeakerDetection({
     isProgramOutputAdded,
     calls,
@@ -85,11 +91,6 @@ export const CallsPage = () => {
     calls,
     initialHotkey: "p",
   });
-
-  const callActionHandlers = useRef<Record<string, Record<string, () => void>>>(
-    {}
-  );
-  const callIndexMap = useRef<Record<number, string>>({});
 
   useEffect(() => {
     callIndexMap.current = {};
@@ -105,6 +106,12 @@ export const CallsPage = () => {
       setProductionId(selectedProductionId);
     }
   }, [selectedProductionId]);
+
+  useSendWSCallStateUpdate({
+    isSettingGlobalMute,
+    isEmpty,
+    sendCallsStateUpdate,
+  });
 
   useGlobalHotkeys({
     muteInput: setIsMasterInputMuted,

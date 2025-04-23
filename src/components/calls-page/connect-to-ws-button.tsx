@@ -8,7 +8,6 @@ import { useWebsocketReconnect } from "../../hooks/use-websocket-reconnect";
 import { PrimaryButton } from "../landing-page/form-elements";
 import { Spinner } from "../loader/loader";
 import { ConnectToWsModal } from "./connect-to-ws-modal";
-import { useGlobalMuteToggle } from "./use-global-mute-toggle";
 
 const ConnectWebSocketWrapper = styled.div`
   display: flex;
@@ -41,8 +40,7 @@ interface ConnectToWSButtonProps {
     Record<string, Record<string, () => void>>
   >;
   isMasterInputMuted: boolean;
-  setIsMasterInputMuted: React.Dispatch<React.SetStateAction<boolean>>;
-  setIsSettingGlobalMute: React.Dispatch<React.SetStateAction<boolean>>;
+  handleToggleGlobalMute: () => void;
   sendCallsStateUpdate: () => void;
   resetLastSentCallsState: () => void;
 }
@@ -51,8 +49,7 @@ export const ConnectToWSButton = ({
   callIndexMap,
   callActionHandlers,
   isMasterInputMuted,
-  setIsMasterInputMuted,
-  setIsSettingGlobalMute,
+  handleToggleGlobalMute,
   sendCallsStateUpdate,
   resetLastSentCallsState,
 }: ConnectToWSButtonProps) => {
@@ -72,12 +69,6 @@ export const ConnectToWSButton = ({
       indexMap[i + 1] = callId;
     });
   }, [calls, callIndexMap]);
-
-  const { handleToggleGlobalMute } = useGlobalMuteToggle({
-    setIsMasterInputMuted,
-    sendCallsStateUpdate,
-    setIsSettingGlobalMute,
-  });
 
   const handleAction = useWebsocketActions({
     callIndexMap,
