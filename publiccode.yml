@@ -1,4 +1,4 @@
-publiccodeYmlVersion: '0.4'
+publiccodeYmlVersion: "0.4"
 name: Eyevinn Open Intercom Client
 applicationSuite: Eyevinn Open Source Cloud
 url: https://github.com/Eyevinn/intercom-frontend.git
