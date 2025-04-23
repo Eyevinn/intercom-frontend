@@ -18,6 +18,18 @@ Pre-requisites: [Node v20](https://nodejs.org/), [Yarn Classic](https://classic.
 
 To use a local [Open Intercom Server](https://github.com/Eyevinn/intercom-manager/), set the environment variable `VITE_BACKEND_URL=http://0.0.0.0:8000/`
 
+Decide whether or not debug mode should be on or not `VITE_DEBUG_MODE=true`
+
+Choose desired level of logging `VITE_DEV_LOGGER_LEVEL=3`
+
+```
+LOGGER LEVELS
+0 = no logs
+1 = basic logs
+2 = colored logs
+3 = data logs
+```
+
 `yarn dev` to start a dev server
 
 ### Open Intercom Server in Open Source Cloud
@@ -63,17 +75,17 @@ Build local Docker image
 docker build -t intercom-frontend:dev
 ```
 
-Run container on port 8080 and with intercom manager on https://intercom-manager.dev.eyevinn.technology/
+Run container on port 8000 and with intercom manager on https://<intercom-manager-url>/
 
 ```
-docker run --rm -d -p 8080:8080 \
-  -e PORT=8080 \
-  -e MANAGER_URL=https://intercom-manager.dev.eyevinn.technology/ \
+docker run --rm -d -p 8000:8000 \
+  -e PORT=8000 \
+  -e MANAGER_URL=https://<intercom-manager-url>/ \
   --name=frontend \
   intercom-frontend:dev
 ```
 
-Then the app is available at http://localhost:8080/
+Then the app is available at http://localhost:8000/
 
 Stop container
 
@@ -129,7 +141,7 @@ Try to describe what was added or changed, instead of describing what the code d
 
 ## Support
 
-Join our [community on Slack](http://slack.streamingtech.se) where you can post any questions regarding any of our open source projects. Eyevinn's consulting business can also offer you:
+Join our [community on Slack](https://slack.osaas.io/) where you can post any questions regarding any of our open source projects. Eyevinn's consulting business can also offer you:
 
 - Further development of this component
 - Customization and integration of this component into your platform
