@@ -18,6 +18,15 @@ Pre-requisites: [Node v20](https://nodejs.org/), [Yarn Classic](https://classic.
 
 To use a local [Open Intercom Server](https://github.com/Eyevinn/intercom-manager/), set the environment variable `VITE_BACKEND_URL=http://0.0.0.0:8000/`
 
+Decide whether or not debug mode should be on or not `VITE_DEBUG_MODE=true`
+
+Choose desired level of logging `VITE_DEV_LOGGER_LEVEL=3`
+LOGGER LEVELS
+0 = no logs
+1 = basic logs
+2 = colored logs
+3 = data logs
+
 `yarn dev` to start a dev server
 
 ### Open Intercom Server in Open Source Cloud
