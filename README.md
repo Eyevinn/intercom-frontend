@@ -129,7 +129,7 @@ Try to describe what was added or changed, instead of describing what the code d
 
 ## Support
 
-Join our [community on Slack](http://slack.streamingtech.se) where you can post any questions regarding any of our open source projects. Eyevinn's consulting business can also offer you:
+Join our [community on Slack](https://slack.osaas.io/) where you can post any questions regarding any of our open source projects. Eyevinn's consulting business can also offer you:
 
 - Further development of this component
 - Customization and integration of this component into your platform
