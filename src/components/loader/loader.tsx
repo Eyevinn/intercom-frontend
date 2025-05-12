@@ -47,6 +47,11 @@ const Loading = styled.div`
     width: 2rem;
   }
 
+  &.copy-button {
+    height: 2rem;
+    width: 2rem;
+  }
+
   @keyframes spin {
     0% {
       transform: rotate(0deg);

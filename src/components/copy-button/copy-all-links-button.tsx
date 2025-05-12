@@ -1,3 +1,4 @@
+import styled from "@emotion/styled";
 import { PrimaryButton } from "../landing-page/form-elements";
 import { useCopyLinks } from "./use-copy-links";
 import { TProduction } from "../production-line/types";
@@ -10,6 +11,12 @@ import {
   NoteTextItalic,
   NoteWrapper,
 } from "./copy-components";
+import { Spinner } from "../loader/loader";
+
+const CopyButton = styled(PrimaryButton)`
+  min-width: 12rem;
+  min-height: 4.5rem;
+`;
 
 export const CopyAllLinksButton = ({
   production,
@@ -44,9 +51,9 @@ export const CopyAllLinksButton = ({
         </NoteTextItalic>
       </NoteWrapper>
       <ButtonWrapper className={className}>
-        <PrimaryButton type="button" onClick={handleCopy} disabled={isCopied}>
-          Copy Links
-        </PrimaryButton>
+        <CopyButton type="button" onClick={handleCopy} disabled={isCopied}>
+          {isCopied ? <Spinner className="copy-button" /> : "Copy Links"}
+        </CopyButton>
         {isCopied && <CheckIcon />}
       </ButtonWrapper>
     </CopyToClipboardWrapper>
