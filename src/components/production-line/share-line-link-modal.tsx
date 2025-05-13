@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FormInput } from "../landing-page/form-elements";
 import { Modal } from "../modal/modal";
 import { CopyButton } from "../copy-button/copy-button";
@@ -55,6 +55,7 @@ export const ShareLineLinkModal = ({
   onClose,
 }: TShareLineLinkModalProps) => {
   const modalRef = useRef<HTMLDivElement>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -69,6 +70,14 @@ export const ShareLineLinkModal = ({
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [onClose]);
+
+  const handleRefresh = async () => {
+    setIsLoading(true);
+    onRefresh();
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 1000);
+  };
 
   return (
     <Modal onClose={onClose}>
@@ -85,10 +94,14 @@ export const ShareLineLinkModal = ({
           Refresh the URL to generate a new one.
         </ModalTextItalic>
         <Wrapper>
-          <FormInput value={url} readOnly />
+          <FormInput value={isLoading ? "Loading..." : url} readOnly />
           <CopyButton url={url} className="share-line-link-modal" />
         </Wrapper>
-        <RefreshButton label="Refresh URL" onRefresh={onRefresh} />
+        <RefreshButton
+          label="Refresh URL"
+          isLoading={isLoading}
+          onRefresh={handleRefresh}
+        />
       </div>
     </Modal>
   );
