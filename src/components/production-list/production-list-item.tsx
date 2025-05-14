@@ -22,7 +22,6 @@ import {
   HeaderIcon,
   HeaderTexts,
   HeaderWrapper,
-  Id,
   InnerDiv,
   Lineblock,
   ParticipantCount,
@@ -125,7 +124,6 @@ export const ProductionsListItem = ({
             {production.name.length > 40
               ? `${production.name.slice(0, 40)}...`
               : production.name}
-            <Id>{`(id: ${production?.productionId})`}</Id>
           </ProductionName>
           <ParticipantCountWrapper>
             <UsersIcon />

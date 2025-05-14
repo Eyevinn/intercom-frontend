@@ -9,7 +9,6 @@ import {
   ProductionName,
   ParticipantCount,
   HeaderIcon,
-  Id,
   ParticipantCountWrapper,
 } from "../production-list/production-list-components";
 import { AudioFeedIcon, CallHeader } from "./production-line-components";
@@ -46,13 +45,9 @@ export const CallHeaderComponent = ({
             <TVIcon />
           </AudioFeedIcon>
         )}
-        <ProductionName
-          title={`${production?.name} (id: ${production?.productionId}) / ${line?.name}`}
-        >
+        <ProductionName title={`${production?.name} / ${line?.name}`}>
           <span className="production-name-container">
-            {`${truncatedProductionName}`}
-            <Id>{`(id: ${production?.productionId})`}</Id>
-            {`/ ${truncatedLineName}`}
+            {`${truncatedProductionName}/ ${truncatedLineName}`}
           </span>
         </ProductionName>
         <ParticipantCountWrapper>
