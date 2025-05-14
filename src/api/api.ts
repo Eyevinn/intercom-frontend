@@ -237,4 +237,35 @@ export const API = {
       })
     );
   },
+  reauth: async (): Promise<void> => {
+    return handleFetchRequest<void>(
+      fetch(`${API_URL}reauth`, {
+        method: "GET",
+        headers: {
+          ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
+        },
+      }).catch((error) => {
+        console.error("Reauth request failed:", error);
+        throw error;
+      })
+    );
+  },
+};
+
+// Set up automatic token refresh every hour
+export const setupTokenRefresh = () => {
+  API.reauth().catch((error) => {
+    console.error("Initial reauth failed:", error);
+  });
+
+  const intervalId = setInterval(
+    () => {
+      API.reauth().catch((error) => {
+        console.error("Periodic reauth failed:", error);
+      });
+    },
+    60 * 60 * 1000
+  );
+
+  return () => clearInterval(intervalId);
 };

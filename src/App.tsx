@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import styled from "@emotion/styled";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ErrorPage } from "./components/router-error.tsx";
 import { useDevicePermissions } from "./hooks/use-device-permission.ts";
 import { LandingPage } from "./components/landing-page/landing-page.tsx";
@@ -21,6 +21,7 @@ import { Header } from "./components/header.tsx";
 import { useLocalUserSettings } from "./hooks/use-local-user-settings.ts";
 import { ManageProductionsPage } from "./components/manage-productions-page/manage-productions-page.tsx";
 import { CreateProductionPage } from "./components/create-production/create-production-page.tsx";
+import { setupTokenRefresh } from "./api/api.ts";
 
 const DisplayBoxPositioningContainer = styled(FlexContainer)`
   justify-content: center;
@@ -60,6 +61,11 @@ const App = () => {
   });
 
   useLocalUserSettings({ devices, dispatch });
+
+  useEffect(() => {
+    const cleanup = setupTokenRefresh();
+    return () => cleanup();
+  }, []);
 
   return (
     <GlobalStateContext.Provider value={initializedGlobalState}>

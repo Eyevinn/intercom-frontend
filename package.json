@@ -9,7 +9,8 @@
     "lint": "eslint ./src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "prepare": "husky install",
     "preview": "vite preview",
-    "pretty": "prettier --write --ignore-unknown .",
+    "pretty": "prettier --write --ignore-unknown \"**/*.{js,jsx,ts,tsx,json,css,scss,md}\"",
+    "pretty:check": "prettier --check --ignore-unknown \"**/*.{js,jsx,ts,tsx,json,css,scss,md}\"",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "postversion": "git push && git push --tags"
   },
