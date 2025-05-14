@@ -237,4 +237,14 @@ export const API = {
       })
     );
   },
+  reauth: async (): Promise<void> => {
+    return handleFetchRequest<void>(
+      fetch(`${API_URL}reauth`, {
+        method: "GET",
+        headers: {
+          ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
+        },
+      })
+    );
+  },
 };
