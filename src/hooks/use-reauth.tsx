@@ -1,33 +1,35 @@
-import { useCallback } from "react";
+import { useCallback, useRef } from "react";
 import { useGlobalState } from "../global-state/context-provider";
 import { API } from "../api/api";
 
 // Set up automatic token refresh every hour
 export const useSetupTokenRefresh = () => {
   const [, dispatch] = useGlobalState();
+  const intervalRef = useRef<NodeJS.Timeout>();
 
   const setupTokenRefresh = useCallback(() => {
-    API.reauth().catch((error) => {
-      dispatch({
-        type: "ERROR",
-        payload: error,
-      });
-    });
+    // Clear any existing interval
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
 
-    const intervalId = setInterval(
+    intervalRef.current = setInterval(
       () => {
         API.reauth().catch((error) => {
           dispatch({
             type: "ERROR",
-            payload: error,
+            payload: {
+              error: new Error(`Failed to reauth: ${error}`),
+            },
           });
         });
       },
       60 * 60 * 1000
     );
 
-    // Return cleanup function
-    return () => clearInterval(intervalId);
+    return () => {
+      clearInterval(intervalRef.current);
+    };
   }, [dispatch]);
 
   return { setupTokenRefresh };
