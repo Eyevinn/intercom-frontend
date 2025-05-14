@@ -69,7 +69,6 @@ export const JoinProduction = ({
           preSelected={preSelected}
           buttonText="Join"
           defaultValues={defaultValues}
-          addAdditionalCallId={addAdditionalCallId}
           isProgramUser={isProgramUser}
           setIsProgramUser={setIsProgramUser}
           setJoinProductionOptions={setJoinProductionOptions}

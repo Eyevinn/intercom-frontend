@@ -44,7 +44,6 @@ export const FormSelect = styled.select`
   font-size: 1.6rem;
   padding: 0.5rem;
   ${sharedMargin};
-
   border: 1px solid #6d6d6d;
   border-radius: 0.5rem;
   background: #32383b;

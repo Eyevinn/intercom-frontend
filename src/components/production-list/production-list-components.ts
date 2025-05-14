@@ -42,11 +42,6 @@ export const ProductionName = styled.div`
   }
 `;
 
-export const Id = styled.span`
-  display: inline;
-  margin: 0 0.2rem;
-`;
-
 export const ParticipantCountWrapper = styled.div`
   display: flex;
   align-items: center;
