@@ -176,7 +176,7 @@ export const ManageProductionButtons: FC<ManageProductionButtonsProps> = (
           onClick={onEditNameSubmit}
           shouldSubmitOnEnter
         >
-          {isLoading ? <Spinner className="copy-button" /> : "Submit"}
+          {isLoading ? <Spinner className="copy-button" /> : "Save"}
         </SubmitButton>
       )}
       {addLineOpen && (
