@@ -37,6 +37,10 @@ export const FormInput = styled.input`
       -moz-appearance: textfield;
     }
   }
+
+  &.edit-name {
+    margin: 0;
+  }
 `;
 
 export const FormSelect = styled.select`

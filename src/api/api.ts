@@ -73,6 +73,17 @@ type TShareUrlResponse = {
   url: string;
 };
 
+type TUpdateProductionNameOptions = {
+  productionId: string;
+  name: string;
+};
+
+type TUpdateLineNameOptions = {
+  productionId: string;
+  lineId: string;
+  name: string;
+};
+
 export const API = {
   createProduction: async ({ name, lines }: TCreateProductionOptions) =>
     handleFetchRequest<TBasicProductionResponse>(
@@ -85,6 +96,39 @@ export const API = {
         body: JSON.stringify({
           name,
           lines,
+        }),
+      })
+    ),
+  updateProductionName: async ({
+    productionId,
+    name,
+  }: TUpdateProductionNameOptions) =>
+    handleFetchRequest<TBasicProductionResponse>(
+      fetch(`${API_URL}production/${productionId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
+        },
+        body: JSON.stringify({
+          name,
+        }),
+      })
+    ),
+  updateLineName: async ({
+    productionId,
+    lineId,
+    name,
+  }: TUpdateLineNameOptions) =>
+    handleFetchRequest<TBasicProductionResponse>(
+      fetch(`${API_URL}production/${productionId}/line/${lineId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
+        },
+        body: JSON.stringify({
+          name,
         }),
       })
     ),
