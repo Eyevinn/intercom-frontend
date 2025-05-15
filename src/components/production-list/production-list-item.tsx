@@ -222,13 +222,10 @@ export const ProductionsListItem = ({
   }, [savedProduction, setValue]);
 
   const onSubmit: SubmitHandler<FormValues> = (data) => {
-    console.log("production", savedProduction);
-    console.log("data", data);
     if (
       savedProduction?.name !== data.productionName &&
       data.productionName !== ""
     ) {
-      console.log("production name changed");
       setEditProductionId({
         productionId: savedProduction?.productionId || production.productionId,
         name: data.productionName,
@@ -239,7 +236,6 @@ export const ProductionsListItem = ({
         line.name !== data[`lineName-${index}`] &&
         data[`lineName-${index}`] !== ""
       ) {
-        console.log("line name changed");
         setEditLineId({
           productionId:
             savedProduction?.productionId || production.productionId,
