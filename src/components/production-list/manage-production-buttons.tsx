@@ -1,9 +1,8 @@
-import styled from "@emotion/styled";
 import { ErrorMessage } from "@hookform/error-message";
 import { FC, useEffect, useState } from "react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { TBasicProductionResponse } from "../../api/api";
-import { RemoveIcon } from "../../assets/icons/icon";
+import { EditIcon, RemoveIcon } from "../../assets/icons/icon";
 import { useGlobalState } from "../../global-state/context-provider";
 import { Checkbox } from "../checkbox/checkbox";
 import { ListItemWrapper } from "../generic-components";
@@ -20,17 +19,26 @@ import { ConfirmationModal } from "../verify-decision/confirmation-modal";
 import {
   AddLineHeader,
   AddLineSectionForm,
+  CheckboxWrapper,
   CreateLineButton,
   DeleteButton,
-  ManageButtons,
+  ManageBtnsWrapper,
+  NameEditButton,
   RemoveIconWrapper,
   SpinnerWrapper,
+  SubmitButton,
+  TextButtons,
 } from "./production-list-components";
 import { CopyAllLinksButton } from "../copy-button/copy-all-links-button";
 
 interface ManageProductionButtonsProps {
   production: TBasicProductionResponse;
   isDeleteProductionDisabled: boolean;
+  editNameOpen: boolean;
+  isUpdated: boolean;
+  isLoading: boolean;
+  setEditNameOpen: () => void;
+  onEditNameSubmit: () => void;
 }
 
 type Line = {
@@ -38,15 +46,18 @@ type Line = {
   programOutputLine: boolean;
 };
 
-const CheckboxWrapper = styled.div`
-  margin-bottom: 3rem;
-  margin-top: 0.5rem;
-`;
-
 export const ManageProductionButtons: FC<ManageProductionButtonsProps> = (
   props
 ) => {
-  const { production, isDeleteProductionDisabled } = props;
+  const {
+    production,
+    isDeleteProductionDisabled,
+    editNameOpen,
+    isUpdated,
+    isLoading,
+    setEditNameOpen,
+    onEditNameSubmit,
+  } = props;
 
   const [, dispatch] = useGlobalState();
   const [removeProductionId, setRemoveProductionId] = useState<string>("");
@@ -122,33 +133,52 @@ export const ManageProductionButtons: FC<ManageProductionButtonsProps> = (
           {productionDeleteError.message}
         </StyledWarningMessage>
       )}
-      <ManageButtons>
-        {!addLineOpen && (
-          <SecondaryButton
-            style={{ marginRight: "1rem" }}
-            type="button"
-            onClick={handleAddLineOpen}
-          >
-            Add Line
-          </SecondaryButton>
-        )}
-        <DeleteButton
+      <ManageBtnsWrapper>
+        <NameEditButton
           type="button"
-          disabled={isDeleteProductionDisabled}
-          onClick={() => setDisplayConfirmationModal(true)}
+          className={editNameOpen ? "edit-active" : ""}
+          onClick={setEditNameOpen}
         >
-          Delete Production
-          {deleteProductionLoading && (
-            <SpinnerWrapper>
-              <Spinner className="production-list" />
-            </SpinnerWrapper>
+          <EditIcon />
+        </NameEditButton>
+        <TextButtons>
+          {!addLineOpen && (
+            <SecondaryButton
+              style={{ marginRight: "1rem" }}
+              type="button"
+              onClick={handleAddLineOpen}
+            >
+              Add Line
+            </SecondaryButton>
           )}
-        </DeleteButton>
-      </ManageButtons>
+          <DeleteButton
+            type="button"
+            disabled={isDeleteProductionDisabled}
+            onClick={() => setDisplayConfirmationModal(true)}
+          >
+            Delete Production
+            {deleteProductionLoading && (
+              <SpinnerWrapper>
+                <Spinner className="production-list" />
+              </SpinnerWrapper>
+            )}
+          </DeleteButton>
+        </TextButtons>
+      </ManageBtnsWrapper>
       <CopyAllLinksButton
         production={production}
         className="manage-production-page"
       />
+      {editNameOpen && (
+        <SubmitButton
+          type="button"
+          disabled={!isUpdated}
+          onClick={onEditNameSubmit}
+          shouldSubmitOnEnter
+        >
+          {isLoading ? <Spinner className="copy-button" /> : "Submit"}
+        </SubmitButton>
+      )}
       {addLineOpen && (
         <AddLineSectionForm>
           <FormLabel>

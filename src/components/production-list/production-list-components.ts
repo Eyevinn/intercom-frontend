@@ -1,6 +1,10 @@
 import styled from "@emotion/styled";
 import { isMobile } from "../../bowser";
-import { PrimaryButton, SecondaryButton } from "../landing-page/form-elements";
+import {
+  ActionButton,
+  PrimaryButton,
+  SecondaryButton,
+} from "../landing-page/form-elements";
 import { mediaQueries } from "../generic-components";
 
 export const ProductionItemWrapper = styled.div`
@@ -10,7 +14,7 @@ export const ProductionItemWrapper = styled.div`
   flex: 0 0 calc(25% - 2rem);
   ${isMobile ? `flex-grow: 1;` : `flex-grow: 0;`}
   justify-content: start;
-  min-width: 30rem;
+  min-width: 34rem;
   border: 1px solid #424242;
   border-radius: 0.5rem;
   margin: 0 2rem 2rem 0;
@@ -111,6 +115,7 @@ export const InnerDiv = styled.div`
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  position: relative;
 `;
 
 export const Lineblock = styled.div`
@@ -123,6 +128,7 @@ export const Lineblock = styled.div`
   justify-content: space-between;
   align-items: center;
   gap: 0.5rem;
+  min-height: 6.5rem;
 `;
 
 export const LineBlockTexts = styled.div``;
@@ -191,10 +197,63 @@ export const DeleteButton = styled(SecondaryButton)`
   }
 `;
 
-export const ManageButtons = styled.div`
+export const CheckboxWrapper = styled.div`
+  margin-bottom: 3rem;
+  margin-top: 0.5rem;
+`;
+
+export const ManageBtnsWrapper = styled.div`
+  display: flex;
+  justify-content: space-between;
+`;
+
+export const NameEditButton = styled.button`
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+  display: flex;
+  justify-content: center;
+  align-self: center;
+  margin: 1rem 0;
+  height: 3rem;
+  width: 3rem;
+  flex-shrink: 0;
+  svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  &.edit-active svg {
+    fill: #73d16d;
+  }
+
+  &:hover svg {
+    fill: ${({ className }) =>
+      className?.includes("edit-active") ? "#73d16d" : "#ffffff"};
+  }
+`;
+
+export const TextButtons = styled.div`
   display: flex;
   justify-content: flex-end;
-  margin: 1rem 0 1rem 0;
+  margin: 1rem 0;
+  white-space: nowrap;
+`;
+
+export const SubmitButton = styled(ActionButton)<{
+  shouldSubmitOnEnter?: boolean;
+}>`
+  outline: ${({ shouldSubmitOnEnter }) =>
+    shouldSubmitOnEnter ? "2px solid #157d3a" : "none"};
+  outline-offset: ${({ shouldSubmitOnEnter }) =>
+    shouldSubmitOnEnter ? "2px" : "0"};
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  min-width: 8.5rem;
+  min-height: 4.4rem;
 `;
 
 export const AddLineSectionForm = styled.form`
