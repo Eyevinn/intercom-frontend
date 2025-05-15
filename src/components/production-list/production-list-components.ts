@@ -252,7 +252,7 @@ export const SubmitButton = styled(ActionButton)<{
   position: absolute;
   left: 0;
   bottom: 0;
-  min-width: 8.5rem;
+  min-width: 6.8rem;
   min-height: 4.4rem;
 `;
 
