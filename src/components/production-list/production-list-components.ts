@@ -1,10 +1,6 @@
 import styled from "@emotion/styled";
 import { isMobile } from "../../bowser";
-import {
-  ActionButton,
-  PrimaryButton,
-  SecondaryButton,
-} from "../landing-page/form-elements";
+import { PrimaryButton, SecondaryButton } from "../landing-page/form-elements";
 import { mediaQueries } from "../generic-components";
 
 export const ProductionItemWrapper = styled.div`
@@ -37,8 +33,6 @@ export const ProductionName = styled.div`
   font-size: 1.4rem;
   font-weight: bold;
   margin-right: 1rem;
-  max-width: 30rem;
-  min-width: 20rem;
 
   .production-name-container {
     display: inline-block;
@@ -50,6 +44,19 @@ export const ParticipantCountWrapper = styled.div`
   display: flex;
   align-items: center;
   gap: 0.1rem;
+
+  svg {
+    height: 1.5rem;
+    width: 1.5rem;
+    margin-right: 0.5rem;
+    flex-shrink: 0;
+  }
+
+  &.active {
+    svg {
+      fill: #73d16d;
+    }
+  }
 `;
 
 export const ParticipantCount = styled.div`
@@ -77,18 +84,6 @@ export const HeaderTexts = styled.div`
     open: boolean;
     isProgramOutputLine: boolean;
   }) => (!open && isProgramOutputLine ? "1.5rem" : "0")};
-
-  svg {
-    height: 1.5rem;
-    width: 1.5rem;
-    margin-right: 0.5rem;
-    flex-shrink: 0;
-  }
-  &.active {
-    svg {
-      fill: #73d16d;
-    }
-  }
 `;
 
 export const HeaderIcon = styled.div`
@@ -142,6 +137,10 @@ export const LineBlockTitleWrapper = styled.div`
   display: flex;
   align-items: center;
   gap: 0.5rem;
+
+  &.management {
+    margin-right: 1rem;
+  }
 `;
 
 export const ParticipantExpandBtn = styled.button`
@@ -202,9 +201,10 @@ export const CheckboxWrapper = styled.div`
   margin-top: 0.5rem;
 `;
 
-export const ManageBtnsWrapper = styled.div`
+export const ManageButtons = styled.div`
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
+  margin: 1rem 0 1rem 0;
 `;
 
 export const NameEditButton = styled.button`
@@ -217,43 +217,23 @@ export const NameEditButton = styled.button`
   justify-content: center;
   align-self: center;
   margin: 1rem 0;
-  height: 3rem;
-  width: 3rem;
   flex-shrink: 0;
+  height: 2rem;
+  width: 2rem;
+
+  &.line {
+    height: 2.5rem;
+    width: 2.5rem;
+  }
+
   svg {
     width: 100%;
     height: 100%;
   }
 
-  &.edit-active svg {
-    fill: #73d16d;
-  }
-
   &:hover svg {
-    fill: ${({ className }) =>
-      className?.includes("edit-active") ? "#73d16d" : "#ffffff"};
+    transform: scale(1.2);
   }
-`;
-
-export const TextButtons = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  margin: 1rem 0;
-  white-space: nowrap;
-`;
-
-export const SubmitButton = styled(ActionButton)<{
-  shouldSubmitOnEnter?: boolean;
-}>`
-  outline: ${({ shouldSubmitOnEnter }) =>
-    shouldSubmitOnEnter ? "2px solid #157d3a" : "none"};
-  outline-offset: ${({ shouldSubmitOnEnter }) =>
-    shouldSubmitOnEnter ? "2px" : "0"};
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  min-width: 6.8rem;
-  min-height: 4.4rem;
 `;
 
 export const AddLineSectionForm = styled.form`
@@ -303,4 +283,23 @@ export const IconWrapper = styled.div`
     height: 100%;
     width: 100%;
   }
+`;
+
+export const EditNameWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: start;
+  max-width: 30rem;
+  pointer-events: none;
+
+  > * {
+    pointer-events: auto;
+  }
+`;
+
+export const ProductionNameWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  max-width: 30rem;
 `;

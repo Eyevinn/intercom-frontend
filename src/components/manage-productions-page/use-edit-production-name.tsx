@@ -1,61 +1,17 @@
-import { useEffect, useState } from "react";
-import { useGlobalState } from "../../global-state/context-provider";
-import { API } from "../../api/api";
+import { API, TBasicProductionResponse } from "../../api/api";
+import { useRequest } from "../../hooks/use-request";
+
+type EditProductionNameParams = {
+  productionId: string;
+  name: string;
+};
 
 export const useEditProductionName = (
-  params: {
-    productionId: string;
-    name: string;
-  } | null
+  params: EditProductionNameParams | null
 ) => {
-  const [successfullEdit, setSuccessfullEdit] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
-
-  const [, dispatch] = useGlobalState();
-
-  useEffect(() => {
-    let aborted = false;
-    setError(null);
-    setSuccessfullEdit(false);
-    setLoading(true);
-    if (params?.productionId && params?.name) {
-      API.updateProductionName({
-        productionId: params.productionId,
-        name: params.name,
-      })
-        .then(() => {
-          if (aborted) return;
-
-          setSuccessfullEdit(true);
-          setLoading(false);
-          setError(null);
-        })
-        .catch((err) => {
-          dispatch({
-            type: "ERROR",
-            payload: {
-              error:
-                err instanceof Error
-                  ? err
-                  : new Error("Failed to delete production"),
-            },
-          });
-          setError(err);
-          setLoading(false);
-        });
-    } else {
-      setLoading(false);
-    }
-
-    return () => {
-      aborted = true;
-    };
-  }, [dispatch, params]);
-
-  return {
-    loading,
-    error,
-    successfullEdit,
-  };
+  return useRequest<EditProductionNameParams, TBasicProductionResponse>({
+    params,
+    apiCall: API.updateProductionName,
+    errorMessage: (p) => `Failed to edit production name: ${p.name}`,
+  });
 };

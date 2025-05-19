@@ -2,7 +2,7 @@ import { ErrorMessage } from "@hookform/error-message";
 import { FC, useEffect, useState } from "react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { TBasicProductionResponse } from "../../api/api";
-import { EditIcon, RemoveIcon } from "../../assets/icons/icon";
+import { RemoveIcon } from "../../assets/icons/icon";
 import { useGlobalState } from "../../global-state/context-provider";
 import { Checkbox } from "../checkbox/checkbox";
 import { ListItemWrapper } from "../generic-components";
@@ -22,23 +22,14 @@ import {
   CheckboxWrapper,
   CreateLineButton,
   DeleteButton,
-  ManageBtnsWrapper,
-  NameEditButton,
+  ManageButtons,
   RemoveIconWrapper,
   SpinnerWrapper,
-  SubmitButton,
-  TextButtons,
 } from "./production-list-components";
-import { CopyAllLinksButton } from "../copy-button/copy-all-links-button";
 
 interface ManageProductionButtonsProps {
   production: TBasicProductionResponse;
   isDeleteProductionDisabled: boolean;
-  editNameOpen: boolean;
-  isUpdated: boolean;
-  isLoading: boolean;
-  setEditNameOpen: () => void;
-  onEditNameSubmit: () => void;
 }
 
 type Line = {
@@ -49,15 +40,7 @@ type Line = {
 export const ManageProductionButtons: FC<ManageProductionButtonsProps> = (
   props
 ) => {
-  const {
-    production,
-    isDeleteProductionDisabled,
-    editNameOpen,
-    isUpdated,
-    isLoading,
-    setEditNameOpen,
-    onEditNameSubmit,
-  } = props;
+  const { production, isDeleteProductionDisabled } = props;
 
   const [, dispatch] = useGlobalState();
   const [removeProductionId, setRemoveProductionId] = useState<string>("");
@@ -83,16 +66,12 @@ export const ManageProductionButtons: FC<ManageProductionButtonsProps> = (
     },
   });
 
-  const {
-    loading: createLineLoading,
-    successfullCreate: successfullCreateLine,
-    error: lineCreateError,
-  } = useAddProductionLine(production.productionId, newLine);
+  const { loading: createLineLoading, success: successfullCreateLine } =
+    useAddProductionLine(production.productionId, newLine);
 
   const {
     loading: deleteProductionLoading,
-    successfullDelete: successfullDeleteProduction,
-    error: productionDeleteError,
+    success: successfullDeleteProduction,
   } = useDeleteProduction(removeProductionId);
 
   useEffect(() => {
@@ -128,57 +107,29 @@ export const ManageProductionButtons: FC<ManageProductionButtonsProps> = (
 
   return (
     <>
-      {productionDeleteError && (
-        <StyledWarningMessage className="error-message production-list">
-          {productionDeleteError.message}
-        </StyledWarningMessage>
-      )}
-      <ManageBtnsWrapper>
-        <NameEditButton
-          type="button"
-          className={editNameOpen ? "edit-active" : ""}
-          onClick={setEditNameOpen}
-        >
-          <EditIcon />
-        </NameEditButton>
-        <TextButtons>
-          {!addLineOpen && (
-            <SecondaryButton
-              style={{ marginRight: "1rem" }}
-              type="button"
-              onClick={handleAddLineOpen}
-            >
-              Add Line
-            </SecondaryButton>
-          )}
-          <DeleteButton
+      <ManageButtons>
+        {!addLineOpen && (
+          <SecondaryButton
+            style={{ marginRight: "1rem" }}
             type="button"
-            disabled={isDeleteProductionDisabled}
-            onClick={() => setDisplayConfirmationModal(true)}
+            onClick={handleAddLineOpen}
           >
-            Delete Production
-            {deleteProductionLoading && (
-              <SpinnerWrapper>
-                <Spinner className="production-list" />
-              </SpinnerWrapper>
-            )}
-          </DeleteButton>
-        </TextButtons>
-      </ManageBtnsWrapper>
-      <CopyAllLinksButton
-        production={production}
-        className="manage-production-page"
-      />
-      {editNameOpen && (
-        <SubmitButton
+            Add Line
+          </SecondaryButton>
+        )}
+        <DeleteButton
           type="button"
-          disabled={!isUpdated}
-          onClick={onEditNameSubmit}
-          shouldSubmitOnEnter
+          disabled={isDeleteProductionDisabled}
+          onClick={() => setDisplayConfirmationModal(true)}
         >
-          {isLoading ? <Spinner className="copy-button" /> : "Save"}
-        </SubmitButton>
-      )}
+          Delete Production
+          {deleteProductionLoading && (
+            <SpinnerWrapper>
+              <Spinner className="production-list" />
+            </SpinnerWrapper>
+          )}
+        </DeleteButton>
+      </ManageButtons>
       {addLineOpen && (
         <AddLineSectionForm>
           <FormLabel>
@@ -214,11 +165,6 @@ export const ManageProductionButtons: FC<ManageProductionButtonsProps> = (
             </CheckboxWrapper>
           </FormLabel>
           <ErrorMessage errors={errors} name="name" as={StyledWarningMessage} />
-          {lineCreateError && (
-            <StyledWarningMessage className="error-message">
-              {lineCreateError.message}
-            </StyledWarningMessage>
-          )}
           <CreateLineButton onClick={handleSubmit(onSubmit)}>
             Create
             {createLineLoading && (

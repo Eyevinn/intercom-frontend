@@ -61,6 +61,10 @@ export const FormLabel = styled.label`
     font-size: 1.6rem;
     display: inline-block;
   }
+
+  &.save-edit {
+    margin-right: 1rem;
+  }
 `;
 
 export const DecorativeLabel = styled.span`
