@@ -148,6 +148,7 @@ export const CallWrapper = styled.div<{ isSomeoneSpeaking: boolean }>`
   flex: 0 0 calc(25% - 2rem);
   ${isMobile ? `flex-grow: 1;` : `flex-grow: 0;`}
   min-width: 35rem;
+  max-width: 49rem;
   background-color: transparent;
   border-radius: 0.5rem;
   animation: ${({ isSomeoneSpeaking }) =>
