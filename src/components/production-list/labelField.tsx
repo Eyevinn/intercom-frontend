@@ -21,10 +21,6 @@ export const LabelField = ({
       managementMode={managementMode}
     />
   ) : (
-    <LineBlock
-      managementMode={managementMode}
-      line={line}
-      production={production}
-    />
+    <LineBlock managementMode={managementMode} line={line} />
   );
 };
