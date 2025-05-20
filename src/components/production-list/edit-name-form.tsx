@@ -19,14 +19,14 @@ type FormValues = {
 
 type EditNameFormProps = {
   production: TBasicProductionResponse;
-  label: `lineName-${string}` | "productionName";
+  formSubmitType: `lineName-${string}` | "productionName";
   managementMode: boolean;
   setEditNameOpen: (editNameOpen: boolean) => void;
 };
 
 export const EditNameForm = ({
   production,
-  label,
+  formSubmitType,
   managementMode,
   setEditNameOpen,
 }: EditNameFormProps) => {
@@ -58,7 +58,7 @@ export const EditNameForm = ({
     setSavedProduction(null);
   });
 
-  const lineIndex = parseInt(label.toString().split("-")[1], 10);
+  const lineIndex = parseInt(formSubmitType.toString().split("-")[1], 10);
   const line = production.lines[lineIndex];
 
   const isCurrentLine = editLineId?.lineId === line?.id;
@@ -128,8 +128,11 @@ export const EditNameForm = ({
     }
 
     // Only update the line that matches our current label
-    if (label !== "productionName" && savedProduction) {
-      const currentLineIndex = parseInt(label.toString().split("-")[1], 10);
+    if (formSubmitType !== "productionName" && savedProduction) {
+      const currentLineIndex = parseInt(
+        formSubmitType.toString().split("-")[1],
+        10
+      );
       const currentLine = savedProduction.lines[currentLineIndex];
       const newName = data[`lineName-${currentLineIndex}`];
 
@@ -149,11 +152,23 @@ export const EditNameForm = ({
     shouldSubmitOnEnter: isUpdated,
   });
 
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent click from bubbling to HeaderWrapper
+    if (isEditingName) {
+      handleSubmit(onSubmit)();
+    } else {
+      setSavedProduction(production);
+      setIsEditingName(true);
+    }
+  };
+
   const saveButton =
-    (label === "productionName" && editProductionLoading) ||
-    (label !== "productionName" && editLineLoading && isCurrentLine) ? (
+    (formSubmitType === "productionName" && editProductionLoading) ||
+    (formSubmitType !== "productionName" &&
+      editLineLoading &&
+      isCurrentLine) ? (
       <Spinner
-        className={`name-edit-button ${label === "productionName" ? "production-name" : ""}`}
+        className={`name-edit-button ${formSubmitType === "productionName" ? "production-name" : ""}`}
       />
     ) : (
       <SaveIcon />
@@ -164,7 +179,7 @@ export const EditNameForm = ({
       <EditNameWrapper>
         {!isEditingName && (
           <LabelField
-            isLabelProductionName={label === "productionName"}
+            isLabelProductionName={formSubmitType === "productionName"}
             production={production}
             line={line}
             managementMode={managementMode}
@@ -174,7 +189,7 @@ export const EditNameForm = ({
           <FormLabel className="save-edit">
             <FormInput
               // eslint-disable-next-line
-              {...register(label)}
+              {...register(formSubmitType)}
               placeholder="New Name"
               className="name-edit-button edit-name"
               autoComplete="off"
@@ -185,16 +200,8 @@ export const EditNameForm = ({
       {managementMode && (
         <NameEditButton
           type="button"
-          className={`name-edit-button ${label === "productionName" ? "" : "line"}`}
-          onClick={(e) => {
-            e.stopPropagation(); // Prevent click from bubbling to HeaderWrapper
-            if (isEditingName) {
-              handleSubmit(onSubmit)();
-            } else {
-              setSavedProduction(production);
-              setIsEditingName(true);
-            }
-          }}
+          className="name-edit-button"
+          onClick={handleClick}
         >
           {isEditingName ? saveButton : <EditIcon />}
         </NameEditButton>

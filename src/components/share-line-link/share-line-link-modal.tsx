@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { FormInput } from "../landing-page/form-elements";
+import { DecorativeLabel, FormInput } from "../landing-page/form-elements";
 import { Modal } from "../modal/modal";
 import { CopyButton } from "../copy-button/copy-button";
 import { RefreshButton } from "../refresh-button/refresh-button";
@@ -11,6 +11,7 @@ import {
   ModalTextItalic,
   Wrapper,
   InputWrapper,
+  LinkLabel,
 } from "./share-line-components";
 
 type TShareLineLinkModalProps = {
@@ -70,16 +71,25 @@ export const ShareLineLinkModal = ({
           Refresh the URL to generate a new one.
         </ModalTextItalic>
         <Wrapper>
-          <InputWrapper>
-            {urls.map((url) => (
-              <FormInput
-                key={url}
-                value={isLoading ? "Loading..." : url}
-                readOnly
-              />
-            ))}
-          </InputWrapper>
-          <CopyButton urls={urls} className="share-line-link-modal" />
+          {urls.map((url) => {
+            const [name, urlPart] = url.split(": ").map((part) => part.trim());
+
+            const urlToDisplay = isCopyProduction ? urlPart : url;
+            return (
+              <InputWrapper key={url}>
+                <LinkLabel>
+                  {isCopyProduction && (
+                    <DecorativeLabel>{name}</DecorativeLabel>
+                  )}
+                  <FormInput value={isLoading ? "Loading..." : urlToDisplay} />
+                </LinkLabel>
+                <CopyButton
+                  urls={[urlToDisplay]}
+                  className="share-line-link-modal"
+                />
+              </InputWrapper>
+            );
+          })}
         </Wrapper>
         <RefreshButton
           label={`Refresh URL${urls.length > 1 ? "s" : ""}`}

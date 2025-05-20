@@ -20,17 +20,13 @@ import {
 
 import { isMobile } from "../../bowser";
 import { TLine } from "../production-line/types";
-import { TBasicProductionResponse } from "../../api/api";
-import { CopyLink } from "./copy-link";
 
 export const LineBlock = ({
   managementMode,
   line,
-  production,
 }: {
   managementMode: boolean;
   line: TLine;
-  production: TBasicProductionResponse;
 }) => {
   const [showFullUserList, setShowFullUserList] = useState<boolean>(false);
 
@@ -57,7 +53,6 @@ export const LineBlock = ({
             {showFullUserList ? <ChevronUpIcon /> : <ChevronDownIcon />}
           </ParticipantExpandBtn>
         )}
-        {!managementMode && <CopyLink production={production} line={line} />}
       </LineBlockTitleWrapper>
       <LineBlockParticipants>
         {(showFullUserList

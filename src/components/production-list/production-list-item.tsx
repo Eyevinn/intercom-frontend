@@ -138,7 +138,7 @@ export const ProductionsListItem = ({
         >
           <EditNameForm
             production={production}
-            label="productionName"
+            formSubmitType="productionName"
             managementMode={managementMode}
             setEditNameOpen={setEditNameOpen}
           />
@@ -163,7 +163,7 @@ export const ProductionsListItem = ({
             >
               <EditNameForm
                 production={production}
-                label={`lineName-${index.toString()}`}
+                formSubmitType={`lineName-${index.toString()}`}
                 managementMode={managementMode}
                 setEditNameOpen={setEditNameOpen}
               />

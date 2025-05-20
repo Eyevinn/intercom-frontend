@@ -32,7 +32,7 @@ export const ProductionItemWrapper = styled.div`
 export const ProductionName = styled.div`
   font-size: 1.4rem;
   font-weight: bold;
-  margin-right: 1rem;
+  margin-right: 0.5rem;
 
   .production-name-container {
     display: inline-block;
@@ -221,11 +221,6 @@ export const NameEditButton = styled.button`
   height: 2rem;
   width: 2rem;
 
-  &.line {
-    height: 2.5rem;
-    width: 2.5rem;
-  }
-
   svg {
     width: 100%;
     height: 100%;
@@ -300,6 +295,5 @@ export const EditNameWrapper = styled.div`
 export const ProductionNameWrapper = styled.div`
   display: flex;
   align-items: center;
-  gap: 0.5rem;
   max-width: 30rem;
 `;

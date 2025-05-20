@@ -32,22 +32,35 @@ export const CopyLink = ({
     setProductionUrls(urls);
   }, [production.productionId, production.lines, shareUrl]);
 
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (isCopyProduction) {
+      handleGenerateProductionUrls();
+    } else {
+      shareUrl({
+        productionId: production.productionId,
+        lineId: line.id,
+      });
+    }
+    setIsModalOpen(true);
+  };
+
+  const handleRefresh = () => {
+    if (isCopyProduction) {
+      handleGenerateProductionUrls();
+    } else {
+      shareUrl({
+        productionId: production.productionId,
+        lineId: line.id,
+      });
+    }
+  };
+
   return (
     <>
       <CopyIconWrapper
         title="Get share link"
-        onClick={(e) => {
-          e.stopPropagation();
-          if (isCopyProduction) {
-            handleGenerateProductionUrls();
-          } else {
-            shareUrl({
-              productionId: production.productionId,
-              lineId: line.id,
-            });
-          }
-          setIsModalOpen(true);
-        }}
+        onClick={handleClick}
         className="production-list-item"
       >
         <ShareIcon />
@@ -56,16 +69,7 @@ export const CopyLink = ({
         <ShareLineLinkModal
           isCopyProduction={isCopyProduction}
           urls={isCopyProduction ? productionUrls : [url]}
-          onRefresh={() => {
-            if (isCopyProduction) {
-              handleGenerateProductionUrls();
-            } else {
-              shareUrl({
-                productionId: production.productionId,
-                lineId: line.id,
-              });
-            }
-          }}
+          onRefresh={handleRefresh}
           onClose={() => setIsModalOpen(false)}
         />
       )}

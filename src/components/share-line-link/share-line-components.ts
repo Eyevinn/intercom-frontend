@@ -1,10 +1,11 @@
 import styled from "@emotion/styled";
+import { FormLabel } from "../landing-page/form-elements";
 
 export const Wrapper = styled.div`
   margin-top: 2rem;
   display: flex;
-  flex-direction: row;
-  align-items: flex-start;
+  flex-direction: column;
+  width: 100%;
 `;
 
 export const ModalHeader = styled.h1`
@@ -40,6 +41,11 @@ export const ModalNoteWrapper = styled.div`
 
 export const InputWrapper = styled.div`
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  align-items: center;
+  width: 100%;
+`;
+
+export const LinkLabel = styled(FormLabel)`
   width: 100%;
 `;
