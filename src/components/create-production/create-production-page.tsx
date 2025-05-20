@@ -55,12 +55,12 @@ export const CreateProductionPage = () => {
     },
   });
 
-  const { createdProductionId, loading } = useCreateProduction({
+  const { loading, success, data } = useCreateProduction({
     createNewProduction,
   });
 
   const { error: productionFetchError, production } = useFetchProduction(
-    createdProductionId ? parseInt(createdProductionId, 10) : null
+    data?.productionId ? parseInt(data.productionId, 10) : null
   );
 
   const onSubmit: SubmitHandler<FormValues> = (value) => {
@@ -69,7 +69,7 @@ export const CreateProductionPage = () => {
 
   // Reset form values when created production id changes
   useEffect(() => {
-    if (createdProductionId) {
+    if (data?.productionId) {
       reset({
         productionName: "",
         defaultLine: "",
@@ -79,7 +79,7 @@ export const CreateProductionPage = () => {
         type: "PRODUCTION_UPDATED",
       });
     }
-  }, [createdProductionId, dispatch, reset]);
+  }, [data?.productionId, dispatch, reset]);
 
   return (
     <ResponsiveFormContainer className={isMobile ? "" : "desktop"}>
@@ -180,10 +180,10 @@ export const CreateProductionPage = () => {
         handleAddLine={() => append({ name: "" })}
         handleSubmit={handleSubmit(onSubmit)}
       />
-      {createdProductionId !== null && (
+      {success && data?.name && (
         <>
           <ProductionConfirmation>
-            The production ID is: {createdProductionId.toString()}
+            The production <strong>{data.name}</strong> has been created.
           </ProductionConfirmation>
           {!productionFetchError && production && (
             <CopyAllLinksButton

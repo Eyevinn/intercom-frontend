@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useCallback } from "react";
 import {
   FieldValues,
   SubmitHandler,
@@ -29,31 +29,51 @@ export type UseSubmitOnEnterProps<T extends FieldValues> =
 export function useSubmitOnEnter<T extends FieldValues>(
   props: UseSubmitOnEnterProps<T>
 ) {
-  useEffect(() => {
-    if (!props.shouldSubmitOnEnter) return undefined;
+  const {
+    shouldSubmitOnEnter,
+    needsConfirmation,
+    isBrowserFirefox,
+    setConfirmModalOpen,
+  } = props;
 
-    const handleKeyDown = (e: KeyboardEvent) => {
+  const handleSubmit = "handleSubmit" in props ? props.handleSubmit : undefined;
+  const submitHandler =
+    "handleSubmit" in props ? props.submitHandler : props.submitHandler;
+
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
       if (e.key !== "Enter") return;
 
+      // Stop event propagation to prevent other handlers from firing
+      e.stopPropagation();
       e.preventDefault();
-
-      const { needsConfirmation, isBrowserFirefox, setConfirmModalOpen } =
-        props;
 
       const shouldSubmitNow = !needsConfirmation || isBrowserFirefox;
 
-      if ("handleSubmit" in props && shouldSubmitNow) {
-        props.handleSubmit(props.submitHandler)();
-      } else if ("handleSubmit" in props) {
+      if (handleSubmit && shouldSubmitNow) {
+        handleSubmit(submitHandler)();
+      } else if (handleSubmit) {
         setConfirmModalOpen?.(true);
       } else if (shouldSubmitNow) {
-        props.submitHandler();
+        (submitHandler as () => void)();
       } else {
         setConfirmModalOpen?.(true);
       }
-    };
+    },
+    [
+      handleSubmit,
+      submitHandler,
+      needsConfirmation,
+      isBrowserFirefox,
+      setConfirmModalOpen,
+    ]
+  );
 
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [props]);
+  useEffect(() => {
+    if (!shouldSubmitOnEnter) return undefined;
+
+    // Use capture phase to handle the event before it bubbles up
+    window.addEventListener("keydown", handleKeyDown, true);
+    return () => window.removeEventListener("keydown", handleKeyDown, true);
+  }, [shouldSubmitOnEnter, handleKeyDown]);
 }

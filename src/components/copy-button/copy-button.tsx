@@ -3,10 +3,10 @@ import { useCopyLinks } from "./use-copy-links";
 import { CopyIconWrapper } from "./copy-components";
 
 export const CopyButton = ({
-  url,
+  urls,
   className,
 }: {
-  url: string;
+  urls: string[];
   className: string;
 }) => {
   const { isCopied, handleCopyUrlToClipboard } = useCopyLinks();
@@ -14,7 +14,7 @@ export const CopyButton = ({
   const handleCopy = () => {
     if (isCopied) return;
 
-    handleCopyUrlToClipboard(url);
+    handleCopyUrlToClipboard(urls);
   };
 
   return (

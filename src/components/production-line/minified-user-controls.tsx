@@ -11,7 +11,7 @@ import {
   MinifiedControlsButton,
   PTTWrapper,
 } from "./production-line-components";
-import { ShareLineButton } from "./share-line-button";
+import { ShareLineButton } from "../share-line-link/share-line-button";
 import { TJoinProductionOptions, TLine } from "./types";
 import { TUseAudioInputValues } from "./use-audio-input";
 

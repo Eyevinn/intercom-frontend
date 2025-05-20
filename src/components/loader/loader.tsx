@@ -52,6 +52,16 @@ const Loading = styled.div`
     width: 2rem;
   }
 
+  &.name-edit-button {
+    height: 100%;
+    width: 100%;
+  }
+
+  &.production-name {
+    border: 0.3rem solid rgba(101, 101, 101, 0.4);
+    border-top: 0.3rem solid #595959;
+  }
+
   @keyframes spin {
     0% {
       transform: rotate(0deg);

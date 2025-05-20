@@ -1,56 +1,29 @@
-import styled from "@emotion/styled";
 import { useEffect, useRef, useState } from "react";
-import { FormInput } from "../landing-page/form-elements";
+import { DecorativeLabel, FormInput } from "../landing-page/form-elements";
 import { Modal } from "../modal/modal";
 import { CopyButton } from "../copy-button/copy-button";
 import { RefreshButton } from "../refresh-button/refresh-button";
+import {
+  ModalHeader,
+  ModalText,
+  ModalNoteWrapper,
+  ModalTextBold,
+  ModalTextItalic,
+  Wrapper,
+  InputWrapper,
+  LinkLabel,
+} from "./share-line-components";
 
 type TShareLineLinkModalProps = {
-  url: string;
+  urls: string[];
+  isCopyProduction?: boolean;
   onRefresh: () => void;
   onClose: () => void;
 };
 
-const Wrapper = styled.div`
-  margin-top: 2rem;
-  display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-`;
-
-const ModalHeader = styled.h1`
-  font-size: 2.2rem;
-  margin-bottom: 2rem;
-  font-weight: 700;
-`;
-
-const ModalText = styled.p`
-  font-size: 1.6rem;
-  display: flex;
-  flex-direction: row;
-`;
-
-const ModalTextItalic = styled.p`
-  font-size: 1.4rem;
-  font-style: italic;
-`;
-
-const ModalTextBold = styled.p`
-  font-size: 1.4rem;
-  font-weight: 700;
-  margin-right: 0.5rem;
-  font-style: italic;
-`;
-
-const ModalNoteWrapper = styled.div`
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  margin-top: 2rem;
-`;
-
 export const ShareLineLinkModal = ({
-  url,
+  urls,
+  isCopyProduction = false,
   onRefresh,
   onClose,
 }: TShareLineLinkModalProps) => {
@@ -82,9 +55,13 @@ export const ShareLineLinkModal = ({
   return (
     <Modal onClose={onClose}>
       <div ref={modalRef}>
-        <ModalHeader>Share Line URL</ModalHeader>
+        <ModalHeader>
+          Share {isCopyProduction ? "Production URLs" : "Line URL"}
+        </ModalHeader>
         <ModalText>
-          Share this link with someone you wish to join your line.
+          Share {isCopyProduction ? "these production links" : "this line link"}{" "}
+          with someone you wish to join your{" "}
+          {isCopyProduction ? "production" : "line"}.
         </ModalText>
         <ModalNoteWrapper>
           <ModalTextBold>Note:</ModalTextBold>
@@ -94,11 +71,28 @@ export const ShareLineLinkModal = ({
           Refresh the URL to generate a new one.
         </ModalTextItalic>
         <Wrapper>
-          <FormInput value={isLoading ? "Loading..." : url} readOnly />
-          <CopyButton url={url} className="share-line-link-modal" />
+          {urls.map((url) => {
+            const [name, urlPart] = url.split(": ").map((part) => part.trim());
+
+            const urlToDisplay = isCopyProduction ? urlPart : url;
+            return (
+              <InputWrapper key={url}>
+                <LinkLabel>
+                  {isCopyProduction && (
+                    <DecorativeLabel>{name}</DecorativeLabel>
+                  )}
+                  <FormInput value={isLoading ? "Loading..." : urlToDisplay} />
+                </LinkLabel>
+                <CopyButton
+                  urls={[urlToDisplay]}
+                  className="share-line-link-modal"
+                />
+              </InputWrapper>
+            );
+          })}
         </Wrapper>
         <RefreshButton
-          label="Refresh URL"
+          label={`Refresh URL${urls.length > 1 ? "s" : ""}`}
           isLoading={isLoading}
           onRefresh={handleRefresh}
         />

@@ -21,6 +21,7 @@ import UserSettings from "./user_settings.svg?react";
 import Users from "./users.svg?react";
 import VolumeOff from "./volume_off.svg?react";
 import VolumeOn from "./volume_on.svg?react";
+import Save from "./save.svg?react";
 
 export const MicMuted = () => <MicMute />;
 
@@ -67,3 +68,5 @@ export const CopyIcon = () => <Copy />;
 export const ShareIcon = () => <Share />;
 
 export const CheckIcon = () => <Check />;
+
+export const SaveIcon = () => <Save />;

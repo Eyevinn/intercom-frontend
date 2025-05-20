@@ -28,11 +28,10 @@ import {
   ParticipantCountWrapper,
   ProductionItemWrapper,
   ProductionLines,
-  ProductionName,
   SpinnerWrapper,
 } from "./production-list-components";
-import { LineBlock } from "./line-block";
 import { useInitiateProductionCall } from "../../hooks/use-initiate-production-call";
+import { EditNameForm } from "./edit-name-form";
 
 type ProductionsListItemProps = {
   production: TBasicProductionResponse;
@@ -48,6 +47,8 @@ export const ProductionsListItem = ({
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [modalLineId, setModalLineId] = useState<string | null>(null);
   const [isProgramUser, setIsProgramUser] = useState<boolean>(false);
+  const [editNameOpen, setEditNameOpen] = useState<boolean>(false);
+
   const navigate = useNavigate();
 
   const [selectedLine, setSelectedLine] = useState<TLine | null>();
@@ -69,9 +70,14 @@ export const ProductionsListItem = ({
         type: "PRODUCTION_UPDATED",
       });
     }
-    setLineRemoveId("");
-    setSelectedLine(null);
   }, [successfullDeleteLine, dispatch]);
+
+  useEffect(() => {
+    if (successfullDeleteLine) {
+      setLineRemoveId("");
+      setSelectedLine(null);
+    }
+  }, [successfullDeleteLine]);
 
   const totalParticipants = useMemo(() => {
     return (
@@ -114,18 +120,31 @@ export const ProductionsListItem = ({
 
   return (
     <ProductionItemWrapper>
-      <HeaderWrapper onClick={() => setOpen(!open)}>
+      <HeaderWrapper
+        onClick={(e: React.MouseEvent) => {
+          // Only handle click if not clicking the edit/save button or the name-change input
+          if (
+            !editNameOpen &&
+            !(e.target as HTMLElement).closest(".name-edit-button")
+          ) {
+            setOpen(!open);
+          }
+        }}
+      >
         <HeaderTexts
           open={open}
           isProgramOutputLine={false}
           className={totalParticipants > 0 ? "active" : ""}
         >
-          <ProductionName title={production.name}>
-            {production.name.length > 40
-              ? `${production.name.slice(0, 40)}...`
-              : production.name}
-          </ProductionName>
-          <ParticipantCountWrapper>
+          <EditNameForm
+            production={production}
+            formSubmitType="productionName"
+            managementMode={managementMode}
+            setEditNameOpen={setEditNameOpen}
+          />
+          <ParticipantCountWrapper
+            className={totalParticipants > 0 ? "active" : ""}
+          >
             <UsersIcon />
             <ParticipantCount>{totalParticipants}</ParticipantCount>
           </ParticipantCountWrapper>
@@ -136,15 +155,17 @@ export const ProductionsListItem = ({
       </HeaderWrapper>
       <ProductionLines className={open ? "expanded" : ""}>
         <InnerDiv>
-          {production.lines?.map((l) => (
+          {production.lines?.map((l, index) => (
             <Lineblock
               key={`line-${l.id}-${l.name}`}
               isProgramOutput={l.programOutputLine}
+              className={editNameOpen ? "edit-name-open" : ""}
             >
-              <LineBlock
-                managementMode={managementMode}
-                line={l}
+              <EditNameForm
                 production={production}
+                formSubmitType={`lineName-${index.toString()}`}
+                managementMode={managementMode}
+                setEditNameOpen={setEditNameOpen}
               />
               {managementMode ? (
                 <DeleteButton

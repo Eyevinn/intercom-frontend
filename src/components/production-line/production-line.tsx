@@ -33,7 +33,7 @@ import {
   LongPressWrapper,
 } from "./production-line-components.ts";
 import { SelectDevices } from "./select-devices.tsx";
-import { ShareLineButton } from "./share-line-button.tsx";
+import { ShareLineButton } from "../share-line-link/share-line-button.tsx";
 import { SymphonyRtcConnectionComponent } from "./symphony-rtc-connection-component.tsx";
 import { useActiveParticipant } from "./use-active-participant.tsx";
 import { useAudioCue } from "./use-audio-cue.ts";

@@ -10,7 +10,7 @@ export const ProductionItemWrapper = styled.div`
   flex: 0 0 calc(25% - 2rem);
   ${isMobile ? `flex-grow: 1;` : `flex-grow: 0;`}
   justify-content: start;
-  min-width: 30rem;
+  min-width: 34rem;
   border: 1px solid #424242;
   border-radius: 0.5rem;
   margin: 0 2rem 2rem 0;
@@ -32,9 +32,7 @@ export const ProductionItemWrapper = styled.div`
 export const ProductionName = styled.div`
   font-size: 1.4rem;
   font-weight: bold;
-  margin-right: 1rem;
-  max-width: 30rem;
-  min-width: 20rem;
+  margin-right: 0.5rem;
 
   .production-name-container {
     display: inline-block;
@@ -46,6 +44,19 @@ export const ParticipantCountWrapper = styled.div`
   display: flex;
   align-items: center;
   gap: 0.1rem;
+
+  svg {
+    height: 1.5rem;
+    width: 1.5rem;
+    margin-right: 0.5rem;
+    flex-shrink: 0;
+  }
+
+  &.active {
+    svg {
+      fill: #73d16d;
+    }
+  }
 `;
 
 export const ParticipantCount = styled.div`
@@ -73,18 +84,6 @@ export const HeaderTexts = styled.div`
     open: boolean;
     isProgramOutputLine: boolean;
   }) => (!open && isProgramOutputLine ? "1.5rem" : "0")};
-
-  svg {
-    height: 1.5rem;
-    width: 1.5rem;
-    margin-right: 0.5rem;
-    flex-shrink: 0;
-  }
-  &.active {
-    svg {
-      fill: #73d16d;
-    }
-  }
 `;
 
 export const HeaderIcon = styled.div`
@@ -111,6 +110,7 @@ export const InnerDiv = styled.div`
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  position: relative;
 `;
 
 export const Lineblock = styled.div`
@@ -123,6 +123,7 @@ export const Lineblock = styled.div`
   justify-content: space-between;
   align-items: center;
   gap: 0.5rem;
+  min-height: 6.5rem;
 `;
 
 export const LineBlockTexts = styled.div``;
@@ -136,6 +137,10 @@ export const LineBlockTitleWrapper = styled.div`
   display: flex;
   align-items: center;
   gap: 0.5rem;
+
+  &.management {
+    margin-right: 1rem;
+  }
 `;
 
 export const ParticipantExpandBtn = styled.button`
@@ -191,10 +196,39 @@ export const DeleteButton = styled(SecondaryButton)`
   }
 `;
 
+export const CheckboxWrapper = styled.div`
+  margin-bottom: 3rem;
+  margin-top: 0.5rem;
+`;
+
 export const ManageButtons = styled.div`
   display: flex;
   justify-content: flex-end;
   margin: 1rem 0 1rem 0;
+`;
+
+export const NameEditButton = styled.button`
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+  display: flex;
+  justify-content: center;
+  align-self: center;
+  margin: 1rem 0;
+  flex-shrink: 0;
+  height: 2rem;
+  width: 2rem;
+
+  svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  &:hover svg {
+    transform: scale(1.2);
+  }
 `;
 
 export const AddLineSectionForm = styled.form`
@@ -244,4 +278,22 @@ export const IconWrapper = styled.div`
     height: 100%;
     width: 100%;
   }
+`;
+
+export const EditNameWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: start;
+  max-width: 30rem;
+  pointer-events: none;
+
+  > * {
+    pointer-events: auto;
+  }
+`;
+
+export const ProductionNameWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  max-width: 30rem;
 `;

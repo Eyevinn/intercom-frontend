@@ -20,23 +20,19 @@ import {
 
 import { isMobile } from "../../bowser";
 import { TLine } from "../production-line/types";
-import { TBasicProductionResponse } from "../../api/api";
-import { CopySingleLink } from "./copy-single-link";
 
 export const LineBlock = ({
   managementMode,
   line,
-  production,
 }: {
   managementMode: boolean;
   line: TLine;
-  production: TBasicProductionResponse;
 }) => {
   const [showFullUserList, setShowFullUserList] = useState<boolean>(false);
 
   return (
     <LineBlockTexts>
-      <LineBlockTitleWrapper>
+      <LineBlockTitleWrapper className={managementMode ? "management" : ""}>
         {line.programOutputLine && (
           <IconWrapper>
             <TVIcon />
@@ -56,9 +52,6 @@ export const LineBlock = ({
             </PersonText>
             {showFullUserList ? <ChevronUpIcon /> : <ChevronDownIcon />}
           </ParticipantExpandBtn>
-        )}
-        {managementMode && (
-          <CopySingleLink production={production} line={line} />
         )}
       </LineBlockTitleWrapper>
       <LineBlockParticipants>

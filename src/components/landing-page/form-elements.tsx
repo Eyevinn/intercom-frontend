@@ -37,6 +37,10 @@ export const FormInput = styled.input`
       -moz-appearance: textfield;
     }
   }
+
+  &.edit-name {
+    margin: 0;
+  }
 `;
 
 export const FormSelect = styled.select`
@@ -56,6 +60,10 @@ export const FormLabel = styled.label`
   select {
     font-size: 1.6rem;
     display: inline-block;
+  }
+
+  &.save-edit {
+    margin-right: 1rem;
   }
 `;
 

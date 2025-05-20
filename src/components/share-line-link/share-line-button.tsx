@@ -64,7 +64,7 @@ export const ShareLineButton = ({
       </ShareButton>
       {isModalOpen && (
         <ShareLineLinkModal
-          url={url}
+          urls={[url]}
           onRefresh={() => shareUrl({ productionId, lineId })}
           onClose={() => setIsModalOpen(false)}
         />

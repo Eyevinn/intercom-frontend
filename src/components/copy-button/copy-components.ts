@@ -64,10 +64,6 @@ export const CopyIconWrapper = styled.div<{
   }
   `}
 
-  &:hover {
-    background: rgba(0, 0, 0, 0.3);
-  }
-
   &.production-list-item {
     width: 3rem;
     height: 3rem;
@@ -82,5 +78,9 @@ export const CopyIconWrapper = styled.div<{
 
   svg {
     fill: #59cbe8;
+  }
+
+  &:hover svg {
+    transform: scale(1.2);
   }
 `;
