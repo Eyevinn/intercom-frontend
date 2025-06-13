@@ -4,7 +4,7 @@ import {
   FormInput,
   PrimaryButton,
   SecondaryButton,
-} from "../landing-page/form-elements";
+} from "../form-elements/form-elements";
 import { Modal } from "../modal/modal";
 
 const ButtonWrapper = styled.div`

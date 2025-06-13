@@ -6,7 +6,7 @@ import {
   FormInput,
   FormContainer,
   StyledWarningMessage,
-} from "../landing-page/form-elements";
+} from "../form-elements/form-elements";
 import { useUpdateGlobalHotkey } from "./use-update-global-hotkey";
 import { useCheckForDuplicateHotkey } from "./use-check-for-duplicate-hotkey";
 import { Hotkeys } from "./types";

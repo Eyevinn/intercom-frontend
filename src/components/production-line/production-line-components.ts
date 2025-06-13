@@ -4,11 +4,11 @@ import {
   FlexContainer,
   mediaQueries,
 } from "../generic-components";
-import { ActionButton } from "../landing-page/form-elements";
+import { ActionButton } from "../form-elements/form-elements";
 import {
   HeaderWrapper,
-  ProductionItemWrapper,
-} from "../production-list/production-list-components";
+  CollapsibleItemWrapper,
+} from "../shared/shared-components";
 import { isIpad, isMobile } from "../../bowser";
 
 export const CallInfo = styled.div`
@@ -179,7 +179,7 @@ export const CallWrapper = styled.div<{ isSomeoneSpeaking: boolean }>`
   }
 `;
 
-export const CallContainer = styled(ProductionItemWrapper)<{
+export const CallContainer = styled(CollapsibleItemWrapper)<{
   isProgramLine?: boolean;
 }>`
   margin: 0;

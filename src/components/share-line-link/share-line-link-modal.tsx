@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { DecorativeLabel, FormInput } from "../landing-page/form-elements";
+import { DecorativeLabel, FormInput } from "../form-elements/form-elements";
 import { Modal } from "../modal/modal";
 import { CopyButton } from "../copy-button/copy-button";
 import { RefreshButton } from "../refresh-button/refresh-button";

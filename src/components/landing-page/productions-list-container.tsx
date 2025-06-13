@@ -7,7 +7,7 @@ import { useFetchProductionList } from "./use-fetch-production-list.ts";
 import { ProductionsList } from "../production-list/productions-list.tsx";
 import { PageHeader } from "../page-layout/page-header.tsx";
 import { AddIcon, EditIcon } from "../../assets/icons/icon.tsx";
-import { PrimaryButton } from "./form-elements.tsx";
+import { PrimaryButton } from "../form-elements/form-elements.tsx";
 import { isMobile } from "../../bowser.ts";
 
 const HeaderButton = styled(PrimaryButton)`
@@ -66,14 +66,22 @@ export const ProductionsListContainer = () => {
     navigate("/manage-productions");
   };
 
+  const goToIngests = () => {
+    navigate("/ingests");
+  };
+
   return (
     <>
       <PageHeader title="Productions" loading={showRefreshing}>
         {!isMobile && (
           <>
+            <HeaderButton onClick={goToIngests}>
+              <HeaderButtonText>Ingests</HeaderButtonText>
+              <EditIcon />
+            </HeaderButton>
             {!!productions?.productions.length && (
               <HeaderButton onClick={goToManage}>
-                <HeaderButtonText>Manage</HeaderButtonText>
+                <HeaderButtonText>Productions</HeaderButtonText>
                 <EditIcon />
               </HeaderButton>
             )}

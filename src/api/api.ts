@@ -32,6 +32,20 @@ export type TBasicProductionResponse = {
   lines: TLine[];
 };
 
+export type TSavedIngestResponse = {
+  id: string;
+  name: string;
+  ipAddress: string;
+  deviceOutput: {
+    name: string;
+    label: string;
+  }[];
+  deviceInput: {
+    name: string;
+    label: string;
+  }[];
+};
+
 export type TListProductionsResponse = {
   productions: TBasicProductionResponse[];
   offset: 0;

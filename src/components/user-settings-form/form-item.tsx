@@ -5,7 +5,7 @@ import {
   DecorativeLabel,
   FormLabel,
   StyledWarningMessage,
-} from "../landing-page/form-elements";
+} from "../form-elements/form-elements";
 import { FormValues } from "../create-production/use-create-production";
 import { TUserSettings } from "../user-settings/types";
 

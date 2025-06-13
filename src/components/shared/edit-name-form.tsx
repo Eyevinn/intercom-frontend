@@ -1,38 +1,83 @@
 import { useEffect, useState, useRef } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { FormInput, FormLabel } from "../landing-page/form-elements";
-import { EditNameWrapper, NameEditButton } from "./production-list-components";
+import { FormInput, FormLabel } from "../form-elements/form-elements";
+import { EditNameWrapper, NameEditButton } from "./shared-components";
 import { SaveIcon, EditIcon } from "../../assets/icons/icon";
-import { TBasicProductionResponse } from "../../api/api";
+import { Spinner } from "../loader/loader";
 import { useSubmitOnEnter } from "../../hooks/use-submit-form-enter-press";
 import { useEditLineName } from "../manage-productions-page/use-edit-line-name";
 import { useEditProductionName } from "../manage-productions-page/use-edit-production-name";
 import { useGlobalState } from "../../global-state/context-provider";
-import { Spinner } from "../loader/loader";
 import { useOutsideClickHandler } from "../../hooks/use-outside-click-handler";
-import { LabelField } from "./labelField";
+import { TLine } from "../production-line/types";
 
 type FormValues = {
   productionName: string;
   [key: `lineName-${string}`]: string;
+  ingestName: string;
+  deviceOutputLabel: string;
+  deviceInputLabel: string;
+  currentDeviceLabel: string;
 };
 
-type EditNameFormProps = {
-  production: TBasicProductionResponse;
-  formSubmitType: `lineName-${string}` | "productionName";
+type BaseItem = {
+  name: string;
+};
+
+type ProductionItem = BaseItem & {
+  productionId: string;
+  lines?: TLine[];
+};
+
+type IngestItem = BaseItem & {
+  id: string;
+  name: string;
+  deviceOutput: {
+    name: string;
+    label: string;
+  }[];
+  deviceInput: {
+    name: string;
+    label: string;
+  }[];
+  currentDeviceLabel?: string;
+};
+
+type EditableItem = ProductionItem | IngestItem;
+
+type EditNameFormProps<T extends EditableItem> = {
+  item: T;
+  formSubmitType:
+    | `lineName-${string}`
+    | "productionName"
+    | "ingestName"
+    | "deviceOutputLabel"
+    | "deviceInputLabel"
+    | "currentDeviceLabel";
   managementMode: boolean;
   setEditNameOpen: (editNameOpen: boolean) => void;
+  renderLabel: (
+    item: T,
+    line?: TLine,
+    managementMode?: boolean
+  ) => React.ReactNode;
+  className?: string;
 };
 
-export const EditNameForm = ({
-  production,
+const isProduction = (item: EditableItem): item is ProductionItem => {
+  return "productionId" in item;
+};
+
+export const EditNameForm = <T extends EditableItem>({
+  item,
   formSubmitType,
   managementMode,
   setEditNameOpen,
-}: EditNameFormProps) => {
+  renderLabel,
+  className,
+}: EditNameFormProps<T>) => {
   const [isEditingName, setIsEditingName] = useState<boolean>(false);
-  const [savedProduction, setSavedProduction] =
-    useState<TBasicProductionResponse | null>(null);
+  const [savedItem, setSavedItem] = useState<T | null>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   const [editLineId, setEditLineId] = useState<{
@@ -54,12 +99,15 @@ export const EditNameForm = ({
     useEditLineName(editLineId);
 
   useOutsideClickHandler(wrapperRef, () => {
-    setIsEditingName(false);
-    setSavedProduction(null);
+    if (isEditingName) {
+      setIsEditingName(false);
+      setSavedItem(null);
+    }
   });
 
   const lineIndex = parseInt(formSubmitType.toString().split("-")[1], 10);
-  const line = production.lines[lineIndex];
+  const line =
+    isProduction(item) && item.lines ? item.lines[lineIndex] : undefined;
 
   const isCurrentLine = editLineId?.lineId === line?.id;
 
@@ -74,35 +122,51 @@ export const EditNameForm = ({
   const [productionName] = watch(["productionName"]);
 
   const hasLineChanges = () => {
-    if (!savedProduction?.lines) return false;
-    return savedProduction.lines.some(
+    if (!savedItem || !isProduction(savedItem) || !savedItem.lines)
+      return false;
+    return savedItem.lines.some(
       (l, index) =>
         formValues[`lineName-${index}`] &&
         formValues[`lineName-${index}`] !== l.name
     );
   };
 
-  const isUpdated =
-    productionName !== savedProduction?.name || hasLineChanges();
+  const isUpdated = productionName !== savedItem?.name || hasLineChanges();
 
   useEffect(() => {
-    if (savedProduction?.name) {
-      setValue(`productionName`, savedProduction.name);
+    if (savedItem?.name && formSubmitType === "productionName") {
+      setValue(formSubmitType, savedItem.name);
     }
-    if (savedProduction?.lines) {
-      savedProduction.lines.forEach((l, index) => {
+    if (savedItem?.name && formSubmitType === "ingestName") {
+      setValue(formSubmitType, savedItem.name);
+    }
+    if (
+      savedItem &&
+      formSubmitType === "currentDeviceLabel" &&
+      "currentDeviceLabel" in savedItem
+    ) {
+      setValue(formSubmitType, savedItem.currentDeviceLabel || "");
+    }
+    if (savedItem && isProduction(savedItem) && savedItem.lines) {
+      savedItem.lines.forEach((l, index) => {
         setValue(`lineName-${index}`, l.name);
       });
     }
-  }, [savedProduction, setValue]);
+  }, [savedItem, setValue, formSubmitType, item]);
+
+  useEffect(() => {
+    if (savedItem) {
+      console.log("savedItem", savedItem);
+    }
+  }, [savedItem]);
 
   useEffect(() => {
     if (successfullEditLine || successfullEditProduction) {
       setEditLineId(null);
       setEditProductionId(null);
-      setEditNameOpen(false);
+      setEditNameOpen?.(false);
       setIsEditingName(false);
-      setSavedProduction(null);
+      setSavedItem(null);
     }
     dispatch({
       type: "PRODUCTION_UPDATED",
@@ -116,34 +180,44 @@ export const EditNameForm = ({
 
   const onSubmit: SubmitHandler<FormValues> = (data) => {
     if (
+      data.productionName &&
       data.productionName !== "" &&
-      data.productionName !== savedProduction?.name &&
-      savedProduction?.name
+      data.productionName !== savedItem?.name &&
+      savedItem?.name
     ) {
+      const productionId = isProduction(savedItem)
+        ? savedItem.productionId
+        : savedItem.id;
       setEditProductionId({
-        productionId: savedProduction.productionId,
+        productionId,
         name: data.productionName,
       });
-      return; // Exit early if we're updating production name
+      return;
     }
 
-    // Only update the line that matches our current label
-    if (formSubmitType !== "productionName" && savedProduction) {
+    if (
+      formSubmitType.startsWith("lineName-") &&
+      savedItem &&
+      isProduction(savedItem)
+    ) {
       const currentLineIndex = parseInt(
         formSubmitType.toString().split("-")[1],
         10
       );
-      const currentLine = savedProduction.lines[currentLineIndex];
+      const currentLine = savedItem.lines?.[currentLineIndex];
       const newName = data[`lineName-${currentLineIndex}`];
 
       if (currentLine && newName !== "" && currentLine.name !== newName) {
         setEditLineId({
-          productionId: savedProduction.productionId,
+          productionId: savedItem.productionId,
           lineId: currentLine.id,
           name: newName,
         });
       }
     }
+
+    setSavedItem(null);
+    setIsEditingName(false);
   };
 
   useSubmitOnEnter<FormValues>({
@@ -153,11 +227,13 @@ export const EditNameForm = ({
   });
 
   const handleClick = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent click from bubbling to HeaderWrapper
+    e.stopPropagation();
+    e.preventDefault();
+
     if (isEditingName) {
       handleSubmit(onSubmit)();
     } else {
-      setSavedProduction(production);
+      setSavedItem(item);
       setIsEditingName(true);
     }
   };
@@ -177,21 +253,14 @@ export const EditNameForm = ({
   return (
     <EditNameWrapper ref={wrapperRef}>
       <EditNameWrapper>
-        {!isEditingName && (
-          <LabelField
-            isLabelProductionName={formSubmitType === "productionName"}
-            production={production}
-            line={line}
-            managementMode={managementMode}
-          />
-        )}
+        {!isEditingName && renderLabel(item, line, managementMode)}
         {isEditingName && (
           <FormLabel className="save-edit">
             <FormInput
-              // eslint-disable-next-line
+              // eslint-disable-next-line react/jsx-props-no-spreading
               {...register(formSubmitType)}
               placeholder="New Name"
-              className="name-edit-button edit-name"
+              className={`name-edit-button edit-name ${className}`}
               autoComplete="off"
             />
           </FormLabel>

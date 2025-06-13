@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 import { Modal } from "../modal/modal";
-import { PrimaryButton } from "../landing-page/form-elements";
+import { PrimaryButton } from "../form-elements/form-elements";
 import { Checkbox } from "../checkbox/checkbox";
 
 const ContentWrapper = styled.div`

@@ -11,7 +11,7 @@ import {
   FormLabel,
   SecondaryButton,
   StyledWarningMessage,
-} from "../landing-page/form-elements";
+} from "../form-elements/form-elements";
 import { Spinner } from "../loader/loader";
 import { useAddProductionLine } from "../manage-productions-page/use-add-production-line";
 import { useDeleteProduction } from "../manage-productions-page/use-delete-production";
@@ -21,11 +21,13 @@ import {
   AddLineSectionForm,
   CheckboxWrapper,
   CreateLineButton,
-  DeleteButton,
-  ManageButtons,
   RemoveIconWrapper,
-  SpinnerWrapper,
 } from "./production-list-components";
+import {
+  ButtonsWrapper,
+  DeleteButton,
+  SpinnerWrapper,
+} from "../delete-button/delete-button-components";
 
 interface ManageProductionButtonsProps {
   production: TBasicProductionResponse;
@@ -107,7 +109,7 @@ export const ManageProductionButtons: FC<ManageProductionButtonsProps> = (
 
   return (
     <>
-      <ManageButtons>
+      <ButtonsWrapper>
         {!addLineOpen && (
           <SecondaryButton
             style={{ marginRight: "1rem" }}
@@ -129,7 +131,7 @@ export const ManageProductionButtons: FC<ManageProductionButtonsProps> = (
             </SpinnerWrapper>
           )}
         </DeleteButton>
-      </ManageButtons>
+      </ButtonsWrapper>
       {addLineOpen && (
         <AddLineSectionForm>
           <FormLabel>

@@ -6,7 +6,7 @@ import { useGlobalState } from "../../global-state/context-provider";
 import { useDevicePermissions } from "../../hooks/use-device-permission";
 import { useFetchDevices } from "../../hooks/use-fetch-devices";
 import { DisplayContainerHeader } from "../landing-page/display-container-header";
-import { PrimaryButton } from "../landing-page/form-elements";
+import { PrimaryButton } from "../form-elements/form-elements";
 import { Spinner } from "../loader/loader";
 import { Modal } from "../modal/modal";
 

@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 import React from "react";
-import { ActionButton } from "../landing-page/form-elements";
+import { ActionButton } from "../form-elements/form-elements";
 
 const RemoveBtn = styled(ActionButton)<{ shouldSubmitOnEnter?: boolean }>`
   cursor: pointer;

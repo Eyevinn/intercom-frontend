@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { ActionButton } from "../landing-page/form-elements";
+import { ActionButton } from "../form-elements/form-elements";
 
 export const ModalOverlay = styled.div`
   position: fixed;

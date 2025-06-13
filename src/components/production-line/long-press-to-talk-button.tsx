@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 import { isMobile } from "../../bowser";
-import { PrimaryButton } from "../landing-page/form-elements";
+import { PrimaryButton } from "../form-elements/form-elements";
 
 type TLongPressToTalkButton = {
   isTalking: boolean;
