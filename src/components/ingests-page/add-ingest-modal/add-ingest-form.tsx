@@ -4,6 +4,7 @@ import { ButtonWrapper } from "../../generic-components";
 import { FormInput } from "../../form-elements/form-elements";
 import { FormItem } from "../../user-settings-form/form-item";
 import { FormWrapper, SubmitButton } from "../ingest-components";
+import logger from "../../../utils/logger";
 
 type FormValues = {
   ingestName: string;
@@ -27,8 +28,8 @@ export const AddIngestForm = ({ onSave }: AddIngestFormProps) => {
   });
 
   const onSubmit: SubmitHandler<FormValues> = (data) => {
-    console.log("data", data);
     // TODO: when endpoint is ready, add create ingest function
+    logger.cyan(`onSubmit DATA: ${data.ingestName} ${data.ipAddress}`);
     if (onSave) onSave();
   };
 

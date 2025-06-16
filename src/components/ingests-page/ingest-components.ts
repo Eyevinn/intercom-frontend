@@ -114,8 +114,8 @@ export const SubmitButton = styled(PrimaryButton)<{
 `;
 
 export const StatusDot = styled.div<{ isActive: boolean }>`
-  width: 10px;
-  height: 10px;
+  width: 1rem;
+  height: 1rem;
   border-radius: 50%;
   background-color: ${({ isActive }) => (isActive ? "#22c55e" : "#ef4444")};
   margin-right: 1rem;

@@ -112,14 +112,18 @@ export const ExpandedContent = ({
             formSubmitType={`lineName-${index.toString()}`}
             managementMode={managementMode}
             setEditNameOpen={setEditNameOpen}
-            renderLabel={(item, line, mode) => (
-              <LabelField
-                isLabelProductionName={false}
-                production={item as TBasicProductionResponse}
-                line={line!}
-                managementMode={mode!}
-              />
-            )}
+            renderLabel={(item, line, mode) => {
+              if (!line || !mode) return null;
+
+              return (
+                <LabelField
+                  isLabelProductionName={false}
+                  production={item as TBasicProductionResponse}
+                  line={line}
+                  managementMode={mode}
+                />
+              );
+            }}
           />
           {managementMode ? (
             <DeleteButton

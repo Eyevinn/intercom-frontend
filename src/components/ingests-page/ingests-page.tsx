@@ -7,45 +7,13 @@ import { LocalError } from "../error";
 import { Modal } from "../modal/modal";
 import { IngestFormModal } from "./add-ingest-modal/ingest-form";
 import { ListWrapper } from "./ingest-components";
+import { mockedIngestData, mockedError } from "./mocked-data";
 
 export const IngestsPage = ({ setApiError }: { setApiError: () => void }) => {
   const [showAddIngestModal, setShowAddIngestModal] = useState<boolean>(false);
   const [{ apiError }] = useGlobalState();
 
   // TODO: fetch ingests when endpoint is ready
-  const ingests = [
-    {
-      id: "1",
-      name: "Ingest 1",
-      ipAddress: "192.168.1.1",
-      deviceOutput: [
-        { name: "Output 1", label: "Output 1" },
-        { name: "Output 2", label: "Output 2" },
-        { name: "Output 3", label: "Output 3" },
-      ],
-      deviceInput: [
-        { name: "Input 1", label: "Input 1" },
-        { name: "Input 2", label: "Input 2" },
-        { name: "Input 3", label: "Input 3" },
-      ],
-    },
-    {
-      id: "2",
-      name: "Ingest 2",
-      ipAddress: "192.168.1.2",
-      deviceOutput: [
-        { name: "Output 1", label: "Output 1" },
-        { name: "Output 2", label: "Output 2" },
-        { name: "Output 3", label: "Output 3" },
-      ],
-      deviceInput: [
-        { name: "Input 1", label: "Input 1" },
-        { name: "Input 2", label: "Input 2" },
-        { name: "Input 3", label: "Input 3" },
-      ],
-    },
-  ];
-  const error = null;
 
   useEffect(() => {
     if (apiError) {
@@ -63,12 +31,12 @@ export const IngestsPage = ({ setApiError }: { setApiError: () => void }) => {
           Add Ingest
         </SecondaryButton>
       </PageHeader>
-      {!!ingests?.length && (
+      {!!mockedIngestData?.length && (
         <ListWrapper>
-          {error && <LocalError error={error} />}
-          {!error &&
-            ingests &&
-            ingests.map((i) => <IngestItem key={i.id} ingest={i} />)}
+          {mockedError && <LocalError error={mockedError} />}
+          {!mockedError &&
+            mockedIngestData &&
+            mockedIngestData.map((i) => <IngestItem key={i.id} ingest={i} />)}
         </ListWrapper>
       )}
       {showAddIngestModal && (

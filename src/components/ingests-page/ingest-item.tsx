@@ -5,6 +5,7 @@ import { CollapsibleItem } from "../shared/collapsible-item";
 import { EditNameForm } from "../shared/edit-name-form";
 import { HeaderText, StatusDot, HeaderWrapper } from "./ingest-components";
 import { ExpandedContent } from "./expanded-content";
+import { useHandleHeaderClick } from "../shared/use-handle-header-click";
 
 type IngestItemProps = {
   ingest: TSavedIngestResponse;
@@ -18,6 +19,8 @@ export const IngestItem = ({ ingest }: IngestItemProps) => {
   // TODO: remove this dummy state when delete ingest success state is added
   const [successfullDeleteIngest, setSuccessfullDeleteIngest] =
     useState<boolean>(false);
+
+  const handleHeaderClick = useHandleHeaderClick(editNameOpen);
 
   useEffect(() => {
     if (removeIngestId) {
@@ -33,19 +36,6 @@ export const IngestItem = ({ ingest }: IngestItemProps) => {
       setDisplayConfirmationModal(false);
     }
   }, [successfullDeleteIngest]);
-
-  const handleHeaderClick = (
-    e: React.MouseEvent,
-    open: boolean,
-    setOpen: (open: boolean) => void
-  ) => {
-    if (
-      !editNameOpen &&
-      !(e.target as HTMLElement).closest(".name-edit-button")
-    ) {
-      setOpen(!open);
-    }
-  };
 
   const headerContent = (
     <HeaderWrapper>

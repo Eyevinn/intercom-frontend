@@ -134,10 +134,13 @@ export const EditNameForm = <T extends EditableItem>({
   const isUpdated = productionName !== savedItem?.name || hasLineChanges();
 
   useEffect(() => {
-    if (savedItem?.name && formSubmitType === "productionName") {
-      setValue(formSubmitType, savedItem.name);
-    }
-    if (savedItem?.name && formSubmitType === "ingestName") {
+    if (!savedItem) return;
+
+    if (
+      (formSubmitType === "productionName" ||
+        formSubmitType === "ingestName") &&
+      savedItem.name
+    ) {
       setValue(formSubmitType, savedItem.name);
     }
     if (
@@ -152,13 +155,7 @@ export const EditNameForm = <T extends EditableItem>({
         setValue(`lineName-${index}`, l.name);
       });
     }
-  }, [savedItem, setValue, formSubmitType, item]);
-
-  useEffect(() => {
-    if (savedItem) {
-      console.log("savedItem", savedItem);
-    }
-  }, [savedItem]);
+  }, [savedItem, setValue, formSubmitType]);
 
   useEffect(() => {
     if (successfullEditLine || successfullEditProduction) {

@@ -9,6 +9,7 @@ import { EditNameForm } from "../shared/edit-name-form";
 import { CollapsibleItem } from "../shared/collapsible-item";
 import { LabelField } from "./labelField";
 import { ExpandedContent } from "./expanded-content";
+import { useHandleHeaderClick } from "../shared/use-handle-header-click";
 
 type ProductionsListItemProps = {
   production: TBasicProductionResponse;
@@ -20,6 +21,8 @@ export const ProductionsListItem = ({
   managementMode = false,
 }: ProductionsListItemProps) => {
   const [editNameOpen, setEditNameOpen] = useState<boolean>(false);
+
+  const handleHeaderClick = useHandleHeaderClick(editNameOpen);
 
   const totalParticipants = useMemo(() => {
     return (
@@ -36,14 +39,18 @@ export const ProductionsListItem = ({
         formSubmitType="productionName"
         managementMode={managementMode}
         setEditNameOpen={setEditNameOpen}
-        renderLabel={(item, line, mode) => (
-          <LabelField
-            isLabelProductionName
-            production={item as TBasicProductionResponse}
-            line={line!}
-            managementMode={mode!}
-          />
-        )}
+        renderLabel={(item, line, mode) => {
+          if (!line || !mode) return null;
+
+          return (
+            <LabelField
+              isLabelProductionName
+              production={item as TBasicProductionResponse}
+              line={line}
+              managementMode={mode}
+            />
+          );
+        }}
       />
       <ParticipantCountWrapper
         className={totalParticipants > 0 ? "active" : ""}
@@ -61,19 +68,6 @@ export const ProductionsListItem = ({
       totalParticipants={totalParticipants}
     />
   );
-
-  const handleHeaderClick = (
-    e: React.MouseEvent,
-    open: boolean,
-    setOpen: (open: boolean) => void
-  ) => {
-    if (
-      !editNameOpen &&
-      !(e.target as HTMLElement).closest(".name-edit-button")
-    ) {
-      setOpen(!open);
-    }
-  };
 
   return (
     <CollapsibleItem

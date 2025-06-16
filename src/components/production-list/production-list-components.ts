@@ -116,7 +116,7 @@ export const CheckboxWrapper = styled.div`
 export const AddLineSectionForm = styled.form`
   margin-top: 1rem;
   border: 1px grey solid;
-  border-radius: 5px;
+  border-radius: 0.5rem;
   padding: 1rem;
   position: relative;
 `;
