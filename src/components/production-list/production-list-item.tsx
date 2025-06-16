@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { TBasicProductionResponse } from "../../api/api";
 import { UsersIcon } from "../../assets/icons/icon";
+import { TLine } from "../production-line/types";
 import {
   ParticipantCount,
   ParticipantCountWrapper,
@@ -39,18 +40,14 @@ export const ProductionsListItem = ({
         formSubmitType="productionName"
         managementMode={managementMode}
         setEditNameOpen={setEditNameOpen}
-        renderLabel={(item, line, mode) => {
-          if (!line || !mode) return null;
-
-          return (
-            <LabelField
-              isLabelProductionName
-              production={item as TBasicProductionResponse}
-              line={line}
-              managementMode={mode}
-            />
-          );
-        }}
+        renderLabel={(item, line, mode) => (
+          <LabelField
+            isLabelProductionName
+            production={item as TBasicProductionResponse}
+            line={line ?? ({} as TLine)}
+            managementMode={mode ?? false}
+          />
+        )}
       />
       <ParticipantCountWrapper
         className={totalParticipants > 0 ? "active" : ""}
