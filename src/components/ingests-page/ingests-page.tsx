@@ -7,19 +7,31 @@ import { LocalError } from "../error";
 import { Modal } from "../modal/modal";
 import { IngestFormModal } from "./add-ingest-modal/ingest-form";
 import { ListWrapper } from "./ingest-components";
-import { mockedIngestData, mockedError } from "./mocked-data";
+// TODO: remove this, but keep for now for testing because real outputs/inputs are not yet implemented
+// import { mockedIngestData, mockedError } from "./mocked-data";
+import { useListIngest } from "./use-list-ingests";
 
 export const IngestsPage = ({ setApiError }: { setApiError: () => void }) => {
   const [showAddIngestModal, setShowAddIngestModal] = useState<boolean>(false);
   const [{ apiError }] = useGlobalState();
 
-  // TODO: fetch ingests when endpoint is ready
+  const { ingests, error, setIntervalLoad, refresh } = useListIngest();
 
   useEffect(() => {
     if (apiError) {
       setApiError();
     }
   }, [apiError, setApiError]);
+
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      setIntervalLoad(true);
+    }, 10000);
+
+    return () => {
+      window.clearInterval(interval);
+    };
+  }, [setIntervalLoad]);
 
   return (
     <>
@@ -31,17 +43,31 @@ export const IngestsPage = ({ setApiError }: { setApiError: () => void }) => {
           Add Ingest
         </SecondaryButton>
       </PageHeader>
-      {!!mockedIngestData?.length && (
+      {!!ingests?.length && (
         <ListWrapper>
-          {mockedError && <LocalError error={mockedError} />}
+          {error && <LocalError error={error} />}
+          {!error &&
+            ingests &&
+            ingests.map((i) => (
+              <IngestItem key={i._id} ingest={i} refresh={refresh} />
+            ))}
+          {/* TODO: remove this, but keep for now for testing because real outputs/inputs are not yet implemented */}
+          {/*  {mockedError && <LocalError error={mockedError} />}
           {!mockedError &&
             mockedIngestData &&
-            mockedIngestData.map((i) => <IngestItem key={i.id} ingest={i} />)}
+            mockedIngestData.map((i) => (
+              <IngestItem key={i._id} ingest={i} refresh={refresh} />
+            ))} */}
         </ListWrapper>
       )}
       {showAddIngestModal && (
         <Modal onClose={() => setShowAddIngestModal(false)}>
-          <IngestFormModal onSave={() => setShowAddIngestModal(false)} />
+          <IngestFormModal
+            onSave={() => {
+              setShowAddIngestModal(false);
+              refresh();
+            }}
+          />
         </Modal>
       )}
     </>

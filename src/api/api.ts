@@ -32,8 +32,8 @@ export type TBasicProductionResponse = {
   lines: TLine[];
 };
 
-export type TSavedIngestResponse = {
-  id: string;
+export type TSavedIngest = {
+  _id: string;
   name: string;
   ipAddress: string;
   deviceOutput: {
@@ -44,6 +44,26 @@ export type TSavedIngestResponse = {
     name: string;
     label: string;
   }[];
+};
+
+export type TEditIngest = {
+  _id: string;
+  name?: string;
+  deviceOutput?: {
+    name: string;
+    label: string;
+  };
+  deviceInput?: {
+    name: string;
+    label: string;
+  };
+};
+
+export type TListIngestResponse = {
+  ingests: TSavedIngest[];
+  offset: 0;
+  limit: 0;
+  totalItems: 0;
 };
 
 export type TListProductionsResponse = {
@@ -305,4 +325,60 @@ export const API = {
       })
     );
   },
+  fetchIngestList: (): Promise<TListIngestResponse> =>
+    handleFetchRequest<TListIngestResponse>(
+      fetch(`${API_URL}ingestlist`, {
+        method: "GET",
+        headers: {
+          ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
+        },
+      })
+    ),
+  createIngest: async (data: { name: string; ipAddress: string }) =>
+    handleFetchRequest<boolean>(
+      fetch(`${API_URL}ingest/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
+        },
+        body: JSON.stringify({
+          name: data.name,
+          ipAddress: data.ipAddress,
+        }),
+      })
+    ),
+  fetchIngest: (id: number): Promise<TSavedIngest> =>
+    handleFetchRequest<TSavedIngest>(
+      fetch(`${API_URL}ingest/${id}`, {
+        method: "GET",
+        headers: {
+          ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
+        },
+      })
+    ),
+  updateIngest: async (data: TEditIngest) =>
+    handleFetchRequest<TEditIngest>(
+      fetch(`${API_URL}ingest/${data._id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
+        },
+        body: JSON.stringify({
+          name: data.name,
+          deviceOutput: data.deviceOutput,
+          deviceInput: data.deviceInput,
+        }),
+      })
+    ),
+  deleteIngest: async (id: string): Promise<string> =>
+    handleFetchRequest<string>(
+      fetch(`${API_URL}ingest/${id}`, {
+        method: "DELETE",
+        headers: {
+          ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
+        },
+      })
+    ),
 };

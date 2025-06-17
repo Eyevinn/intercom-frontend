@@ -1,41 +1,36 @@
 import { useEffect, useState } from "react";
-import { TSavedIngestResponse } from "../../api/api";
+import { TSavedIngest } from "../../api/api";
 
 import { CollapsibleItem } from "../shared/collapsible-item";
 import { EditNameForm } from "../shared/edit-name-form";
 import { HeaderText, StatusDot, HeaderWrapper } from "./ingest-components";
 import { ExpandedContent } from "./expanded-content";
 import { useHandleHeaderClick } from "../shared/use-handle-header-click";
+import { useDeleteIngest } from "./use-delete-ingest";
 
 type IngestItemProps = {
-  ingest: TSavedIngestResponse;
+  ingest: TSavedIngest;
+  refresh: () => void;
 };
 
-export const IngestItem = ({ ingest }: IngestItemProps) => {
+export const IngestItem = ({ ingest, refresh }: IngestItemProps) => {
   const [editNameOpen, setEditNameOpen] = useState<boolean>(false);
   const [displayConfirmationModal, setDisplayConfirmationModal] =
     useState<boolean>(false);
   const [removeIngestId, setRemoveIngestId] = useState<string | null>(null);
-  // TODO: remove this dummy state when delete ingest success state is added
-  const [successfullDeleteIngest, setSuccessfullDeleteIngest] =
-    useState<boolean>(false);
+
+  const { loading: deleteIngestLoading, success: successfullDeleteIngest } =
+    useDeleteIngest(removeIngestId);
 
   const handleHeaderClick = useHandleHeaderClick(editNameOpen);
 
   useEffect(() => {
-    if (removeIngestId) {
-      // TODO: add delete ingest function and add success state
-      setSuccessfullDeleteIngest(true);
-    }
-  }, [removeIngestId]);
-
-  useEffect(() => {
     if (successfullDeleteIngest) {
       setRemoveIngestId(null);
-      setSuccessfullDeleteIngest(false);
       setDisplayConfirmationModal(false);
+      refresh();
     }
-  }, [successfullDeleteIngest]);
+  }, [successfullDeleteIngest, refresh]);
 
   const headerContent = (
     <HeaderWrapper>
@@ -49,6 +44,7 @@ export const IngestItem = ({ ingest }: IngestItemProps) => {
             {item.name.length > 40 ? `${item.name.slice(0, 40)}...` : item.name}
           </HeaderText>
         )}
+        refresh={refresh}
       />
       <StatusDot isActive />
     </HeaderWrapper>
@@ -58,9 +54,11 @@ export const IngestItem = ({ ingest }: IngestItemProps) => {
     <ExpandedContent
       ingest={ingest}
       displayConfirmationModal={displayConfirmationModal}
+      deleteIngestLoading={deleteIngestLoading}
       setDisplayConfirmationModal={setDisplayConfirmationModal}
       setEditNameOpen={setEditNameOpen}
       setRemoveIngestId={setRemoveIngestId}
+      refresh={refresh}
     />
   );
 

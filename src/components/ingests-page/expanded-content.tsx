@@ -1,4 +1,4 @@
-import { TSavedIngestResponse } from "../../api/api";
+import { TSavedIngest } from "../../api/api";
 import {
   ButtonsWrapper,
   DeleteButton,
@@ -22,26 +22,28 @@ import {
 } from "./ingest-components";
 
 type ExpandedContentProps = {
-  ingest: TSavedIngestResponse;
+  ingest: TSavedIngest;
   displayConfirmationModal: boolean;
+  deleteIngestLoading: boolean;
   setDisplayConfirmationModal: (displayConfirmationModal: boolean) => void;
   setEditNameOpen: (editNameOpen: boolean) => void;
   setRemoveIngestId: (removeIngestId: string | null) => void;
+  refresh: () => void;
 };
 
 export const ExpandedContent = ({
   ingest,
   displayConfirmationModal,
+  deleteIngestLoading,
   setDisplayConfirmationModal,
   setEditNameOpen,
   setRemoveIngestId,
+  refresh,
 }: ExpandedContentProps) => {
   const deviceTypes = ["deviceInput", "deviceOutput"];
 
   // TODO: add disabled state when ingest is in use
   const isDeleteIngestDisabled = false;
-  // TODO: add loading state when deleting ingest
-  const deleteIngestLoading = false;
 
   return (
     <>
@@ -80,6 +82,9 @@ export const ExpandedContent = ({
                             managementMode
                             className="device-label"
                             setEditNameOpen={setEditNameOpen}
+                            deviceType={
+                              deviceType === "deviceInput" ? "input" : "output"
+                            }
                             renderLabel={() => (
                               <span
                                 title={d.label}
@@ -90,6 +95,7 @@ export const ExpandedContent = ({
                                   : d.label}
                               </span>
                             )}
+                            refresh={refresh}
                           />
                         </DeviceTableCell>
                         <DeviceTableCell>
@@ -123,7 +129,7 @@ export const ExpandedContent = ({
           description={`You are about to delete the ingest: ${ingest.name}`}
           confirmationText="Are you sure?"
           onCancel={() => setDisplayConfirmationModal(false)}
-          onConfirm={() => setRemoveIngestId(ingest.id)}
+          onConfirm={() => setRemoveIngestId(ingest._id)}
         />
       )}
     </>

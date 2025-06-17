@@ -10,6 +10,8 @@ import { useEditProductionName } from "../manage-productions-page/use-edit-produ
 import { useGlobalState } from "../../global-state/context-provider";
 import { useOutsideClickHandler } from "../../hooks/use-outside-click-handler";
 import { TLine } from "../production-line/types";
+import { useEditIngest } from "../ingests-page/use-edit-ingest";
+import { TEditIngest } from "../../api/api";
 
 type FormValues = {
   productionName: string;
@@ -30,7 +32,7 @@ type ProductionItem = BaseItem & {
 };
 
 type IngestItem = BaseItem & {
-  id: string;
+  _id: string;
   name: string;
   deviceOutput: {
     name: string;
@@ -62,6 +64,8 @@ type EditNameFormProps<T extends EditableItem> = {
     managementMode?: boolean
   ) => React.ReactNode;
   className?: string;
+  deviceType?: "input" | "output";
+  refresh?: () => void;
 };
 
 const isProduction = (item: EditableItem): item is ProductionItem => {
@@ -75,6 +79,8 @@ export const EditNameForm = <T extends EditableItem>({
   setEditNameOpen,
   renderLabel,
   className,
+  deviceType,
+  refresh,
 }: EditNameFormProps<T>) => {
   const [isEditingName, setIsEditingName] = useState<boolean>(false);
   const [savedItem, setSavedItem] = useState<T | null>(null);
@@ -89,6 +95,7 @@ export const EditNameForm = <T extends EditableItem>({
     productionId: string;
     name: string;
   } | null>(null);
+  const [editIngestId, setEditIngestId] = useState<TEditIngest | null>(null);
 
   const [, dispatch] = useGlobalState();
 
@@ -97,6 +104,9 @@ export const EditNameForm = <T extends EditableItem>({
 
   const { loading: editLineLoading, success: successfullEditLine } =
     useEditLineName(editLineId);
+
+  const { loading: editIngestLoading, success: successfullEditIngest } =
+    useEditIngest(editIngestId);
 
   useOutsideClickHandler(wrapperRef, () => {
     if (isEditingName) {
@@ -158,6 +168,15 @@ export const EditNameForm = <T extends EditableItem>({
   }, [savedItem, setValue, formSubmitType]);
 
   useEffect(() => {
+    if (successfullEditIngest && refresh) {
+      setEditIngestId(null);
+      setIsEditingName(false);
+      setSavedItem(null);
+      refresh();
+    }
+  }, [successfullEditIngest, refresh]);
+
+  useEffect(() => {
     if (successfullEditLine || successfullEditProduction) {
       setEditLineId(null);
       setEditProductionId(null);
@@ -184,7 +203,7 @@ export const EditNameForm = <T extends EditableItem>({
     ) {
       const productionId = isProduction(savedItem)
         ? savedItem.productionId
-        : savedItem.id;
+        : savedItem._id;
       setEditProductionId({
         productionId,
         name: data.productionName,
@@ -213,6 +232,56 @@ export const EditNameForm = <T extends EditableItem>({
       }
     }
 
+    if (
+      data.ingestName &&
+      data.ingestName !== "" &&
+      data.ingestName !== savedItem?.name &&
+      savedItem?.name &&
+      savedItem &&
+      "_id" in savedItem
+    ) {
+      setEditIngestId({
+        _id: savedItem._id,
+        name: data.ingestName,
+      });
+    }
+
+    if (
+      data &&
+      data.currentDeviceLabel !== "" &&
+      savedItem &&
+      "_id" in savedItem &&
+      "currentDeviceLabel" in item
+    ) {
+      if (deviceType === "input") {
+        const deviceInput = savedItem.deviceInput.find(
+          (d) => d.label === item.currentDeviceLabel
+        );
+        if (deviceInput) {
+          setEditIngestId({
+            _id: savedItem._id,
+            deviceInput: {
+              name: deviceInput.name,
+              label: data.currentDeviceLabel,
+            },
+          });
+        } else {
+          const deviceOutput = savedItem.deviceOutput.find(
+            (d) => d.label === data.currentDeviceLabel
+          );
+          if (deviceOutput) {
+            setEditIngestId({
+              _id: savedItem._id,
+              deviceOutput: {
+                name: deviceOutput.name,
+                label: data.currentDeviceLabel,
+              },
+            });
+          }
+        }
+      }
+    }
+
     setSavedItem(null);
     setIsEditingName(false);
   };
@@ -237,6 +306,9 @@ export const EditNameForm = <T extends EditableItem>({
 
   const saveButton =
     (formSubmitType === "productionName" && editProductionLoading) ||
+    ((formSubmitType === "ingestName" ||
+      formSubmitType === "currentDeviceLabel") &&
+      editIngestLoading) ||
     (formSubmitType !== "productionName" &&
       editLineLoading &&
       isCurrentLine) ? (

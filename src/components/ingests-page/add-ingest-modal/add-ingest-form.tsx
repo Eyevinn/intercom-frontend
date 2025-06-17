@@ -1,10 +1,13 @@
 import { SubmitHandler, useForm } from "react-hook-form";
+import { useEffect, useState } from "react";
 import { useSubmitOnEnter } from "../../../hooks/use-submit-form-enter-press";
 import { ButtonWrapper } from "../../generic-components";
 import { FormInput } from "../../form-elements/form-elements";
 import { FormItem } from "../../user-settings-form/form-item";
 import { FormWrapper, SubmitButton } from "../ingest-components";
-import logger from "../../../utils/logger";
+import { useCreateIngest } from "./use-create-ingest";
+import { Spinner } from "../../loader/loader";
+import { SpinnerWrapper } from "../../delete-button/delete-button-components";
 
 type FormValues = {
   ingestName: string;
@@ -16,6 +19,7 @@ type AddIngestFormProps = {
 };
 
 export const AddIngestForm = ({ onSave }: AddIngestFormProps) => {
+  const [createIngest, setCreateIngest] = useState<FormValues | null>(null);
   const {
     formState: { errors, isValid },
     register,
@@ -27,10 +31,17 @@ export const AddIngestForm = ({ onSave }: AddIngestFormProps) => {
     },
   });
 
+  const { loading, success } = useCreateIngest({ createIngest });
+
+  useEffect(() => {
+    if (success) {
+      setCreateIngest(null);
+      if (onSave) onSave();
+    }
+  }, [success, onSave]);
+
   const onSubmit: SubmitHandler<FormValues> = (data) => {
-    // TODO: when endpoint is ready, add create ingest function
-    logger.cyan(`onSubmit DATA: ${data.ingestName} ${data.ipAddress}`);
-    if (onSave) onSave();
+    setCreateIngest(data);
   };
 
   useSubmitOnEnter<FormValues>({
@@ -69,6 +80,11 @@ export const AddIngestForm = ({ onSave }: AddIngestFormProps) => {
           shouldSubmitOnEnter
         >
           Add Ingest
+          {loading && (
+            <SpinnerWrapper>
+              <Spinner className="production-list" />
+            </SpinnerWrapper>
+          )}
         </SubmitButton>
       </ButtonWrapper>
     </FormWrapper>

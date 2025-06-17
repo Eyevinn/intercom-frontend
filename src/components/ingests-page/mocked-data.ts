@@ -1,6 +1,6 @@
 export const mockedIngestData = [
   {
-    id: "1",
+    _id: "1",
     name: "Ingest 1",
     ipAddress: "192.168.1.1",
     deviceOutput: [
@@ -15,7 +15,7 @@ export const mockedIngestData = [
     ],
   },
   {
-    id: "2",
+    _id: "2",
     name: "Ingest 2",
     ipAddress: "192.168.1.2",
     deviceOutput: [
