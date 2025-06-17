@@ -19,6 +19,7 @@ import {
   DeviceTableRow,
   DeviceTableCell,
   StatusDot,
+  NoDevices,
 } from "./ingest-components";
 
 type ExpandedContentProps = {
@@ -55,59 +56,65 @@ export const ExpandedContent = ({
         </Text>
       </FormItem>
       <Wrapper>
-        {deviceTypes.map((deviceType) => (
-          <DeviceSection key={deviceType}>
-            <DecorativeLabel>
-              {deviceType === "deviceInput" ? "Input" : "Output"}
-            </DecorativeLabel>
-            <DeviceTable>
-              <DeviceTableHeader>
-                <DeviceTableHeaderCell>Name</DeviceTableHeaderCell>
-                <DeviceTableHeaderCell>Label</DeviceTableHeaderCell>
-                <DeviceTableHeaderCell>Status</DeviceTableHeaderCell>
-              </DeviceTableHeader>
-              {deviceType === "deviceOutput" || deviceType === "deviceInput"
-                ? ingest[deviceType].map(
-                    (d: { name: string; label: string }) => (
-                      <DeviceTableRow key={d.name}>
-                        <DeviceTableCell title={d.name}>
-                          {d.name.length > 40
-                            ? `${d.name.slice(0, 40)}...`
-                            : d.name}
-                        </DeviceTableCell>
-                        <DeviceTableCell>
-                          <EditNameForm
-                            item={{ ...ingest, currentDeviceLabel: d.label }}
-                            formSubmitType="currentDeviceLabel"
-                            managementMode
-                            className="device-label"
-                            setEditNameOpen={setEditNameOpen}
-                            deviceType={
-                              deviceType === "deviceInput" ? "input" : "output"
-                            }
-                            renderLabel={() => (
-                              <span
-                                title={d.label}
-                                style={{ marginRight: "1rem" }}
-                              >
-                                {d.label.length > 40
-                                  ? `${d.label.slice(0, 40)}...`
-                                  : d.label}
-                              </span>
-                            )}
-                            refresh={refresh}
-                          />
-                        </DeviceTableCell>
-                        <DeviceTableCell>
-                          <StatusDot isActive />
-                        </DeviceTableCell>
-                      </DeviceTableRow>
-                    )
-                  )
-                : null}
-            </DeviceTable>
-          </DeviceSection>
-        ))}
+        {deviceTypes.map((deviceType) => {
+          const devices =
+            deviceType === "deviceOutput" || deviceType === "deviceInput"
+              ? ingest[deviceType]
+              : [];
+          return (
+            <DeviceSection key={deviceType}>
+              <DecorativeLabel>
+                {deviceType === "deviceInput" ? "Input" : "Output"}
+              </DecorativeLabel>
+              <DeviceTable>
+                <DeviceTableHeader>
+                  <DeviceTableHeaderCell>Name</DeviceTableHeaderCell>
+                  <DeviceTableHeaderCell>Label</DeviceTableHeaderCell>
+                  <DeviceTableHeaderCell>Status</DeviceTableHeaderCell>
+                </DeviceTableHeader>
+                {devices.length === 0 ? (
+                  <NoDevices>No devices</NoDevices>
+                ) : (
+                  devices.map((d: { name: string; label: string }) => (
+                    <DeviceTableRow key={d.name}>
+                      <DeviceTableCell title={d.name}>
+                        {d.name.length > 40
+                          ? `${d.name.slice(0, 40)}...`
+                          : d.name}
+                      </DeviceTableCell>
+                      <DeviceTableCell>
+                        <EditNameForm
+                          item={{ ...ingest, currentDeviceLabel: d.label }}
+                          formSubmitType="currentDeviceLabel"
+                          managementMode
+                          className="device-label"
+                          setEditNameOpen={setEditNameOpen}
+                          deviceType={
+                            deviceType === "deviceInput" ? "input" : "output"
+                          }
+                          renderLabel={() => (
+                            <span
+                              title={d.label}
+                              style={{ marginRight: "1rem" }}
+                            >
+                              {d.label.length > 40
+                                ? `${d.label.slice(0, 40)}...`
+                                : d.label}
+                            </span>
+                          )}
+                          refresh={refresh}
+                        />
+                      </DeviceTableCell>
+                      <DeviceTableCell>
+                        <StatusDot isActive />
+                      </DeviceTableCell>
+                    </DeviceTableRow>
+                  ))
+                )}
+              </DeviceTable>
+            </DeviceSection>
+          );
+        })}
       </Wrapper>
       <ButtonsWrapper>
         <DeleteButton

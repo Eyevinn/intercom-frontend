@@ -267,7 +267,7 @@ export const EditNameForm = <T extends EditableItem>({
           });
         } else {
           const deviceOutput = savedItem.deviceOutput.find(
-            (d) => d.label === data.currentDeviceLabel
+            (d) => d.label === item.currentDeviceLabel
           );
           if (deviceOutput) {
             setEditIngestId({

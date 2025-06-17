@@ -38,6 +38,18 @@ export const Wrapper = styled.div`
   margin-top: 1rem;
 `;
 
+export const NoDevices = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: #888;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  padding: 1rem;
+`;
+
 export const DeviceWrapper = styled.div`
   background-color: #2a2a2a;
   border-radius: 0.5rem;
