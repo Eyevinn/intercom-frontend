@@ -36,12 +36,14 @@ export const IngestItem = ({ ingest, refresh }: IngestItemProps) => {
     <HeaderWrapper>
       <EditNameForm
         item={ingest}
-        formSubmitType="ingestName"
+        formSubmitType="ingestLabel"
         managementMode
         setEditNameOpen={setEditNameOpen}
-        renderLabel={(item) => (
-          <HeaderText title={item.name}>
-            {item.name.length > 40 ? `${item.name.slice(0, 40)}...` : item.name}
+        renderLabel={() => (
+          <HeaderText title={ingest.label}>
+            {ingest.label.length > 40
+              ? `${ingest.label.slice(0, 40)}...`
+              : ingest.label}
           </HeaderText>
         )}
         refresh={refresh}

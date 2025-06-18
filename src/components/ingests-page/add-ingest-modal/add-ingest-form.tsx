@@ -10,7 +10,7 @@ import { Spinner } from "../../loader/loader";
 import { SpinnerWrapper } from "../../delete-button/delete-button-components";
 
 type FormValues = {
-  ingestName: string;
+  ingestLabel: string;
   ipAddress: string;
 };
 
@@ -52,10 +52,10 @@ export const AddIngestForm = ({ onSave }: AddIngestFormProps) => {
 
   return (
     <FormWrapper>
-      <FormItem label="Name" fieldName="ingestName" errors={errors}>
+      <FormItem label="Name" fieldName="ingestLabel" errors={errors}>
         <FormInput
           // eslint-disable-next-line
-          {...register(`ingestName`, {
+          {...register(`ingestLabel`, {
             required: "Ingest name is required",
             minLength: 1,
           })}

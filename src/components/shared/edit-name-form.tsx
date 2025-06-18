@@ -16,7 +16,7 @@ import { TEditIngest } from "../../api/api";
 type FormValues = {
   productionName: string;
   [key: `lineName-${string}`]: string;
-  ingestName: string;
+  ingestLabel: string;
   deviceOutputLabel: string;
   deviceInputLabel: string;
   currentDeviceLabel: string;
@@ -31,9 +31,9 @@ type ProductionItem = BaseItem & {
   lines?: TLine[];
 };
 
-type IngestItem = BaseItem & {
+type IngestItem = {
   _id: string;
-  name: string;
+  label: string;
   deviceOutput: {
     name: string;
     label: string;
@@ -52,7 +52,7 @@ type EditNameFormProps<T extends EditableItem> = {
   formSubmitType:
     | `lineName-${string}`
     | "productionName"
-    | "ingestName"
+    | "ingestLabel"
     | "deviceOutputLabel"
     | "deviceInputLabel"
     | "currentDeviceLabel";
@@ -141,18 +141,26 @@ export const EditNameForm = <T extends EditableItem>({
     );
   };
 
-  const isUpdated = productionName !== savedItem?.name || hasLineChanges();
+  const isUpdated =
+    savedItem &&
+    "name" in savedItem &&
+    (productionName !== savedItem?.name || hasLineChanges());
 
   useEffect(() => {
     if (!savedItem) return;
 
     if (
-      (formSubmitType === "productionName" ||
-        formSubmitType === "ingestName") &&
+      formSubmitType === "productionName" &&
+      "name" in savedItem &&
       savedItem.name
     ) {
       setValue(formSubmitType, savedItem.name);
     }
+
+    if (formSubmitType === "ingestLabel" && "label" in savedItem) {
+      setValue(formSubmitType, savedItem.label);
+    }
+
     if (
       savedItem &&
       formSubmitType === "currentDeviceLabel" &&
@@ -196,16 +204,14 @@ export const EditNameForm = <T extends EditableItem>({
 
   const onSubmit: SubmitHandler<FormValues> = (data) => {
     if (
+      savedItem &&
+      "name" in savedItem &&
       data.productionName &&
       data.productionName !== "" &&
-      data.productionName !== savedItem?.name &&
-      savedItem?.name
+      data.productionName !== savedItem.name
     ) {
-      const productionId = isProduction(savedItem)
-        ? savedItem.productionId
-        : savedItem._id;
       setEditProductionId({
-        productionId,
+        productionId: savedItem.productionId,
         name: data.productionName,
       });
       return;
@@ -233,16 +239,16 @@ export const EditNameForm = <T extends EditableItem>({
     }
 
     if (
-      data.ingestName &&
-      data.ingestName !== "" &&
-      data.ingestName !== savedItem?.name &&
-      savedItem?.name &&
       savedItem &&
-      "_id" in savedItem
+      "_id" in savedItem &&
+      "label" in savedItem &&
+      data.ingestLabel &&
+      data.ingestLabel !== "" &&
+      data.ingestLabel !== savedItem.label
     ) {
       setEditIngestId({
         _id: savedItem._id,
-        name: data.ingestName,
+        label: data.ingestLabel,
       });
     }
 
@@ -289,7 +295,7 @@ export const EditNameForm = <T extends EditableItem>({
   useSubmitOnEnter<FormValues>({
     handleSubmit,
     submitHandler: onSubmit,
-    shouldSubmitOnEnter: isUpdated,
+    shouldSubmitOnEnter: isUpdated ?? false,
   });
 
   const handleClick = (e: React.MouseEvent) => {
@@ -306,7 +312,7 @@ export const EditNameForm = <T extends EditableItem>({
 
   const saveButton =
     (formSubmitType === "productionName" && editProductionLoading) ||
-    ((formSubmitType === "ingestName" ||
+    ((formSubmitType === "ingestLabel" ||
       formSubmitType === "currentDeviceLabel") &&
       editIngestLoading) ||
     (formSubmitType !== "productionName" &&

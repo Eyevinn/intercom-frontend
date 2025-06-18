@@ -1,7 +1,7 @@
 export const mockedIngestData = [
   {
     _id: "1",
-    name: "Ingest 1",
+    label: "Ingest 1",
     ipAddress: "192.168.1.1",
     deviceOutput: [
       { name: "Output 1", label: "Output 1" },
@@ -16,7 +16,7 @@ export const mockedIngestData = [
   },
   {
     _id: "2",
-    name: "Ingest 2",
+    label: "Ingest 2",
     ipAddress: "192.168.1.2",
     deviceOutput: [
       { name: "Output 1", label: "Output 1" },

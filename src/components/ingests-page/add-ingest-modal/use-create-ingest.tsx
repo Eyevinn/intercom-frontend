@@ -2,7 +2,7 @@ import { API } from "../../../api/api";
 import { useRequest } from "../../../hooks/use-request";
 
 type FormValues = {
-  ingestName: string;
+  ingestLabel: string;
   ipAddress: string;
 };
 
@@ -11,14 +11,14 @@ export const useCreateIngest = ({
 }: {
   createIngest: FormValues | null;
 }) => {
-  return useRequest<{ name: string; ipAddress: string }, boolean>({
+  return useRequest<{ label: string; ipAddress: string }, boolean>({
     params: createIngest
       ? {
-          name: createIngest.ingestName,
+          label: createIngest.ingestLabel,
           ipAddress: createIngest.ipAddress,
         }
       : null,
     apiCall: API.createIngest,
-    errorMessage: (i) => `Failed to create ingest: ${i.name}`,
+    errorMessage: (i) => `Failed to create ingest: ${i.label}`,
   });
 };

@@ -133,7 +133,7 @@ export const ExpandedContent = ({
       {displayConfirmationModal && (
         <ConfirmationModal
           title="Delete Ingest"
-          description={`You are about to delete the ingest: ${ingest.name}`}
+          description={`You are about to delete the ingest: ${ingest.label}`}
           confirmationText="Are you sure?"
           onCancel={() => setDisplayConfirmationModal(false)}
           onConfirm={() => setRemoveIngestId(ingest._id)}

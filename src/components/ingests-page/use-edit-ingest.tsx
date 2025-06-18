@@ -6,6 +6,6 @@ export const useEditIngest = (params: TEditIngest | null) => {
     params,
     apiCall: API.updateIngest,
     errorMessage: (i) =>
-      `Failed to edit ingest: ${i.name} ${i.deviceOutput?.label} ${i.deviceInput?.label}`,
+      `Failed to edit ingest: ${i.label} ${i.deviceOutput?.label} ${i.deviceInput?.label}`,
   });
 };

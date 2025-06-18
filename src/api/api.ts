@@ -34,7 +34,7 @@ export type TBasicProductionResponse = {
 
 export type TSavedIngest = {
   _id: string;
-  name: string;
+  label: string;
   ipAddress: string;
   deviceOutput: {
     name: string;
@@ -48,7 +48,7 @@ export type TSavedIngest = {
 
 export type TEditIngest = {
   _id: string;
-  name?: string;
+  label?: string;
   deviceOutput?: {
     name: string;
     label: string;
@@ -334,7 +334,7 @@ export const API = {
         },
       })
     ),
-  createIngest: async (data: { name: string; ipAddress: string }) =>
+  createIngest: async (data: { label: string; ipAddress: string }) =>
     handleFetchRequest<boolean>(
       fetch(`${API_URL}ingest/`, {
         method: "POST",
@@ -343,7 +343,7 @@ export const API = {
           ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
         },
         body: JSON.stringify({
-          name: data.name,
+          label: data.label,
           ipAddress: data.ipAddress,
         }),
       })
@@ -366,7 +366,7 @@ export const API = {
           ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
         },
         body: JSON.stringify({
-          name: data.name,
+          label: data.label,
           deviceOutput: data.deviceOutput,
           deviceInput: data.deviceInput,
         }),
