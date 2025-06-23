@@ -1,17 +1,17 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { FormInput, FormLabel } from "../form-elements/form-elements";
-import { EditNameWrapper, NameEditButton } from "./shared-components";
-import { SaveIcon, EditIcon } from "../../assets/icons/icon";
-import { Spinner } from "../loader/loader";
-import { useSubmitOnEnter } from "../../hooks/use-submit-form-enter-press";
-import { useEditLineName } from "../manage-productions-page/use-edit-line-name";
-import { useEditProductionName } from "../manage-productions-page/use-edit-production-name";
+import { TAudioDevice, TEditIngest } from "../../api/api";
+import { EditIcon, SaveIcon } from "../../assets/icons/icon";
 import { useGlobalState } from "../../global-state/context-provider";
 import { useOutsideClickHandler } from "../../hooks/use-outside-click-handler";
-import { TLine } from "../production-line/types";
+import { useSubmitOnEnter } from "../../hooks/use-submit-form-enter-press";
+import { FormInput, FormLabel } from "../form-elements/form-elements";
 import { useEditIngest } from "../ingests-page/use-edit-ingest";
-import { TEditIngest } from "../../api/api";
+import { Spinner } from "../loader/loader";
+import { useEditLineName } from "../manage-productions-page/use-edit-line-name";
+import { useEditProductionName } from "../manage-productions-page/use-edit-production-name";
+import { TLine } from "../production-line/types";
+import { EditNameWrapper, NameEditButton } from "./shared-components";
 
 type FormValues = {
   productionName: string;
@@ -34,14 +34,8 @@ type ProductionItem = BaseItem & {
 type IngestItem = {
   _id: string;
   label: string;
-  deviceOutput: {
-    name: string;
-    label: string;
-  }[];
-  deviceInput: {
-    name: string;
-    label: string;
-  }[];
+  deviceOutput: TAudioDevice[];
+  deviceInput: TAudioDevice[];
   currentDeviceLabel?: string;
 };
 
@@ -261,29 +255,27 @@ export const EditNameForm = <T extends EditableItem>({
     ) {
       if (deviceType === "input") {
         const deviceInput = savedItem.deviceInput.find(
-          (d) => d.label === item.currentDeviceLabel
+          (d) =>
+            d.label === item.currentDeviceLabel ||
+            d.name === item.currentDeviceLabel
         );
         if (deviceInput) {
           setEditIngestId({
             _id: savedItem._id,
-            deviceInput: {
-              name: deviceInput.name,
-              label: data.currentDeviceLabel,
-            },
+            deviceInput: { ...deviceInput, label: data.currentDeviceLabel },
           });
-        } else {
-          const deviceOutput = savedItem.deviceOutput.find(
-            (d) => d.label === item.currentDeviceLabel
-          );
-          if (deviceOutput) {
-            setEditIngestId({
-              _id: savedItem._id,
-              deviceOutput: {
-                name: deviceOutput.name,
-                label: data.currentDeviceLabel,
-              },
-            });
-          }
+        }
+      } else if (deviceType === "output") {
+        const deviceOutput = savedItem.deviceOutput.find(
+          (d) =>
+            d.label === item.currentDeviceLabel ||
+            d.name === item.currentDeviceLabel
+        );
+        if (deviceOutput) {
+          setEditIngestId({
+            _id: savedItem._id,
+            deviceOutput: { ...deviceOutput, label: data.currentDeviceLabel },
+          });
         }
       }
     }

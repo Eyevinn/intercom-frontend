@@ -1,4 +1,4 @@
-import { TSavedIngest } from "../../api/api";
+import { TAudioDevice, TSavedIngest } from "../../api/api";
 import {
   ButtonsWrapper,
   DeleteButton,
@@ -10,16 +10,16 @@ import { EditNameForm } from "../shared/edit-name-form";
 import { FormItem } from "../user-settings-form/form-item";
 import { ConfirmationModal } from "../verify-decision/confirmation-modal";
 import {
-  Text,
-  Wrapper,
   DeviceSection,
   DeviceTable,
+  DeviceTableCell,
   DeviceTableHeader,
   DeviceTableHeaderCell,
   DeviceTableRow,
-  DeviceTableCell,
-  StatusDot,
   NoDevices,
+  StatusDot,
+  Text,
+  Wrapper,
 } from "./ingest-components";
 
 type ExpandedContentProps = {
@@ -75,7 +75,7 @@ export const ExpandedContent = ({
                 {devices.length === 0 ? (
                   <NoDevices>No devices</NoDevices>
                 ) : (
-                  devices.map((d: { name: string; label: string }) => (
+                  devices.map((d: TAudioDevice) => (
                     <DeviceTableRow key={d.name}>
                       <DeviceTableCell title={d.name}>
                         {d.name.length > 40
@@ -84,7 +84,10 @@ export const ExpandedContent = ({
                       </DeviceTableCell>
                       <DeviceTableCell>
                         <EditNameForm
-                          item={{ ...ingest, currentDeviceLabel: d.label }}
+                          item={{
+                            ...ingest,
+                            currentDeviceLabel: d.label || d.name,
+                          }}
                           formSubmitType="currentDeviceLabel"
                           managementMode
                           className="device-label"
@@ -97,7 +100,7 @@ export const ExpandedContent = ({
                               title={d.label}
                               style={{ marginRight: "1rem" }}
                             >
-                              {d.label.length > 40
+                              {d.label && d.label.length > 40
                                 ? `${d.label.slice(0, 40)}...`
                                 : d.label}
                             </span>
