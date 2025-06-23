@@ -32,31 +32,34 @@ export type TBasicProductionResponse = {
   lines: TLine[];
 };
 
+export type TAudioDevice = {
+  name: string;
+  maxInputChannels: number;
+  maxOutputChannels: number;
+  defaultSampleRate: number;
+  defaultLowInputLatency: number;
+  defaultLowOutputLatency: number;
+  defaultHighInputLatency: number;
+  defaultHighOutputLatency: number;
+  isInput: boolean;
+  isOutput: boolean;
+  hostApiName: string;
+  label?: string;
+};
+
 export type TSavedIngest = {
   _id: string;
   label: string;
   ipAddress: string;
-  deviceOutput: {
-    name: string;
-    label: string;
-  }[];
-  deviceInput: {
-    name: string;
-    label: string;
-  }[];
+  deviceOutput: TAudioDevice[];
+  deviceInput: TAudioDevice[];
 };
 
 export type TEditIngest = {
   _id: string;
   label?: string;
-  deviceOutput?: {
-    name: string;
-    label: string;
-  };
-  deviceInput?: {
-    name: string;
-    label: string;
-  };
+  deviceOutput?: TAudioDevice;
+  deviceInput?: TAudioDevice;
 };
 
 export type TListIngestResponse = {
@@ -327,7 +330,7 @@ export const API = {
   },
   fetchIngestList: (): Promise<TListIngestResponse> =>
     handleFetchRequest<TListIngestResponse>(
-      fetch(`${API_URL}ingestlist`, {
+      fetch(`${API_URL}ingest`, {
         method: "GET",
         headers: {
           ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
