@@ -1,7 +1,7 @@
 import styled from "@emotion/styled";
 import { useState } from "react";
 import { ShareIcon } from "../../assets/icons/icon";
-import { PrimaryButton } from "../landing-page/form-elements";
+import { PrimaryButton } from "../form-elements/form-elements";
 import { ShareLineLinkModal } from "./share-line-link-modal";
 import { useShareUrl } from "../../hooks/use-share-url";
 

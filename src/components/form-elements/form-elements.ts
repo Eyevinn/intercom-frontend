@@ -40,6 +40,10 @@ export const FormInput = styled.input`
 
   &.edit-name {
     margin: 0;
+
+    &.device-label {
+      font-size: 1.2rem;
+    }
   }
 `;
 
@@ -52,6 +56,12 @@ export const FormSelect = styled.select`
   border-radius: 0.5rem;
   background: #32383b;
   color: white;
+
+  &.ingest {
+    display: flex;
+    align-items: center;
+    margin: 0 1rem 0 0;
+  }
 `;
 
 export const FormLabel = styled.label`

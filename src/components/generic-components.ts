@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { FormContainer } from "./landing-page/form-elements";
+import { FormContainer } from "./form-elements/form-elements";
 import { isMobile } from "../bowser";
 
 // Screen size breakpoints based on width

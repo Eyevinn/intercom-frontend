@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { PrimaryButton } from "../landing-page/form-elements";
+import { PrimaryButton } from "../form-elements/form-elements";
 import { useCopyLinks } from "./use-copy-links";
 import { TProduction } from "../production-line/types";
 import { CheckIcon } from "../../assets/icons/icon";

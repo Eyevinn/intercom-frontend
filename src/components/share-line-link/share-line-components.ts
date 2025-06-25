@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { FormLabel } from "../landing-page/form-elements";
+import { FormLabel } from "../form-elements/form-elements";
 
 export const Wrapper = styled.div`
   margin-top: 2rem;

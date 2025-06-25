@@ -12,10 +12,7 @@ import { DisplayWarning } from "../display-box.tsx";
 import { FlexContainer } from "../generic-components.ts";
 import { useFetchProduction } from "../landing-page/use-fetch-production.ts";
 import { Spinner } from "../loader/loader.tsx";
-import {
-  InnerDiv,
-  ProductionLines,
-} from "../production-list/production-list-components.ts";
+import { ExpandableSection, InnerDiv } from "../shared/shared-components.ts";
 import { ConfirmationModal } from "../verify-decision/confirmation-modal.tsx";
 import { CallHeaderComponent } from "./call-header.tsx";
 import { CollapsableSection } from "./collapsable-section.tsx";
@@ -472,7 +469,7 @@ export const ProductionLine = ({
               productionId={joinProductionOptions.productionId}
             />
           )}
-          <ProductionLines className={open ? "expanded" : ""}>
+          <ExpandableSection className={open ? "expanded" : ""}>
             <InnerDiv>
               {joinProductionOptions && !loading && (
                 <FlexContainer>
@@ -596,7 +593,7 @@ export const ProductionLine = ({
                 />
               )}
             </InnerDiv>
-          </ProductionLines>
+          </ExpandableSection>
         </CallContainer>
       )}
     </CallWrapper>

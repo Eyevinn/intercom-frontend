@@ -11,7 +11,7 @@ import {
   FormSelect,
   PrimaryButton,
   StyledWarningMessage,
-} from "../landing-page/form-elements";
+} from "../form-elements/form-elements";
 import {
   CheckboxWrapper,
   FetchErrorMessage,
