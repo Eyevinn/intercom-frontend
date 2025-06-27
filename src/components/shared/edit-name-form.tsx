@@ -167,19 +167,21 @@ export const EditNameForm = <T extends EditableItem>({
   }, [isSuccess, setEditNameOpen, dispatch, refresh]);
 
   const onSubmit: SubmitHandler<FormValues> = (data) => {
-    if (!savedItem) return;
-
     if (
+      savedItem &&
       "name" in savedItem &&
       data.productionName &&
       data.productionName !== "" &&
       data.productionName !== savedItem.name
     ) {
       editProductionName(savedItem.productionId, data.productionName);
-      return;
     }
 
-    if (formSubmitType.startsWith("lineName-") && isProduction(savedItem)) {
+    if (
+      savedItem &&
+      formSubmitType.startsWith("lineName-") &&
+      isProduction(savedItem)
+    ) {
       const currentLineIndex = parseInt(
         formSubmitType.toString().split("-")[1],
         10
@@ -189,11 +191,12 @@ export const EditNameForm = <T extends EditableItem>({
 
       if (currentLine && newName !== "" && currentLine.name !== newName) {
         editLineName(savedItem.productionId, currentLine.id, newName);
+        return;
       }
-      return;
     }
 
     if (
+      savedItem &&
       "_id" in savedItem &&
       "label" in savedItem &&
       data.ingestLabel &&
@@ -205,6 +208,7 @@ export const EditNameForm = <T extends EditableItem>({
     }
 
     if (
+      savedItem &&
       data.currentDeviceLabel !== "" &&
       "_id" in savedItem &&
       "currentDeviceLabel" in item &&
