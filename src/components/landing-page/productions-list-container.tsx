@@ -66,19 +66,27 @@ export const ProductionsListContainer = () => {
     navigate("/manage-productions");
   };
 
+  const goToIngests = () => {
+    navigate("/ingests");
+  };
+
   return (
     <>
       <PageHeader title="Productions" loading={showRefreshing}>
         {!isMobile && (
           <>
+            <HeaderButton onClick={goToIngests}>
+              <HeaderButtonText>Ingests</HeaderButtonText>
+              <EditIcon />
+            </HeaderButton>
             {!!productions?.productions.length && (
               <HeaderButton onClick={goToManage}>
-                <HeaderButtonText>Manage</HeaderButtonText>
+                <HeaderButtonText>Productions</HeaderButtonText>
                 <EditIcon />
               </HeaderButton>
             )}
             <HeaderButton onClick={goToCreate}>
-              <HeaderButtonText>Create</HeaderButtonText>
+              <HeaderButtonText>Create Production</HeaderButtonText>
               <AddIcon />
             </HeaderButton>
           </>

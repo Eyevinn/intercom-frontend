@@ -48,5 +48,6 @@ module.exports = {
       { allowConstantExport: true },
     ],
     "no-console": "off",
+    "no-underscore-dangle": "off",
   },
 };

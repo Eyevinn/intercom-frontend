@@ -8,11 +8,16 @@ import { useSubmitOnEnter } from "../../hooks/use-submit-form-enter-press";
 import { useGlobalState } from "../../global-state/context-provider";
 import { useOutsideClickHandler } from "../../hooks/use-outside-click-handler";
 import { TLine } from "../production-line/types";
+import { TIngest } from "../../api/api";
 import { useEditActions } from "./use-edit-actions";
 
 type FormValues = {
   productionName: string;
   [key: `lineName-${string}`]: string;
+  ingestLabel: string;
+  deviceOutputLabel: string;
+  deviceInputLabel: string;
+  currentDeviceLabel: string;
 };
 
 type BaseItem = {
@@ -24,9 +29,21 @@ type ProductionItem = BaseItem & {
   lines?: TLine[];
 };
 
-type EditNameFormProps<T extends ProductionItem> = {
+type IngestItem = TIngest & {
+  currentDeviceLabel?: string;
+};
+
+type EditableItem = ProductionItem | IngestItem;
+
+type EditNameFormProps<T extends EditableItem> = {
   item: T;
-  formSubmitType: `lineName-${string}` | "productionName";
+  formSubmitType:
+    | `lineName-${string}`
+    | "productionName"
+    | "ingestLabel"
+    | "deviceOutputLabel"
+    | "deviceInputLabel"
+    | "currentDeviceLabel";
   managementMode: boolean;
   setEditNameOpen: (editNameOpen: boolean) => void;
   renderLabel: (
@@ -35,19 +52,23 @@ type EditNameFormProps<T extends ProductionItem> = {
     managementMode?: boolean
   ) => React.ReactNode;
   className?: string;
+  deviceType?: "input" | "output";
+  refresh?: () => void;
 };
 
-const isProduction = (item: ProductionItem): item is ProductionItem => {
+const isProduction = (item: EditableItem): item is ProductionItem => {
   return "productionId" in item;
 };
 
-export const EditNameForm = <T extends ProductionItem>({
+export const EditNameForm = <T extends EditableItem>({
   item,
   formSubmitType,
   managementMode,
   setEditNameOpen,
   renderLabel,
   className,
+  deviceType,
+  refresh,
 }: EditNameFormProps<T>) => {
   const [isEditingName, setIsEditingName] = useState<boolean>(false);
   const [savedItem, setSavedItem] = useState<T | null>(null);
@@ -55,8 +76,14 @@ export const EditNameForm = <T extends ProductionItem>({
 
   const [, dispatch] = useGlobalState();
 
-  const { editProductionName, editLineName, isLoading, isSuccess } =
-    useEditActions();
+  const {
+    editProductionName,
+    editLineName,
+    editIngestLabel,
+    editIngestDevice,
+    isLoading,
+    isSuccess,
+  } = useEditActions();
 
   useOutsideClickHandler(wrapperRef, () => {
     if (isEditingName) {
@@ -105,6 +132,21 @@ export const EditNameForm = <T extends ProductionItem>({
       setValue(formSubmitType, savedItem.name);
     }
 
+    if (
+      formSubmitType === "ingestLabel" &&
+      "label" in savedItem &&
+      savedItem.label
+    ) {
+      setValue(formSubmitType, savedItem.label);
+    }
+
+    if (
+      savedItem &&
+      formSubmitType === "currentDeviceLabel" &&
+      "currentDeviceLabel" in savedItem
+    ) {
+      setValue(formSubmitType, savedItem.currentDeviceLabel || "");
+    }
     if (savedItem && isProduction(savedItem) && savedItem.lines) {
       savedItem.lines.forEach((l, index) => {
         setValue(`lineName-${index}`, l.name);
@@ -117,15 +159,17 @@ export const EditNameForm = <T extends ProductionItem>({
       setEditNameOpen?.(false);
       setIsEditingName(false);
       setSavedItem(null);
+      refresh?.();
       dispatch({
         type: "PRODUCTION_UPDATED",
       });
     }
-  }, [isSuccess, setEditNameOpen, dispatch]);
+  }, [isSuccess, setEditNameOpen, dispatch, refresh]);
 
   const onSubmit: SubmitHandler<FormValues> = (data) => {
+    if (!savedItem) return;
+
     if (
-      savedItem &&
       "name" in savedItem &&
       data.productionName &&
       data.productionName !== "" &&
@@ -135,11 +179,7 @@ export const EditNameForm = <T extends ProductionItem>({
       return;
     }
 
-    if (
-      savedItem &&
-      formSubmitType.startsWith("lineName-") &&
-      isProduction(savedItem)
-    ) {
+    if (formSubmitType.startsWith("lineName-") && isProduction(savedItem)) {
       const currentLineIndex = parseInt(
         formSubmitType.toString().split("-")[1],
         10
@@ -149,8 +189,33 @@ export const EditNameForm = <T extends ProductionItem>({
 
       if (currentLine && newName !== "" && currentLine.name !== newName) {
         editLineName(savedItem.productionId, currentLine.id, newName);
-        return;
       }
+      return;
+    }
+
+    if (
+      "_id" in savedItem &&
+      "label" in savedItem &&
+      data.ingestLabel &&
+      data.ingestLabel !== "" &&
+      data.ingestLabel !== savedItem.label
+    ) {
+      editIngestLabel(savedItem as TIngest, data.ingestLabel);
+      return;
+    }
+
+    if (
+      data.currentDeviceLabel !== "" &&
+      "_id" in savedItem &&
+      "currentDeviceLabel" in item &&
+      deviceType
+    ) {
+      editIngestDevice(
+        savedItem as TIngest,
+        deviceType,
+        item.currentDeviceLabel!,
+        data.currentDeviceLabel
+      );
     }
 
     setSavedItem(null);

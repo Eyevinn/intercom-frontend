@@ -7,7 +7,7 @@ import { VerifyDecision } from "./verify-decision";
 
 interface ConfirmationModalProps {
   title: string;
-  description: string;
+  description: React.ReactNode;
   confirmationText?: string;
   shouldSubmitOnEnter?: boolean;
   onCancel: () => void;
