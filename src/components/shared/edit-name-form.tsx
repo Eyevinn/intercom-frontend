@@ -60,7 +60,7 @@ const isProduction = (item: EditableItem): item is ProductionItem => {
   return "productionId" in item;
 };
 
-export const EditNameForm = <T extends EditableItem>({
+export const EditNameForm = <T extends ProductionItem>({
   item,
   formSubmitType,
   managementMode,
@@ -147,6 +147,7 @@ export const EditNameForm = <T extends EditableItem>({
     ) {
       setValue(formSubmitType, savedItem.currentDeviceLabel || "");
     }
+
     if (savedItem && isProduction(savedItem) && savedItem.lines) {
       savedItem.lines.forEach((l, index) => {
         setValue(`lineName-${index}`, l.name);
@@ -175,6 +176,7 @@ export const EditNameForm = <T extends EditableItem>({
       data.productionName !== savedItem.name
     ) {
       editProductionName(savedItem.productionId, data.productionName);
+      return;
     }
 
     if (
