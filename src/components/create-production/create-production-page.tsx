@@ -6,7 +6,7 @@ import {
 } from "react-hook-form";
 import { useEffect, useState } from "react";
 import { DisplayContainerHeader } from "../landing-page/display-container-header.tsx";
-import { FormInput } from "../landing-page/form-elements.tsx";
+import { FormInput } from "../form-elements/form-elements.ts";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
 import {
   ListItemWrapper,

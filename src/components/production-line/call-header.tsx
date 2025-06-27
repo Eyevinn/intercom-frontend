@@ -5,12 +5,11 @@ import {
   TVIcon,
 } from "../../assets/icons/icon";
 import {
-  HeaderTexts,
   ProductionName,
   ParticipantCount,
-  HeaderIcon,
   ParticipantCountWrapper,
 } from "../production-list/production-list-components";
+import { HeaderTexts, HeaderIcon } from "../shared/shared-components";
 import { AudioFeedIcon, CallHeader } from "./production-line-components";
 import { TLine, TProduction } from "./types";
 

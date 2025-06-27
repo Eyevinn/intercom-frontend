@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { ActionButton } from "../landing-page/form-elements";
+import { ActionButton } from "../form-elements/form-elements";
 import { Spinner } from "../loader/loader";
 import { RemoveButton } from "../remove-button/remove-button";
 

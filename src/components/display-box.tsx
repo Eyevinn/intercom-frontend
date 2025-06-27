@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { PrimaryButton } from "./landing-page/form-elements";
+import { PrimaryButton } from "./form-elements/form-elements";
 
 const borderRadius = 0.5;
 

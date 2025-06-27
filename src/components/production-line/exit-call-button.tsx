@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 import { LogoutIcon } from "../../assets/icons/icon";
-import { PrimaryButton } from "../landing-page/form-elements";
+import { PrimaryButton } from "../form-elements/form-elements";
 
 const StyledBackBtn = styled(PrimaryButton)`
   margin-top: 1rem;

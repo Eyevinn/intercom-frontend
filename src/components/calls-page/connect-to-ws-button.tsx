@@ -5,7 +5,7 @@ import { useGlobalState } from "../../global-state/context-provider";
 import { useWebSocket } from "../../hooks/use-websocket";
 import { useWebsocketActions } from "../../hooks/use-websocket-actions";
 import { useWebsocketReconnect } from "../../hooks/use-websocket-reconnect";
-import { PrimaryButton } from "../landing-page/form-elements";
+import { PrimaryButton } from "../form-elements/form-elements";
 import { Spinner } from "../loader/loader";
 import { ConnectToWsModal } from "./connect-to-ws-modal";
 

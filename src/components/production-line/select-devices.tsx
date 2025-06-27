@@ -9,7 +9,7 @@ import {
   FormSelect,
   PrimaryButton,
   StyledWarningMessage,
-} from "../landing-page/form-elements";
+} from "../form-elements/form-elements";
 import { ReloadDevicesButton } from "../reload-devices-button.tsx/reload-devices-button";
 import { DeviceButtonWrapper } from "./production-line-components";
 import { TJoinProductionOptions, TLine } from "./types";

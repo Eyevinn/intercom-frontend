@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 import React from "react";
-import { ActionButton } from "../landing-page/form-elements";
+import { ActionButton } from "../form-elements/form-elements";
 
 const RemoveBtn = styled(ActionButton)<{ shouldSubmitOnEnter?: boolean }>`
   cursor: pointer;
@@ -10,9 +10,8 @@ const RemoveBtn = styled(ActionButton)<{ shouldSubmitOnEnter?: boolean }>`
   z-index: 1;
   outline: ${({ shouldSubmitOnEnter }) =>
     shouldSubmitOnEnter ? "2px solid #007bff" : "none"};
-  outline-offset: (
-    {({shouldSubmitOnEnter}) => (shouldSubmitOnEnter ? "2px": "0")}
-  );
+  outline-offset: ${({ shouldSubmitOnEnter }) =>
+    shouldSubmitOnEnter ? "2px" : "0"};
 
   &:active:enabled {
     background: #ab5252;
