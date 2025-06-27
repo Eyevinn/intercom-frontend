@@ -16,6 +16,15 @@ export const useSetupTokenRefresh = () => {
     intervalRef.current = setInterval(
       () => {
         API.reauth().catch((error) => {
+          const is500Error =
+            error.message.includes("500") ||
+            error.message.includes("Response Code: 500");
+
+          if (is500Error) {
+            // Don't dispatch 500 errors as they're expected when inital OSC token expires
+            return;
+          }
+
           dispatch({
             type: "ERROR",
             payload: {
