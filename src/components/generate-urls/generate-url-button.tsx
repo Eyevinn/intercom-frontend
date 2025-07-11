@@ -13,12 +13,12 @@ const Wrapper = styled.div`
 const GenerateButton = styled(PrimaryButton)<{ isMinified: boolean }>`
   cursor: pointer;
   padding: ${({ isMinified }: { isMinified: boolean }) =>
-    isMinified && isMobile ? "0.5rem 1rem" : "0.5rem 2rem"};
+    isMinified && isMobile ? "0.5rem 1rem" : "0.5rem 1rem"};
   z-index: 1;
   width: fit-content;
   margin-top: 1rem;
   justify-self: flex-end;
-  height: ${({ isMinified }) => (isMinified ? "4rem" : "auto")};
+  height: ${({ isMinified }) => (isMinified ? "4.5rem" : "auto")};
   min-height: 3.5rem;
   display: flex;
   align-items: center;
