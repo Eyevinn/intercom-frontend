@@ -1,15 +1,15 @@
 import styled from "@emotion/styled";
+import { isIpad, isMobile } from "../../bowser";
+import { ActionButton } from "../form-elements/form-elements";
 import {
   DisplayContainer,
   FlexContainer,
   mediaQueries,
 } from "../generic-components";
-import { ActionButton } from "../form-elements/form-elements";
 import {
-  HeaderWrapper,
   CollapsibleItemWrapper,
+  HeaderWrapper,
 } from "../shared/shared-components";
-import { isIpad, isMobile } from "../../bowser";
 
 export const CallInfo = styled.div`
   display: flex;
@@ -232,4 +232,11 @@ export const MinifiedControlsButton = styled(UserControlBtn)`
       fill: #6fd84f;
     }
   }
+`;
+
+export const UrlButtonsWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
 `;

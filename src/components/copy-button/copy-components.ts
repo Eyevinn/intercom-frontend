@@ -47,6 +47,7 @@ export const NoteWrapper = styled.div`
 
 export const CopyIconWrapper = styled.div<{
   isCopied?: boolean;
+  disabled?: boolean;
 }>`
   display: flex;
   padding: 0.5rem;
@@ -59,9 +60,27 @@ export const CopyIconWrapper = styled.div<{
     !isCopied &&
     `
     &:active {
-    transform: scale(0.95);
-    background: rgba(0, 0, 0, 0.4);
-  }
+      transform: scale(0.95);
+      background: rgba(0, 0, 0, 0.4);
+    }
+  `}
+
+  ${({ disabled }) =>
+    disabled &&
+    `
+    pointer-events: none;
+    opacity: 0.5;
+    cursor: default;
+
+    &:hover,
+    &:active {
+      background: none !important;
+      transform: none !important;
+    }
+
+    svg {
+      transform: none !important;
+    }
   `}
 
   &.production-list-item {
@@ -78,6 +97,7 @@ export const CopyIconWrapper = styled.div<{
 
   svg {
     fill: #59cbe8;
+    transition: transform 0.2s ease;
   }
 
   &:hover svg {

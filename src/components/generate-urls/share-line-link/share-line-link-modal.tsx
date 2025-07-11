@@ -1,18 +1,18 @@
 import { useEffect, useRef, useState } from "react";
-import { DecorativeLabel, FormInput } from "../form-elements/form-elements";
-import { Modal } from "../modal/modal";
-import { CopyButton } from "../copy-button/copy-button";
-import { RefreshButton } from "../refresh-button/refresh-button";
+import { CopyButton } from "../../copy-button/copy-button";
+import { DecorativeLabel, FormInput } from "../../form-elements/form-elements";
+import { Modal } from "../../modal/modal";
+import { RefreshButton } from "../../refresh-button/refresh-button";
 import {
+  InputWrapper,
+  LinkLabel,
   ModalHeader,
-  ModalText,
   ModalNoteWrapper,
+  ModalText,
   ModalTextBold,
   ModalTextItalic,
   Wrapper,
-  InputWrapper,
-  LinkLabel,
-} from "./share-line-components";
+} from "../generate-urls-components";
 
 type TShareLineLinkModalProps = {
   urls: string[];
