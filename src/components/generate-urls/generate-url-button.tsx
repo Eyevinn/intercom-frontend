@@ -1,5 +1,6 @@
 import styled from "@emotion/styled";
 import { ReactNode, useState } from "react";
+import { isMobile } from "../../bowser";
 import { PrimaryButton } from "../form-elements/form-elements";
 
 const Wrapper = styled.div`
@@ -9,13 +10,18 @@ const Wrapper = styled.div`
   align-items: center;
 `;
 
-const GenerateButton = styled(PrimaryButton)`
+const GenerateButton = styled(PrimaryButton)<{ isMinified: boolean }>`
   cursor: pointer;
-  padding: 1rem;
+  padding: ${({ isMinified }: { isMinified: boolean }) =>
+    isMinified && isMobile ? "0.5rem 1rem" : "0.5rem 2rem"};
   z-index: 1;
   width: fit-content;
   margin-top: 1rem;
   justify-self: flex-end;
+  height: ${({ isMinified }) => (isMinified ? "4rem" : "auto")};
+  min-height: 3.5rem;
+  display: flex;
+  align-items: center;
 `;
 
 const IconWrapper = styled.div`
@@ -55,7 +61,7 @@ export const GenerateUrlButton = ({
 
   return (
     <div>
-      <GenerateButton onClick={handleClick}>
+      <GenerateButton isMinified={isMinified} onClick={handleClick}>
         <Wrapper>
           {icon && <IconWrapper isMinified={isMinified}>{icon}</IconWrapper>}
           {!isMinified && isShareLine && label}
