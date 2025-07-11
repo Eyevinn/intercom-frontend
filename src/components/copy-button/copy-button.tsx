@@ -1,18 +1,20 @@
-import { CopyIcon, CheckIcon } from "../../assets/icons/icon";
-import { useCopyLinks } from "./use-copy-links";
+import { CheckIcon, CopyIcon } from "../../assets/icons/icon";
 import { CopyIconWrapper } from "./copy-components";
+import { useCopyLinks } from "./use-copy-links";
 
 export const CopyButton = ({
   urls,
   className,
+  disabled,
 }: {
   urls: string[];
-  className: string;
+  className?: string;
+  disabled?: boolean;
 }) => {
   const { isCopied, handleCopyUrlToClipboard } = useCopyLinks();
 
   const handleCopy = () => {
-    if (isCopied) return;
+    if (isCopied || disabled) return;
 
     handleCopyUrlToClipboard(urls);
   };
@@ -23,6 +25,7 @@ export const CopyButton = ({
       isCopied={isCopied}
       onClick={handleCopy}
       className={className}
+      disabled={disabled}
     >
       {isCopied ? <CheckIcon /> : <CopyIcon />}
     </CopyIconWrapper>

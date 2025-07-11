@@ -1,10 +1,10 @@
-import { useState, useCallback } from "react";
+import { useCallback, useState } from "react";
+import { TBasicProductionResponse } from "../../api/api";
 import { ShareIcon } from "../../assets/icons/icon";
 import { useShareUrl } from "../../hooks/use-share-url";
-import { ShareLineLinkModal } from "../share-line-link/share-line-link-modal";
-import { TLine } from "../production-line/types";
-import { TBasicProductionResponse } from "../../api/api";
 import { CopyIconWrapper } from "../copy-button/copy-components";
+import { ShareLineLinkModal } from "../generate-urls/share-line-link/share-line-link-modal";
+import { TLine } from "../production-line/types";
 
 export const CopyLink = ({
   production,

@@ -4,6 +4,8 @@ import {
   SpeakerOff,
   SpeakerOn,
 } from "../../assets/icons/icon";
+import { GenerateWhipUrlButton } from "../generate-urls/generate-whip-url/generate-whip-url-button";
+import { ShareLineButton } from "../generate-urls/share-line-link/share-line-button";
 import { LongPressToTalkButton } from "./long-press-to-talk-button";
 import {
   MinifiedControls,
@@ -11,7 +13,6 @@ import {
   MinifiedControlsButton,
   PTTWrapper,
 } from "./production-line-components";
-import { ShareLineButton } from "../share-line-link/share-line-button";
 import { TJoinProductionOptions, TLine } from "./types";
 import { TUseAudioInputValues } from "./use-audio-input";
 
@@ -81,11 +82,18 @@ export const MinifiedUserControls = ({
           </MinifiedControlsBlock>
         )}
       {line && (
-        <ShareLineButton
-          isMinified
-          productionId={productionId}
-          lineId={line.id}
-        />
+        <>
+          <ShareLineButton
+            isMinified
+            productionId={productionId}
+            lineId={line.id}
+          />
+          <GenerateWhipUrlButton
+            isMinified
+            productionId={productionId}
+            lineId={line.id}
+          />
+        </>
       )}
     </MinifiedControls>
   );
