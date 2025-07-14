@@ -3,12 +3,10 @@ export const generateWhipUrl = (
   lineId: string,
   username: string
 ): string => {
-  const baseUrl =
-    import.meta.env.VITE_BACKEND_URL?.replace(/\/+$/, "") ||
-    "http://localhost:8000";
-  const apiVersion =
-    import.meta.env.VITE_BACKEND_API_VERSION?.replace(/^\/+|\/+$/g, "") ||
-    "api/v1";
+  const API_VERSION = import.meta.env.VITE_BACKEND_API_VERSION ?? "api/v1/";
+  const API_URL =
+    `${import.meta.env.VITE_BACKEND_URL.replace(/\/+$/, "")}/${API_VERSION}` ||
+    `${window.location.origin}/${API_VERSION}`;
 
-  return `${baseUrl}/${apiVersion}/whip/${productionId}/${lineId}/${encodeURIComponent(username)}`;
+  return `${API_URL.replace(/\/+$/, "")}/whip/${productionId}/${lineId}/${encodeURIComponent(username)}`;
 };
