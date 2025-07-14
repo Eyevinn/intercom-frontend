@@ -8,5 +8,5 @@ export const generateWhipUrl = (
     `${import.meta.env.VITE_BACKEND_URL.replace(/\/+$/, "")}/${API_VERSION}` ||
     `${window.location.origin}/${API_VERSION}`;
 
-  return `${API_URL}/whip/${productionId}/${lineId}/${encodeURIComponent(username)}`;
+  return `${API_URL.replace(/\/+$/, "")}/whip/${productionId}/${lineId}/${encodeURIComponent(username)}`;
 };
