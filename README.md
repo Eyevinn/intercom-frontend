@@ -58,6 +58,19 @@ The `<personal-access-token>` is found in the settings menu in the [user interfa
 <service-access-token>
 ```
 
+If you are developing against an intercom manager in OSC dev environment you use the `<personal-access-token>` that you have in the development environment and run the following instead.
+
+```bash
+% npx -y @osaas/cli --env dev service-access-token eyevinn-intercom-manager
+<service-access-token>
+```
+
+You also need to update the `VITE_BACKEND_URL` to point to your instance in OSC dev.
+
+```bash
+export VITE_BACKEND_URL=https://<instance>.eyevinn-intercom-manager.auto.dev.osaas.io/
+```
+
 Then you start the dev server with the `VITE_BACKEND_API_KEY` environment variable set. Either on the comand line or stored in the shell with `export VITE_BACKEND_API_KEY=<service-access-token>`. The token expires after a while so you might need to refresh the token using the same command above.
 
 ```bash
