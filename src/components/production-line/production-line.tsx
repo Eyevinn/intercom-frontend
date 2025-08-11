@@ -298,6 +298,8 @@ export const ProductionLine = ({
     isInputMuted,
     customKeyMute: savedHotkeys?.muteHotkey || "m",
     customKeyPress: savedHotkeys?.pushToTalkHotkey || "t",
+    startTalking,
+    stopTalking,
   });
 
   useEffect(() => {
