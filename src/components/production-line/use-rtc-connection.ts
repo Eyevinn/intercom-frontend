@@ -7,15 +7,15 @@ import {
   useState,
 } from "react";
 import { useNavigate } from "react-router-dom";
-import { noop } from "../../helpers";
 import { API } from "../../api/api.ts";
-import { TJoinProductionOptions } from "./types.ts";
+import { isBrowserSafari, isIpad, isMobile } from "../../bowser.ts";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { TGlobalStateAction } from "../../global-state/global-state-actions.ts";
-import { TUseAudioInputValues } from "./use-audio-input.ts";
-import { startRtcStatInterval } from "./rtc-stat-interval.ts";
-import { isBrowserSafari, isIpad, isMobile } from "../../bowser.ts";
+import { noop } from "../../helpers";
 import logger from "../../utils/logger.ts";
+import { startRtcStatInterval } from "./rtc-stat-interval.ts";
+import { TJoinProductionOptions } from "./types.ts";
+import { TUseAudioInputValues } from "./use-audio-input.ts";
 
 type TRtcConnectionOptions = {
   inputAudioStream: TUseAudioInputValues;
@@ -170,6 +170,26 @@ const establishConnection = ({
           updates: {
             dominantSpeaker: message.endpoint,
           },
+        },
+      });
+    } else if (
+      // Handle LastN updates (e.g., when WHIP is the only audio)
+      message &&
+      typeof message === "object" &&
+      "type" in message &&
+      message.type === "LastN" &&
+      "endpoints" in message &&
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      Array.isArray((message as any).endpoints)
+    ) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const endpoints = (message as any).endpoints as string[];
+      const dominantSpeaker = endpoints[0] ?? null;
+      dispatch({
+        type: "UPDATE_CALL",
+        payload: {
+          id: callId,
+          updates: { dominantSpeaker },
         },
       });
     } else if (
