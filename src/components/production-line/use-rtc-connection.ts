@@ -147,10 +147,33 @@ const establishConnection = ({
   });
 
   const onDataChannelMessage = ({ data }: MessageEvent) => {
-    let message: unknown;
+    type DominantSpeakerMessage = {
+      type: "DominantSpeaker";
+      endpoint: string;
+    };
+
+    type LastNMessage = {
+      type: "LastN";
+      endpoints: string[];
+    };
+
+    type EndpointMessage = {
+      type: "EndpointMessage";
+      to: string;
+      from: string;
+      payload: { muteParticipant: string };
+    };
+
+    type MessageType =
+      | DominantSpeakerMessage
+      | LastNMessage
+      | EndpointMessage
+      | Record<string, unknown>;
+
+    let message: MessageType | undefined;
 
     try {
-      message = JSON.parse(data);
+      message = JSON.parse(data) as MessageType;
     } catch (e) {
       logger.red(`Error parsing data channel message: ${e}`);
     }
@@ -173,18 +196,12 @@ const establishConnection = ({
         },
       });
     } else if (
-      // Handle LastN updates (e.g., when WHIP is the only audio)
       message &&
-      typeof message === "object" &&
-      "type" in message &&
       message.type === "LastN" &&
       "endpoints" in message &&
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      Array.isArray((message as any).endpoints)
+      Array.isArray(message.endpoints)
     ) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const endpoints = (message as any).endpoints as string[];
-      const dominantSpeaker = endpoints[0] ?? null;
+      const dominantSpeaker = message.endpoints[0] ?? null;
       dispatch({
         type: "UPDATE_CALL",
         payload: {
