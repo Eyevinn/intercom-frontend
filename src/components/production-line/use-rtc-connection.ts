@@ -159,7 +159,9 @@ const establishConnection = ({
       message &&
       typeof message === "object" &&
       "type" in message &&
-      (message.type === "DominantSpeaker" || (message.type === "LastN" && Array.isArray((message as any).endpoints))) &&
+      (message.type === "DominantSpeaker" ||
+        (message.type === "LastN" &&
+          Array.isArray((message as any).endpoints))) &&
       "endpoint" in message &&
       typeof message.endpoint === "string"
     ) {
