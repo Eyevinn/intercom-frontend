@@ -147,33 +147,10 @@ const establishConnection = ({
   });
 
   const onDataChannelMessage = ({ data }: MessageEvent) => {
-    type DominantSpeakerMessage = {
-      type: "DominantSpeaker";
-      endpoint: string;
-    };
-
-    type LastNMessage = {
-      type: "LastN";
-      endpoints: string[];
-    };
-
-    type EndpointMessage = {
-      type: "EndpointMessage";
-      to: string;
-      from: string;
-      payload: { muteParticipant: string };
-    };
-
-    type MessageType =
-      | DominantSpeakerMessage
-      | LastNMessage
-      | EndpointMessage
-      | Record<string, unknown>;
-
-    let message: MessageType | undefined;
+    let message: unknown;
 
     try {
-      message = JSON.parse(data) as MessageType;
+      message = JSON.parse(data);
     } catch (e) {
       logger.red(`Error parsing data channel message: ${e}`);
     }
@@ -182,10 +159,11 @@ const establishConnection = ({
       message &&
       typeof message === "object" &&
       "type" in message &&
-      message.type === "DominantSpeaker" &&
+      (message.type === "DominantSpeaker" || (message.type === "LastN" && Array.isArray((message as any).endpoints))) &&
       "endpoint" in message &&
       typeof message.endpoint === "string"
     ) {
+      console.log("Dominant Speaker message received or LastN:", message);
       dispatch({
         type: "UPDATE_CALL",
         payload: {
@@ -193,20 +171,6 @@ const establishConnection = ({
           updates: {
             dominantSpeaker: message.endpoint,
           },
-        },
-      });
-    } else if (
-      message &&
-      message.type === "LastN" &&
-      "endpoints" in message &&
-      Array.isArray(message.endpoints)
-    ) {
-      const dominantSpeaker = message.endpoints[0] ?? null;
-      dispatch({
-        type: "UPDATE_CALL",
-        payload: {
-          id: callId,
-          updates: { dominantSpeaker },
         },
       });
     } else if (
@@ -222,6 +186,7 @@ const establishConnection = ({
       "muteParticipant" in message.payload &&
       typeof message.payload.muteParticipant === "string"
     ) {
+      console.log("Mute message received:", message);
       dispatch({
         type: "UPDATE_CALL",
         payload: {
