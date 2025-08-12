@@ -163,7 +163,6 @@ const establishConnection = ({
       "endpoint" in message &&
       typeof message.endpoint === "string"
     ) {
-      console.log("Dominant Speaker message received or LastN:", message);
       dispatch({
         type: "UPDATE_CALL",
         payload: {
@@ -186,7 +185,6 @@ const establishConnection = ({
       "muteParticipant" in message.payload &&
       typeof message.payload.muteParticipant === "string"
     ) {
-      console.log("Mute message received:", message);
       dispatch({
         type: "UPDATE_CALL",
         payload: {
