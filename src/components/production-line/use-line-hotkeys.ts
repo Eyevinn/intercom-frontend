@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 
 type TuseLineHotkeys = {
@@ -58,15 +57,6 @@ export const useLineHotkeys = ({
     },
     { keydown: true, keyup: true }
   );
-
-  useEffect(() => {
-    const onBlur = () => {
-      if (stopTalking) stopTalking();
-      else muteInput(true);
-    };
-    window.addEventListener("blur", onBlur);
-    return () => window.removeEventListener("blur", onBlur);
-  }, [stopTalking, muteInput]);
 };
 
 export const useSpeakerHotkeys = ({
