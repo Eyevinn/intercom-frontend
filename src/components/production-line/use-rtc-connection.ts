@@ -62,6 +62,10 @@ const establishConnection = ({
   setAudioElements,
   setNoStreamError,
 }: TEstablishConnection): { teardown: () => void } => {
+  let lastDominantSource: "DS" | "LN" | null = null;
+  let lastDominantTs = 0;
+  const DS_PRIORITY_MS = 800; // window to prefer DominantSpeaker over LastN messages, used when both are received in quick succession
+
   const onRtcTrack = ({ streams }: RTCTrackEvent) => {
     // We can count on there being only a single stream per event for now.
     const selectedStream = streams[0];
@@ -147,43 +151,78 @@ const establishConnection = ({
   });
 
   const onDataChannelMessage = ({ data }: MessageEvent) => {
-    let message: unknown;
+    type DominantSpeakerMsg = { type: "DominantSpeaker"; endpoint: string };
+    type LastNMsg = { type: "LastN"; endpoints: string[] };
+    type EndpointMuteMsg = {
+      type: "EndpointMessage";
+      to: string;
+      from: string;
+      payload: { muteParticipant: string };
+    };
+    type Msg =
+      | DominantSpeakerMsg
+      | LastNMsg
+      | EndpointMuteMsg
+      | Record<string, unknown>;
 
+    let message: Msg | undefined;
     try {
-      message = JSON.parse(data);
+      message = JSON.parse(data) as Msg;
     } catch (e) {
       logger.red(`Error parsing data channel message: ${e}`);
+      return;
     }
 
+    // DominantSpeaker message handling
     if (
       message &&
-      typeof message === "object" &&
-      "type" in message &&
-      (message.type === "DominantSpeaker" ||
-        (message.type === "LastN" &&
-          Array.isArray((message as any).endpoints))) &&
-      "endpoint" in message &&
+      message.type === "DominantSpeaker" &&
       typeof message.endpoint === "string"
     ) {
+      const dominantSpeaker = message.endpoint;
+      lastDominantSource = "DS";
+      lastDominantTs = Date.now();
+
       dispatch({
         type: "UPDATE_CALL",
-        payload: {
-          id: callId,
-          updates: {
-            dominantSpeaker: message.endpoint,
-          },
-        },
+        payload: { id: callId, updates: { dominantSpeaker } },
       });
-    } else if (
+      return;
+    }
+
+    // LastN message handling, used to set WHIP stream as dominant speaker
+    if (
       message &&
-      typeof message === "object" &&
-      "type" in message &&
+      message.type === "LastN" &&
+      Array.isArray(message.endpoints)
+    ) {
+      // Only use LastN if it’s unambiguous (exactly one endpoint forwarded),
+      // and a DominantSpeaker message was not received recently.
+      const now = Date.now();
+      const recentDS =
+        lastDominantSource === "DS" && now - lastDominantTs < DS_PRIORITY_MS;
+
+      if (message.endpoints.length === 1 && !recentDS) {
+        const dominantSpeaker = message.endpoints[0] ?? null;
+        lastDominantSource = "LN";
+        lastDominantTs = now;
+
+        dispatch({
+          type: "UPDATE_CALL",
+          payload: { id: callId, updates: { dominantSpeaker } },
+        });
+      }
+      return;
+    }
+
+    // Mute message handling
+    if (
+      message &&
       message.type === "EndpointMessage" &&
-      "payload" in message &&
-      "to" in message &&
-      "from" in message &&
       message.payload &&
       typeof message.payload === "object" &&
+      typeof message.to === "string" &&
+      typeof message.from === "string" &&
       "muteParticipant" in message.payload &&
       typeof message.payload.muteParticipant === "string"
     ) {
@@ -198,9 +237,10 @@ const establishConnection = ({
           },
         },
       });
-    } else {
-      logger.red("Unexpected data channel message structure");
+      return;
     }
+
+    logger.red("Unexpected data channel message structure");
   };
 
   // Listen for data channel messages to parse dominant speaker
