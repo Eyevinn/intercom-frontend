@@ -62,9 +62,9 @@ const establishConnection = ({
   setAudioElements,
   setNoStreamError,
 }: TEstablishConnection): { teardown: () => void } => {
-  let lastDominantSource: "DS" | "LN" | null = null;
+  let sawDominantSpeakerEver = false; // Track if a DominantSpeaker message has been received
   let lastDominantTs = 0;
-  const DS_PRIORITY_MS = 800; // window to prefer DominantSpeaker over LastN messages, used when both are received in quick succession
+  const DS_PRIORITY_MS = 2000; // window to prefer DominantSpeaker over LastN messages, used when both are received in quick succession
 
   const onRtcTrack = ({ streams }: RTCTrackEvent) => {
     // We can count on there being only a single stream per event for now.
@@ -173,14 +173,14 @@ const establishConnection = ({
       return;
     }
 
-    // DominantSpeaker message handling
+    // Prioritize DominantSpeaker messages over LastN
     if (
       message &&
       message.type === "DominantSpeaker" &&
       typeof message.endpoint === "string"
     ) {
       const dominantSpeaker = message.endpoint;
-      lastDominantSource = "DS";
+      sawDominantSpeakerEver = true;
       lastDominantTs = Date.now();
 
       dispatch({
@@ -190,28 +190,27 @@ const establishConnection = ({
       return;
     }
 
-    // LastN message handling, used to set WHIP stream as dominant speaker
+    // Only use LastN if a DominantSpeaker message never arrived (WHIP stream)
     if (
       message &&
       message.type === "LastN" &&
       Array.isArray(message.endpoints)
     ) {
-      // Only use LastN if it’s unambiguous (exactly one endpoint forwarded),
-      // and a DominantSpeaker message was not received recently.
       const now = Date.now();
-      const recentDS =
-        lastDominantSource === "DS" && now - lastDominantTs < DS_PRIORITY_MS;
+      const dsRecently = now - lastDominantTs < DS_PRIORITY_MS;
 
-      if (message.endpoints.length === 1 && !recentDS) {
+      if (
+        !sawDominantSpeakerEver &&
+        !dsRecently &&
+        message.endpoints.length === 1
+      ) {
         const dominantSpeaker = message.endpoints[0] ?? null;
-        lastDominantSource = "LN";
-        lastDominantTs = now;
-
         dispatch({
           type: "UPDATE_CALL",
           payload: { id: callId, updates: { dominantSpeaker } },
         });
       }
+      // Otherwise ignore LastN
       return;
     }
 
