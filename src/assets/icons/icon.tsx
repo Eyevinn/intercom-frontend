@@ -8,11 +8,13 @@ import RemoveSvg from "./clear.svg?react";
 import Copy from "./copy.svg?react";
 import Edit from "./edit.svg?react";
 import Headset from "./headset.svg?react";
+import Help from "./help.svg?react";
 import Logout from "./logout.svg?react";
 import MicMute from "./mic_off.svg?react";
 import MicUnmute from "./mic_on.svg?react";
 import NoSound from "./no_sound.svg?react";
 import RefreshSvg from "./refresh.svg?react";
+import Save from "./save.svg?react";
 import Settings from "./settings.svg?react";
 import Share from "./share.svg?react";
 import TV from "./tv.svg?react";
@@ -21,7 +23,6 @@ import UserSettings from "./user_settings.svg?react";
 import Users from "./users.svg?react";
 import VolumeOff from "./volume_off.svg?react";
 import VolumeOn from "./volume_on.svg?react";
-import Save from "./save.svg?react";
 
 export const MicMuted = () => <MicMute />;
 
@@ -70,3 +71,5 @@ export const ShareIcon = () => <Share />;
 export const CheckIcon = () => <Check />;
 
 export const SaveIcon = () => <Save />;
+
+export const HelpIcon = () => <Help />;
