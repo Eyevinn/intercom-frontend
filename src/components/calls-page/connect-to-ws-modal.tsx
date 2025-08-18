@@ -75,6 +75,7 @@ const InputGroup = styled.div`
   position: relative;
   display: flex;
   align-items: center;
+  margin-bottom: 3rem;
 `;
 
 const Prefix = styled.span`
@@ -121,11 +122,14 @@ export const ConnectToWsModal = ({
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const v = e.target.value.trim();
-    const withoutProtocol = v.startsWith("ws://")
-      ? v.slice(5)
-      : v.startsWith("wss://")
-        ? v.slice(6)
-        : v;
+    let withoutProtocol = v;
+
+    if (v.startsWith("ws://")) {
+      withoutProtocol = v.slice(5);
+    } else if (v.startsWith("wss://")) {
+      withoutProtocol = v.slice(6);
+    }
+
     setHostPort(withoutProtocol);
   };
 
@@ -171,7 +175,7 @@ export const ConnectToWsModal = ({
       </InputGroup>
       <ButtonWrapper>
         <SecondaryButton onClick={onClose}>Cancel</SecondaryButton>
-        <PrimaryButton onClick={submit} disabled={!hostPort.trim()}>
+        <PrimaryButton onClick={submit} disabled={!hostPort}>
           Connect
         </PrimaryButton>
       </ButtonWrapper>
