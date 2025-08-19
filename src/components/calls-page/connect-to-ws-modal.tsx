@@ -3,6 +3,7 @@ import { useState } from "react";
 import { HelpIcon } from "../../assets/icons/icon";
 import { PrimaryButton, SecondaryButton } from "../form-elements/form-elements";
 import { Modal } from "../modal/modal";
+import { ToolTip } from "../tool-tip/tool-tip";
 
 const ButtonWrapper = styled.div`
   display: flex;
@@ -28,47 +29,6 @@ const ModalHeader = styled.h2`
 
 const ModalText = styled.p`
   margin-bottom: 1rem;
-`;
-
-const IconWrapper = styled.div`
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-
-  svg {
-    fill: grey;
-    width: 2.2rem;
-    height: 2.2rem;
-  }
-`;
-
-const TooltipWrapper = styled.div`
-  position: relative;
-  display: inline-block;
-  cursor: pointer;
-
-  &:hover span {
-    opacity: 1;
-    visibility: visible;
-  }
-`;
-
-const TooltipText = styled.span`
-  position: absolute;
-  bottom: 125%;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: #333;
-  color: #fff;
-  padding: 0.4rem 0.8rem;
-  border-radius: 0.4rem;
-  font-size: 1.2rem;
-  white-space: nowrap;
-  opacity: 0;
-  visibility: hidden;
-  transition: all 0.2s ease;
-  pointer-events: none;
-  z-index: 10;
 `;
 
 const InputGroup = styled.div`
@@ -146,18 +106,15 @@ export const ConnectToWsModal = ({
     <Modal onClose={onClose}>
       <HeaderWrapper>
         <ModalHeader>Connect to Companion WebSocket</ModalHeader>
-        <IconWrapper>
-          <TooltipWrapper>
-            <a
-              href="https://docs.osaas.io/osaas.wiki/User-Guide%3A-Cloud-Intercom.html#controlling-your-calls-with-an-elgato-stream-deck-using-companion"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <HelpIcon />
-            </a>
-            <TooltipText>View user guide</TooltipText>
-          </TooltipWrapper>
-        </IconWrapper>
+        <ToolTip tooltipText="View user guide">
+          <a
+            href="https://docs.osaas.io/osaas.wiki/User-Guide%3A-Cloud-Intercom.html#controlling-your-calls-with-an-elgato-stream-deck-using-companion"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <HelpIcon />
+          </a>
+        </ToolTip>
       </HeaderWrapper>
       <ModalText>
         To connect to the WebSocket server, please enter it&apos;s address:

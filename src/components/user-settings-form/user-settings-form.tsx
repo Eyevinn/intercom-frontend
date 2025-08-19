@@ -7,9 +7,11 @@ import { useSubmitOnEnter } from "../../hooks/use-submit-form-enter-press";
 import { Checkbox } from "../checkbox/checkbox";
 import { ButtonWrapper } from "../generic-components";
 import {
+  DevicesSection,
   FormInput,
   FormSelect,
   PrimaryButton,
+  SectionTitle,
   StyledWarningMessage,
 } from "../form-elements/form-elements";
 import {
@@ -23,6 +25,7 @@ import { ConfirmationModal } from "../verify-decision/confirmation-modal";
 import { FormItem } from "./form-item";
 import { useSubmitForm } from "./use-submit-form";
 import { useFetchProductionList } from "../landing-page/use-fetch-production-list";
+import { FirefoxWarning } from "../production-line/firefox-warning";
 
 type FormValues = TJoinProductionOptions & {
   audiooutput: string;
@@ -188,7 +191,7 @@ export const UserSettingsForm = ({
   });
 
   return (
-    <>
+    <div style={{ minWidth: updateUserSettings ? "40rem" : "" }}>
       {!preSelected && isJoinProduction && (
         <FormItem label="Production Name" errors={errors}>
           <FormSelect
@@ -218,6 +221,38 @@ export const UserSettingsForm = ({
           )}
         </FormItem>
       )}
+      {!preSelected && isJoinProduction && (
+        <FormItem label="Line">
+          <FormSelect
+            // eslint-disable-next-line
+            {...register(`lineId`, {
+              required: "Line id is required",
+              minLength: 1,
+              onChange: (e) => {
+                const selectedLine = production?.lines.find(
+                  (line) => line.id.toString() === e.target.value
+                );
+                setIsProgramOutputLine(!!selectedLine?.programOutputLine);
+              },
+            })}
+            style={{
+              display: production ? "block" : "none",
+            }}
+          >
+            {production &&
+              production.lines.map((line) => (
+                <option key={line.id} value={line.id}>
+                  {line.name || line.id}
+                </option>
+              ))}
+          </FormSelect>
+          {!production && (
+            <StyledWarningMessage>
+              Please enter a production id
+            </StyledWarningMessage>
+          )}
+        </FormItem>
+      )}
       <FormItem label="Username" fieldName="username" errors={errors}>
         <FormInput
           // eslint-disable-next-line
@@ -230,6 +265,10 @@ export const UserSettingsForm = ({
       </FormItem>
       {(isFirstConnection || isSupportedBrowser || isSettingsConfig) && (
         <>
+          <DevicesSection>
+            <SectionTitle>Devices</SectionTitle>
+            {isBrowserFirefox && <FirefoxWarning type="firefox-warning" />}
+          </DevicesSection>
           <FormItem label="Input">
             <FormSelect
               // eslint-disable-next-line
@@ -265,38 +304,6 @@ export const UserSettingsForm = ({
             )}
           </FormItem>
         </>
-      )}
-      {!preSelected && isJoinProduction && (
-        <FormItem label="Line">
-          <FormSelect
-            // eslint-disable-next-line
-            {...register(`lineId`, {
-              required: "Line id is required",
-              minLength: 1,
-              onChange: (e) => {
-                const selectedLine = production?.lines.find(
-                  (line) => line.id.toString() === e.target.value
-                );
-                setIsProgramOutputLine(!!selectedLine?.programOutputLine);
-              },
-            })}
-            style={{
-              display: production ? "block" : "none",
-            }}
-          >
-            {production &&
-              production.lines.map((line) => (
-                <option key={line.id} value={line.id}>
-                  {line.name || line.id}
-                </option>
-              ))}
-          </FormSelect>
-          {!production && (
-            <StyledWarningMessage>
-              Please enter a production id
-            </StyledWarningMessage>
-          )}
-        </FormItem>
       )}
       {isProgramOutputLine && isJoinProduction && (
         <>
@@ -348,6 +355,6 @@ export const UserSettingsForm = ({
           shouldSubmitOnEnter
         />
       )}
-    </>
+    </div>
   );
 };
