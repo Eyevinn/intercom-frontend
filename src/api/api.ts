@@ -16,6 +16,7 @@ type TParticipant = {
   sessionId: string;
   endpointId: string;
   isActive: boolean;
+  isWhip: boolean;
 };
 
 type TLine = {
