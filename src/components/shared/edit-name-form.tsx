@@ -1,7 +1,11 @@
 import { useEffect, useState, useRef } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { FormInput, FormLabel } from "../form-elements/form-elements";
-import { EditNameWrapper, NameEditButton } from "./shared-components";
+import {
+  EditNameWrapper,
+  NameEditButton,
+  EditNameIconWrapper,
+} from "./shared-components";
 import { SaveIcon, EditIcon } from "../../assets/icons/icon";
 import { Spinner } from "../loader/loader";
 import { useSubmitOnEnter } from "../../hooks/use-submit-form-enter-press";
@@ -183,6 +187,12 @@ export const EditNameForm = <T extends ProductionItem>({
     <SaveIcon />
   );
 
+  const editButton = (
+    <EditNameIconWrapper>
+      <EditIcon />
+    </EditNameIconWrapper>
+  );
+
   return (
     <EditNameWrapper ref={wrapperRef}>
       <EditNameWrapper>
@@ -202,10 +212,10 @@ export const EditNameForm = <T extends ProductionItem>({
       {managementMode && (
         <NameEditButton
           type="button"
-          className="name-edit-button"
+          className={`name-edit-button ${isEditingName ? "editing" : ""}`}
           onClick={handleClick}
         >
-          {isEditingName ? saveButton : <EditIcon />}
+          {isEditingName ? saveButton : editButton}
         </NameEditButton>
       )}
     </EditNameWrapper>

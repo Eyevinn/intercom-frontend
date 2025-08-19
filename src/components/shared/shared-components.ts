@@ -77,6 +77,11 @@ export const InnerDiv = styled.div`
   position: relative;
 `;
 
+export const EditNameIconWrapper = styled.div`
+  width: 1.8rem;
+  height: 1.8rem;
+`;
+
 export const NameEditButton = styled.button`
   background: transparent;
   border: none;
@@ -85,11 +90,14 @@ export const NameEditButton = styled.button`
   font: inherit;
   display: flex;
   justify-content: center;
-  align-self: center;
-  margin: 1rem 0;
+  align-self: flex-start;
   flex-shrink: 0;
   height: 2rem;
   width: 2rem;
+
+  &.editing {
+    margin-top: 1rem;
+  }
 
   svg {
     width: 100%;

@@ -54,6 +54,7 @@ export const LineBlockTexts = styled.div``;
 export const LineBlockTitle = styled.div`
   font-weight: bold;
   font-size: 1.5rem;
+  margin-bottom: 0.2rem;
 `;
 
 export const LineBlockTitleWrapper = styled.div`
