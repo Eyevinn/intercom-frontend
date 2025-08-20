@@ -33,7 +33,7 @@ export const ProductionsListItem = ({
     );
   }, [production]);
 
-  const totalWhips = useMemo(() => {
+  const totalWhipSessions = useMemo(() => {
     return (
       production.lines
         ?.map((line) => line.participants.filter((p) => p.isWhip).length || 0)
@@ -58,10 +58,12 @@ export const ProductionsListItem = ({
         )}
       />
       <div>
-        {totalWhips > 0 && (
-          <ParticipantCountWrapper className={totalWhips > 0 ? "whip" : ""}>
+        {totalWhipSessions > 0 && (
+          <ParticipantCountWrapper
+            className={totalWhipSessions > 0 ? "whip" : ""}
+          >
             <WhipIcon />
-            <ParticipantCount>{totalWhips}</ParticipantCount>
+            <ParticipantCount>{totalWhipSessions}</ParticipantCount>
           </ParticipantCountWrapper>
         )}
         <ParticipantCountWrapper className={totalUsers > 0 ? "active" : ""}>

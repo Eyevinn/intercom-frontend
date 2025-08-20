@@ -194,7 +194,7 @@ export const EditNameForm = <T extends ProductionItem>({
   );
 
   return (
-    <EditNameWrapper ref={wrapperRef} id="hej">
+    <EditNameWrapper ref={wrapperRef}>
       {!isEditingName && renderLabel(item, line, managementMode)}
       {isEditingName && (
         <FormLabel className="save-edit">

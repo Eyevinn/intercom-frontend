@@ -38,7 +38,7 @@ export const CallHeaderComponent = ({
     return line?.participants.filter((p) => !p.isWhip).length || 0;
   }, [line]);
 
-  const totalWhips = useMemo(() => {
+  const totalWhipSessions = useMemo(() => {
     return line?.participants.filter((p) => p.isWhip).length || 0;
   }, [line]);
 
@@ -60,10 +60,12 @@ export const CallHeaderComponent = ({
           </span>
         </ProductionName>
         <div>
-          {totalWhips > 0 && (
-            <ParticipantCountWrapper className={totalWhips > 0 ? "whip" : ""}>
+          {totalWhipSessions > 0 && (
+            <ParticipantCountWrapper
+              className={totalWhipSessions > 0 ? "whip" : ""}
+            >
               <WhipIcon />
-              <ParticipantCount>{totalWhips}</ParticipantCount>
+              <ParticipantCount>{totalWhipSessions}</ParticipantCount>
             </ParticipantCountWrapper>
           )}
           <ParticipantCountWrapper className={totalUsers > 0 ? "active" : ""}>
