@@ -470,7 +470,6 @@ export const ProductionLine = ({
               isInputMuted={isInputMuted}
               inputAudioStream={inputAudioStream}
               value={value}
-              productionId={joinProductionOptions.productionId}
             />
           )}
           <ExpandableSection className={open ? "expanded" : ""}>

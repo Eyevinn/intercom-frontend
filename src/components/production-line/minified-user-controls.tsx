@@ -4,8 +4,6 @@ import {
   SpeakerOff,
   SpeakerOn,
 } from "../../assets/icons/icon";
-import { GenerateWhipUrlButton } from "../generate-urls/generate-whip-url/generate-whip-url-button";
-import { ShareLineButton } from "../generate-urls/share-line-link/share-line-button";
 import { LongPressToTalkButton } from "./long-press-to-talk-button";
 import {
   MinifiedControls,
@@ -28,7 +26,6 @@ export const MinifiedUserControls = ({
   isInputMuted,
   inputAudioStream,
   value,
-  productionId,
 }: {
   muteOutput: () => void;
   muteInput: () => void;
@@ -41,7 +38,6 @@ export const MinifiedUserControls = ({
   isInputMuted: boolean;
   inputAudioStream: TUseAudioInputValues;
   value: number;
-  productionId: string;
 }) => {
   return (
     <MinifiedControls>
@@ -81,20 +77,6 @@ export const MinifiedUserControls = ({
             </PTTWrapper>
           </MinifiedControlsBlock>
         )}
-      {line && (
-        <>
-          <ShareLineButton
-            isMinified
-            productionId={productionId}
-            lineId={line.id}
-          />
-          <GenerateWhipUrlButton
-            isMinified
-            productionId={productionId}
-            lineId={line.id}
-          />
-        </>
-      )}
     </MinifiedControls>
   );
 };
