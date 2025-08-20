@@ -1,4 +1,4 @@
-import { ToolTip } from "../tooltip/tooltip";
+import { Tooltip } from "../tooltip/tooltip";
 import { WarningIcon } from "../../assets/icons/icon";
 
 export const FirefoxWarning = ({
@@ -7,7 +7,7 @@ export const FirefoxWarning = ({
   type: "collapsable-header" | "firefox-warning";
 }) => {
   return (
-    <ToolTip
+    <Tooltip
       tooltipText={
         <p>
           If a new device has been added Firefox needs the permission to be
@@ -18,6 +18,6 @@ export const FirefoxWarning = ({
       type={type}
     >
       <WarningIcon />
-    </ToolTip>
+    </Tooltip>
   );
 };

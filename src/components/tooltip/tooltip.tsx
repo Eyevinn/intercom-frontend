@@ -73,7 +73,7 @@ const TooltipText = styled.span`
   }
 `;
 
-export const ToolTip = ({
+export const Tooltip = ({
   children,
   tooltipText,
   type,

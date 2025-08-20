@@ -3,7 +3,7 @@ import { useState } from "react";
 import { HelpIcon } from "../../assets/icons/icon";
 import { PrimaryButton, SecondaryButton } from "../form-elements/form-elements";
 import { Modal } from "../modal/modal";
-import { ToolTip } from "../tooltip/tooltip";
+import { Tooltip } from "../tooltip/tooltip";
 
 const ButtonWrapper = styled.div`
   display: flex;
@@ -106,7 +106,7 @@ export const ConnectToWsModal = ({
     <Modal onClose={onClose}>
       <HeaderWrapper>
         <ModalHeader>Connect to Companion WebSocket</ModalHeader>
-        <ToolTip tooltipText="View user guide">
+        <Tooltip tooltipText="View user guide">
           <a
             href="https://docs.osaas.io/osaas.wiki/User-Guide%3A-Cloud-Intercom.html#controlling-your-calls-with-an-elgato-stream-deck-using-companion"
             target="_blank"
@@ -114,7 +114,7 @@ export const ConnectToWsModal = ({
           >
             <HelpIcon />
           </a>
-        </ToolTip>
+        </Tooltip>
       </HeaderWrapper>
       <ModalText>
         To connect to the WebSocket server, please enter it&apos;s address:
