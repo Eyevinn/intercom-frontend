@@ -1,6 +1,7 @@
 import styled from "@emotion/styled";
 import { FC, PropsWithChildren, useState } from "react";
 import { ChevronDownIcon, ChevronUpIcon } from "../../assets/icons/icon";
+import { FirefoxWarning } from "./firefox-warning";
 
 const SectionWrapper = styled.div`
   border: 0.2rem #6d6d6d solid;
@@ -15,6 +16,7 @@ const SectionHeader = styled.div`
   align-items: center;
   height: 3rem;
   font-weight: bold;
+  position: relative;
 
   &:hover {
     cursor: pointer;
@@ -56,6 +58,9 @@ export const CollapsableSection: FC<CollapsableSectionProps> = (props) => {
     <SectionWrapper>
       <SectionHeader onClick={() => setOpen(!open)}>
         <SectionTitle>{title}</SectionTitle>
+        {title === "Devices" && open && (
+          <FirefoxWarning type="collapsable-header" />
+        )}
         <SectionCollapser>
           {open ? <ChevronUpIcon /> : <ChevronDownIcon />}
         </SectionCollapser>

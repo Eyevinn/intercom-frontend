@@ -247,3 +247,16 @@ export const SecondaryButton = styled(ActionButton)`
     background: rgba(255, 255, 255, 0.8);
   }
 `;
+
+export const SectionTitle = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 3rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+`;
+
+export const DevicesSection = styled.div`
+  position: relative;
+`;

@@ -23,6 +23,7 @@ import UserSettings from "./user_settings.svg?react";
 import Users from "./users.svg?react";
 import VolumeOff from "./volume_off.svg?react";
 import VolumeOn from "./volume_on.svg?react";
+import Warning from "./warning.svg?react";
 
 export const MicMuted = () => <MicMute />;
 
@@ -73,3 +74,5 @@ export const CheckIcon = () => <Check />;
 export const SaveIcon = () => <Save />;
 
 export const HelpIcon = () => <Help />;
+
+export const WarningIcon = () => <Warning />;
