@@ -25,6 +25,7 @@ export type TParticipant = {
   sessionId: string;
   endpointId: string;
   isActive: boolean;
+  isWhip: boolean;
 };
 
 export type TLine = {

@@ -24,6 +24,7 @@ import Users from "./users.svg?react";
 import VolumeOff from "./volume_off.svg?react";
 import VolumeOn from "./volume_on.svg?react";
 import Warning from "./warning.svg?react";
+import WhipSvg from "./whip_user.svg?react";
 
 export const MicMuted = () => <MicMute />;
 
@@ -38,6 +39,8 @@ export const SpeakerOff = () => <VolumeOff />;
 export const SpeakerOn = () => <VolumeOn />;
 
 export const UserIcon = () => <UserSvg />;
+
+export const WhipIcon = () => <WhipSvg />;
 
 export const RefreshIcon = () => <RefreshSvg />;
 
