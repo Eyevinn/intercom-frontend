@@ -3,7 +3,7 @@ import { useState } from "react";
 import { HelpIcon } from "../../assets/icons/icon";
 import { PrimaryButton, SecondaryButton } from "../form-elements/form-elements";
 import { Modal } from "../modal/modal";
-import { ToolTip } from "../tool-tip/tool-tip";
+import { ToolTip } from "../tooltip/tooltip";
 
 const ButtonWrapper = styled.div`
   display: flex;

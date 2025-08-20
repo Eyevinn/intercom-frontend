@@ -1,4 +1,4 @@
-import { ToolTip } from "../tool-tip/tool-tip";
+import { ToolTip } from "../tooltip/tooltip";
 import { WarningIcon } from "../../assets/icons/icon";
 
 export const FirefoxWarning = ({
@@ -9,12 +9,11 @@ export const FirefoxWarning = ({
   return (
     <ToolTip
       tooltipText={
-        <>
-          <p>If a new device has been added Firefox</p>
-          <p>needs the permission to be manually reset.</p>
-          <p>If your device is missing, please</p>
-          <p>remove the permission and reload page.</p>
-        </>
+        <p>
+          If a new device has been added Firefox needs the permission to be
+          manually reset. If your device is missing, please remove the
+          permission and reload page.
+        </p>
       }
       type={type}
     >

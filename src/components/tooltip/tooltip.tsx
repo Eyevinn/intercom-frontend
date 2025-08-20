@@ -15,18 +15,21 @@ const IconWrapper = styled.div`
   &.firefox-warning {
     svg {
       fill: #ebca6a;
+      width: 2rem;
+      height: 2rem;
     }
   }
 
   &.collapsable-header {
     position: absolute;
-    left: 25%;
+    left: 20%;
   }
 
   &.firefox-warning {
     position: absolute;
-    left: 8rem;
-    bottom: 0.2rem;
+    left: 6.5rem;
+    bottom: 0.5rem;
+    width: auto;
   }
 `;
 
@@ -51,7 +54,7 @@ const TooltipText = styled.span`
   padding: 0.4rem 0.8rem;
   border-radius: 0.4rem;
   font-size: 1.2rem;
-  white-space: nowrap;
+  white-space: normal;
   opacity: 0;
   visibility: hidden;
   transition: all 0.2s ease;
@@ -61,9 +64,12 @@ const TooltipText = styled.span`
   &.collapsable-header,
   &.firefox-warning {
     bottom: -9rem;
-    left: 8rem;
+    left: 0;
     background-color: #676767;
     line-height: 1.5;
+    white-space: normal;
+    transform: none;
+    width: 26rem;
   }
 `;
 
