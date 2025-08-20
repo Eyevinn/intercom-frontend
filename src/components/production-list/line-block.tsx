@@ -16,6 +16,7 @@ import {
   TVIcon,
   UserIcon,
   UsersIcon,
+  WhipIcon,
 } from "../../assets/icons/icon";
 
 import { isMobile } from "../../bowser";
@@ -59,8 +60,11 @@ export const LineBlock = ({
           ? line.participants
           : line.participants.slice(0, 4)
         ).map((participant) => (
-          <LineBlockParticipant key={`participant-${participant.sessionId}`}>
-            <UserIcon />
+          <LineBlockParticipant
+            key={`participant-${participant.sessionId}`}
+            className={participant.isWhip ? "whip" : ""}
+          >
+            {participant.isWhip ? <WhipIcon /> : <UserIcon />}
             <PersonText>{participant.name}</PersonText>
           </LineBlockParticipant>
         ))}

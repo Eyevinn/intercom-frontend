@@ -78,14 +78,14 @@ const OnlineIndicator = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #ebca6a;
+  background: #c7c7c7;
 
-  &.active {
+  &.user {
     background: #7be27b;
   }
 
   &.whip {
-    background: #c7c7c7;
+    background: rgb(89, 203, 232);
   }
 `;
 
@@ -143,7 +143,7 @@ export const UserList = ({
                 >
                   <OnlineIndicator
                     className={
-                      p.isActive ? (p.isWhip ? "whip" : "active") : "inactive"
+                      p.isActive ? (p.isWhip ? "whip" : "user") : "inactive"
                     }
                   >
                     {(p.isWhip && <WhipIcon />) || <UserIcon />}
