@@ -195,24 +195,22 @@ export const EditNameForm = <T extends ProductionItem>({
 
   return (
     <EditNameWrapper ref={wrapperRef}>
-      <EditNameWrapper>
-        {!isEditingName && renderLabel(item, line, managementMode)}
-        {isEditingName && (
-          <FormLabel className="save-edit">
-            <FormInput
-              // eslint-disable-next-line react/jsx-props-no-spreading
-              {...register(formSubmitType)}
-              placeholder="New Name"
-              className={`name-edit-button edit-name ${className}`}
-              autoComplete="off"
-            />
-          </FormLabel>
-        )}
-      </EditNameWrapper>
+      {!isEditingName && renderLabel(item, line, managementMode)}
+      {isEditingName && (
+        <FormLabel className="save-edit">
+          <FormInput
+            // eslint-disable-next-line react/jsx-props-no-spreading
+            {...register(formSubmitType)}
+            placeholder="New Name"
+            className={`name-edit-button edit-name ${className}`}
+            autoComplete="off"
+          />
+        </FormLabel>
+      )}
       {managementMode && (
         <NameEditButton
           type="button"
-          className={`name-edit-button ${isEditingName ? "editing" : ""}`}
+          className={`name-edit-button ${isEditingName ? "save" : "edit"}`}
           onClick={handleClick}
         >
           {isEditingName ? saveButton : editButton}

@@ -13,9 +13,10 @@ export const ProductionName = styled.div`
 `;
 
 export const ParticipantCountWrapper = styled.div`
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 0.1rem;
+  margin-right: 1rem;
 
   svg {
     height: 1.5rem;
@@ -27,6 +28,12 @@ export const ParticipantCountWrapper = styled.div`
   &.active {
     svg {
       fill: #73d16d;
+    }
+  }
+
+  &.whip {
+    svg {
+      fill: rgb(89, 203, 232);
     }
   }
 `;
@@ -98,10 +105,16 @@ export const LineBlockParticipant = styled.div`
   align-items: center;
 
   svg {
-    fill: #d6d3d1;
+    fill: #7be27b;
     height: 2rem;
     width: 2rem;
     flex-shrink: 0;
+  }
+
+  &.whip {
+    svg {
+      fill: rgb(89, 203, 232);
+    }
   }
 `;
 

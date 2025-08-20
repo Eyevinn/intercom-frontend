@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { TBasicProductionResponse } from "../../api/api";
-import { UsersIcon } from "../../assets/icons/icon";
+import { UsersIcon, WhipIcon } from "../../assets/icons/icon";
 import { TLine } from "../production-line/types";
 import {
   ParticipantCount,
@@ -25,10 +25,18 @@ export const ProductionsListItem = ({
 
   const handleHeaderClick = useHandleHeaderClick(editNameOpen);
 
-  const totalParticipants = useMemo(() => {
+  const totalUsers = useMemo(() => {
     return (
       production.lines
-        ?.map((line) => line.participants.length || 0)
+        ?.map((line) => line.participants.filter((p) => !p.isWhip).length || 0)
+        .reduce((partialSum, a) => partialSum + a, 0) || 0
+    );
+  }, [production]);
+
+  const totalWhipSessions = useMemo(() => {
+    return (
+      production.lines
+        ?.map((line) => line.participants.filter((p) => p.isWhip).length || 0)
         .reduce((partialSum, a) => partialSum + a, 0) || 0
     );
   }, [production]);
@@ -49,12 +57,20 @@ export const ProductionsListItem = ({
           />
         )}
       />
-      <ParticipantCountWrapper
-        className={totalParticipants > 0 ? "active" : ""}
-      >
-        <UsersIcon />
-        <ParticipantCount>{totalParticipants}</ParticipantCount>
-      </ParticipantCountWrapper>
+      <div>
+        {totalWhipSessions > 0 && (
+          <ParticipantCountWrapper
+            className={totalWhipSessions > 0 ? "whip" : ""}
+          >
+            <WhipIcon />
+            <ParticipantCount>{totalWhipSessions}</ParticipantCount>
+          </ParticipantCountWrapper>
+        )}
+        <ParticipantCountWrapper className={totalUsers > 0 ? "active" : ""}>
+          <UsersIcon />
+          <ParticipantCount>{totalUsers}</ParticipantCount>
+        </ParticipantCountWrapper>
+      </div>
     </>
   );
 
@@ -62,7 +78,7 @@ export const ProductionsListItem = ({
     <ProductionListExpandedContent
       production={production}
       managementMode={managementMode}
-      totalParticipants={totalParticipants}
+      totalParticipants={totalUsers}
     />
   );
 
@@ -71,7 +87,7 @@ export const ProductionsListItem = ({
       headerContent={headerContent}
       expandedContent={expandedContent}
       onHeaderClick={handleHeaderClick}
-      className={totalParticipants > 0 ? "active" : ""}
+      className={totalUsers > 0 ? "active" : ""}
     />
   );
 };

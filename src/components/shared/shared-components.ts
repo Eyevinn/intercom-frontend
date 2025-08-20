@@ -89,14 +89,19 @@ export const NameEditButton = styled.button`
   cursor: pointer;
   font: inherit;
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   align-self: flex-start;
   flex-shrink: 0;
   height: 2rem;
   width: 2rem;
 
-  &.editing {
-    margin-top: 1rem;
+  &.edit {
+    margin-top: -0.5rem;
+  }
+
+  &.save {
+    justify-content: center;
+    align-self: center;
   }
 
   svg {

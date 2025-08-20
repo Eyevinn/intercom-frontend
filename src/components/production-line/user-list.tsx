@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 import { TParticipant } from "./types.ts";
-import { MicMuted, UserIcon } from "../../assets/icons/icon.tsx";
+import { MicMuted, UserIcon, WhipIcon } from "../../assets/icons/icon.tsx";
 
 const Container = styled.div`
   width: 100%;
@@ -19,10 +19,6 @@ type TUserProps = {
 
 type TIsTalkingIndicator = {
   isTalking: boolean;
-};
-
-type TIndicatorProps = {
-  isActive: boolean;
 };
 
 const UserWrapper = styled.div<TUserProps>`
@@ -75,15 +71,22 @@ const IsTalkingIndicator = styled.div<TIsTalkingIndicator>`
       : ""}
 `;
 
-const OnlineIndicator = styled.div<TIndicatorProps>`
-  width: 2.5rem;
-  height: 2.5rem;
+const OnlineIndicator = styled.div`
+  width: 2.6rem;
+  height: 2.6rem;
   border-radius: 5rem;
   display: flex;
   align-items: center;
   justify-content: center;
+  background: #c7c7c7;
 
-  ${({ isActive }) => `background: ${isActive ? "#7be27b;" : "#ebca6a;"}`}
+  &.user {
+    background: #7be27b;
+  }
+
+  &.whip {
+    background: rgb(89, 203, 232);
+  }
 `;
 
 const MuteParticipantButton = styled.button`
@@ -138,13 +141,17 @@ export const UserList = ({
                     audioLevelAboveThreshold && p.endpointId === dominantSpeaker
                   }
                 >
-                  <OnlineIndicator isActive={p.isActive}>
-                    <UserIcon />
+                  <OnlineIndicator
+                    className={
+                      p.isActive ? (p.isWhip ? "whip" : "user") : "inactive"
+                    }
+                  >
+                    {(p.isWhip && <WhipIcon />) || <UserIcon />}
                   </OnlineIndicator>
                 </IsTalkingIndicator>
                 {truncatedUsername} {p.isActive ? "" : "(inactive)"}
               </User>
-              {!isYou && p.isActive && !programOutputLine && (
+              {!isYou && p.isActive && !programOutputLine && !p.isWhip && (
                 <MuteParticipantButton
                   onClick={() => {
                     setUserId(p.endpointId);

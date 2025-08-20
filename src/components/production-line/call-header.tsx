@@ -1,8 +1,10 @@
+import { useMemo } from "react";
 import {
   UsersIcon,
   ChevronUpIcon,
   ChevronDownIcon,
   TVIcon,
+  WhipIcon,
 } from "../../assets/icons/icon";
 import {
   ProductionName,
@@ -32,6 +34,14 @@ export const CallHeaderComponent = ({
   const truncatedLineName =
     line && line.name.length > 40 ? `${line.name.slice(0, 40)}...` : line?.name;
 
+  const totalUsers = useMemo(() => {
+    return line?.participants.filter((p) => !p.isWhip).length || 0;
+  }, [line]);
+
+  const totalWhipSessions = useMemo(() => {
+    return line?.participants.filter((p) => p.isWhip).length || 0;
+  }, [line]);
+
   return (
     <CallHeader open={open} onClick={setOpen}>
       <HeaderTexts
@@ -49,10 +59,20 @@ export const CallHeaderComponent = ({
             {`${truncatedProductionName}/ ${truncatedLineName}`}
           </span>
         </ProductionName>
-        <ParticipantCountWrapper>
-          <UsersIcon />
-          <ParticipantCount>{line?.participants.length}</ParticipantCount>
-        </ParticipantCountWrapper>
+        <div>
+          {totalWhipSessions > 0 && (
+            <ParticipantCountWrapper
+              className={totalWhipSessions > 0 ? "whip" : ""}
+            >
+              <WhipIcon />
+              <ParticipantCount>{totalWhipSessions}</ParticipantCount>
+            </ParticipantCountWrapper>
+          )}
+          <ParticipantCountWrapper className={totalUsers > 0 ? "active" : ""}>
+            <UsersIcon />
+            <ParticipantCount>{totalUsers}</ParticipantCount>
+          </ParticipantCountWrapper>
+        </div>
       </HeaderTexts>
       {line?.programOutputLine && open && (
         <AudioFeedIcon open={open}>
