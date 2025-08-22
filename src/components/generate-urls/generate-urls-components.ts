@@ -2,9 +2,11 @@ import styled from "@emotion/styled";
 import { FormLabel } from "../form-elements/form-elements";
 
 export const Wrapper = styled.div`
-  margin-top: 2rem;
+  margin-top: 1rem;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
   width: 100%;
 `;
 

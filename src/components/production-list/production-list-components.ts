@@ -1,14 +1,30 @@
 import styled from "@emotion/styled";
 import { PrimaryButton } from "../form-elements/form-elements";
 
+export const HeaderLeftSide = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  gap: 1rem;
+`;
+
+export const HeaderRightSide = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
 export const ProductionName = styled.div`
-  font-size: 1.4rem;
+  font-size: 1.6rem;
   font-weight: bold;
-  margin-right: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 2;
+  flex-grow: 0;
 
   .production-name-container {
     display: inline-block;
-    width: 100%;
+    word-break: break-word;
   }
 `;
 
@@ -33,7 +49,7 @@ export const ParticipantCountWrapper = styled.div`
 
   &.whip {
     svg {
-      fill: rgb(89, 203, 232);
+      fill: #6ad9d1;
     }
   }
 `;

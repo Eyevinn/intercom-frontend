@@ -24,10 +24,19 @@ export const ModalContent = styled.div`
   color: white;
 `;
 
-export const ModalHeader = styled.h2`
-  font-size: 2rem;
+export const ModalHeader = styled.h1`
+  font-size: 2.2rem;
   margin-bottom: 2rem;
   font-weight: 600;
+  font-weight: bold;
+`;
+
+export const ModalSubHeader = styled.h2`
+  margin-top: 3rem;
+  margin-bottom: 1rem;
+  font-size: 1.8rem;
+  font-weight: 600;
+  font-weight: bold;
 `;
 
 export const ModalCloseButton = styled.button`
@@ -51,6 +60,6 @@ export const CancelButton = styled(ActionButton)`
 export const ButtonDiv = styled.div`
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
-  margin-top: 3rem;
+  justify-content: flex-end;
+  margin-top: 1rem;
 `;

@@ -6,6 +6,8 @@ import {
   FormInput,
   FormContainer,
   StyledWarningMessage,
+  DecorativeLabel,
+  FormLabel,
 } from "../form-elements/form-elements";
 import { useUpdateGlobalHotkey } from "./use-update-global-hotkey";
 import { useCheckForDuplicateHotkey } from "./use-check-for-duplicate-hotkey";
@@ -16,11 +18,16 @@ import {
   ModalContent,
   ModalHeader,
   ModalCloseButton,
-  CancelButton,
   ButtonDiv,
+  ModalSubHeader,
 } from "./settings-modal-components";
+import { ModalText, Wrapper } from "../generate-urls/generate-urls-components";
+import { CopyButton } from "../copy-button/copy-button";
+import { generateWhipUrl } from "../../utils/generateWhipUrl";
 
 type TSettingsModalProps = {
+  productionId: string;
+  lineId: string;
   isOpen: boolean;
   callId: string;
   savedHotkeys: Hotkeys;
@@ -29,10 +36,11 @@ type TSettingsModalProps = {
   programOutPutLine?: boolean;
   isProgramUser: boolean;
   onClose: () => void;
-  onSave: () => void;
 };
 
 export const SettingsModal = ({
+  productionId,
+  lineId,
   isOpen,
   callId,
   savedHotkeys,
@@ -41,7 +49,6 @@ export const SettingsModal = ({
   programOutPutLine,
   isProgramUser,
   onClose,
-  onSave,
 }: TSettingsModalProps) => {
   const stopPropagation = (e: React.MouseEvent) => e.stopPropagation();
   const [hotkeys, setHotkeys] = useState<Hotkeys>({
@@ -63,6 +70,21 @@ export const SettingsModal = ({
 
   const [updateGlobalHotkey] = useUpdateGlobalHotkey();
   const globalStateDuplicates = useCheckForDuplicateHotkey({ callId, hotkeys });
+  const [username, setUsername] = useState("");
+  const [whipUrl, setWhipUrl] = useState("");
+
+  const generateUrl = () => {
+    if (username.trim()) {
+      const url = generateWhipUrl(productionId, lineId, username.trim());
+      setWhipUrl(url);
+    } else {
+      setWhipUrl("");
+    }
+  };
+
+  useEffect(() => {
+    generateUrl();
+  }, [username]);
 
   const {
     formState: { errors },
@@ -143,7 +165,7 @@ export const SettingsModal = ({
 
   const onSubmit: SubmitHandler<Hotkeys> = (payload) => {
     updateGlobalHotkey({ callId, hotkeys: payload });
-    onSave();
+    onClose();
   };
 
   const updateFieldErrors = (field: keyof Hotkeys, value: string) => {
@@ -187,6 +209,7 @@ export const SettingsModal = ({
       fieldName={field}
       errors={errors}
       errorClassName="error-message"
+      className="inline-label"
     >
       <FormInput
         // eslint-disable-next-line
@@ -203,6 +226,7 @@ export const SettingsModal = ({
           },
         })}
         placeholder="Enter hotkey"
+        className="inline-input"
       />
       {formError && formWarning && (
         <ErrorMessage
@@ -218,7 +242,37 @@ export const SettingsModal = ({
     <ModalOverlay onClick={onClose}>
       <ModalContent onClick={stopPropagation}>
         <ModalCloseButton onClick={onClose}>X</ModalCloseButton>
-        <ModalHeader>Hotkey settings for line: {lineName}</ModalHeader>
+        <ModalHeader>
+          Settings for line{" "}
+          <p style={{ fontStyle: "italic", display: "inline" }}>{lineName}</p>
+        </ModalHeader>
+        <>
+          <ModalSubHeader>WebRTC / WHIP</ModalSubHeader>
+          <ModalText>
+            After entering a username, the WHIP URL to connect to this line
+            becomes copyable.
+          </ModalText>
+
+          <Wrapper>
+            <FormLabel className="inline-label">
+              <DecorativeLabel className="italic">{"URL/"}</DecorativeLabel>
+              <FormInput
+                className="inline-input expanded"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="username"
+              />
+            </FormLabel>
+            <CopyButton
+              urls={[whipUrl]}
+              className="share-line-link-modal"
+              disabled={!whipUrl}
+            />
+          </Wrapper>
+        </>
+        <ModalSubHeader style={{ marginTop: "2rem" }}>
+          Hotkey settings
+        </ModalSubHeader>
         <FormContainer>
           {(programOutPutLine ? isProgramUser : !isProgramUser) &&
             renderFormInput(
@@ -267,11 +321,8 @@ export const SettingsModal = ({
               warning.globalMuteHotkey
             )}
           <ButtonDiv>
-            <CancelButton type="button" onClick={onClose}>
-              Cancel
-            </CancelButton>
             <PrimaryButton type="button" onClick={handleSubmit(onSubmit)}>
-              Save settings
+              Save
             </PrimaryButton>
           </ButtonDiv>
         </FormContainer>

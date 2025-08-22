@@ -234,9 +234,11 @@ export const MinifiedControlsButton = styled(UserControlBtn)`
   }
 `;
 
-export const UrlButtonsWrapper = styled.div`
+export const ProductionLineFooter = styled.div`
   display: flex;
   flex-direction: row;
   justify-content: space-between;
+  gap: 1rem;
   align-items: center;
+  width: 100%;
 `;

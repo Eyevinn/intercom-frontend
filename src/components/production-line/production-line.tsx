@@ -9,8 +9,6 @@ import { CallData } from "../../hooks/use-call-list.ts";
 import { usePushToTalk } from "../../hooks/use-push-to-talk.ts";
 import logger from "../../utils/logger.ts";
 import { DisplayWarning } from "../display-box.tsx";
-import { GenerateWhipUrlButton } from "../generate-urls/generate-whip-url/generate-whip-url-button.tsx";
-import { ShareLineButton } from "../generate-urls/share-line-link/share-line-button.tsx";
 import { FlexContainer } from "../generic-components.ts";
 import { useFetchProduction } from "../landing-page/use-fetch-production.ts";
 import { Spinner } from "../loader/loader.tsx";
@@ -19,7 +17,7 @@ import { ConfirmationModal } from "../verify-decision/confirmation-modal.tsx";
 import { CallHeaderComponent } from "./call-header.tsx";
 import { CollapsableSection } from "./collapsable-section.tsx";
 import { ExitCallButton } from "./exit-call-button.tsx";
-import { HotkeysComponent } from "./hotkeys-component.tsx";
+import { SettingsButton } from "./settings-button.tsx";
 import { LongPressToTalkButton } from "./long-press-to-talk-button.tsx";
 import { MinifiedUserControls } from "./minified-user-controls.tsx";
 import {
@@ -30,7 +28,7 @@ import {
   ListWrapper,
   LoaderWrapper,
   LongPressWrapper,
-  UrlButtonsWrapper,
+  ProductionLineFooter,
 } from "./production-line-components.ts";
 import { SelectDevices } from "./select-devices.tsx";
 import { SymphonyRtcConnectionComponent } from "./symphony-rtc-connection-component.tsx";
@@ -47,6 +45,8 @@ import { useUpdateCallDevice } from "./use-update-call-device.tsx";
 import { useVolumeReducer } from "./use-volume-reducer.tsx";
 import { UserControls } from "./user-controls.tsx";
 import { UserList } from "./user-list.tsx";
+import { ShareLineButton } from "../generate-urls/share-line-link/share-line-button.tsx";
+import { GenerateWhipUrlButton } from "../generate-urls/generate-whip-url/generate-whip-url-button.tsx";
 
 type TProductionLine = {
   id: string;
@@ -523,20 +523,6 @@ export const ProductionLine = ({
                           />
                         </CollapsableSection>
                       )}
-                      {inputAudioStream &&
-                        inputAudioStream !== "no-device" &&
-                        !isMobile &&
-                        !isTablet && (
-                          <CollapsableSection title="Hotkeys">
-                            <HotkeysComponent
-                              callId={id}
-                              savedHotkeys={savedHotkeys}
-                              customGlobalMute={customGlobalMute}
-                              line={line}
-                              joinProductionOptions={joinProductionOptions}
-                            />
-                          </CollapsableSection>
-                        )}
                       <CollapsableSection title="Participants">
                         {line && (
                           <UserList
@@ -552,19 +538,39 @@ export const ProductionLine = ({
                         )}
                       </CollapsableSection>
                       {production && line && (
-                        <ButtonWrapper>
-                          <ExitCallButton
-                            resetOnExit={() => setConfirmExitModalOpen(true)}
+                        <ProductionLineFooter>
+                          {inputAudioStream &&
+                            inputAudioStream !== "no-device" &&
+                            !isMobile &&
+                            !isTablet && (
+                              <SettingsButton
+                                callId={id}
+                                savedHotkeys={savedHotkeys}
+                                customGlobalMute={customGlobalMute}
+                                line={line}
+                                joinProductionOptions={joinProductionOptions}
+                                productionId={production.productionId}
+                                lineId={line.id}
+                              />
+                            )}
+                          <ShareLineButton
+                            productionId={production.productionId}
+                            lineId={line.id}
                           />
-                          {confirmExitModalOpen && (
-                            <ConfirmationModal
-                              title="Confirm"
-                              description={`Are you sure you want to leave ${line?.name}?`}
-                              onCancel={() => setConfirmExitModalOpen(false)}
-                              onConfirm={exit}
+                          <ButtonWrapper>
+                            <ExitCallButton
+                              resetOnExit={() => setConfirmExitModalOpen(true)}
                             />
-                          )}
-                        </ButtonWrapper>
+                            {confirmExitModalOpen && (
+                              <ConfirmationModal
+                                title="Confirm"
+                                description={`Are you sure you want to leave ${line?.name}?`}
+                                onCancel={() => setConfirmExitModalOpen(false)}
+                                onConfirm={exit}
+                              />
+                            )}
+                          </ButtonWrapper>
+                        </ProductionLineFooter>
                       )}
                     </div>
                   </ListWrapper>
@@ -588,18 +594,6 @@ export const ProductionLine = ({
                     )}
                   </ListWrapper>
                 </FlexContainer>
-              )}
-              {production && line && (
-                <UrlButtonsWrapper>
-                  <GenerateWhipUrlButton
-                    productionId={production.productionId}
-                    lineId={line.id}
-                  />
-                  <ShareLineButton
-                    productionId={production.productionId}
-                    lineId={line.id}
-                  />
-                </UrlButtonsWrapper>
               )}
             </InnerDiv>
           </ExpandableSection>

@@ -13,6 +13,7 @@ export const HeaderWrapper = styled.div`
 export const HeaderTexts = styled.div`
   width: 100%;
   display: flex;
+  gap: 1rem;
   justify-content: space-between;
   align-items: center;
   margin-left: ${({

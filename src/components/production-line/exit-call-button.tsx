@@ -2,21 +2,39 @@ import styled from "@emotion/styled";
 import { LogoutIcon } from "../../assets/icons/icon";
 import { PrimaryButton } from "../form-elements/form-elements";
 
-const StyledBackBtn = styled(PrimaryButton)`
+export const FooterButton = styled(PrimaryButton)`
   margin-top: 1rem;
   background: rgba(50, 56, 59, 1);
   color: white;
   border: 0.2rem solid #6d6d6d;
   position: relative;
-  width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-grow: 1;
 
   svg {
     width: 2.5rem;
     height: 2.5rem;
-    fill: #f96c6c;
+    fill: rgb(89, 203, 232);
+  }
+
+  &.hotkeys-button {
+    svg {
+      fill: #c4c4c4;
+    }
+  }
+
+  &.whip-button {
+    svg {
+      fill: #b589fe;
+    }
+  }
+
+  &.exit-call-button {
+    svg {
+      fill: #f96c6c;
+    }
   }
 `;
 
@@ -30,13 +48,14 @@ export const ExitCallButton = ({
   resetOnExit: () => void;
 }) => {
   return (
-    <StyledBackBtn
+    <FooterButton
+      className="exit-call-button"
       type="button"
       title="Exit call"
       onClick={() => resetOnExit()}
     >
       <ButtonText>Leave Call</ButtonText>
       <LogoutIcon />
-    </StyledBackBtn>
+    </FooterButton>
   );
 };

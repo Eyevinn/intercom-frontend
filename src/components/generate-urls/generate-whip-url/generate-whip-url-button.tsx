@@ -1,9 +1,8 @@
-import { isMobile } from "../../../bowser";
+import { WhipIcon } from "../../../assets/icons/icon";
 import { GenerateUrlButton } from "../generate-url-button";
 import { GenerateWhipUrlModal } from "./generate-whip-url-modal";
 
 export const GenerateWhipUrlButton = ({
-  isMinified,
   productionId,
   lineId,
 }: {
@@ -11,22 +10,10 @@ export const GenerateWhipUrlButton = ({
   productionId: string;
   lineId: string;
 }) => {
-  const renderButtonLabel = () => {
-    if (isMinified) {
-      if (isMobile) {
-        return "Whip";
-      } else {
-        return "Whip URL";
-      }
-    } else {
-      return "Get Whip URL";
-    }
-  };
-
   return (
     <GenerateUrlButton
-      isMinified={isMinified}
-      label={renderButtonLabel()}
+      icon={<WhipIcon />}
+      className="whip-button"
       modalContent={(onClose) => (
         <GenerateWhipUrlModal
           productionId={productionId}

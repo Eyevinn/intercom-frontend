@@ -1,26 +1,21 @@
 import { ShareIcon } from "../../../assets/icons/icon";
 import { useShareUrl } from "../../../hooks/use-share-url";
-import { GenerateUrlButton } from "../generate-url-button";
+import { ModalButton } from "../../ui-components/buttons/modal-button";
 import { ShareLineLinkModal } from "../share-line-link/share-line-link-modal";
 
 export const ShareLineButton = ({
-  isMinified,
   productionId,
   lineId,
 }: {
-  isMinified?: boolean;
   productionId: string;
   lineId: string;
 }) => {
   const { shareUrl, url } = useShareUrl();
 
   return (
-    <GenerateUrlButton
-      isMinified={isMinified}
-      label="Share Line"
+    <ModalButton
       icon={<ShareIcon />}
       onClick={() => shareUrl({ productionId, lineId })}
-      isShareLine
       modalContent={(onClose) => (
         <ShareLineLinkModal
           urls={[url]}

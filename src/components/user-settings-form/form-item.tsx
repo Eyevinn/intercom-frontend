@@ -16,6 +16,7 @@ export const FormItem = ({
   productionLabel,
   errorClassName,
   children,
+  className,
 }: {
   label?: string;
   fieldName?: string;
@@ -23,12 +24,13 @@ export const FormItem = ({
   productionLabel?: string;
   errorClassName?: string;
   children: React.ReactNode;
+  className?: string;
 }) => {
   const Wrapper = productionLabel ? React.Fragment : FormLabel;
 
   return (
     <>
-      <Wrapper>
+      <Wrapper className={className}>
         {label && <DecorativeLabel>{label}</DecorativeLabel>}
         {children}
       </Wrapper>

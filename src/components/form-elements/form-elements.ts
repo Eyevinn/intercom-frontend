@@ -45,6 +45,17 @@ export const FormInput = styled.input`
       font-size: 1.2rem;
     }
   }
+
+  &.inline-input {
+    width: 30%;
+    text-align: right;
+    margin-bottom: 0.5rem;
+  }
+
+  &.expanded {
+    flex-grow: 2;
+    text-align: left;
+  }
 `;
 
 export const FormSelect = styled.select`
@@ -75,12 +86,23 @@ export const FormLabel = styled.label`
   &.save-edit {
     margin-right: 1rem;
   }
+
+  &.inline-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-grow: 1;
+  }
 `;
 
 export const DecorativeLabel = styled.span`
   display: block;
   white-space: nowrap;
   padding: 0 1rem 1rem 0;
+
+  &.italic {
+    font-style: italic;
+  }
 `;
 
 export const StyledWarningMessage = styled.div`

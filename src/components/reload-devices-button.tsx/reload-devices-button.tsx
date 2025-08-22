@@ -11,7 +11,6 @@ import { Spinner } from "../loader/loader";
 import { Modal } from "../modal/modal";
 
 export const StyledRefreshBtn = styled(PrimaryButton)`
-  margin-right: 1.5rem;
   display: flex;
   align-items: center;
   min-width: 16rem;

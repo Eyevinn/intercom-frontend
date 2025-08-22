@@ -10,6 +10,8 @@ import {
   ProductionName,
   ParticipantCount,
   ParticipantCountWrapper,
+  HeaderLeftSide,
+  HeaderRightSide,
 } from "../production-list/production-list-components";
 import { HeaderTexts, HeaderIcon } from "../shared/shared-components";
 import { AudioFeedIcon, CallHeader } from "./production-line-components";
@@ -54,12 +56,28 @@ export const CallHeaderComponent = ({
             <TVIcon />
           </AudioFeedIcon>
         )}
-        <ProductionName title={`${production?.name} / ${line?.name}`}>
-          <span className="production-name-container">
-            {`${truncatedProductionName}/ ${truncatedLineName}`}
-          </span>
-        </ProductionName>
-        <div>
+        <HeaderLeftSide>
+          <ProductionName title={`${production?.name} / ${line?.name}`}>
+            <span className="production-name-container">
+              {`${truncatedProductionName}/ ${truncatedLineName}`}
+            </span>
+          </ProductionName>
+          {/* {production && line && (
+            <UrlButtonsWrapper>
+              <ShareLineButton
+                productionId={production.productionId}
+                lineId={line.id}
+              />
+              {!isMobile && (
+                <GenerateWhipUrlButton
+                  productionId={production.productionId}
+                  lineId={line.id}
+                />
+              )}
+            </UrlButtonsWrapper>
+          )} */}
+        </HeaderLeftSide>
+        <HeaderRightSide>
           {totalWhipSessions > 0 && (
             <ParticipantCountWrapper
               className={totalWhipSessions > 0 ? "whip" : ""}
@@ -72,7 +90,7 @@ export const CallHeaderComponent = ({
             <UsersIcon />
             <ParticipantCount>{totalUsers}</ParticipantCount>
           </ParticipantCountWrapper>
-        </div>
+        </HeaderRightSide>
       </HeaderTexts>
       {line?.programOutputLine && open && (
         <AudioFeedIcon open={open}>
