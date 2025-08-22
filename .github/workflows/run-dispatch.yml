@@ -1,35 +1,15 @@
-name: Manual deploy to dev environment
+name: Manually triggered update of osaas-dev fork
+
 on: workflow_dispatch
 
 jobs:
-  deploy:
+  dispatch-osaas-dev-fork:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - name: Dispatch development fork deploy workflow
+        uses: peter-evans/repository-dispatch@v3
         with:
-          node-version: 18
-          registry-url: https://registry.npmjs.org/
-
-      - name: Build
-        run: |
-          yarn
-          yarn build --mode staging
-        env:
-          VITE_BACKEND_URL: ${{ secrets.MANAGER_DEV_URL }}
-          VITE_BACKEND_API_VERSION: api/v1/
-
-      - name: Sync to Dev bucket
-        uses: jakejarvis/s3-sync-action@v0.5.1
-        with:
-          args: --follow-symlinks --delete
-        env:
-          AWS_S3_BUCKET: "origin-intercom-app-dev"
-          AWS_ACCESS_KEY_ID: ${{ secrets.S3_AWS_ACCESS_KEY_ID  }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.S3_AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: "eu-north-1"
-          SOURCE_DIR: "dist/"
+          token: ${{ secrets.REPO_DISPATCH_TOKEN }}
+          repository: eyevinn-osaas-dev/intercom-frontend
+          event-type: sync-upstream
