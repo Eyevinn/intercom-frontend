@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
-import { TParticipant } from "./types.ts";
 import { MicMuted, UserIcon, WhipIcon } from "../../assets/icons/icon.tsx";
+import { TParticipant } from "./types.ts";
 
 const Container = styled.div`
   width: 100%;
@@ -126,6 +126,8 @@ export const UserList = ({
 }: TUserListOptions) => {
   if (!participants) return null;
 
+  const isWhipOnLine = participants.some((p) => p.isWhip);
+
   return (
     <Container>
       <ListWrapper>
@@ -138,7 +140,9 @@ export const UserList = ({
               <User title={p.name}>
                 <IsTalkingIndicator
                   isTalking={
-                    audioLevelAboveThreshold && p.endpointId === dominantSpeaker
+                    !isWhipOnLine &&
+                    audioLevelAboveThreshold &&
+                    p.endpointId === dominantSpeaker
                   }
                 >
                   <OnlineIndicator
