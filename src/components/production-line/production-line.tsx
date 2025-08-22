@@ -418,10 +418,15 @@ export const ProductionLine = ({
 
   // TODO detect if browser back button is pressed and run exit();
 
+  const isWhipOnLine = line?.participants.some((p) => p.isWhip);
+
   return (
     <CallWrapper
       isSomeoneSpeaking={
-        !isProgramOutputLine && !isSelfDominantSpeaker && isActiveParticipant
+        !isProgramOutputLine &&
+        !isSelfDominantSpeaker &&
+        isActiveParticipant &&
+        !isWhipOnLine
       }
     >
       {joinProductionOptions &&
