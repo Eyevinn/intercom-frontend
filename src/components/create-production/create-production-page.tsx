@@ -18,6 +18,7 @@ import { NavigateToRootButton } from "../navigate-to-root-button/navigate-to-roo
 import { isMobile } from "../../bowser.ts";
 import { Checkbox } from "../checkbox/checkbox.tsx";
 import { FormValues, useCreateProduction } from "./use-create-production.tsx";
+import { CopyAllLinksButton } from "../copy-button/copy-all-links-button.tsx";
 import {
   HeaderWrapper,
   CheckboxWrapper,
@@ -58,7 +59,7 @@ export const CreateProductionPage = () => {
     createNewProduction,
   });
 
-  const { error: productionFetchError } = useFetchProduction(
+  const { error: productionFetchError, production } = useFetchProduction(
     data?.productionId ? parseInt(data.productionId, 10) : null
   );
 
@@ -184,7 +185,12 @@ export const CreateProductionPage = () => {
           <ProductionConfirmation>
             The production <strong>{data.name}</strong> has been created.
           </ProductionConfirmation>
-
+          {!productionFetchError && production && (
+            <CopyAllLinksButton
+              production={production}
+              className="create-production-page"
+            />
+          )}
           {productionFetchError && (
             <FetchErrorMessage>
               The production information could not be fetched, not able to copy
