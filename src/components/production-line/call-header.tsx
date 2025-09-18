@@ -1,5 +1,4 @@
 import { useMemo } from "react";
-import styled from "@emotion/styled";
 import {
   UsersIcon,
   ChevronUpIcon,
@@ -15,8 +14,9 @@ import {
 } from "../production-list/production-list-components";
 import { HeaderTexts, HeaderIcon } from "../shared/shared-components";
 import { AudioFeedIcon, CallHeader } from "./production-line-components";
-import { TLine, TProduction } from "./types";
+import { TLine } from "./types";
 import { CopyLink } from "../production-list/copy-link";
+import { TBasicProductionResponse } from "../../api/api";
 
 export const CallHeaderComponent = ({
   open,
@@ -26,7 +26,7 @@ export const CallHeaderComponent = ({
 }: {
   open: boolean;
   line: TLine | null;
-  production: TProduction | null;
+  production: TBasicProductionResponse | null;
   setOpen: () => void;
 }) => {
   const truncatedProductionName =
@@ -63,7 +63,9 @@ export const CallHeaderComponent = ({
               {`${truncatedProductionName}/ ${truncatedLineName}`}
             </span>
           </ProductionName>
-          <CopyLink production={production} line={line} />
+          {production && line && (
+            <CopyLink production={production} line={line} />
+          )}
         </ProductionNameWrapper>
 
         <div>
