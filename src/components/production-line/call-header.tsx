@@ -63,7 +63,7 @@ export const CallHeaderComponent = ({
               {`${truncatedProductionName}/ ${truncatedLineName}`}
             </span>
           </ProductionName>
-          <CopyLink production={production} line={line} isCopyProduction />
+          <CopyLink production={production} line={line} />
         </ProductionNameWrapper>
 
         <div>
