@@ -15,8 +15,8 @@ import {
 import { HeaderTexts, HeaderIcon } from "../shared/shared-components";
 import { AudioFeedIcon, CallHeader } from "./production-line-components";
 import { TLine } from "./types";
-import { CopyLink } from "../production-list/copy-link";
 import { TBasicProductionResponse } from "../../api/api";
+import { CopyLink } from "../production-list/copy-link";
 
 export const CallHeaderComponent = ({
   open,
@@ -63,6 +63,7 @@ export const CallHeaderComponent = ({
               {`${truncatedProductionName}/ ${truncatedLineName}`}
             </span>
           </ProductionName>
+
           {production && line && (
             <CopyLink production={production} line={line} />
           )}

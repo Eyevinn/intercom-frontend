@@ -1,7 +1,7 @@
 import styled from "@emotion/styled";
 import { PrimaryButton } from "../form-elements/form-elements";
 import { useCopyLinks } from "./use-copy-links";
-import { TProduction } from "../production-line/types";
+import { TBasicProductionResponse } from "../../api/api";
 import { CheckIcon } from "../../assets/icons/icon";
 import { useShareUrl } from "../../hooks/use-share-url";
 import {
@@ -22,7 +22,7 @@ export const CopyAllLinksButton = ({
   production,
   className,
 }: {
-  production: TProduction;
+  production: TBasicProductionResponse;
   className: string;
 }) => {
   const { isCopied, handleCopyUrlToClipboard } = useCopyLinks();
