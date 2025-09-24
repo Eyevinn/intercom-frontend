@@ -86,11 +86,15 @@ export const ConnectToWSButton = ({
 }: ConnectToWSButtonProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isWSReconnecting, setIsWSReconnecting] = useState(false);
+  const [isConnectionConflict, setConnectionConflict] = useState(false);
   const [{ error, calls }, dispatch] = useGlobalState();
 
   useEffect(() => {
     if (error) {
       setIsWSReconnecting(false);
+      if (error.statusCode === 409) {
+        setConnectionConflict(true);
+      }
     }
   }, [error, setIsWSReconnecting]);
 
@@ -133,6 +137,7 @@ export const ConnectToWSButton = ({
   };
 
   const renderButtonContent = () => {
+    if (isConnectionConflict) return "Already Connected";
     if (isWSConnected) return "Companion";
     if (isWSReconnecting) return "Reconnecting...";
     return "Connect to Companion";
