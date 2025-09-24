@@ -10,10 +10,13 @@ import {
   ProductionName,
   ParticipantCount,
   ParticipantCountWrapper,
+  ProductionNameWrapper,
 } from "../production-list/production-list-components";
 import { HeaderTexts, HeaderIcon } from "../shared/shared-components";
 import { AudioFeedIcon, CallHeader } from "./production-line-components";
-import { TLine, TProduction } from "./types";
+import { TLine } from "./types";
+import { TBasicProductionResponse } from "../../api/api";
+import { CopyLink } from "../production-list/copy-link";
 
 export const CallHeaderComponent = ({
   open,
@@ -23,7 +26,7 @@ export const CallHeaderComponent = ({
 }: {
   open: boolean;
   line: TLine | null;
-  production: TProduction | null;
+  production: TBasicProductionResponse | null;
   setOpen: () => void;
 }) => {
   const truncatedProductionName =
@@ -54,11 +57,18 @@ export const CallHeaderComponent = ({
             <TVIcon />
           </AudioFeedIcon>
         )}
-        <ProductionName title={`${production?.name} / ${line?.name}`}>
-          <span className="production-name-container">
-            {`${truncatedProductionName}/ ${truncatedLineName}`}
-          </span>
-        </ProductionName>
+        <ProductionNameWrapper>
+          <ProductionName title={`${production?.name} / ${line?.name}`}>
+            <span className="production-name-container">
+              {`${truncatedProductionName}/ ${truncatedLineName}`}
+            </span>
+          </ProductionName>
+
+          {production && line && (
+            <CopyLink production={production} line={line} />
+          )}
+        </ProductionNameWrapper>
+
         <div>
           {totalWhipSessions > 0 && (
             <ParticipantCountWrapper

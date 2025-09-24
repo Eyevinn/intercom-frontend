@@ -43,8 +43,8 @@ interface ModalProps {
 
 export const Modal = ({ onClose, children }: ModalProps) => {
   return (
-    <ModalWrapper>
-      <ModalContent>
+    <ModalWrapper onClick={onClose}>
+      <ModalContent onClick={(e) => e.stopPropagation()}>
         <CloseButton onClick={onClose}>&times;</CloseButton>
         {children}
       </ModalContent>

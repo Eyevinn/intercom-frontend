@@ -1,15 +1,16 @@
 import { useEffect, useState } from "react";
-import { API } from "../../api/api";
-import { TProduction } from "../production-line/types";
+import { API, TBasicProductionResponse } from "../../api/api";
 
 type TUseFetchProduction = (id: number | null) => {
-  production: TProduction | null;
+  production: TBasicProductionResponse | null;
   error: Error | null;
   loading: boolean;
 };
 
 export const useFetchProduction: TUseFetchProduction = (id) => {
-  const [production, setProduction] = useState<TProduction | null>(null);
+  const [production, setProduction] = useState<TBasicProductionResponse | null>(
+    null
+  );
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
 

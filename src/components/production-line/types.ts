@@ -31,6 +31,7 @@ export type TParticipant = {
 export type TLine = {
   name: string;
   id: string;
+  smbConferenceId?: string;
   participants: TParticipant[];
   programOutputLine?: boolean;
 };
