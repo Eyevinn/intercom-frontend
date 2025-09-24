@@ -16,6 +16,9 @@ interface UseWebSocketProps {
   onAction: (action: WebSocketAction, index?: number) => void;
   onConnected?: () => void;
   resetLastSentCallsState?: () => void;
+
+  /** NEW: called when server rejects with 409 */
+  onConflict?: (message?: string) => void;
 }
 
 export function useWebSocket({
@@ -23,6 +26,7 @@ export function useWebSocket({
   onAction,
   onConnected,
   resetLastSentCallsState,
+  onConflict,
 }: UseWebSocketProps) {
   const socketRef = useRef<WebSocket | null>(null);
   const [isWSConnected, setIsWSConnected] = useState<boolean>(false);
@@ -48,19 +52,34 @@ export function useWebSocket({
 
       ws.onopen = () => {
         clearTimeout(timeout);
-
+        // Mark connected; if server immediately sends 409 we’ll flip back to false
         setIsWSConnected(true);
         dispatch({ type: "SET_WEBSOCKET", payload: ws });
-
-        if (onConnected) {
-          onConnected();
-        }
+        if (onConnected) onConnected();
       };
 
       ws.onmessage = (event: MessageEvent) => {
         try {
           const data = JSON.parse(event.data);
-          if (data.action) {
+
+          // Handle connection conflict
+          if (data?.type === "error" && data?.statusCode === 409) {
+            // Local UI path
+            if (onConflict) onConflict(data?.message);
+            // Create a real Error so name/message render correctly
+            const err = new Error(data?.message || "Connection conflict");
+            err.statusCode = 409;
+
+            dispatch({
+              type: "ERROR",
+              payload: { error: err },
+            });
+            setIsWSConnected(false);
+            ws.close();
+            return;
+          }
+
+          if (data?.action) {
             onAction(data.action, data.index);
           }
         } catch (e) {
@@ -87,16 +106,14 @@ export function useWebSocket({
 
       socketRef.current = ws;
     },
-    [onAction, dispatch, onConnected]
+    [onAction, dispatch, onConnected, onConflict]
   );
 
   const wsDisconnect = () => {
     socketRef.current?.close();
     socketRef.current = null;
 
-    if (resetLastSentCallsState) {
-      resetLastSentCallsState();
-    }
+    if (resetLastSentCallsState) resetLastSentCallsState();
 
     setIsWSConnected(false);
     dispatch({ type: "SET_WEBSOCKET", payload: null });
@@ -105,15 +122,11 @@ export function useWebSocket({
   useEffect(() => {
     return () => {
       if (socketRef.current) {
-        socketRef.current?.close();
+        socketRef.current.close();
         socketRef.current = null;
       }
     };
   }, []);
 
-  return {
-    wsDisconnect,
-    wsConnect,
-    isWSConnected,
-  };
+  return { wsDisconnect, wsConnect, isWSConnected };
 }

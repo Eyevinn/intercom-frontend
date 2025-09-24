@@ -19,10 +19,19 @@ const ConnectWebSocketWrapper = styled.div`
 
 const ConnectButton = styled(PrimaryButton)<{
   isConnected: boolean;
+  isConnectionConflict: boolean;
 }>`
-  background: ${({ isConnected }) => (isConnected ? "#73d16d" : "")};
+  background: ${({ isConnected, isConnectionConflict }) => {
+    if (isConnectionConflict) return "#f96c6c";
+    if (isConnected) return "#73d16d";
+    return "";
+  }};
   border: 0.2rem solid
-    ${({ isConnected }) => (isConnected ? "#73d16d" : "rgba(89, 203, 232, 1)")};
+    ${({ isConnected, isConnectionConflict }) => {
+      if (isConnectionConflict) return "#f96c6c";
+      if (isConnected) return "#73d16d";
+      return "rgba(89, 203, 232, 1)";
+    }};
   text-align: center;
   padding: 1rem;
   align-items: center;
@@ -87,17 +96,9 @@ export const ConnectToWSButton = ({
   const [isOpen, setIsOpen] = useState(false);
   const [isWSReconnecting, setIsWSReconnecting] = useState(false);
   const [isConnectionConflict, setConnectionConflict] = useState(false);
-  const [{ error, calls }, dispatch] = useGlobalState();
+  const [{ calls }, dispatch] = useGlobalState();
 
-  useEffect(() => {
-    if (error) {
-      setIsWSReconnecting(false);
-      if (error.statusCode === 409) {
-        setConnectionConflict(true);
-      }
-    }
-  }, [error, setIsWSReconnecting]);
-
+  // map call ids to indices for actions
   useEffect(() => {
     const indexMap = callIndexMap.current;
     Object.keys(calls).forEach((callId, i) => {
@@ -115,10 +116,15 @@ export const ConnectToWSButton = ({
     onAction: handleAction,
     dispatch,
     onConnected: () => {
+      setConnectionConflict(false);
       sendCallsStateUpdate();
     },
     resetLastSentCallsState: () => {
       resetLastSentCallsState();
+    },
+    onConflict: () => {
+      setConnectionConflict(true);
+      setIsWSReconnecting(false);
     },
   });
 
@@ -127,13 +133,29 @@ export const ConnectToWSButton = ({
     isMasterInputMuted,
     isWSReconnecting,
     isWSConnected,
+    isConnectionConflict, // block retries when true
     setIsWSReconnecting,
     wsConnect,
   });
 
   const handleConnect = (url: string) => {
+    setConnectionConflict(false);
     wsConnect(url);
     setIsOpen(false);
+  };
+
+  const handlePrimaryClick = () => {
+    if (isConnectionConflict) {
+      setConnectionConflict(false);
+      setIsWSReconnecting(false);
+      wsDisconnect();
+      return;
+    }
+    if (isWSConnected) {
+      wsDisconnect();
+      return;
+    }
+    setIsOpen(true);
   };
 
   const renderButtonContent = () => {
@@ -148,14 +170,19 @@ export const ConnectToWSButton = ({
       <TooltipWrapper>
         <ConnectButton
           isConnected={isWSConnected}
-          onClick={isWSConnected ? wsDisconnect : () => setIsOpen(true)}
+          isConnectionConflict={isConnectionConflict}
+          onClick={handlePrimaryClick}
         >
           {renderButtonContent()}
           {isWSConnected && <CheckIcon />}
-          {isWSReconnecting && <Spinner className="companion-loader" />}
+          {!isConnectionConflict && isWSReconnecting && (
+            <Spinner className="companion-loader" />
+          )}
         </ConnectButton>
 
-        {isWSConnected && <TooltipText id="disconnect">Disconnect</TooltipText>}
+        {(isWSConnected || isConnectionConflict) && (
+          <TooltipText id="disconnect">Disconnect</TooltipText>
+        )}
       </TooltipWrapper>
 
       <ConnectToWsModal
