@@ -16,8 +16,6 @@ interface UseWebSocketProps {
   onAction: (action: WebSocketAction, index?: number) => void;
   onConnected?: () => void;
   resetLastSentCallsState?: () => void;
-
-  /** NEW: called when server rejects with 409 */
   onConflict?: (message?: string) => void;
 }
 
@@ -52,7 +50,6 @@ export function useWebSocket({
 
       ws.onopen = () => {
         clearTimeout(timeout);
-        // Mark connected; if server immediately sends 409 we’ll flip back to false
         setIsWSConnected(true);
         dispatch({ type: "SET_WEBSOCKET", payload: ws });
         if (onConnected) onConnected();
@@ -61,15 +58,10 @@ export function useWebSocket({
       ws.onmessage = (event: MessageEvent) => {
         try {
           const data = JSON.parse(event.data);
-
-          // Handle connection conflict
           if (data?.type === "error" && data?.statusCode === 409) {
-            // Local UI path
             if (onConflict) onConflict(data?.message);
-            // Create a real Error so name/message render correctly
             const err = new Error(data?.message || "Connection conflict");
             err.statusCode = 409;
-
             dispatch({
               type: "ERROR",
               payload: { error: err },
@@ -78,7 +70,6 @@ export function useWebSocket({
             ws.close();
             return;
           }
-
           if (data?.action) {
             onAction(data.action, data.index);
           }

@@ -19,19 +19,10 @@ const ConnectWebSocketWrapper = styled.div`
 
 const ConnectButton = styled(PrimaryButton)<{
   isConnected: boolean;
-  isConnectionConflict: boolean;
 }>`
-  background: ${({ isConnected, isConnectionConflict }) => {
-    if (isConnectionConflict) return "#f96c6c";
-    if (isConnected) return "#73d16d";
-    return "";
-  }};
+  background: ${({ isConnected }) => (isConnected ? "#73d16d" : "")};
   border: 0.2rem solid
-    ${({ isConnected, isConnectionConflict }) => {
-      if (isConnectionConflict) return "#f96c6c";
-      if (isConnected) return "#73d16d";
-      return "rgba(89, 203, 232, 1)";
-    }};
+    ${({ isConnected }) => (isConnected ? "#73d16d" : "rgba(89, 203, 232, 1)")};
   text-align: center;
   padding: 1rem;
   align-items: center;
@@ -149,6 +140,7 @@ export const ConnectToWSButton = ({
       setConnectionConflict(false);
       setIsWSReconnecting(false);
       wsDisconnect();
+      setIsOpen(true);
       return;
     }
     if (isWSConnected) {
@@ -159,7 +151,6 @@ export const ConnectToWSButton = ({
   };
 
   const renderButtonContent = () => {
-    if (isConnectionConflict) return "Already Connected";
     if (isWSConnected) return "Companion";
     if (isWSReconnecting) return "Reconnecting...";
     return "Connect to Companion";
@@ -168,11 +159,7 @@ export const ConnectToWSButton = ({
   return (
     <ConnectWebSocketWrapper>
       <TooltipWrapper>
-        <ConnectButton
-          isConnected={isWSConnected}
-          isConnectionConflict={isConnectionConflict}
-          onClick={handlePrimaryClick}
-        >
+        <ConnectButton isConnected={isWSConnected} onClick={handlePrimaryClick}>
           {renderButtonContent()}
           {isWSConnected && <CheckIcon />}
           {!isConnectionConflict && isWSReconnecting && (
@@ -180,9 +167,7 @@ export const ConnectToWSButton = ({
           )}
         </ConnectButton>
 
-        {(isWSConnected || isConnectionConflict) && (
-          <TooltipText id="disconnect">Disconnect</TooltipText>
-        )}
+        {isWSConnected && <TooltipText id="disconnect">Disconnect</TooltipText>}
       </TooltipWrapper>
 
       <ConnectToWsModal

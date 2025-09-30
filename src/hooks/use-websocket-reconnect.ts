@@ -28,48 +28,39 @@ export const useWebsocketReconnect = ({
     numberOfCalls: Object.values(calls).length,
   });
 
-  // Stop any spinner on error. Do NOT trigger reconnects on 409.
-  useEffect(() => {
-    if (error) {
-      setIsWSReconnecting(false);
-      const status = error?.statusCode || error?.error?.statusCode;
-      if (status === 409) {
-        // leave it stopped; local conflict flag controls future retries
-        return;
-      }
-    }
-  }, [error, setIsWSReconnecting]);
-
-  // If we somehow became connected, clear reconnecting flag
+  // Reset reconnecting flag when connection succeeds
   useEffect(() => {
     if (isWSConnected && isWSReconnecting) {
       setIsWSReconnecting(false);
     }
   }, [isWSConnected, isWSReconnecting, setIsWSReconnecting]);
 
-  // Reconnect loop — only when NOT in conflict
+  // Handle reconnect attempts
   useEffect(() => {
     let interval: number | null = null;
     let timeout: number | null = null;
 
-    const status = error.statusCode || error?.error?.statusCode;
-    const isConflictFromError = status === 409;
+    // Always reset reconnecting flag on error
+    if (error) {
+      setIsWSReconnecting(false);
+    }
 
     const shouldReconnect =
-      !isConnectionConflict &&
-      !isConflictFromError &&
       websocket !== null &&
       websocket.readyState === WebSocket.CLOSED &&
       websocket.url &&
-      !isWSConnected;
+      !isWSConnected &&
+      !isConnectionConflict;
 
     if (shouldReconnect) {
       setIsWSReconnecting(true);
 
+      // Try reconnecting every second
       interval = window.setInterval(() => {
-        wsConnect(websocket!.url);
+        wsConnect(websocket.url);
       }, 1000);
 
+      // Stop reconnect attempts after 5 seconds
       timeout = window.setTimeout(() => {
         if (interval) window.clearInterval(interval);
         setIsWSReconnecting(false);
