@@ -42,6 +42,10 @@ LOGGER LEVELS
 
 `yarn dev` to start a dev server
 
+### Preview
+
+<img width="2329" height="1276" alt="image" src="https://github.com/user-attachments/assets/c784ac70-2caa-4bca-9a1d-4d0ef883b7bb" />
+
 ### Open Intercom Server in Open Source Cloud
 
 To develop using a server hosted by [Open Source Cloud](https://www.osaas.io/), you need to provide a bearer token (service access token) in the Authorization header. The environment should be set to:
