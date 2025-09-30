@@ -1,7 +1,7 @@
 import styled from "@emotion/styled";
 import { useEffect, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
-import { isBrowserFirefox } from "../../bowser";
+import { isBrowserFirefox, isBrowserSafari } from "../../bowser";
 import { useGlobalState } from "../../global-state/context-provider";
 import { useSubmitOnEnter } from "../../hooks/use-submit-form-enter-press";
 import { Checkbox } from "../checkbox/checkbox";
@@ -285,6 +285,7 @@ export const UserSettingsForm = ({
               )}
             </FormSelect>
           </FormItem>
+          { !isBrowserSafari && (
           <FormItem label="Output">
             {devices.output && devices.output.length > 0 ? (
               <FormSelect
@@ -301,8 +302,9 @@ export const UserSettingsForm = ({
               <StyledWarningMessage>
                 Controlled by operating system
               </StyledWarningMessage>
-            )}
-          </FormItem>
+              )}
+            </FormItem>
+          )}
         </>
       )}
       {isProgramOutputLine && isJoinProduction && (
