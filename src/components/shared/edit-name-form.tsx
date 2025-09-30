@@ -93,10 +93,12 @@ export const EditNameForm = <T extends ProductionItem>({
     );
   };
 
+  const normalizedProductionName = (productionName ?? "").trim();
+  const originalProductionName = (savedItem?.name ?? "").trim();
+
   const isUpdated =
-    savedItem &&
-    "name" in savedItem &&
-    (productionName !== savedItem?.name || hasLineChanges());
+    !!savedItem &&
+    (normalizedProductionName !== originalProductionName || hasLineChanges());
 
   useEffect(() => {
     if (!savedItem) return;
@@ -172,6 +174,9 @@ export const EditNameForm = <T extends ProductionItem>({
     e.preventDefault();
 
     if (isEditingName) {
+      if (!isUpdated) {
+        return;
+      }
       handleSubmit(onSubmit)();
     } else {
       setSavedItem(item);
@@ -203,6 +208,7 @@ export const EditNameForm = <T extends ProductionItem>({
             {...register(formSubmitType)}
             placeholder="New Name"
             className={`name-edit-button edit-name ${className}`}
+            autoFocus
             autoComplete="off"
           />
         </FormLabel>
@@ -211,6 +217,7 @@ export const EditNameForm = <T extends ProductionItem>({
         <NameEditButton
           type="button"
           className={`name-edit-button ${isEditingName ? "save" : "edit"}`}
+          disabled={isEditingName && !isUpdated}
           onClick={handleClick}
         >
           {isEditingName ? saveButton : editButton}

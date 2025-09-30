@@ -112,6 +112,15 @@ export const NameEditButton = styled.button`
   &:hover svg {
     transform: scale(1.2);
   }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+
+  &:disabled:hover svg {
+    transform: none;
+  }
 `;
 
 export const EditNameWrapper = styled.div`

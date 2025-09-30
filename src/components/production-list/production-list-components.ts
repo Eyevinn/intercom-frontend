@@ -5,6 +5,11 @@ export const ProductionName = styled.div`
   font-size: 1.4rem;
   font-weight: bold;
   margin-right: 0.5rem;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 
   .production-name-container {
     display: inline-block;
