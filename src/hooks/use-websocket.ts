@@ -61,7 +61,6 @@ export function useWebSocket({
           if (data?.type === "error" && data?.statusCode === 409) {
             if (onConflict) onConflict(data?.message);
             const err = new Error(data?.message || "Connection conflict");
-            err.statusCode = 409;
             dispatch({
               type: "ERROR",
               payload: { error: err },
