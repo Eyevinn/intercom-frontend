@@ -8,6 +8,7 @@ export const useWebsocketReconnect = ({
   isMasterInputMuted,
   isWSReconnecting,
   isWSConnected,
+  isConnectionConflict,
   setIsWSReconnecting,
   wsConnect,
 }: {
@@ -15,6 +16,7 @@ export const useWebsocketReconnect = ({
   isMasterInputMuted: boolean;
   isWSReconnecting: boolean;
   isWSConnected: boolean;
+  isConnectionConflict: boolean;
   setIsWSReconnecting: (v: boolean) => void;
   wsConnect: (url: string) => void;
 }) => {
@@ -26,30 +28,29 @@ export const useWebsocketReconnect = ({
     numberOfCalls: Object.values(calls).length,
   });
 
-  // Handle WebSocket errors
-  useEffect(() => {
-    if (error) {
-      setIsWSReconnecting(false);
-    }
-  }, [error, setIsWSReconnecting]);
-
-  // Reset reconnecting state when connected
+  // Reset reconnecting flag when connection succeeds
   useEffect(() => {
     if (isWSConnected && isWSReconnecting) {
       setIsWSReconnecting(false);
     }
   }, [isWSConnected, isWSReconnecting, setIsWSReconnecting]);
 
-  // Handle reconnect loop
+  // Handle reconnect attempts
   useEffect(() => {
     let interval: number | null = null;
     let timeout: number | null = null;
+
+    // Always reset reconnecting flag on error
+    if (error) {
+      setIsWSReconnecting(false);
+    }
 
     const shouldReconnect =
       websocket !== null &&
       websocket.readyState === WebSocket.CLOSED &&
       websocket.url &&
-      !isWSConnected;
+      !isWSConnected &&
+      !isConnectionConflict;
 
     if (shouldReconnect) {
       setIsWSReconnecting(true);
@@ -70,7 +71,15 @@ export const useWebsocketReconnect = ({
       if (interval) window.clearInterval(interval);
       if (timeout) window.clearTimeout(timeout);
     };
-  }, [websocket, wsConnect, isWSConnected, setIsWSReconnecting]);
+  }, [
+    websocket,
+    wsConnect,
+    isWSConnected,
+    isWSReconnecting,
+    setIsWSReconnecting,
+    error,
+    isConnectionConflict,
+  ]);
 
   return { registerCallList, deregisterCall };
 };
