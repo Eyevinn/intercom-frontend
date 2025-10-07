@@ -96,7 +96,7 @@ export const NameEditButton = styled.button`
   width: 2rem;
 
   &.edit {
-    margin-top: -0.5rem;
+    margin-top: 0;
   }
 
   &.save {
@@ -128,6 +128,7 @@ export const EditNameWrapper = styled.div`
   align-items: center;
   justify-content: start;
   max-width: 30rem;
+  height: 2rem;
   pointer-events: none;
 
   &.ingests {
