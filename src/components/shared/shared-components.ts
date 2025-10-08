@@ -30,6 +30,10 @@ export const HeaderIcon = styled.div`
   height: 2rem;
   width: 2rem;
   flex-shrink: 0;
+
+  svg {
+    transform: translateY(1.5px);
+  }
 `;
 
 export const CollapsibleItemWrapper = styled.div`
