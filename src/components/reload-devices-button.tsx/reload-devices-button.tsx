@@ -1,7 +1,7 @@
 import styled from "@emotion/styled";
 import { useEffect, useState } from "react";
 import { RefreshIcon } from "../../assets/icons/icon";
-import { isBrowserFirefox, isMobile } from "../../bowser";
+import { isBrowserFirefox, isMobile, isBrowserSafari } from "../../bowser";
 import { useGlobalState } from "../../global-state/context-provider";
 import { useDevicePermissions } from "../../hooks/use-device-permission";
 import { useFetchDevices } from "../../hooks/use-fetch-devices";
@@ -66,10 +66,10 @@ export const ReloadDevicesButton = () => {
     <>
       <StyledRefreshBtn
         type="button"
-        title="Refresh devices"
+        title={isBrowserSafari ? "Refresh device" : "Refresh devices"}
         onClick={() => reloadDevices()}
       >
-        <div>Refresh Devices</div>
+        <div>{isBrowserSafari ? "Refresh Device" : "Refresh Devices"}</div>
         {!deviceRefresh && <RefreshIcon />}
         {deviceRefresh && <Spinner className="refresh-devices" />}
       </StyledRefreshBtn>

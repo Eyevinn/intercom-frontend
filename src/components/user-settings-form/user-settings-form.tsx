@@ -266,7 +266,9 @@ export const UserSettingsForm = ({
       {(isFirstConnection || isSupportedBrowser || isSettingsConfig) && (
         <>
           <DevicesSection>
-            <SectionTitle>Devices</SectionTitle>
+            <SectionTitle>
+              {isBrowserSafari ? "Device" : "Devices"}
+            </SectionTitle>
             {isBrowserFirefox && <FirefoxWarning type="firefox-warning" />}
           </DevicesSection>
           <FormItem label="Input">
@@ -285,23 +287,23 @@ export const UserSettingsForm = ({
               )}
             </FormSelect>
           </FormItem>
-          { !isBrowserSafari && (
-          <FormItem label="Output">
-            {devices.output && devices.output.length > 0 ? (
-              <FormSelect
-                // eslint-disable-next-line
-                {...register(`audiooutput`)}
-              >
-                {devices.output.map((device) => (
-                  <option key={device.deviceId} value={device.deviceId}>
-                    {device.label}
-                  </option>
-                ))}
-              </FormSelect>
-            ) : (
-              <StyledWarningMessage>
-                Controlled by operating system
-              </StyledWarningMessage>
+          {!isBrowserSafari && (
+            <FormItem label="Output">
+              {devices.output && devices.output.length > 0 ? (
+                <FormSelect
+                  // eslint-disable-next-line
+                  {...register(`audiooutput`)}
+                >
+                  {devices.output.map((device) => (
+                    <option key={device.deviceId} value={device.deviceId}>
+                      {device.label}
+                    </option>
+                  ))}
+                </FormSelect>
+              ) : (
+                <StyledWarningMessage>
+                  Controlled by operating system
+                </StyledWarningMessage>
               )}
             </FormItem>
           )}

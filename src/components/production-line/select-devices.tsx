@@ -141,28 +141,29 @@ export const SelectDevices = ({
             </FormSelect>
           </FormLabel>
         )}
-      {!isBrowserSafari && !(line?.programOutputLine && joinProductionOptions.isProgramUser) && (
-        <FormLabel>
-          <DecorativeLabel>Output</DecorativeLabel>
-          {devices.output && devices.output.length > 0 ? (
-            <FormSelect
-              // eslint-disable-next-line
-              {...register(`audiooutput`)}
-              defaultValue={audiooutput || ""}
-            >
-              {devices.output.map((device) => (
-                <option key={device.deviceId} value={device.deviceId}>
-                  {device.label}
-                </option>
-              ))}
-            </FormSelect>
-          ) : (
-            <StyledWarningMessage>
-              Controlled by operating system
-            </StyledWarningMessage>
-          )}
-        </FormLabel>
-      )}
+      {!isBrowserSafari &&
+        !(line?.programOutputLine && joinProductionOptions.isProgramUser) && (
+          <FormLabel>
+            <DecorativeLabel>Output</DecorativeLabel>
+            {devices.output && devices.output.length > 0 ? (
+              <FormSelect
+                // eslint-disable-next-line
+                {...register(`audiooutput`)}
+                defaultValue={audiooutput || ""}
+              >
+                {devices.output.map((device) => (
+                  <option key={device.deviceId} value={device.deviceId}>
+                    {device.label}
+                  </option>
+                ))}
+              </FormSelect>
+            ) : (
+              <StyledWarningMessage>
+                Controlled by operating system
+              </StyledWarningMessage>
+            )}
+          </FormLabel>
+        )}
       <DeviceButtonWrapper>
         {!(isBrowserFirefox && !isMobile) && <ReloadDevicesButton />}
         <PrimaryButton
