@@ -62,18 +62,27 @@ export const Lineblock = styled.div`
   min-height: 6.5rem;
 `;
 
-export const LineBlockTexts = styled.div``;
+export const LineBlockTexts = styled.div`
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+`;
 
 export const LineBlockTitle = styled.div`
   font-weight: bold;
   font-size: 1.5rem;
   margin-bottom: 0.2rem;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 `;
 
 export const LineBlockTitleWrapper = styled.div`
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  min-width: 0;
+  overflow: hidden;
 
   &.management {
     margin-right: 1rem;
@@ -180,4 +189,6 @@ export const ProductionNameWrapper = styled.div`
   display: flex;
   align-items: center;
   max-width: 30rem;
+  flex: 1;
+  min-width: 0;
 `;

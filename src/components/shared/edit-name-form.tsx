@@ -89,7 +89,7 @@ export const EditNameForm = <T extends ProductionItem>({
     return savedItem.lines.some(
       (l, index) =>
         formValues[`lineName-${index}`] &&
-        formValues[`lineName-${index}`] !== l.name
+        (formValues[`lineName-${index}`] ?? "").trim() !== l.name.trim()
     );
   };
 
@@ -166,7 +166,7 @@ export const EditNameForm = <T extends ProductionItem>({
   useSubmitOnEnter<FormValues>({
     handleSubmit,
     submitHandler: onSubmit,
-    shouldSubmitOnEnter: isUpdated ?? false,
+    shouldSubmitOnEnter: isEditingName,
   });
 
   const handleClick = (e: React.MouseEvent) => {
@@ -175,10 +175,21 @@ export const EditNameForm = <T extends ProductionItem>({
 
     if (isEditingName) {
       if (!isUpdated) {
+        setSavedItem(null);
+        setIsEditingName(false);
         return;
       }
+
       handleSubmit(onSubmit)();
     } else {
+      if (formSubmitType === "productionName" && "name" in item && item.name) {
+        setValue(formSubmitType, item.name);
+      }
+      if (isProduction(item) && item.lines) {
+        item.lines.forEach((l, index) => {
+          setValue(`lineName-${index}`, l.name);
+        });
+      }
       setSavedItem(item);
       setIsEditingName(true);
     }
@@ -217,7 +228,6 @@ export const EditNameForm = <T extends ProductionItem>({
         <NameEditButton
           type="button"
           className={`name-edit-button ${isEditingName ? "save" : "edit"}`}
-          disabled={isEditingName && !isUpdated}
           onClick={handleClick}
         >
           {isEditingName ? saveButton : editButton}

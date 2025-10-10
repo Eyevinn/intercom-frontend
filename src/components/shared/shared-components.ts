@@ -15,6 +15,8 @@ export const HeaderTexts = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
+  min-width: 0;
+  overflow: hidden;
   margin-left: ${({
     open,
     isProgramOutputLine,
@@ -132,8 +134,11 @@ export const EditNameWrapper = styled.div`
   align-items: center;
   justify-content: start;
   max-width: 30rem;
-  height: 2rem;
+  min-height: 2rem;
   pointer-events: none;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
 
   &.ingests {
     background-color: #484848;
