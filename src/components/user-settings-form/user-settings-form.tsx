@@ -1,7 +1,7 @@
 import styled from "@emotion/styled";
 import { useEffect, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
-import { isBrowserFirefox } from "../../bowser";
+import { isBrowserFirefox, isBrowserSafari } from "../../bowser";
 import { useGlobalState } from "../../global-state/context-provider";
 import { useSubmitOnEnter } from "../../hooks/use-submit-form-enter-press";
 import { Checkbox } from "../checkbox/checkbox";
@@ -266,7 +266,9 @@ export const UserSettingsForm = ({
       {(isFirstConnection || isSupportedBrowser || isSettingsConfig) && (
         <>
           <DevicesSection>
-            <SectionTitle>Devices</SectionTitle>
+            <SectionTitle>
+              {isBrowserSafari ? "Device" : "Devices"}
+            </SectionTitle>
             {isBrowserFirefox && <FirefoxWarning type="firefox-warning" />}
           </DevicesSection>
           <FormItem label="Input">
@@ -285,24 +287,26 @@ export const UserSettingsForm = ({
               )}
             </FormSelect>
           </FormItem>
-          <FormItem label="Output">
-            {devices.output && devices.output.length > 0 ? (
-              <FormSelect
-                // eslint-disable-next-line
-                {...register(`audiooutput`)}
-              >
-                {devices.output.map((device) => (
-                  <option key={device.deviceId} value={device.deviceId}>
-                    {device.label}
-                  </option>
-                ))}
-              </FormSelect>
-            ) : (
-              <StyledWarningMessage>
-                Controlled by operating system
-              </StyledWarningMessage>
-            )}
-          </FormItem>
+          {!isBrowserSafari && (
+            <FormItem label="Output">
+              {devices.output && devices.output.length > 0 ? (
+                <FormSelect
+                  // eslint-disable-next-line
+                  {...register(`audiooutput`)}
+                >
+                  {devices.output.map((device) => (
+                    <option key={device.deviceId} value={device.deviceId}>
+                      {device.label}
+                    </option>
+                  ))}
+                </FormSelect>
+              ) : (
+                <StyledWarningMessage>
+                  Controlled by operating system
+                </StyledWarningMessage>
+              )}
+            </FormItem>
+          )}
         </>
       )}
       {isProgramOutputLine && isJoinProduction && (

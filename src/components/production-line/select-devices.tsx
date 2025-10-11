@@ -1,6 +1,6 @@
 import { SubmitHandler, useForm, useWatch } from "react-hook-form";
 import { useParams } from "react-router-dom";
-import { isBrowserFirefox, isMobile } from "../../bowser";
+import { isBrowserFirefox, isMobile, isBrowserSafari } from "../../bowser";
 import { useGlobalState } from "../../global-state/context-provider";
 import {
   DecorativeLabel,
@@ -141,28 +141,29 @@ export const SelectDevices = ({
             </FormSelect>
           </FormLabel>
         )}
-      {!(line?.programOutputLine && joinProductionOptions.isProgramUser) && (
-        <FormLabel>
-          <DecorativeLabel>Output</DecorativeLabel>
-          {devices.output && devices.output.length > 0 ? (
-            <FormSelect
-              // eslint-disable-next-line
-              {...register(`audiooutput`)}
-              defaultValue={audiooutput || ""}
-            >
-              {devices.output.map((device) => (
-                <option key={device.deviceId} value={device.deviceId}>
-                  {device.label}
-                </option>
-              ))}
-            </FormSelect>
-          ) : (
-            <StyledWarningMessage>
-              Controlled by operating system
-            </StyledWarningMessage>
-          )}
-        </FormLabel>
-      )}
+      {!isBrowserSafari &&
+        !(line?.programOutputLine && joinProductionOptions.isProgramUser) && (
+          <FormLabel>
+            <DecorativeLabel>Output</DecorativeLabel>
+            {devices.output && devices.output.length > 0 ? (
+              <FormSelect
+                // eslint-disable-next-line
+                {...register(`audiooutput`)}
+                defaultValue={audiooutput || ""}
+              >
+                {devices.output.map((device) => (
+                  <option key={device.deviceId} value={device.deviceId}>
+                    {device.label}
+                  </option>
+                ))}
+              </FormSelect>
+            ) : (
+              <StyledWarningMessage>
+                Controlled by operating system
+              </StyledWarningMessage>
+            )}
+          </FormLabel>
+        )}
       <DeviceButtonWrapper>
         {!(isBrowserFirefox && !isMobile) && <ReloadDevicesButton />}
         <PrimaryButton
