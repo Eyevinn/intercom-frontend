@@ -18,6 +18,7 @@ const MuteAllCallsBtn = styled(PrimaryButton)`
   background: rgba(50, 56, 59, 1);
   color: #6fd84f;
   border: 0.2rem solid #6d6d6d;
+  min-width: 15rem;
   &.mute {
     svg {
       fill: #f96c6c;
@@ -28,6 +29,7 @@ const MuteAllCallsBtn = styled(PrimaryButton)`
   margin-right: 1rem;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   color: white;
 
   svg {
