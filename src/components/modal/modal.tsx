@@ -1,6 +1,4 @@
 import styled from "@emotion/styled";
-import { useEffect } from "react";
-import { createPortal } from "react-dom";
 
 const ModalWrapper = styled.div`
   position: fixed;
@@ -12,7 +10,7 @@ const ModalWrapper = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 2000;
+  z-index: 1000;
 `;
 
 const ModalContent = styled.div`
@@ -44,21 +42,12 @@ interface ModalProps {
 }
 
 export const Modal = ({ onClose, children }: ModalProps) => {
-  useEffect(() => {
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = previousOverflow;
-    };
-  }, []);
-
-  return createPortal(
-    <ModalWrapper onClick={onClose}>
-      <ModalContent onClick={(e) => e.stopPropagation()}>
+  return (
+    <ModalWrapper>
+      <ModalContent>
         <CloseButton onClick={onClose}>&times;</CloseButton>
         {children}
       </ModalContent>
-    </ModalWrapper>,
-    document.body
+    </ModalWrapper>
   );
 };
