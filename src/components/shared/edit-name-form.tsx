@@ -96,9 +96,12 @@ export const EditNameForm = <T extends ProductionItem>({
   const normalizedProductionName = (productionName ?? "").trim();
   const originalProductionName = (savedItem?.name ?? "").trim();
 
+  const isEditingProductionName = formSubmitType === "productionName";
   const isUpdated =
     !!savedItem &&
-    (normalizedProductionName !== originalProductionName || hasLineChanges());
+    (isEditingProductionName
+      ? normalizedProductionName !== originalProductionName
+      : hasLineChanges());
 
   useEffect(() => {
     if (!savedItem) return;
@@ -228,6 +231,7 @@ export const EditNameForm = <T extends ProductionItem>({
         <NameEditButton
           type="button"
           className={`name-edit-button ${isEditingName ? "save" : "edit"}`}
+          disabled={isEditingName && !isUpdated}
           onClick={handleClick}
         >
           {isEditingName ? saveButton : editButton}
