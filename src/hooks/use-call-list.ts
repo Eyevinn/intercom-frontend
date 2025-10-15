@@ -96,7 +96,8 @@ export function useCallList({
       const hasChanged =
         prev.isInputMuted !== data.isInputMuted ||
         (prev.isOutputMuted !== data.isOutputMuted &&
-          !data.isProgramOutputLine) ||
+          ((data.isProgramOutputLine && !data.isProgramUser) ||
+            !data.isProgramOutputLine)) ||
         prev.volume !== data.volume;
 
       if (!hasChanged) return;
