@@ -87,6 +87,7 @@ export const CopyIconWrapper = styled.div<{
     width: 3rem;
     height: 3rem;
     margin-left: 0;
+    flex-shrink: 0;
   }
 
   &.share-line-link-modal {

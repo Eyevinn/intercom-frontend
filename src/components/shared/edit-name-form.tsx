@@ -89,14 +89,19 @@ export const EditNameForm = <T extends ProductionItem>({
     return savedItem.lines.some(
       (l, index) =>
         formValues[`lineName-${index}`] &&
-        formValues[`lineName-${index}`] !== l.name
+        (formValues[`lineName-${index}`] ?? "").trim() !== l.name.trim()
     );
   };
 
+  const normalizedProductionName = (productionName ?? "").trim();
+  const originalProductionName = (savedItem?.name ?? "").trim();
+
+  const isEditingProductionName = formSubmitType === "productionName";
   const isUpdated =
-    savedItem &&
-    "name" in savedItem &&
-    (productionName !== savedItem?.name || hasLineChanges());
+    !!savedItem &&
+    (isEditingProductionName
+      ? normalizedProductionName !== originalProductionName
+      : hasLineChanges());
 
   useEffect(() => {
     if (!savedItem) return;
@@ -164,7 +169,7 @@ export const EditNameForm = <T extends ProductionItem>({
   useSubmitOnEnter<FormValues>({
     handleSubmit,
     submitHandler: onSubmit,
-    shouldSubmitOnEnter: isUpdated ?? false,
+    shouldSubmitOnEnter: isEditingName,
   });
 
   const handleClick = (e: React.MouseEvent) => {
@@ -172,8 +177,22 @@ export const EditNameForm = <T extends ProductionItem>({
     e.preventDefault();
 
     if (isEditingName) {
+      if (!isUpdated) {
+        setSavedItem(null);
+        setIsEditingName(false);
+        return;
+      }
+
       handleSubmit(onSubmit)();
     } else {
+      if (formSubmitType === "productionName" && "name" in item && item.name) {
+        setValue(formSubmitType, item.name);
+      }
+      if (isProduction(item) && item.lines) {
+        item.lines.forEach((l, index) => {
+          setValue(`lineName-${index}`, l.name);
+        });
+      }
       setSavedItem(item);
       setIsEditingName(true);
     }
@@ -203,6 +222,7 @@ export const EditNameForm = <T extends ProductionItem>({
             {...register(formSubmitType)}
             placeholder="New Name"
             className={`name-edit-button edit-name ${className}`}
+            autoFocus
             autoComplete="off"
           />
         </FormLabel>
@@ -211,6 +231,7 @@ export const EditNameForm = <T extends ProductionItem>({
         <NameEditButton
           type="button"
           className={`name-edit-button ${isEditingName ? "save" : "edit"}`}
+          disabled={isEditingName && !isUpdated}
           onClick={handleClick}
         >
           {isEditingName ? saveButton : editButton}
