@@ -56,7 +56,7 @@ export const FormSelect = styled.select`
   border-radius: 0.5rem;
   background: #32383b;
   color: white;
-
+  cursor: pointer;
   &.ingest {
     display: flex;
     align-items: center;
