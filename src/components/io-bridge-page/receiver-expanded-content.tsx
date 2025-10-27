@@ -17,7 +17,14 @@ import {
   StateChangeButton,
   TextWrapper,
 } from "./io-bridge-components";
-import { StopIcon, PlayIcon, ChevronDownIcon, ChevronUpIcon, EditIcon, SaveIcon } from "../../assets/icons/icon";
+import {
+  StopIcon,
+  PlayIcon,
+  ChevronDownIcon,
+  ChevronUpIcon,
+  EditIcon,
+  SaveIcon,
+} from "../../assets/icons/icon";
 import { useToggleReceiver } from "../../hooks/use-edit-receiver";
 import { useUpdateReceiver } from "../../hooks/use-update-receiver";
 import { FormInput, FormSelect } from "../form-elements/form-elements";
@@ -43,7 +50,9 @@ export const ReceiverExpandedContent = ({
   const [showAllParameters, setShowAllParameters] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editLabel, setEditLabel] = useState(receiver.label || "");
-  const [editProductionId, setEditProductionId] = useState(receiver.productionId);
+  const [editProductionId, setEditProductionId] = useState(
+    receiver.productionId
+  );
   const [editLineId, setEditLineId] = useState(receiver.lineId);
 
   const isDeleteReceiverDisabled = receiver.status === "running";
@@ -171,7 +180,9 @@ export const ReceiverExpandedContent = ({
                     onChange={(e) => {
                       const newProdId = Number(e.target.value);
                       setEditProductionId(newProdId);
-                      const newProd = productions?.productions?.find(p => String(p.productionId) === e.target.value);
+                      const newProd = productions?.productions?.find(
+                        (p) => String(p.productionId) === e.target.value
+                      );
                       if (newProd?.lines?.[0]) {
                         setEditLineId(Number(newProd.lines[0].id));
                       }
@@ -179,7 +190,10 @@ export const ReceiverExpandedContent = ({
                     style={{ marginTop: "4px", width: "100%" }}
                   >
                     {productions?.productions?.map((p) => (
-                      <option key={p.productionId} value={String(p.productionId)}>
+                      <option
+                        key={p.productionId}
+                        value={String(p.productionId)}
+                      >
                         {p.name}
                       </option>
                     ))}
@@ -199,7 +213,14 @@ export const ReceiverExpandedContent = ({
                     ))}
                   </FormSelect>
                 </div>
-                <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px", marginTop: "12px" }}>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "flex-end",
+                    gap: "8px",
+                    marginTop: "12px",
+                  }}
+                >
                   <button
                     type="button"
                     onClick={handleSave}
@@ -216,8 +237,19 @@ export const ReceiverExpandedContent = ({
                       gap: "4px",
                     }}
                   >
-                    <span style={{ width: "16px", height: "16px", display: "flex", alignItems: "center" }}>
-                      {updateLoading ? <Spinner className="production-list" /> : <SaveIcon />}
+                    <span
+                      style={{
+                        width: "16px",
+                        height: "16px",
+                        display: "flex",
+                        alignItems: "center",
+                      }}
+                    >
+                      {updateLoading ? (
+                        <Spinner className="production-list" />
+                      ) : (
+                        <SaveIcon />
+                      )}
                     </span>
                   </button>
                   <button
@@ -238,7 +270,14 @@ export const ReceiverExpandedContent = ({
                 </div>
               </div>
             ) : (
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", width: "100%" }}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "flex-start",
+                  width: "100%",
+                }}
+              >
                 <div>
                   <ContentWrapper>
                     <BoldText>Label:</BoldText> {receiver.label || "N/A"}
@@ -266,7 +305,14 @@ export const ReceiverExpandedContent = ({
                   }}
                   title="Edit receiver"
                 >
-                  <span style={{ width: "16px", height: "16px", display: "flex", alignItems: "center" }}>
+                  <span
+                    style={{
+                      width: "16px",
+                      height: "16px",
+                      display: "flex",
+                      alignItems: "center",
+                    }}
+                  >
                     <EditIcon />
                   </span>
                 </button>
@@ -290,23 +336,66 @@ export const ReceiverExpandedContent = ({
                 width: "100%",
               }}
             >
-              <span style={{ width: "16px", height: "16px", display: "flex", alignItems: "center" }}>
+              <span
+                style={{
+                  width: "16px",
+                  height: "16px",
+                  display: "flex",
+                  alignItems: "center",
+                }}
+              >
                 {showAllParameters ? <ChevronUpIcon /> : <ChevronDownIcon />}
               </span>
               {showAllParameters ? "Hide" : "Show more"}
             </button>
           </div>
           {showAllParameters && (
-            <div style={{ marginTop: "8px", fontSize: "12px", lineHeight: "1.6" }}>
-              <div style={{ marginBottom: "3px" }}><span style={{ fontWeight: "bold" }}>ID:</span> {receiver._id}</div>
-              <div style={{ marginBottom: "3px" }}><span style={{ fontWeight: "bold" }}>Label:</span> {receiver.label || "N/A"}</div>
-              <div style={{ marginBottom: "3px" }}><span style={{ fontWeight: "bold" }}>Production ID:</span> {receiver.productionId}</div>
-              <div style={{ marginBottom: "3px" }}><span style={{ fontWeight: "bold" }}>Line ID:</span> {receiver.lineId}</div>
-              <div style={{ marginBottom: "3px" }}><span style={{ fontWeight: "bold" }}>WHEP URL:</span> <span style={{ wordBreak: "break-all" }}>{receiver.whepUrl}</span></div>
-              <div style={{ marginBottom: "3px" }}><span style={{ fontWeight: "bold" }}>SRT URL:</span> <span style={{ wordBreak: "break-all" }}>{receiver.srtUrl}</span></div>
-              <div style={{ marginBottom: "3px" }}><span style={{ fontWeight: "bold" }}>Status:</span> {receiver.status}</div>
-              <div style={{ marginBottom: "3px" }}><span style={{ fontWeight: "bold" }}>Created:</span> {receiver.createdAt ? new Date(receiver.createdAt).toLocaleString() : "N/A"}</div>
-              <div style={{ marginBottom: "3px" }}><span style={{ fontWeight: "bold" }}>Updated:</span> {receiver.updatedAt ? new Date(receiver.updatedAt).toLocaleString() : "N/A"}</div>
+            <div
+              style={{ marginTop: "8px", fontSize: "12px", lineHeight: "1.6" }}
+            >
+              <div style={{ marginBottom: "3px" }}>
+                <span style={{ fontWeight: "bold" }}>ID:</span> {receiver._id}
+              </div>
+              <div style={{ marginBottom: "3px" }}>
+                <span style={{ fontWeight: "bold" }}>Label:</span>{" "}
+                {receiver.label || "N/A"}
+              </div>
+              <div style={{ marginBottom: "3px" }}>
+                <span style={{ fontWeight: "bold" }}>Production ID:</span>{" "}
+                {receiver.productionId}
+              </div>
+              <div style={{ marginBottom: "3px" }}>
+                <span style={{ fontWeight: "bold" }}>Line ID:</span>{" "}
+                {receiver.lineId}
+              </div>
+              <div style={{ marginBottom: "3px" }}>
+                <span style={{ fontWeight: "bold" }}>WHEP URL:</span>{" "}
+                <span style={{ wordBreak: "break-all" }}>
+                  {receiver.whepUrl}
+                </span>
+              </div>
+              <div style={{ marginBottom: "3px" }}>
+                <span style={{ fontWeight: "bold" }}>SRT URL:</span>{" "}
+                <span style={{ wordBreak: "break-all" }}>
+                  {receiver.srtUrl}
+                </span>
+              </div>
+              <div style={{ marginBottom: "3px" }}>
+                <span style={{ fontWeight: "bold" }}>Status:</span>{" "}
+                {receiver.status}
+              </div>
+              <div style={{ marginBottom: "3px" }}>
+                <span style={{ fontWeight: "bold" }}>Created:</span>{" "}
+                {receiver.createdAt
+                  ? new Date(receiver.createdAt).toLocaleString()
+                  : "N/A"}
+              </div>
+              <div style={{ marginBottom: "3px" }}>
+                <span style={{ fontWeight: "bold" }}>Updated:</span>{" "}
+                {receiver.updatedAt
+                  ? new Date(receiver.updatedAt).toLocaleString()
+                  : "N/A"}
+              </div>
             </div>
           )}
         </TextWrapper>

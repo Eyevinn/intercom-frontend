@@ -21,8 +21,9 @@ export const IOBridgePage = ({ setApiError }: { setApiError: () => void }) => {
   const { config, loading: configLoading } = useBridgeConfig();
 
   // Only fetch transmitters if WHIP gateway is enabled
-  const { transmitters, error, setIntervalLoad, refresh } =
-    useListTransmitters(config?.whipGatewayEnabled ?? false);
+  const { transmitters, error, setIntervalLoad, refresh } = useListTransmitters(
+    config?.whipGatewayEnabled ?? false
+  );
 
   // Only fetch receivers if WHEP gateway is enabled
   const {

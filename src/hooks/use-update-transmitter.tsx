@@ -6,7 +6,9 @@ export const useUpdateTransmitter = () => {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  const updateTransmitter = async (data: TPatchTransmitter): Promise<TSavedTransmitter | null> => {
+  const updateTransmitter = async (
+    data: TPatchTransmitter
+  ): Promise<TSavedTransmitter | null> => {
     setLoading(true);
     setError(null);
     setSuccess(false);

@@ -17,7 +17,14 @@ import {
   StateChangeButton,
   TextWrapper,
 } from "./io-bridge-components";
-import { StopIcon, PlayIcon, ChevronDownIcon, ChevronUpIcon, EditIcon, SaveIcon } from "../../assets/icons/icon";
+import {
+  StopIcon,
+  PlayIcon,
+  ChevronDownIcon,
+  ChevronUpIcon,
+  EditIcon,
+  SaveIcon,
+} from "../../assets/icons/icon";
 import { useToggleTransmitter } from "../../hooks/use-edit-transmitter";
 import { useUpdateTransmitter } from "../../hooks/use-update-transmitter";
 import { FormInput, FormSelect } from "../form-elements/form-elements";
@@ -43,7 +50,9 @@ export const ExpandedContent = ({
   const [showAllParameters, setShowAllParameters] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editLabel, setEditLabel] = useState(transmitter.label || "");
-  const [editProductionId, setEditProductionId] = useState(transmitter.productionId);
+  const [editProductionId, setEditProductionId] = useState(
+    transmitter.productionId
+  );
   const [editLineId, setEditLineId] = useState(transmitter.lineId);
 
   const isDeleteTransmitterDisabled = transmitter.status === "running";
@@ -169,7 +178,9 @@ export const ExpandedContent = ({
                     onChange={(e) => {
                       const newProdId = Number(e.target.value);
                       setEditProductionId(newProdId);
-                      const newProd = productions?.productions?.find(p => String(p.productionId) === e.target.value);
+                      const newProd = productions?.productions?.find(
+                        (p) => String(p.productionId) === e.target.value
+                      );
                       if (newProd?.lines?.[0]) {
                         setEditLineId(Number(newProd.lines[0].id));
                       }
@@ -177,7 +188,10 @@ export const ExpandedContent = ({
                     style={{ marginTop: "4px", width: "100%" }}
                   >
                     {productions?.productions?.map((p) => (
-                      <option key={p.productionId} value={String(p.productionId)}>
+                      <option
+                        key={p.productionId}
+                        value={String(p.productionId)}
+                      >
                         {p.name}
                       </option>
                     ))}
@@ -197,7 +211,14 @@ export const ExpandedContent = ({
                     ))}
                   </FormSelect>
                 </div>
-                <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px", marginTop: "12px" }}>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "flex-end",
+                    gap: "8px",
+                    marginTop: "12px",
+                  }}
+                >
                   <button
                     type="button"
                     onClick={handleSave}
@@ -214,8 +235,19 @@ export const ExpandedContent = ({
                       gap: "4px",
                     }}
                   >
-                    <span style={{ width: "16px", height: "16px", display: "flex", alignItems: "center" }}>
-                      {updateLoading ? <Spinner className="production-list" /> : <SaveIcon />}
+                    <span
+                      style={{
+                        width: "16px",
+                        height: "16px",
+                        display: "flex",
+                        alignItems: "center",
+                      }}
+                    >
+                      {updateLoading ? (
+                        <Spinner className="production-list" />
+                      ) : (
+                        <SaveIcon />
+                      )}
                     </span>
                   </button>
                   <button
@@ -236,7 +268,14 @@ export const ExpandedContent = ({
                 </div>
               </div>
             ) : (
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", width: "100%" }}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "flex-start",
+                  width: "100%",
+                }}
+              >
                 <div>
                   <ContentWrapper>
                     <BoldText>Label:</BoldText> {transmitter.label || "N/A"}
@@ -264,7 +303,14 @@ export const ExpandedContent = ({
                   }}
                   title="Edit transmitter"
                 >
-                  <span style={{ width: "16px", height: "16px", display: "flex", alignItems: "center" }}>
+                  <span
+                    style={{
+                      width: "16px",
+                      height: "16px",
+                      display: "flex",
+                      alignItems: "center",
+                    }}
+                  >
                     <EditIcon />
                   </span>
                 </button>
@@ -288,26 +334,81 @@ export const ExpandedContent = ({
                 width: "100%",
               }}
             >
-              <span style={{ width: "16px", height: "16px", display: "flex", alignItems: "center" }}>
+              <span
+                style={{
+                  width: "16px",
+                  height: "16px",
+                  display: "flex",
+                  alignItems: "center",
+                }}
+              >
                 {showAllParameters ? <ChevronUpIcon /> : <ChevronDownIcon />}
               </span>
               {showAllParameters ? "Hide" : "Show more"}
             </button>
           </div>
           {showAllParameters && (
-            <div style={{ marginTop: "8px", fontSize: "12px", lineHeight: "1.6" }}>
-              <div style={{ marginBottom: "3px" }}><span style={{ fontWeight: "bold" }}>ID:</span> {transmitter._id}</div>
-              <div style={{ marginBottom: "3px" }}><span style={{ fontWeight: "bold" }}>Label:</span> {transmitter.label || "N/A"}</div>
-              <div style={{ marginBottom: "3px" }}><span style={{ fontWeight: "bold" }}>Port:</span> {transmitter.port}</div>
-              <div style={{ marginBottom: "3px" }}><span style={{ fontWeight: "bold" }}>Production ID:</span> {transmitter.productionId}</div>
-              <div style={{ marginBottom: "3px" }}><span style={{ fontWeight: "bold" }}>Line ID:</span> {transmitter.lineId}</div>
-              <div style={{ marginBottom: "3px" }}><span style={{ fontWeight: "bold" }}>WHIP URL:</span> <span style={{ wordBreak: "break-all" }}>{transmitter.whipUrl}</span></div>
-              <div style={{ marginBottom: "3px" }}><span style={{ fontWeight: "bold" }}>SRT URL:</span> <span style={{ wordBreak: "break-all" }}>{transmitter.srtUrl || "N/A"}</span></div>
-              <div style={{ marginBottom: "3px" }}><span style={{ fontWeight: "bold" }}>Pass-through URL:</span> <span style={{ wordBreak: "break-all" }}>{transmitter.passThroughUrl || "N/A"}</span></div>
-              <div style={{ marginBottom: "3px" }}><span style={{ fontWeight: "bold" }}>Mode:</span> {transmitter.mode}</div>
-              <div style={{ marginBottom: "3px" }}><span style={{ fontWeight: "bold" }}>Status:</span> {transmitter.status}</div>
-              <div style={{ marginBottom: "3px" }}><span style={{ fontWeight: "bold" }}>Created:</span> {transmitter.createdAt ? new Date(transmitter.createdAt).toLocaleString() : "N/A"}</div>
-              <div style={{ marginBottom: "3px" }}><span style={{ fontWeight: "bold" }}>Updated:</span> {transmitter.updatedAt ? new Date(transmitter.updatedAt).toLocaleString() : "N/A"}</div>
+            <div
+              style={{ marginTop: "8px", fontSize: "12px", lineHeight: "1.6" }}
+            >
+              <div style={{ marginBottom: "3px" }}>
+                <span style={{ fontWeight: "bold" }}>ID:</span>{" "}
+                {transmitter._id}
+              </div>
+              <div style={{ marginBottom: "3px" }}>
+                <span style={{ fontWeight: "bold" }}>Label:</span>{" "}
+                {transmitter.label || "N/A"}
+              </div>
+              <div style={{ marginBottom: "3px" }}>
+                <span style={{ fontWeight: "bold" }}>Port:</span>{" "}
+                {transmitter.port}
+              </div>
+              <div style={{ marginBottom: "3px" }}>
+                <span style={{ fontWeight: "bold" }}>Production ID:</span>{" "}
+                {transmitter.productionId}
+              </div>
+              <div style={{ marginBottom: "3px" }}>
+                <span style={{ fontWeight: "bold" }}>Line ID:</span>{" "}
+                {transmitter.lineId}
+              </div>
+              <div style={{ marginBottom: "3px" }}>
+                <span style={{ fontWeight: "bold" }}>WHIP URL:</span>{" "}
+                <span style={{ wordBreak: "break-all" }}>
+                  {transmitter.whipUrl}
+                </span>
+              </div>
+              <div style={{ marginBottom: "3px" }}>
+                <span style={{ fontWeight: "bold" }}>SRT URL:</span>{" "}
+                <span style={{ wordBreak: "break-all" }}>
+                  {transmitter.srtUrl || "N/A"}
+                </span>
+              </div>
+              <div style={{ marginBottom: "3px" }}>
+                <span style={{ fontWeight: "bold" }}>Pass-through URL:</span>{" "}
+                <span style={{ wordBreak: "break-all" }}>
+                  {transmitter.passThroughUrl || "N/A"}
+                </span>
+              </div>
+              <div style={{ marginBottom: "3px" }}>
+                <span style={{ fontWeight: "bold" }}>Mode:</span>{" "}
+                {transmitter.mode}
+              </div>
+              <div style={{ marginBottom: "3px" }}>
+                <span style={{ fontWeight: "bold" }}>Status:</span>{" "}
+                {transmitter.status}
+              </div>
+              <div style={{ marginBottom: "3px" }}>
+                <span style={{ fontWeight: "bold" }}>Created:</span>{" "}
+                {transmitter.createdAt
+                  ? new Date(transmitter.createdAt).toLocaleString()
+                  : "N/A"}
+              </div>
+              <div style={{ marginBottom: "3px" }}>
+                <span style={{ fontWeight: "bold" }}>Updated:</span>{" "}
+                {transmitter.updatedAt
+                  ? new Date(transmitter.updatedAt).toLocaleString()
+                  : "N/A"}
+              </div>
             </div>
           )}
         </TextWrapper>

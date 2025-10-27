@@ -6,7 +6,9 @@ export const useUpdateReceiver = () => {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  const updateReceiver = async (data: TPatchReceiver): Promise<TSavedReceiver | null> => {
+  const updateReceiver = async (
+    data: TPatchReceiver
+  ): Promise<TSavedReceiver | null> => {
     setLoading(true);
     setError(null);
     setSuccess(false);

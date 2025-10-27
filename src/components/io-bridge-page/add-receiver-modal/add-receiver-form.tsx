@@ -182,7 +182,14 @@ export const AddReceiverForm = ({ onSave }: AddReceiverFormProps) => {
             })}
             placeholder="srt://hostname:port"
           />
-          <div style={{ marginTop: "4px", fontSize: "12px", color: "#999", lineHeight: "1.4" }}>
+          <div
+            style={{
+              marginTop: "4px",
+              fontSize: "12px",
+              color: "#999",
+              lineHeight: "1.4",
+            }}
+          >
             Default SRT mode is caller.<br></br>
             SRT Listener URL example: srt://0.0.0.0:10000?mode=listener
           </div>
