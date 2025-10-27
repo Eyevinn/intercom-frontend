@@ -66,14 +66,22 @@ export const ProductionsListContainer = () => {
     navigate("/manage-productions");
   };
 
+  const goToIO = () => {
+    navigate("/manage-io-bridge");
+  };
+
   return (
     <>
       <PageHeader title="Productions" loading={showRefreshing}>
         {!isMobile && (
           <>
+            <HeaderButton onClick={goToIO}>
+              <HeaderButtonText>I/O Bridges</HeaderButtonText>
+              <EditIcon />
+            </HeaderButton>
             {!!productions?.productions.length && (
               <HeaderButton onClick={goToManage}>
-                <HeaderButtonText>Manage</HeaderButtonText>
+                <HeaderButtonText>Productions</HeaderButtonText>
                 <EditIcon />
               </HeaderButton>
             )}
