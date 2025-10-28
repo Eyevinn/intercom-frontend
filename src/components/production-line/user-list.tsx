@@ -126,8 +126,6 @@ export const UserList = ({
 }: TUserListOptions) => {
   if (!participants) return null;
 
-  const isWhipOnLine = participants.some((p) => p.isWhip);
-
   return (
     <Container>
       <ListWrapper>
@@ -140,7 +138,6 @@ export const UserList = ({
               <User title={p.name}>
                 <IsTalkingIndicator
                   isTalking={
-                    !isWhipOnLine &&
                     audioLevelAboveThreshold &&
                     p.endpointId === dominantSpeaker
                   }
