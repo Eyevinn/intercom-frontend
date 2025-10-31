@@ -1,6 +1,11 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { FormInput, FormLabel } from "../form-elements/form-elements";
+import { ErrorMessage } from "@hookform/error-message";
+import {
+  FormInput,
+  FormLabel,
+  StyledWarningMessage,
+} from "../form-elements/form-elements";
 import {
   EditNameWrapper,
   NameEditButton,
@@ -73,7 +78,13 @@ export const EditNameForm = <T extends ProductionItem>({
   const line =
     isProduction(item) && item.lines ? item.lines[lineIndex] : undefined;
 
-  const { register, handleSubmit, setValue, watch } = useForm<FormValues>({
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm<FormValues>({
     resetOptions: {
       keepDirtyValues: true,
       keepErrors: true,
@@ -96,9 +107,17 @@ export const EditNameForm = <T extends ProductionItem>({
   const normalizedProductionName = (productionName ?? "").trim();
   const originalProductionName = (savedItem?.name ?? "").trim();
 
+  const normalizeName = (name: string | undefined) =>
+    name?.trim().toLowerCase() || "";
+
   const isEditingProductionName = formSubmitType === "productionName";
+  const hasValidationError = useMemo(
+    () => formSubmitType.startsWith("lineName-") && errors[formSubmitType],
+    [formSubmitType, errors]
+  );
   const isUpdated =
     !!savedItem &&
+    !hasValidationError &&
     (isEditingProductionName
       ? normalizedProductionName !== originalProductionName
       : hasLineChanges());
@@ -219,12 +238,47 @@ export const EditNameForm = <T extends ProductionItem>({
         <FormLabel className="save-edit">
           <FormInput
             // eslint-disable-next-line react/jsx-props-no-spreading
-            {...register(formSubmitType)}
+            {...register(formSubmitType, {
+              validate: (value) => {
+                if (
+                  !value ||
+                  !formSubmitType.startsWith("lineName-") ||
+                  !savedItem ||
+                  !isProduction(savedItem) ||
+                  !savedItem.lines
+                ) {
+                  return true;
+                }
+
+                const currentLineIndex = parseInt(
+                  formSubmitType.split("-")[1],
+                  10
+                );
+                const normalized = normalizeName(value);
+                const hasDuplicate = savedItem.lines.some(
+                  (l, index) =>
+                    index !== currentLineIndex &&
+                    normalizeName(l.name) === normalized
+                );
+
+                if (hasDuplicate) {
+                  return "Line name must be unique within this production";
+                }
+                return true;
+              },
+            })}
             placeholder="New Name"
             className={`name-edit-button edit-name ${className}`}
             autoFocus
             autoComplete="off"
           />
+          {formSubmitType.startsWith("lineName-") && (
+            <ErrorMessage
+              errors={errors}
+              name={formSubmitType}
+              as={StyledWarningMessage}
+            />
+          )}
         </FormLabel>
       )}
       {managementMode && (

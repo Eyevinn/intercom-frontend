@@ -1,6 +1,6 @@
 import { ErrorMessage } from "@hookform/error-message";
-import { FC, useEffect, useState } from "react";
-import { Controller, SubmitHandler, useForm } from "react-hook-form";
+import { FC, useEffect, useMemo, useState } from "react";
+import { Controller, SubmitHandler, useForm, useWatch } from "react-hook-form";
 import { TBasicProductionResponse } from "../../api/api";
 import { RemoveIcon } from "../../assets/icons/icon";
 import { useGlobalState } from "../../global-state/context-provider";
@@ -101,6 +101,19 @@ export const ManageProductionButtons: FC<ManageProductionButtonsProps> = (
     }
   };
 
+  const lineName = useWatch({ control, name: "name" });
+
+  const normalizeName = (name: string | undefined) =>
+    name?.trim().toLowerCase() || "";
+
+  const hasDuplicateWithExistingLines = useMemo(() => {
+    if (!lineName || !production.lines) return false;
+    const normalized = normalizeName(lineName);
+    return production.lines.some(
+      (line) => normalizeName(line.name) === normalized
+    );
+  }, [lineName, production.lines]);
+
   const handleAddLineOpen = () => {
     setAddLineOpen(!addLineOpen);
     setValue("name", "");
@@ -147,6 +160,19 @@ export const ManageProductionButtons: FC<ManageProductionButtonsProps> = (
                 {...register("name", {
                   required: "Line name is required",
                   minLength: 1,
+                  validate: (value) => {
+                    if (!value || !production.lines) return true;
+
+                    const normalized = normalizeName(value);
+                    const exists = production.lines.some(
+                      (line) => normalizeName(line.name) === normalized
+                    );
+
+                    if (exists) {
+                      return "Line name must be unique within this production.";
+                    }
+                    return true;
+                  },
                 })}
               />
             </ListItemWrapper>
@@ -167,7 +193,15 @@ export const ManageProductionButtons: FC<ManageProductionButtonsProps> = (
             </CheckboxWrapper>
           </FormLabel>
           <ErrorMessage errors={errors} name="name" as={StyledWarningMessage} />
-          <CreateLineButton onClick={handleSubmit(onSubmit)}>
+          {hasDuplicateWithExistingLines && (
+            <StyledWarningMessage style={{ marginBottom: "1rem" }}>
+              Line name must be unique within this production.
+            </StyledWarningMessage>
+          )}
+          <CreateLineButton
+            onClick={handleSubmit(onSubmit)}
+            disabled={hasDuplicateWithExistingLines}
+          >
             Create
             {createLineLoading && (
               <SpinnerWrapper>
