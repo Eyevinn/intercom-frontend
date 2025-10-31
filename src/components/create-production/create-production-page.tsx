@@ -68,18 +68,13 @@ export const CreateProductionPage = () => {
     minLength: 1,
   };
 
-  const lastDuplicateLineIndex = useMemo(() => {
+  const hasDuplicateWithDefaultLine = useMemo(() => {
     const normalizedDefault = normalizeName(defaultLine);
-    if (!normalizedDefault || !lines) return -1;
-    return lines.findLastIndex(
+    if (!normalizedDefault || !lines) return false;
+    return lines.some(
       (line) => normalizeName(line?.name) === normalizedDefault
     );
   }, [defaultLine, lines]);
-
-  const hasDuplicateWithDefaultLine = useMemo(
-    () => lastDuplicateLineIndex !== -1,
-    [lastDuplicateLineIndex]
-  );
 
   useEffect(() => {
     const fieldsToValidate = fields
@@ -183,7 +178,6 @@ export const CreateProductionPage = () => {
                       return (
                         !normalizedDefault ||
                         normalized !== normalizedDefault ||
-                        index !== lastDuplicateLineIndex ||
                         "Line name must be unique within this production"
                       );
                     },
