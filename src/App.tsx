@@ -23,6 +23,7 @@ import { ManageProductionsPage } from "./components/manage-productions-page/mana
 import { CreateProductionPage } from "./components/create-production/create-production-page.tsx";
 import { useSetupTokenRefresh } from "./hooks/use-reauth.tsx";
 import { TUserSettings } from "./components/user-settings/types";
+import { IOBridgePage } from "./components/io-bridge-page/io-bridge-page.tsx";
 
 const DisplayBoxPositioningContainer = styled(FlexContainer)`
   justify-content: center;
@@ -149,6 +150,13 @@ const AppContent = ({
                     <ManageProductionsPage
                       setApiError={() => setApiError(true)}
                     />
+                  }
+                  errorElement={<ErrorPage />}
+                />
+                <Route
+                  path="/manage-io-bridge"
+                  element={
+                    <IOBridgePage setApiError={() => setApiError(true)} />
                   }
                   errorElement={<ErrorPage />}
                 />

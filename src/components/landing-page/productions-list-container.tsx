@@ -9,6 +9,7 @@ import { PageHeader } from "../page-layout/page-header.tsx";
 import { AddIcon, EditIcon } from "../../assets/icons/icon.tsx";
 import { PrimaryButton } from "../form-elements/form-elements";
 import { isMobile } from "../../bowser.ts";
+import { useBridgeConfig } from "../../hooks/use-bridge-config.tsx";
 
 const HeaderButton = styled(PrimaryButton)`
   margin-left: 1rem;
@@ -43,6 +44,8 @@ export const ProductionsListContainer = () => {
       extended: "true",
     });
 
+  const { config } = useBridgeConfig();
+
   const showRefreshing = useRefreshAnimation({
     reloadProductionList,
     doInitialLoad,
@@ -66,14 +69,28 @@ export const ProductionsListContainer = () => {
     navigate("/manage-productions");
   };
 
+  const goToIO = () => {
+    navigate("/manage-io-bridge");
+  };
+
+  // Show I/O Bridges button only if at least one gateway is enabled
+  const showIOBridgeButton =
+    config?.whipGatewayEnabled || config?.whepGatewayEnabled;
+
   return (
     <>
       <PageHeader title="Productions" loading={showRefreshing}>
         {!isMobile && (
           <>
+            {showIOBridgeButton && (
+              <HeaderButton onClick={goToIO}>
+                <HeaderButtonText>I/O Bridges</HeaderButtonText>
+                <EditIcon />
+              </HeaderButton>
+            )}
             {!!productions?.productions.length && (
               <HeaderButton onClick={goToManage}>
-                <HeaderButtonText>Manage</HeaderButtonText>
+                <HeaderButtonText>Productions</HeaderButtonText>
                 <EditIcon />
               </HeaderButton>
             )}

@@ -25,6 +25,8 @@ import VolumeOff from "./volume_off.svg?react";
 import VolumeOn from "./volume_on.svg?react";
 import Warning from "./warning.svg?react";
 import WhipSvg from "./whip_user.svg?react";
+import Stop from "./stop.svg?react";
+import Play from "./play.svg?react";
 
 export const MicMuted = () => <MicMute />;
 
@@ -79,3 +81,7 @@ export const SaveIcon = () => <Save />;
 export const HelpIcon = () => <Help />;
 
 export const WarningIcon = () => <Warning />;
+
+export const StopIcon = () => <Stop />;
+
+export const PlayIcon = () => <Play />;
