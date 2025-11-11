@@ -20,9 +20,9 @@ export const TransmitterItem = ({
 }: TransmitterItemProps) => {
   const [displayConfirmationModal, setDisplayConfirmationModal] =
     useState<boolean>(false);
-  const [removeTransmitterId, setRemoveTransmitterId] = useState<
-    string | null
-  >(null);
+  const [removeTransmitterId, setRemoveTransmitterId] = useState<string | null>(
+    null
+  );
 
   const {
     loading: deleteTransmitterLoading,

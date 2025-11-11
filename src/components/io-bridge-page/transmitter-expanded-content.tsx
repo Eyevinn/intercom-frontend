@@ -443,9 +443,7 @@ export const ExpandedContent = ({
           description={`You are about to delete the transmitter ${transmitter.label ?? `running at port ${transmitter.port}`}`}
           confirmationText="Are you sure?"
           onCancel={() => setDisplayConfirmationModal(false)}
-          onConfirm={() =>
-            setRemoveTransmitterId(transmitter._id)
-          }
+          onConfirm={() => setRemoveTransmitterId(transmitter._id)}
         />
       )}
     </>
