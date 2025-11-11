@@ -60,9 +60,14 @@ export const AddTransmitterForm = ({ onSave }: AddTransmitterFormProps) => {
   const mode = useWatch({ control, name: "mode" });
 
   useEffect(() => {
-    if (mode !== "caller") {
+    if (mode === "caller") {
+      setValue("port", 0);
+      clearErrors("port");
+      clearErrors("srtUrl");
+    } else {
       setValue("srtUrl", "");
       clearErrors("srtUrl");
+      clearErrors("port");
     }
   }, [mode, setValue, clearErrors]);
 
@@ -190,18 +195,75 @@ export const AddTransmitterForm = ({ onSave }: AddTransmitterFormProps) => {
           />
         </FormItem>
 
-        <FormItem fieldName="port" errors={errors}>
-          <BoldText>SRT Port</BoldText>
-          <FormInput
-            type="number"
+        <FormItem fieldName="mode" errors={errors}>
+          <BoldText>SRT Mode</BoldText>
+          <FormSelect
             // eslint-disable-next-line
-            {...register("port", {
-              required: "SRT Port",
-              valueAsNumber: true,
+            {...register("mode", {
+              required: "SRT Mode",
+              minLength: 1,
             })}
-            placeholder="SRT Port"
-          />
+            defaultValue="listener"
+          >
+            {srtModeOptions.map((opt) => (
+              <option key={opt} value={opt}>
+                {opt.charAt(0).toUpperCase() + opt.slice(1)}
+              </option>
+            ))}
+          </FormSelect>
         </FormItem>
+
+        <Collapsible
+          open={mode === "listener"}
+          aria-hidden={mode !== "listener"}
+        >
+          <div>
+            <FormItem fieldName="port" errors={errors}>
+              <BoldText>SRT Port (Local)</BoldText>
+              <FormInput
+                type="number"
+                // eslint-disable-next-line
+                {...register("port", {
+                  validate: (v) =>
+                    mode !== "listener" ||
+                    (v && v > 0) ||
+                    "SRT Port is required in Listener mode",
+                  valueAsNumber: true,
+                })}
+                placeholder="SRT Port"
+                disabled={mode !== "listener"}
+                tabIndex={mode === "listener" ? 0 : -1}
+              />
+            </FormItem>
+          </div>
+        </Collapsible>
+
+        <Collapsible open={mode === "caller"} aria-hidden={mode !== "caller"}>
+          <div>
+            <FormItem fieldName="srtUrl" errors={errors}>
+              <BoldText>SRT Destination URL</BoldText>
+              <FormInput
+                // eslint-disable-next-line
+                {...register("srtUrl", {
+                  validate: (v) =>
+                    mode !== "caller" ||
+                    (v && v.length > 0) ||
+                    "SRT URL is required in Caller mode (e.g., srt://host:port)",
+                  setValueAs: (v) => {
+                    // Add srt:// prefix if user didn't specify it
+                    if (v && !v.startsWith("srt://")) {
+                      return `srt://${v}`;
+                    }
+                    return v;
+                  },
+                })}
+                placeholder="srt://host:port"
+                disabled={mode !== "caller"}
+                tabIndex={mode === "caller" ? 0 : -1}
+              />
+            </FormItem>
+          </div>
+        </Collapsible>
 
         <FormItem fieldName="passThroughUrl" errors={errors}>
           <FieldHeader>
@@ -212,43 +274,6 @@ export const AddTransmitterForm = ({ onSave }: AddTransmitterFormProps) => {
             {...register("passThroughUrl")}
           />
         </FormItem>
-
-        <FormItem fieldName="mode" errors={errors}>
-          <BoldText>SRT Mode</BoldText>
-          <FormSelect
-            // eslint-disable-next-line
-            {...register("mode", {
-              required: "SRT Mode",
-              minLength: 1,
-            })}
-            defaultValue="Listener"
-          >
-            {...srtModeOptions.map((opt) => (
-              <option key={opt} value={opt}>
-                {opt.charAt(0).toUpperCase() + opt.slice(1)}
-              </option>
-            ))}
-          </FormSelect>
-        </FormItem>
-
-        <Collapsible open={mode === "caller"} aria-hidden={mode !== "caller"}>
-          <div>
-            <FormItem fieldName="srtUrl" errors={errors}>
-              <BoldText>SRT Url</BoldText>
-              <FormInput
-                // eslint-disable-next-line
-                {...register("srtUrl", {
-                  validate: (v) =>
-                    mode !== "caller" ||
-                    (v && v.length > 0) ||
-                    "SRT URL is required in Caller mode",
-                })}
-                disabled={mode !== "caller"}
-                tabIndex={mode === "caller" ? 0 : -1}
-              />
-            </FormItem>
-          </div>
-        </Collapsible>
 
         <ButtonWrapper>
           <SubmitButton

@@ -20,18 +20,18 @@ export const TransmitterItem = ({
 }: TransmitterItemProps) => {
   const [displayConfirmationModal, setDisplayConfirmationModal] =
     useState<boolean>(false);
-  const [removeTransmitterPort, setRemoveTransmitterPort] = useState<
+  const [removeTransmitterId, setRemoveTransmitterId] = useState<
     string | null
   >(null);
 
   const {
     loading: deleteTransmitterLoading,
     success: successfulDeleteTransmitter,
-  } = useDeleteTransmitter(removeTransmitterPort);
+  } = useDeleteTransmitter(removeTransmitterId);
 
   useEffect(() => {
     if (successfulDeleteTransmitter) {
-      setRemoveTransmitterPort(null);
+      setRemoveTransmitterId(null);
       setDisplayConfirmationModal(false);
       refresh();
     }
@@ -69,7 +69,7 @@ export const TransmitterItem = ({
       transmitter={transmitter}
       displayConfirmationModal={displayConfirmationModal}
       setDisplayConfirmationModal={setDisplayConfirmationModal}
-      setRemoveTransmitterPort={setRemoveTransmitterPort}
+      setRemoveTransmitterId={setRemoveTransmitterId}
       deleteTransmitterLoading={deleteTransmitterLoading}
       refresh={refresh}
     />

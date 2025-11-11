@@ -2,8 +2,8 @@ import { useState } from "react";
 import { API, TEditTransmitter, TBridgeState } from "../api/api";
 import { useFetchTransmitter } from "./use-fetch-transmitter";
 
-export const useToggleTransmitter = (port: string) => {
-  const { transmitter, refetch, setTransmitter } = useFetchTransmitter(port);
+export const useToggleTransmitter = (id: string) => {
+  const { transmitter, refetch, setTransmitter } = useFetchTransmitter(id);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<Error | null>(null);
@@ -24,7 +24,7 @@ export const useToggleTransmitter = (port: string) => {
     setSuccess(false);
 
     try {
-      const payload: TEditTransmitter = { port, state: next };
+      const payload: TEditTransmitter = { id, state: next };
       await API.updateTransmitterState(payload);
       setSuccess(true);
       await refetch();

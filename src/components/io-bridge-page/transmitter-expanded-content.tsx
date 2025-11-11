@@ -35,7 +35,7 @@ type ExpandedContentProps = {
   displayConfirmationModal: boolean;
   deleteTransmitterLoading: boolean;
   setDisplayConfirmationModal: (displayConfirmationModal: boolean) => void;
-  setRemoveTransmitterPort: (transmitterPort: string | null) => void;
+  setRemoveTransmitterId: (transmitterId: string | null) => void;
   refresh?: () => void;
 };
 
@@ -44,7 +44,7 @@ export const ExpandedContent = ({
   displayConfirmationModal,
   deleteTransmitterLoading,
   setDisplayConfirmationModal,
-  setRemoveTransmitterPort,
+  setRemoveTransmitterId,
   refresh,
 }: ExpandedContentProps) => {
   const [showAllParameters, setShowAllParameters] = useState(false);
@@ -58,7 +58,7 @@ export const ExpandedContent = ({
   const isDeleteTransmitterDisabled = transmitter.status === "running";
 
   const { toggle, loading: editTransmitterLoading } = useToggleTransmitter(
-    transmitter.port.toString()
+    transmitter._id
   );
   const { updateTransmitter, loading: updateLoading } = useUpdateTransmitter();
   const { productions } = useFetchProductionList({ extended: "true" });
@@ -96,7 +96,7 @@ export const ExpandedContent = ({
 
   const handleSave = async () => {
     const updated = await updateTransmitter({
-      port: transmitter.port.toString(),
+      id: transmitter._id,
       label: editLabel,
       productionId: editProductionId,
       lineId: editLineId,
@@ -444,7 +444,7 @@ export const ExpandedContent = ({
           confirmationText="Are you sure?"
           onCancel={() => setDisplayConfirmationModal(false)}
           onConfirm={() =>
-            setRemoveTransmitterPort(transmitter.port.toString())
+            setRemoveTransmitterId(transmitter._id)
           }
         />
       )}

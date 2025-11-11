@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { API, TSavedTransmitter } from "../api/api";
 
-type TUseFetchTransmitter = (port: string | null) => {
+type TUseFetchTransmitter = (id: string | null) => {
   transmitter: TSavedTransmitter | null;
   error: Error | null;
   loading: boolean;
@@ -11,7 +11,7 @@ type TUseFetchTransmitter = (port: string | null) => {
   >;
 };
 
-export const useFetchTransmitter: TUseFetchTransmitter = (port) => {
+export const useFetchTransmitter: TUseFetchTransmitter = (id) => {
   const [transmitter, setTransmitter] = useState<TSavedTransmitter | null>(
     null
   );
@@ -24,7 +24,7 @@ export const useFetchTransmitter: TUseFetchTransmitter = (port) => {
     setLoading(true);
     setError(null);
 
-    if (!port) {
+    if (!id) {
       setTransmitter(null);
       setLoading(false);
       return;
@@ -34,7 +34,7 @@ export const useFetchTransmitter: TUseFetchTransmitter = (port) => {
     abortedRef.current = false;
 
     try {
-      const t = await API.fetchTransmitter(parseInt(port, 10));
+      const t = await API.fetchTransmitter(id);
       if (abortedRef.current || localAbortedToken.aborted) return;
       setTransmitter(t);
     } catch (e: unknown) {
@@ -46,7 +46,7 @@ export const useFetchTransmitter: TUseFetchTransmitter = (port) => {
         setLoading(false);
       }
     }
-  }, [port]);
+  }, [id]);
 
   useEffect(() => {
     abortedRef.current = false;

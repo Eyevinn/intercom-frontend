@@ -80,7 +80,7 @@ export enum TBridgeState {
 }
 
 export type TEditTransmitter = {
-  port: string;
+  id: string;
   state: TBridgeState;
 };
 
@@ -90,7 +90,7 @@ export type TEditReceiver = {
 };
 
 export type TPatchTransmitter = {
-  port: string;
+  id: string;
   label?: string;
   productionId?: number;
   lineId?: number;
@@ -409,9 +409,9 @@ export const API = {
         },
       })
     ).then((res) => res?.transmitters || []),
-  fetchTransmitter: (port: number): Promise<TSavedTransmitter> =>
+  fetchTransmitter: (id: string): Promise<TSavedTransmitter> =>
     handleFetchRequest<TSavedTransmitter>(
-      fetch(`${API_URL}bridge/tx/${port}`, {
+      fetch(`${API_URL}bridge/tx/${id}`, {
         method: "GET",
         headers: {
           ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
@@ -420,7 +420,7 @@ export const API = {
     ),
   updateTransmitterState: async (data: TEditTransmitter) =>
     handleFetchRequest<TSavedTransmitter>(
-      fetch(`${API_URL}bridge/tx/${data.port}/state`, {
+      fetch(`${API_URL}bridge/tx/${data.id}/state`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -433,7 +433,7 @@ export const API = {
     ),
   updateTransmitter: async (data: TPatchTransmitter) =>
     handleFetchRequest<TSavedTransmitter>(
-      fetch(`${API_URL}bridge/tx/${data.port}`, {
+      fetch(`${API_URL}bridge/tx/${data.id}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -446,9 +446,9 @@ export const API = {
         }),
       })
     ),
-  deleteTransmitter: async (port: string): Promise<string> =>
+  deleteTransmitter: async (id: string): Promise<string> =>
     handleFetchRequest<string>(
-      fetch(`${API_URL}bridge/tx/${port}`, {
+      fetch(`${API_URL}bridge/tx/${id}`, {
         method: "DELETE",
         headers: {
           ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
