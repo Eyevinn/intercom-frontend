@@ -18,6 +18,7 @@ import { useGlobalState } from "../../global-state/context-provider";
 import { useOutsideClickHandler } from "../../hooks/use-outside-click-handler";
 import { TLine } from "../production-line/types";
 import { useEditActions } from "./use-edit-actions";
+import { normalizeLineName } from "../../hooks/use-has-duplicate-line-name.ts";
 
 type FormValues = {
   productionName: string;
@@ -106,9 +107,6 @@ export const EditNameForm = <T extends ProductionItem>({
 
   const normalizedProductionName = (productionName ?? "").trim();
   const originalProductionName = (savedItem?.name ?? "").trim();
-
-  const normalizeName = (name: string | undefined) =>
-    name?.trim().toLowerCase() || "";
 
   const isEditingProductionName = formSubmitType === "productionName";
   const hasValidationError = useMemo(
@@ -229,10 +227,10 @@ export const EditNameForm = <T extends ProductionItem>({
     }
 
     const currentLineIndex = parseInt(formSubmitType.split("-")[1], 10);
-    const normalized = normalizeName(value);
+    const normalized = normalizeLineName(value);
     const hasDuplicate = savedItem.lines.some(
       (l, index) =>
-        index !== currentLineIndex && normalizeName(l.name) === normalized
+        index !== currentLineIndex && normalizeLineName(l.name) === normalized
     );
 
     if (hasDuplicate) {

@@ -28,10 +28,7 @@ import {
   DeleteButton,
   SpinnerWrapper,
 } from "../delete-button/delete-button-components";
-import {
-  normalizeLineName,
-  useHasDuplicateLineName,
-} from "../../hooks/use-has-duplicate-line-name.ts";
+import { useHasDuplicateLineName } from "../../hooks/use-has-duplicate-line-name.ts";
 
 interface ManageProductionButtonsProps {
   production: TBasicProductionResponse;
@@ -119,17 +116,11 @@ export const ManageProductionButtons: FC<ManageProductionButtonsProps> = (
   };
 
   const validateUniqueLineName = (value: string) => {
-    if (!value || !production.lines) return true;
+    if (!value?.trim()) return true;
 
-    const normalized = normalizeLineName(value);
-    const exists = production.lines.some(
-      (line) => normalizeLineName(line.name) === normalized
-    );
-
-    if (exists) {
-      return "Line name must be unique within this production.";
-    }
-    return true;
+    return hasDuplicateWithExistingLines
+      ? "Line name must be unique within this production."
+      : true;
   };
 
   return (
