@@ -118,6 +118,20 @@ export const ManageProductionButtons: FC<ManageProductionButtonsProps> = (
     setValue("programOutputLine", false);
   };
 
+  const validateUniqueLineName = (value: string) => {
+    if (!value || !production.lines) return true;
+
+    const normalized = normalizeLineName(value);
+    const exists = production.lines.some(
+      (line) => normalizeLineName(line.name) === normalized
+    );
+
+    if (exists) {
+      return "Line name must be unique within this production.";
+    }
+    return true;
+  };
+
   return (
     <>
       <ButtonsWrapper>
@@ -158,19 +172,7 @@ export const ManageProductionButtons: FC<ManageProductionButtonsProps> = (
                 {...register("name", {
                   required: "Line name is required",
                   minLength: 1,
-                  validate: (value) => {
-                    if (!value || !production.lines) return true;
-
-                    const normalized = normalizeLineName(value);
-                    const exists = production.lines.some(
-                      (line) => normalizeLineName(line.name) === normalized
-                    );
-
-                    if (exists) {
-                      return "Line name must be unique within this production.";
-                    }
-                    return true;
-                  },
+                  validate: validateUniqueLineName,
                 })}
               />
             </ListItemWrapper>

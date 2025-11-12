@@ -217,6 +217,30 @@ export const EditNameForm = <T extends ProductionItem>({
     }
   };
 
+  const validateLineName = (value: string) => {
+    if (
+      !value ||
+      !formSubmitType.startsWith("lineName-") ||
+      !savedItem ||
+      !isProduction(savedItem) ||
+      !savedItem.lines
+    ) {
+      return true;
+    }
+
+    const currentLineIndex = parseInt(formSubmitType.split("-")[1], 10);
+    const normalized = normalizeName(value);
+    const hasDuplicate = savedItem.lines.some(
+      (l, index) =>
+        index !== currentLineIndex && normalizeName(l.name) === normalized
+    );
+
+    if (hasDuplicate) {
+      return "Line name must be unique within this production";
+    }
+    return true;
+  };
+
   const saveButton = isLoading(formSubmitType, line?.id) ? (
     <Spinner
       className={`name-edit-button ${formSubmitType === "productionName" ? "production-name" : ""}`}
@@ -239,33 +263,7 @@ export const EditNameForm = <T extends ProductionItem>({
           <FormInput
             // eslint-disable-next-line react/jsx-props-no-spreading
             {...register(formSubmitType, {
-              validate: (value) => {
-                if (
-                  !value ||
-                  !formSubmitType.startsWith("lineName-") ||
-                  !savedItem ||
-                  !isProduction(savedItem) ||
-                  !savedItem.lines
-                ) {
-                  return true;
-                }
-
-                const currentLineIndex = parseInt(
-                  formSubmitType.split("-")[1],
-                  10
-                );
-                const normalized = normalizeName(value);
-                const hasDuplicate = savedItem.lines.some(
-                  (l, index) =>
-                    index !== currentLineIndex &&
-                    normalizeName(l.name) === normalized
-                );
-
-                if (hasDuplicate) {
-                  return "Line name must be unique within this production";
-                }
-                return true;
-              },
+              validate: validateLineName,
             })}
             placeholder="New Name"
             className={`name-edit-button edit-name ${className}`}
