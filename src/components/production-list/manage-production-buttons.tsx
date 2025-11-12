@@ -1,5 +1,5 @@
 import { ErrorMessage } from "@hookform/error-message";
-import { FC, useEffect, useMemo, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import { Controller, SubmitHandler, useForm, useWatch } from "react-hook-form";
 import { TBasicProductionResponse } from "../../api/api";
 import { RemoveIcon } from "../../assets/icons/icon";
@@ -28,6 +28,10 @@ import {
   DeleteButton,
   SpinnerWrapper,
 } from "../delete-button/delete-button-components";
+import {
+  normalizeLineName,
+  useHasDuplicateLineName,
+} from "../../hooks/use-has-duplicate-line-name.ts";
 
 interface ManageProductionButtonsProps {
   production: TBasicProductionResponse;
@@ -103,16 +107,10 @@ export const ManageProductionButtons: FC<ManageProductionButtonsProps> = (
 
   const lineName = useWatch({ control, name: "name" });
 
-  const normalizeName = (name: string | undefined) =>
-    name?.trim().toLowerCase() || "";
-
-  const hasDuplicateWithExistingLines = useMemo(() => {
-    if (!lineName || !production.lines) return false;
-    const normalized = normalizeName(lineName);
-    return production.lines.some(
-      (line) => normalizeName(line.name) === normalized
-    );
-  }, [lineName, production.lines]);
+  const hasDuplicateWithExistingLines = useHasDuplicateLineName({
+    candidateName: lineName,
+    lines: production.lines,
+  });
 
   const handleAddLineOpen = () => {
     setAddLineOpen(!addLineOpen);
@@ -163,9 +161,9 @@ export const ManageProductionButtons: FC<ManageProductionButtonsProps> = (
                   validate: (value) => {
                     if (!value || !production.lines) return true;
 
-                    const normalized = normalizeName(value);
+                    const normalized = normalizeLineName(value);
                     const exists = production.lines.some(
-                      (line) => normalizeName(line.name) === normalized
+                      (line) => normalizeLineName(line.name) === normalized
                     );
 
                     if (exists) {

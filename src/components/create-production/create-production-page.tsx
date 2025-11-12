@@ -5,7 +5,7 @@ import {
   useForm,
   useWatch,
 } from "react-hook-form";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { DisplayContainerHeader } from "../landing-page/display-container-header.tsx";
 import { FormInput } from "../form-elements/form-elements.ts";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
@@ -27,6 +27,10 @@ import {
 } from "./create-production-components.ts";
 import { FormItem } from "../user-settings-form/form-item.tsx";
 import { CreateProductionButtons } from "./create-production-buttons.tsx";
+import {
+  normalizeLineName,
+  useHasDuplicateLineName,
+} from "../../hooks/use-has-duplicate-line-name.ts";
 
 export const CreateProductionPage = () => {
   const [, dispatch] = useGlobalState();
@@ -60,21 +64,15 @@ export const CreateProductionPage = () => {
   const defaultLine = useWatch({ control, name: "defaultLine" });
   const lines = useWatch({ control, name: "lines" });
 
-  const normalizeName = (name: string | undefined) =>
-    name?.trim().toLowerCase() || "";
-
   const lineNameRequiredValidation = {
     required: "Line name is required",
     minLength: 1,
   };
 
-  const hasDuplicateWithDefaultLine = useMemo(() => {
-    const normalizedDefault = normalizeName(defaultLine);
-    if (!normalizedDefault || !lines) return false;
-    return lines.some(
-      (line) => normalizeName(line?.name) === normalizedDefault
-    );
-  }, [defaultLine, lines]);
+  const hasDuplicateWithDefaultLine = useHasDuplicateLineName({
+    candidateName: defaultLine,
+    lines,
+  });
 
   useEffect(() => {
     const fieldsToValidate = fields
@@ -172,8 +170,8 @@ export const CreateProductionPage = () => {
                   {...register(`lines.${index}.name`, {
                     ...lineNameRequiredValidation,
                     validate: (value) => {
-                      const normalized = normalizeName(value);
-                      const normalizedDefault = normalizeName(defaultLine);
+                      const normalized = normalizeLineName(value);
+                      const normalizedDefault = normalizeLineName(defaultLine);
 
                       return (
                         !normalizedDefault ||
