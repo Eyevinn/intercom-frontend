@@ -136,7 +136,7 @@ export const EditNameWrapper = styled.div`
   max-width: 30rem;
   min-height: 2rem;
   pointer-events: none;
-  flex: 1;
+  flex: 0 1 auto;
   min-width: 0;
   overflow: hidden;
 
