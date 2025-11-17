@@ -10,7 +10,14 @@ export const useHeartbeat = ({ sessionId }: TProps) => {
     if (!sessionId) return noop;
 
     const interval = window.setInterval(() => {
-      API.heartbeat({ sessionId }).catch(logger.red);
+      API.heartbeat({ sessionId }).catch((error) => {
+        logger.red(error);
+
+        const is401Error = error.message.includes("401");
+        if (is401Error) {
+          window.clearInterval(interval);
+        }
+      });
     }, 10_000);
 
     return () => {
