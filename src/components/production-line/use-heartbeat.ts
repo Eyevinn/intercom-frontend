@@ -12,8 +12,9 @@ export const useHeartbeat = ({ sessionId }: TProps) => {
     const interval = window.setInterval(() => {
       API.heartbeat({ sessionId }).catch((error) => {
         logger.red(error);
-
-        const is401Error = error.message.includes("401");
+        const is401Error =
+          error.message.includes("401") ||
+          error.message.includes("Unauthorized");
         if (is401Error) {
           window.clearInterval(interval);
         }
