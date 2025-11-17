@@ -166,10 +166,7 @@ export const EditNameForm = <T extends ProductionItem>({
       formSubmitType.startsWith("lineName-") &&
       isProduction(savedItem)
     ) {
-      const currentLineIndex = parseInt(
-        formSubmitType.toString().split("-")[1],
-        10
-      );
+      const currentLineIndex = lineIndex;
       const currentLine = savedItem.lines?.[currentLineIndex];
       const newName = data[`lineName-${currentLineIndex}`];
 
@@ -226,7 +223,7 @@ export const EditNameForm = <T extends ProductionItem>({
       return true;
     }
 
-    const currentLineIndex = parseInt(formSubmitType.split("-")[1], 10);
+    const currentLineIndex = lineIndex;
     const normalized = normalizeLineName(value);
     const hasDuplicate = savedItem.lines.some(
       (l, index) =>
