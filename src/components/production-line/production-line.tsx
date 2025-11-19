@@ -148,6 +148,12 @@ export const ProductionLine = ({
   );
 
   const isSelfDominantSpeaker = lineParticipant === dominantSpeaker;
+  const isWhipOnLine = line?.participants.some((p) => p.isWhip);
+  const isSomeoneSpeaking =
+    !isProgramOutputLine &&
+    !isSelfDominantSpeaker &&
+    isActiveParticipant &&
+    !isWhipOnLine;
 
   const { production, error: fetchProductionError } = useFetchProduction(
     joinProductionOptions
@@ -187,6 +193,7 @@ export const ProductionLine = ({
           isProgramOutputLine ||
           false,
         isProgramUser: joinProductionOptions?.isProgramUser || false,
+        isSomeoneSpeaking: isSomeoneSpeaking || false,
       },
       isSettingGlobalMute
     );
@@ -202,6 +209,7 @@ export const ProductionLine = ({
     registerCallList,
     isProgramOutputLine,
     isProgramUser,
+    isSomeoneSpeaking,
   ]);
 
   useEffect(() => {
@@ -416,8 +424,6 @@ export const ProductionLine = ({
   };
 
   // TODO detect if browser back button is pressed and run exit();
-
-  const isWhipOnLine = line?.participants.some((p) => p.isWhip);
 
   return (
     <CallWrapper
