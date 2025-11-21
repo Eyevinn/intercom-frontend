@@ -3,6 +3,7 @@ import {
   SubmitHandler,
   useFieldArray,
   useForm,
+  useWatch,
 } from "react-hook-form";
 import { useEffect, useState } from "react";
 import { DisplayContainerHeader } from "../landing-page/display-container-header.tsx";
@@ -26,6 +27,10 @@ import {
 } from "./create-production-components.ts";
 import { FormItem } from "../user-settings-form/form-item.tsx";
 import { CreateProductionButtons } from "./create-production-buttons.tsx";
+import {
+  normalizeLineName,
+  useHasDuplicateLineName,
+} from "../../hooks/use-has-duplicate-line-name.ts";
 
 export const CreateProductionPage = () => {
   const [, dispatch] = useGlobalState();
@@ -37,7 +42,9 @@ export const CreateProductionPage = () => {
     register,
     handleSubmit,
     reset,
+    trigger,
   } = useForm<FormValues>({
+    mode: "onTouched",
     defaultValues: {
       productionName: "",
       defaultLine: "",
@@ -53,6 +60,47 @@ export const CreateProductionPage = () => {
       minLength: 1,
     },
   });
+
+  const defaultLine = useWatch({ control, name: "defaultLine" });
+  const lines = useWatch({ control, name: "lines" });
+
+  const lineNameRequiredValidation = {
+    required: "Line name is required",
+    minLength: 1,
+  };
+
+  const hasDuplicateWithDefaultLine = useHasDuplicateLineName({
+    candidateName: defaultLine,
+    lines,
+  });
+
+  const validateLineNameUniqueness = (defaultLineValue: string) => {
+    const normalizedDefault = normalizeLineName(defaultLineValue);
+
+    return (value: string) => {
+      const normalized = normalizeLineName(value);
+
+      return (
+        !normalizedDefault ||
+        normalized !== normalizedDefault ||
+        "Line name must be unique within this production"
+      );
+    };
+  };
+
+  const lineNameValidator = validateLineNameUniqueness(defaultLine);
+
+  useEffect(() => {
+    const fieldsToValidate = fields
+      .map((_, i) => (lines?.[i]?.name ? `lines.${i}.name` : null))
+      .filter((field): field is `lines.${number}.name` => Boolean(field));
+
+    if (fieldsToValidate.length > 0) {
+      Promise.all(
+        fieldsToValidate.map((field) => trigger(field, { shouldFocus: false }))
+      );
+    }
+  }, [defaultLine, lines, trigger, fields]);
 
   const { loading, success, data } = useCreateProduction({
     createNewProduction,
@@ -104,10 +152,7 @@ export const CreateProductionPage = () => {
       <FormItem label="Line" fieldName="defaultLine" errors={errors}>
         <FormInput
           // eslint-disable-next-line
-          {...register(`defaultLine`, {
-            required: "Line name is required",
-            minLength: 1,
-          })}
+          {...register(`defaultLine`, lineNameRequiredValidation)}
           autoComplete="off"
           placeholder="Line Name"
         />
@@ -139,8 +184,8 @@ export const CreateProductionPage = () => {
                 <FormInput
                   // eslint-disable-next-line
                   {...register(`lines.${index}.name`, {
-                    required: "Line name is required",
-                    minLength: 1,
+                    ...lineNameRequiredValidation,
+                    validate: lineNameValidator,
                   })}
                   className={
                     index === fields.length - 1 ? "additional-line" : ""
@@ -178,6 +223,8 @@ export const CreateProductionPage = () => {
         loading={loading}
         handleAddLine={() => append({ name: "" })}
         handleSubmit={handleSubmit(onSubmit)}
+        isAddLineDisabled={hasDuplicateWithDefaultLine}
+        isCreateDisabled={hasDuplicateWithDefaultLine}
       />
       {success && data?.name && (
         <>
