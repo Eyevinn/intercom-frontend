@@ -10,6 +10,7 @@ import { usePushToTalk } from "../../hooks/use-push-to-talk.ts";
 import logger from "../../utils/logger.ts";
 import { DisplayWarning } from "../display-box.tsx";
 import { GenerateWhipUrlButton } from "../generate-urls/generate-whip-url/generate-whip-url-button.tsx";
+import { GenerateWhepUrlButton } from "../generate-urls/generate-whep-url/generate-whep-url-button.tsx";
 import { FlexContainer } from "../generic-components.ts";
 import { useFetchProduction } from "../landing-page/use-fetch-production.ts";
 import { Spinner } from "../loader/loader.tsx";
@@ -602,6 +603,10 @@ export const ProductionLine = ({
               {production && line && (
                 <UrlButtonsWrapper>
                   <GenerateWhipUrlButton
+                    productionId={production.productionId}
+                    lineId={line.id}
+                  />
+                  <GenerateWhepUrlButton
                     productionId={production.productionId}
                     lineId={line.id}
                   />
