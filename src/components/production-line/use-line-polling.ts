@@ -14,7 +14,9 @@ export const useLinePolling = ({ callId, joinProductionOptions }: TProps) => {
   const [line, setLine] = useState<TLine | null>(null);
   const [, dispatch] = useGlobalState();
 
+
   useEffect(() => {
+    let failureCount = 0;
     if (!joinProductionOptions) return noop;
 
     const productionId = parseInt(joinProductionOptions.productionId, 10);
@@ -22,8 +24,12 @@ export const useLinePolling = ({ callId, joinProductionOptions }: TProps) => {
 
     const interval = window.setInterval(() => {
       API.fetchProductionLine(productionId, lineId)
-        .then((l) => setLine(l))
+        .then((l) => {
+          failureCount = 0;
+          setLine(l);
+        })
         .catch(() => {
+          failureCount++;
           logger.red(
             `Error fetching production line ${productionId}/${lineId}. For call-id: ${callId}`
           );
@@ -36,6 +42,14 @@ export const useLinePolling = ({ callId, joinProductionOptions }: TProps) => {
               ),
             },
           });
+          if (failureCount >= 10) {
+            dispatch({
+              type: "ERROR",
+              payload: { callId, error: new Error("Polling stopped after 10 retries.") },
+            });
+            window.clearInterval(interval);
+            return;
+          }
         });
     }, 1000);
 
