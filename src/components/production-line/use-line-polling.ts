@@ -29,6 +29,7 @@ export const useLinePolling = ({ callId, joinProductionOptions }: TProps) => {
           setLine(l);
         })
         .catch(() => {
+          // Maybe check specificallt for 401 error codes? Practically however, this would work the same.
           failureCount++;
           logger.red(
             `Error fetching production line ${productionId}/${lineId}. For call-id: ${callId}`
