@@ -13,8 +13,12 @@ export const useHeartbeat = ({ sessionId }: TProps) => {
     let failure401Count = 0;
     if (!sessionId) return noop;
 
+    let failureCount = 0;
     const interval = window.setInterval(() => {
       API.heartbeat({ sessionId })
+        .then(() => {
+          failure401Count = 0; // resets after success
+        })
         .catch((err) => { 
           if (err.status === 401) {
             failure401Count++;
