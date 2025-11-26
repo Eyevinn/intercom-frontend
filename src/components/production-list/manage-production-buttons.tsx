@@ -1,6 +1,6 @@
 import { ErrorMessage } from "@hookform/error-message";
 import { FC, useEffect, useState } from "react";
-import { Controller, SubmitHandler, useForm } from "react-hook-form";
+import { Controller, SubmitHandler, useForm, useWatch } from "react-hook-form";
 import { TBasicProductionResponse } from "../../api/api";
 import { RemoveIcon } from "../../assets/icons/icon";
 import { useGlobalState } from "../../global-state/context-provider";
@@ -28,6 +28,7 @@ import {
   DeleteButton,
   SpinnerWrapper,
 } from "../delete-button/delete-button-components";
+import { useHasDuplicateLineName } from "../../hooks/use-has-duplicate-line-name.ts";
 
 interface ManageProductionButtonsProps {
   production: TBasicProductionResponse;
@@ -101,10 +102,25 @@ export const ManageProductionButtons: FC<ManageProductionButtonsProps> = (
     }
   };
 
+  const lineName = useWatch({ control, name: "name" });
+
+  const hasDuplicateWithExistingLines = useHasDuplicateLineName({
+    candidateName: lineName,
+    lines: production.lines,
+  });
+
   const handleAddLineOpen = () => {
     setAddLineOpen(!addLineOpen);
     setValue("name", "");
     setValue("programOutputLine", false);
+  };
+
+  const validateUniqueLineName = (value: string) => {
+    if (!value?.trim()) return true;
+
+    return hasDuplicateWithExistingLines
+      ? "Line name must be unique within this production."
+      : true;
   };
 
   return (
@@ -147,6 +163,7 @@ export const ManageProductionButtons: FC<ManageProductionButtonsProps> = (
                 {...register("name", {
                   required: "Line name is required",
                   minLength: 1,
+                  validate: validateUniqueLineName,
                 })}
               />
             </ListItemWrapper>
@@ -167,7 +184,15 @@ export const ManageProductionButtons: FC<ManageProductionButtonsProps> = (
             </CheckboxWrapper>
           </FormLabel>
           <ErrorMessage errors={errors} name="name" as={StyledWarningMessage} />
-          <CreateLineButton onClick={handleSubmit(onSubmit)}>
+          {hasDuplicateWithExistingLines && (
+            <StyledWarningMessage style={{ marginBottom: "1rem" }}>
+              Line name must be unique within this production.
+            </StyledWarningMessage>
+          )}
+          <CreateLineButton
+            onClick={handleSubmit(onSubmit)}
+            disabled={hasDuplicateWithExistingLines}
+          >
             Create
             {createLineLoading && (
               <SpinnerWrapper>

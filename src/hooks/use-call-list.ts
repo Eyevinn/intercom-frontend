@@ -10,6 +10,7 @@ export type CallData = {
   productionName: string;
   isProgramOutputLine: boolean;
   isProgramUser: boolean;
+  isSomeoneSpeaking: boolean;
 };
 
 type UseCallListProps = {
@@ -96,8 +97,10 @@ export function useCallList({
       const hasChanged =
         prev.isInputMuted !== data.isInputMuted ||
         (prev.isOutputMuted !== data.isOutputMuted &&
-          !data.isProgramOutputLine) ||
-        prev.volume !== data.volume;
+          ((data.isProgramOutputLine && !data.isProgramUser) ||
+            !data.isProgramOutputLine)) ||
+        prev.volume !== data.volume ||
+        prev.isSomeoneSpeaking !== data.isSomeoneSpeaking;
 
       if (!hasChanged) return;
 

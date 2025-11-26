@@ -5,6 +5,11 @@ export const ProductionName = styled.div`
   font-size: 1.4rem;
   font-weight: bold;
   margin-right: 0.5rem;
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 
   .production-name-container {
     display: inline-block;
@@ -17,6 +22,7 @@ export const ParticipantCountWrapper = styled.div`
   align-items: center;
   gap: 0.1rem;
   margin-right: 1rem;
+  transform: translateY(1.5px);
 
   svg {
     height: 1.5rem;
@@ -56,18 +62,27 @@ export const Lineblock = styled.div`
   min-height: 6.5rem;
 `;
 
-export const LineBlockTexts = styled.div``;
+export const LineBlockTexts = styled.div`
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+`;
 
 export const LineBlockTitle = styled.div`
   font-weight: bold;
   font-size: 1.5rem;
   margin-bottom: 0.2rem;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 `;
 
 export const LineBlockTitleWrapper = styled.div`
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  min-width: 0;
+  overflow: hidden;
 
   &.management {
     margin-right: 1rem;
@@ -174,4 +189,6 @@ export const ProductionNameWrapper = styled.div`
   display: flex;
   align-items: center;
   max-width: 30rem;
+  flex: 1;
+  min-width: 0;
 `;
