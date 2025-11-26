@@ -10,6 +10,7 @@ import { usePushToTalk } from "../../hooks/use-push-to-talk.ts";
 import logger from "../../utils/logger.ts";
 import { DisplayWarning } from "../display-box.tsx";
 import { GenerateWhipUrlButton } from "../generate-urls/generate-whip-url/generate-whip-url-button.tsx";
+import { GenerateWhepUrlButton } from "../generate-urls/generate-whep-url/generate-whep-url-button.tsx";
 import { FlexContainer } from "../generic-components.ts";
 import { useFetchProduction } from "../landing-page/use-fetch-production.ts";
 import { Spinner } from "../loader/loader.tsx";
@@ -148,6 +149,12 @@ export const ProductionLine = ({
   );
 
   const isSelfDominantSpeaker = lineParticipant === dominantSpeaker;
+  const isWhipOnLine = line?.participants.some((p) => p.isWhip);
+  const isSomeoneSpeaking =
+    !isProgramOutputLine &&
+    !isSelfDominantSpeaker &&
+    isActiveParticipant &&
+    !isWhipOnLine;
 
   const { production, error: fetchProductionError } = useFetchProduction(
     joinProductionOptions
@@ -187,6 +194,7 @@ export const ProductionLine = ({
           isProgramOutputLine ||
           false,
         isProgramUser: joinProductionOptions?.isProgramUser || false,
+        isSomeoneSpeaking: isSomeoneSpeaking || false,
       },
       isSettingGlobalMute
     );
@@ -202,6 +210,7 @@ export const ProductionLine = ({
     registerCallList,
     isProgramOutputLine,
     isProgramUser,
+    isSomeoneSpeaking,
   ]);
 
   useEffect(() => {
@@ -417,8 +426,6 @@ export const ProductionLine = ({
 
   // TODO detect if browser back button is pressed and run exit();
 
-  const isWhipOnLine = line?.participants.some((p) => p.isWhip);
-
   return (
     <CallWrapper
       isSomeoneSpeaking={
@@ -596,6 +603,10 @@ export const ProductionLine = ({
               {production && line && (
                 <UrlButtonsWrapper>
                   <GenerateWhipUrlButton
+                    productionId={production.productionId}
+                    lineId={line.id}
+                  />
+                  <GenerateWhepUrlButton
                     productionId={production.productionId}
                     lineId={line.id}
                   />

@@ -1,8 +1,8 @@
 import { isMobile } from "../../../bowser";
 import { GenerateUrlButton } from "../generate-url-button";
-import { GenerateWhipUrlModal } from "./generate-whip-url-modal";
+import { GenerateWhepUrlModal } from "./generate-whep-url-modal";
 
-export const GenerateWhipUrlButton = ({
+export const GenerateWhepUrlButton = ({
   isMinified,
   productionId,
   lineId,
@@ -14,12 +14,12 @@ export const GenerateWhipUrlButton = ({
   const renderButtonLabel = () => {
     if (isMinified) {
       if (isMobile) {
-        return "WHIP";
+        return "WHEP";
       } else {
-        return "WHIP URL";
+        return "WHEP URL";
       }
     } else {
-      return "Get WHIP URL";
+      return "Get WHEP URL";
     }
   };
 
@@ -28,7 +28,7 @@ export const GenerateWhipUrlButton = ({
       isMinified={isMinified}
       label={renderButtonLabel()}
       modalContent={(onClose) => (
-        <GenerateWhipUrlModal
+        <GenerateWhepUrlModal
           productionId={productionId}
           lineId={lineId}
           onClose={onClose}

@@ -39,7 +39,6 @@ const SliderThumb = styled.div<{ position: number }>`
   top: -0.6rem;
   left: ${({ position }) => `${position}%`};
   transform: translateX(-50%);
-  cursor: pointer;
 `;
 
 const VolumeWrapper = styled.div`
@@ -82,7 +81,7 @@ export const VolumeSlider: FC<TVolumeSliderProps> = ({
               top: 0,
               height: "0.4rem",
               opacity: 0,
-              pointerEvents: "all",
+              cursor: "pointer",
             }}
           />
         </SliderTrack>
