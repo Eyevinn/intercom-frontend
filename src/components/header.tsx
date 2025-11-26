@@ -73,7 +73,7 @@ export const Header: FC = () => {
       <HeaderWrapper>
         <HomeButton onClick={returnToRoot}>
           <HeadsetIcon />
-          Intercom
+          Open Intercom
         </HomeButton>
       </HeaderWrapper>
       {confirmExitModalOpen && (

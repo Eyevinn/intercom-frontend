@@ -1,4 +1,4 @@
-import { Dispatch, useEffect, useState } from "react";
+import { Dispatch, useEffect, useRef, useState } from "react";
 import { TJoinProductionOptions } from "./types.ts";
 import { noop } from "../../helpers.ts";
 import { API } from "../../api/api.ts";
@@ -19,42 +19,75 @@ export const useEstablishSession = ({
 }: TUseGetRtcOfferOptions) => {
   const [sdpOffer, setSdpOffer] = useState<string | null>(null);
   const [sessionId, setSessionId] = useState<string | null>(null);
+  const reqRef = useRef<{
+    key: string;
+    t: number | null;
+    cancelled: boolean;
+  } | null>(null);
 
   // Establish audio session
   useEffect(() => {
     if (!joinProductionOptions) return noop;
 
-    let aborted = false;
+    const { productionId, lineId, username } = joinProductionOptions;
+    const key = `${callId}-${productionId}-${lineId}-${username}`;
 
-    const productionId = parseInt(joinProductionOptions.productionId, 10);
-    const lineId = parseInt(joinProductionOptions.lineId, 10);
+    if (reqRef.current?.key === key) {
+      if (reqRef.current.t != null) {
+        window.clearTimeout(reqRef.current.t);
+        reqRef.current.t = null;
+      }
+      reqRef.current.cancelled = false;
+      return noop;
+    }
+
+    const state = { key, cancelled: false, t: null as number | null };
+    reqRef.current = state;
 
     API.offerAudioSession({
-      productionId,
-      lineId,
-      username: joinProductionOptions.username,
+      productionId: parseInt(productionId, 10),
+      lineId: parseInt(lineId, 10),
+      username,
     })
       .then((response) => {
-        if (aborted) return;
+        if (state.cancelled) {
+          API.deleteAudioSession({ sessionId: response.sessionId }).catch(
+            logger.red
+          );
+          return;
+        }
 
         setSessionId(response.sessionId);
         setSdpOffer(response.sdp);
       })
       .catch((e) => {
-        dispatch({
-          type: "ERROR",
-          payload: {
-            callId,
-            error:
-              e instanceof Error
-                ? e
-                : new Error("Failed to establish audio session."),
-          },
-        });
+        if (!state.cancelled) {
+          reqRef.current = null;
+          dispatch({
+            type: "ERROR",
+            payload: {
+              callId,
+              error:
+                e instanceof Error
+                  ? e
+                  : new Error("Failed to establish audio session."),
+            },
+          });
+        }
       });
 
     return () => {
-      aborted = true;
+      const current = reqRef.current;
+      const timeoutId = window.setTimeout(() => {
+        if (reqRef.current === current) {
+          if (current) current.cancelled = true;
+          reqRef.current = null;
+        }
+      }, 0);
+
+      if (current) {
+        current.t = timeoutId;
+      }
     };
   }, [callId, dispatch, joinProductionOptions]);
 

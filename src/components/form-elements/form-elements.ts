@@ -40,6 +40,10 @@ export const FormInput = styled.input`
 
   &.edit-name {
     margin: 0;
+    font-size: 1.4rem;
+    padding: 0.5rem;
+    min-width: 0;
+    max-width: 100%;
 
     &.device-label {
       font-size: 1.2rem;
@@ -56,7 +60,7 @@ export const FormSelect = styled.select`
   border-radius: 0.5rem;
   background: #32383b;
   color: white;
-
+  cursor: pointer;
   &.ingest {
     display: flex;
     align-items: center;
@@ -74,6 +78,9 @@ export const FormLabel = styled.label`
 
   &.save-edit {
     margin-right: 1rem;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
   }
 `;
 
