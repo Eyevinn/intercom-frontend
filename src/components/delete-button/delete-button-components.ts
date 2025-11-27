@@ -5,6 +5,7 @@ export const ButtonsWrapper = styled.div`
   display: flex;
   justify-content: flex-end;
   margin: 1rem 0 1rem 0;
+  gap: 1rem;
 `;
 
 export const DeleteButton = styled(SecondaryButton)`
