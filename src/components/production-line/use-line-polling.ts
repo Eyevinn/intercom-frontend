@@ -15,21 +15,23 @@ export const useLinePolling = ({ callId, joinProductionOptions }: TProps) => {
   const [, dispatch] = useGlobalState();
 
   useEffect(() => {
-    let failureCount = 0;
     if (!joinProductionOptions) return noop;
 
+    let failure401Count = 0;
     const productionId = parseInt(joinProductionOptions.productionId, 10);
     const lineId = parseInt(joinProductionOptions.lineId, 10);
 
     const interval = window.setInterval(() => {
       API.fetchProductionLine(productionId, lineId)
         .then((l) => {
-          failureCount = 0;
+          failure401Count = 0;
           setLine(l);
         })
-        .catch(() => {
-          // Maybe check specificallt for 401 error codes? Practically however, this would work the same.
-          failureCount++;
+        .catch((err) => {
+          if (err.status === 401) {
+            failure401Count += 1;
+          }
+          // Might want to add another dispatch here for other error codes.
           logger.red(
             `Error fetching production line ${productionId}/${lineId}. For call-id: ${callId}`
           );
@@ -42,7 +44,7 @@ export const useLinePolling = ({ callId, joinProductionOptions }: TProps) => {
               ),
             },
           });
-          if (failureCount >= 10) {
+          if (failure401Count >= 10) {
             dispatch({
               type: "ERROR",
               payload: {
