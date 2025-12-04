@@ -12,7 +12,8 @@ export type TGlobalStateAction =
   | TAddCallState
   | TUpdateCallState
   | TRemoveCallState
-  | TSetWebSocket;
+  | TSetWebSocket
+  | THeartbeatError;
 
 export type TPublishError = {
   type: "ERROR";
@@ -64,4 +65,9 @@ export type TUpdateUserSettings = {
 export type TSetWebSocket = {
   type: "SET_WEBSOCKET";
   payload: WebSocket | null;
+};
+
+export type THeartbeatError = {
+  type: "HEARTBEAT_ERROR";
+  payload: { sessionId: string; error: Error };
 };
