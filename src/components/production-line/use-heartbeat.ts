@@ -28,7 +28,7 @@ export const useHeartbeat = ({ sessionId }: TProps) => {
             dispatch({
               type: "HEARTBEAT_ERROR",
               payload: {
-                sessionId: sessionId,
+                sessionId,
                 error: new Error("Stopped heartbeat after 3 retries."),
               },
             });
@@ -40,5 +40,5 @@ export const useHeartbeat = ({ sessionId }: TProps) => {
     return () => {
       window.clearInterval(interval);
     };
-  }, [sessionId]);
+  }, [sessionId, dispatch]);
 };
