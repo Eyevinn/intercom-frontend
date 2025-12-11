@@ -1,10 +1,11 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { generateWhipUrl } from "../../../utils/generateWhipUrl";
 import { CopyButton } from "../../copy-button/copy-button";
-import { DecorativeLabel, FormInput } from "../../form-elements/form-elements";
+import { DecorativeLabel } from "../../form-elements/form-elements";
 import { Modal } from "../../modal/modal";
 import { RefreshButton } from "../../refresh-button/refresh-button";
 import {
+  CombinedInputWrapper,
   InputWrapper,
   LinkLabel,
   ModalHeader,
@@ -31,14 +32,14 @@ export const GenerateWhipUrlModal = ({
   const [whipUrl, setWhipUrl] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const generateUrl = () => {
+  const generateUrl = useCallback(() => {
     if (username.trim()) {
       const url = generateWhipUrl(productionId, lineId, username.trim());
       setWhipUrl(url);
     } else {
       setWhipUrl("");
     }
-  };
+  }, [username, productionId, lineId]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -56,7 +57,7 @@ export const GenerateWhipUrlModal = ({
 
   useEffect(() => {
     generateUrl();
-  }, [username]);
+  }, [generateUrl]);
 
   const handleRefresh = () => {
     setIsLoading(true);
@@ -83,26 +84,15 @@ export const GenerateWhipUrlModal = ({
         <Wrapper>
           <InputWrapper>
             <LinkLabel>
-              <DecorativeLabel>Username</DecorativeLabel>
-              <FormInput
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="Enter your username"
-              />
-            </LinkLabel>
-          </InputWrapper>
-
-          <InputWrapper>
-            <LinkLabel>
               <DecorativeLabel>WHIP URL</DecorativeLabel>
-              <FormInput
-                readOnly
-                value={
-                  isLoading
-                    ? "Loading..."
-                    : whipUrl || "Enter a username to generate the URL"
-                }
-              />
+              <CombinedInputWrapper>
+                <span>{generateWhipUrl(productionId, lineId, "")}</span>
+                <input
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="username"
+                />
+              </CombinedInputWrapper>
             </LinkLabel>
             <CopyButton
               urls={[whipUrl]}
