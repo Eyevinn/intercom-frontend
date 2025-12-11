@@ -70,6 +70,7 @@ export const CombinedInputWrapper = styled.div`
   span {
     color: #9d9d9d;
     flex-shrink: 0;
+    margin-right: 1rem;
   }
 
   input {
