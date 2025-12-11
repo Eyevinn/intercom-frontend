@@ -17,13 +17,21 @@ export const useLinePolling = ({ callId, joinProductionOptions }: TProps) => {
   useEffect(() => {
     if (!joinProductionOptions) return noop;
 
+    let failure401Count = 0;
     const productionId = parseInt(joinProductionOptions.productionId, 10);
     const lineId = parseInt(joinProductionOptions.lineId, 10);
 
     const interval = window.setInterval(() => {
       API.fetchProductionLine(productionId, lineId)
-        .then((l) => setLine(l))
-        .catch(() => {
+        .then((l) => {
+          failure401Count = 0;
+          setLine(l);
+        })
+        .catch((err) => {
+          if (err.status === 401) {
+            failure401Count += 1;
+          }
+          // Might want to add another dispatch here for other error codes.
           logger.red(
             `Error fetching production line ${productionId}/${lineId}. For call-id: ${callId}`
           );
@@ -36,6 +44,16 @@ export const useLinePolling = ({ callId, joinProductionOptions }: TProps) => {
               ),
             },
           });
+          if (failure401Count >= 10) {
+            dispatch({
+              type: "ERROR",
+              payload: {
+                callId,
+                error: new Error("Line polling stopped after 10 retries."),
+              },
+            });
+            window.clearInterval(interval);
+          }
         });
     }, 1000);
 
