@@ -22,9 +22,10 @@
     "@martinstark/storage-ts": "^1.1.0",
     "bowser": "^2.11.0",
     "react": "^19.2.3",
-    "react-dom": "^19.2.0",
+    "react-dom": "^19.2.3",
     "react-hook-form": "^7.68.0",
     "react-hotkeys-hook": "^4.5.0",
+    "react-router": "^7.10.1",
     "react-router-dom": "^7.10.1"
   },
   "devDependencies": {
