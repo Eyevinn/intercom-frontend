@@ -1,7 +1,7 @@
-import { useEffect } from "react";
+import { MutableRefObject, RefObject, useEffect } from "react";
 
 export const useOutsideClickHandler = <T extends HTMLElement>(
-  ref: React.RefObject<T>,
+  ref: RefObject<T | null> | MutableRefObject<T | null>,
   callback: () => void
 ) => {
   useEffect(() => {
