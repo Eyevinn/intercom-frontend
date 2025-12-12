@@ -22,14 +22,14 @@
     "@martinstark/storage-ts": "^1.1.0",
     "@types/react-router-dom": "^5.3.3",
     "bowser": "^2.11.0",
-    "react": "^19.2.1",
+    "react": "^19.2.3",
     "react-dom": "^19.2.0",
-    "react-hook-form": "^7.51.5",
+    "react-hook-form": "^7.68.0",
     "react-hotkeys-hook": "^4.5.0",
     "react-router-dom": "^6.26.2"
   },
   "devDependencies": {
-    "@commitlint/cli": "^19.3.0",
+    "@commitlint/cli": "^20.2.0",
     "@commitlint/config-conventional": "^20.0.0",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^18.3.0",
@@ -50,7 +50,7 @@
     "lint-staged": "^16.2.6",
     "prettier": "^3.7.0",
     "typescript": "5.4.5",
-    "vite": "^5.3.3",
+    "vite": "^7.2.7",
     "vite-plugin-svgr": "^4.2.0"
   },
   "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
