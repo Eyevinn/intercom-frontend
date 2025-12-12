@@ -24,7 +24,7 @@
     "bowser": "^2.11.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "react-hook-form": "^7.51.5",
+    "react-hook-form": "^7.68.0",
     "react-hotkeys-hook": "^4.5.0",
     "react-router-dom": "^6.26.2"
   },
