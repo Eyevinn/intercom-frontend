@@ -36,6 +36,7 @@ export const CreateProductionPage = () => {
   const [, dispatch] = useGlobalState();
   const [createNewProduction, setCreateNewProduction] =
     useState<FormValues | null>(null);
+  const [showConfirmation, setShowConfirmation] = useState(false);
   const {
     formState: { errors },
     control,
@@ -127,6 +128,18 @@ export const CreateProductionPage = () => {
       });
     }
   }, [data?.productionId, dispatch, reset]);
+
+  // Auto-hide confirmation after a short delay
+  useEffect(() => {
+    if (!success || !data?.name) {
+      setShowConfirmation(false);
+      return;
+    }
+
+    setShowConfirmation(true);
+    const id = setTimeout(() => setShowConfirmation(false), 4000);
+    return () => clearTimeout(id);
+  }, [success, data?.name]);
 
   return (
     <ResponsiveFormContainer className={isMobile ? "" : "desktop"}>
@@ -226,7 +239,7 @@ export const CreateProductionPage = () => {
         isAddLineDisabled={hasDuplicateWithDefaultLine}
         isCreateDisabled={hasDuplicateWithDefaultLine}
       />
-      {success && data?.name && (
+      {showConfirmation && data?.name && (
         <>
           <ProductionConfirmation>
             The production <strong>{data.name}</strong> has been created.
