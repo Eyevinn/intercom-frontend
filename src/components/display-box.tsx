@@ -1,4 +1,5 @@
 import styled from "@emotion/styled";
+import { ReactNode } from "react";
 import { PrimaryButton } from "./form-elements/form-elements";
 
 const borderRadius = 0.5;
@@ -36,7 +37,7 @@ const DisplayBoxButton = styled(PrimaryButton)`
 `;
 
 type TDisplayWarning = {
-  text: string | JSX.Element;
+  text: ReactNode;
   title?: string;
   btn?: () => void;
 };

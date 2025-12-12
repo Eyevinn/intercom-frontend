@@ -5,7 +5,7 @@ import { API } from "../api/api";
 // Set up automatic token refresh every hour
 export const useSetupTokenRefresh = () => {
   const [, dispatch] = useGlobalState();
-  const intervalRef = useRef<NodeJS.Timeout>();
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const setupTokenRefresh = useCallback(() => {
     // Clear any existing interval
@@ -35,7 +35,9 @@ export const useSetupTokenRefresh = () => {
     );
 
     return () => {
-      clearInterval(intervalRef.current);
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
     };
   }, [dispatch]);
 
