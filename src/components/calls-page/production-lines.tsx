@@ -35,26 +35,29 @@ export const ProductionLines = ({
 }: ProductionLinesProps) => {
   return (
     <>
-      {Object.entries(calls).map(
-        ([callId, callState]) =>
-          callId &&
-          callState.joinProductionOptions && (
-            <ProductionLine
-              key={callId}
-              id={callId}
-              shouldReduceVolume={shouldReduceVolume}
-              callState={callState}
-              isSingleCall={isSingleCall}
-              customGlobalMute={customGlobalMute}
-              masterInputMute={isMasterInputMuted}
-              setFailedToConnect={() => setAddCallActive(true)}
-              isSettingGlobalMute={isSettingGlobalMute}
-              callActionHandlers={callActionHandlers}
-              registerCallList={registerCallList}
-              deregisterCall={deregisterCall}
-            />
-          )
-      )}
+      {Object.entries(calls)
+        .slice()
+        .reverse()
+        .map(
+          ([callId, callState]) =>
+            callId &&
+            callState.joinProductionOptions && (
+              <ProductionLine
+                key={callId}
+                id={callId}
+                shouldReduceVolume={shouldReduceVolume}
+                callState={callState}
+                isSingleCall={isSingleCall}
+                customGlobalMute={customGlobalMute}
+                masterInputMute={isMasterInputMuted}
+                setFailedToConnect={() => setAddCallActive(true)}
+                isSettingGlobalMute={isSettingGlobalMute}
+                callActionHandlers={callActionHandlers}
+                registerCallList={registerCallList}
+                deregisterCall={deregisterCall}
+              />
+            )
+        )}
     </>
   );
 };

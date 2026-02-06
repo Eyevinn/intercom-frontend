@@ -94,9 +94,12 @@ export const CallsPage = () => {
 
   useEffect(() => {
     callIndexMap.current = {};
-    Object.keys(calls).forEach((callId, i) => {
-      callIndexMap.current[i + 1] = callId;
-    });
+    Object.keys(calls)
+      .slice()
+      .reverse()
+      .forEach((callId, i) => {
+        callIndexMap.current[i + 1] = callId;
+      });
   }, [calls]);
 
   usePreventPullToRefresh();
