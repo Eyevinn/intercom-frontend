@@ -14,32 +14,29 @@ export const useSetupTokenRefresh = () => {
     }
 
     // Function to call reauthenticate
-    const reauth =  () => {
-        API.reauth().catch((error) => {
-          const is500Error = error.message.includes("500");
+    const reauth = () => {
+      API.reauth().catch((error) => {
+        const is500Error = error.message.includes("500");
 
-          if (is500Error) {
-            // Don't dispatch 500 errors as they're expected when inital OSC token expires
-            return;
-          }
+        if (is500Error) {
+          // Don't dispatch 500 errors as they're expected when inital OSC token expires
+          return;
+        }
 
-          dispatch({
-            type: "ERROR",
-            payload: {
-              error: new Error(`Failed to reauth: ${error}`),
-            },
-          });
+        dispatch({
+          type: "ERROR",
+          payload: {
+            error: new Error(`Failed to reauth: ${error}`),
+          },
         });
-      }
+      });
+    };
 
     // Call reauthenticate immediately when entering the app to renew the cookie if it's valid
     reauth();
 
     // Set up interval to call reauthenticate every hour
-    intervalRef.current = setInterval(
-     reauth,
-      60 * 60 * 1000
-    );
+    intervalRef.current = setInterval(reauth, 60 * 60 * 1000);
 
     // Clean up interval when unmounting
     return () => {
