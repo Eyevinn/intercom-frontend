@@ -13,8 +13,8 @@ export const useSetupTokenRefresh = () => {
       clearInterval(intervalRef.current);
     }
 
-    intervalRef.current = setInterval(
-      () => {
+    // Function to call reauthenticate
+    const reauth =  () => {
         API.reauth().catch((error) => {
           const is500Error = error.message.includes("500");
 
@@ -30,10 +30,18 @@ export const useSetupTokenRefresh = () => {
             },
           });
         });
-      },
+      }
+
+    // Call reauthenticate immediately when entering the app to renew the cookie if it's valid
+    reauth();
+
+    // Set up interval to call reauthenticate every hour
+    intervalRef.current = setInterval(
+     reauth,
       60 * 60 * 1000
     );
 
+    // Clean up interval when unmounting
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
