@@ -8,6 +8,7 @@
     "build": "tsc && vite build",
     "lint": "eslint ./src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "prepare": "husky install",
+    "start": "vite preview --host 0.0.0.0 --port 8000",
     "preview": "vite preview",
     "pretty": "prettier --write --ignore-unknown .",
     "typecheck": "tsc --noEmit -p tsconfig.json",
