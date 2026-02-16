@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { FC, useEffect } from "react";
+import { FC, useEffect, useRef } from "react";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { useP2PCalls } from "../../hooks/use-p2p-calls.ts";
 
@@ -96,6 +96,7 @@ const ButtonGroup = styled.div`
 export const ActiveCallsPanel: FC = () => {
   const [{ p2pCalls }] = useGlobalState();
   const { endCall, togglePTT, handleIncomingCall } = useP2PCalls();
+  const joiningCallsRef = useRef<Set<string>>(new Set());
 
   const activeCalls = Object.values(p2pCalls);
 
@@ -105,9 +106,12 @@ export const ActiveCallsPanel: FC = () => {
       if (
         call.direction === "incoming" &&
         call.state === "setting_up" &&
-        !call.peerConnection
+        !call.peerConnection &&
+        !joiningCallsRef.current.has(call.callId)
       ) {
-        handleIncomingCall(call.callId, call.callerId, call.callerName);
+        joiningCallsRef.current.add(call.callId);
+        handleIncomingCall(call.callId, call.callerId, call.callerName)
+          .finally(() => joiningCallsRef.current.delete(call.callId));
       }
     }
   }, [activeCalls, handleIncomingCall]);
