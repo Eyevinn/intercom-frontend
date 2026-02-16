@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useState } from "react";
 
 type UsePushToTalkOptions = {
   muteInput: (mute: boolean) => void;
@@ -6,7 +6,6 @@ type UsePushToTalkOptions = {
 
 export function usePushToTalk({ muteInput }: UsePushToTalkOptions) {
   const [isTalking, setIsTalking] = useState<boolean>(false);
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const startTalking = useCallback(() => {
     muteInput(false);
@@ -19,25 +18,15 @@ export function usePushToTalk({ muteInput }: UsePushToTalkOptions) {
   }, [muteInput]);
 
   const handleLongPressStart = useCallback(() => {
-    timeoutRef.current = setTimeout(() => {
-      startTalking();
-    }, 300);
+    // Start talking immediately — no delay. Audio tracks are pre-opened,
+    // so toggling track.enabled is instant. The previous 300ms setTimeout
+    // was causing first-syllable loss (violates R2.1).
+    startTalking();
   }, [startTalking]);
 
   const handleLongPressEnd = useCallback(() => {
     stopTalking();
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
   }, [stopTalking]);
-
-  useEffect(() => {
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
-  }, []);
 
   return {
     isTalking,

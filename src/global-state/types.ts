@@ -4,6 +4,8 @@ import {
   TProduction,
 } from "../components/production-line/types.ts";
 import { TUserSettings } from "../components/user-settings/types.ts";
+import { TClientProfile } from "../components/client-registry/types.ts";
+import { TP2PCall, TActiveTalk } from "./global-state-actions.ts";
 
 export interface ErrorState {
   globalError?: Error | null;
@@ -42,4 +44,13 @@ export type TGlobalState = {
   selectedProductionId: string | null;
   apiError: Error | false;
   websocket: WebSocket | null;
+  clients: TClientProfile[];
+  currentClient: {
+    clientId: string;
+    name: string;
+    role: string;
+    location: string;
+  } | null;
+  p2pCalls: Record<string, TP2PCall>;
+  activeTalks: Record<string, TActiveTalk>;
 };

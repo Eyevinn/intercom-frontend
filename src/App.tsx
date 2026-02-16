@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { useEffect, useState } from "react";
+import { Dispatch, useEffect, useState } from "react";
 import { ErrorPage } from "./components/router-error.tsx";
 import { useDevicePermissions } from "./hooks/use-device-permission.ts";
 import { LandingPage } from "./components/landing-page/landing-page.tsx";
@@ -23,6 +23,12 @@ import { CreateProductionPage } from "./components/create-production/create-prod
 import { useSetupTokenRefresh } from "./hooks/use-reauth.tsx";
 import { TUserSettings } from "./components/user-settings/types";
 import { BrowserRouter, Routes, Route } from "react-router";
+import { isAuthenticated } from "./api/auth.ts";
+import { RegistrationPage } from "./components/client-registry/registration-page.tsx";
+import { ClientList } from "./components/client-registry/client-list.tsx";
+import { useStatusWebSocket } from "./hooks/use-status-websocket.ts";
+import { TGlobalStateAction } from "./global-state/global-state-actions.ts";
+import { ActiveCallsPanel } from "./components/p2p-calls/active-calls-panel.tsx";
 
 const DisplayBoxPositioningContainer = styled(FlexContainer)`
   justify-content: center;
@@ -48,12 +54,45 @@ const NotFound = () => {
   );
 };
 
+const AppLayoutContainer = styled.div`
+  display: flex;
+  min-height: calc(100vh - 6rem);
+`;
+
+const MainContent = styled.div`
+  flex: 1;
+  min-width: 0;
+`;
+
+const ClientListSidebar = styled.aside`
+  width: 28rem;
+  flex-shrink: 0;
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  overflow-y: auto;
+  max-height: calc(100vh - 6rem);
+`;
+
+/**
+ * Connects the status WebSocket when rendered.
+ * Separated into its own component so the hook is only
+ * called when the user is authenticated.
+ */
+const StatusWebSocketConnector = ({
+  dispatch,
+}: {
+  dispatch: Dispatch<TGlobalStateAction>;
+}) => {
+  useStatusWebSocket(dispatch);
+  return null;
+};
+
 type AppContentProps = {
   continueToApp: boolean;
   denied: boolean;
   permission: boolean;
   apiError: boolean;
   userSettings: TUserSettings | null;
+  dispatch: Dispatch<TGlobalStateAction>;
   setUnsupportedContinue: (value: boolean) => void;
   setApiError: (value: boolean) => void;
 };
@@ -64,9 +103,11 @@ const AppContent = ({
   permission,
   apiError,
   userSettings,
+  dispatch,
   setUnsupportedContinue,
   setApiError,
 }: AppContentProps) => {
+  const [registered, setRegistered] = useState(isAuthenticated());
   const { setupTokenRefresh } = useSetupTokenRefresh();
 
   useEffect(() => {
@@ -74,8 +115,26 @@ const AppContent = ({
     return () => cleanup();
   }, [setupTokenRefresh]);
 
+  const handleRegistered = (client: {
+    clientId: string;
+    name: string;
+    role: string;
+    location: string;
+  }) => {
+    dispatch({
+      type: "SET_CURRENT_CLIENT",
+      payload: client,
+    });
+    setRegistered(true);
+  };
+
+  if (!registered) {
+    return <RegistrationPage onRegistered={handleRegistered} />;
+  }
+
   return (
     <BrowserRouter>
+      <StatusWebSocketConnector dispatch={dispatch} />
       <Header />
       <ErrorBanner />
 
@@ -127,37 +186,45 @@ const AppContent = ({
             </DisplayBoxPositioningContainer>
           )}
           {permission && !denied && !apiError && userSettings && (
-            <Routes>
-              <>
-                <Route
-                  path="/"
-                  element={
-                    <LandingPage setApiError={() => setApiError(true)} />
-                  }
-                  errorElement={<ErrorPage />}
-                />
-                <Route
-                  path="/create-production"
-                  element={<CreateProductionPage />}
-                  errorElement={<ErrorPage />}
-                />
-                <Route
-                  path="/manage-productions"
-                  element={
-                    <ManageProductionsPage
-                      setApiError={() => setApiError(true)}
+            <AppLayoutContainer>
+              <MainContent>
+                <Routes>
+                  <>
+                    <Route
+                      path="/"
+                      element={
+                        <LandingPage setApiError={() => setApiError(true)} />
+                      }
+                      errorElement={<ErrorPage />}
                     />
-                  }
-                  errorElement={<ErrorPage />}
-                />
-                <Route
-                  path="/production-calls/production/:productionId/line/:lineId"
-                  element={<CallsPage />}
-                  errorElement={<ErrorPage />}
-                />
-                <Route path="*" element={<NotFound />} />
-              </>
-            </Routes>
+                    <Route
+                      path="/create-production"
+                      element={<CreateProductionPage />}
+                      errorElement={<ErrorPage />}
+                    />
+                    <Route
+                      path="/manage-productions"
+                      element={
+                        <ManageProductionsPage
+                          setApiError={() => setApiError(true)}
+                        />
+                      }
+                      errorElement={<ErrorPage />}
+                    />
+                    <Route
+                      path="/production-calls/production/:productionId/line/:lineId"
+                      element={<CallsPage />}
+                      errorElement={<ErrorPage />}
+                    />
+                    <Route path="*" element={<NotFound />} />
+                  </>
+                </Routes>
+              </MainContent>
+              <ClientListSidebar>
+                <ActiveCallsPanel />
+                <ClientList />
+              </ClientListSidebar>
+            </AppLayoutContainer>
           )}
         </>
       )}
@@ -188,6 +255,7 @@ const App = () => {
         permission={permission}
         apiError={apiError}
         userSettings={userSettings}
+        dispatch={dispatch}
         setUnsupportedContinue={setUnsupportedContinue}
         setApiError={setApiError}
       />

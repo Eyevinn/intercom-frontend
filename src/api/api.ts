@@ -1,4 +1,5 @@
 import { handleFetchRequest } from "./handle-fetch-request.ts";
+import { getToken } from "./auth.ts";
 
 const API_VERSION = import.meta.env.VITE_BACKEND_API_VERSION ?? "api/v1/";
 const API_URL =
@@ -288,6 +289,193 @@ export const API = {
         method: "GET",
         headers: {
           ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
+        },
+      })
+    );
+  },
+
+  // Client Registry API (SR POC - M1)
+  registerClient: async (data: {
+    name: string;
+    role: string;
+    location: string;
+    existingClientId?: string;
+  }) => {
+    return handleFetchRequest<{
+      clientId: string;
+      token: string;
+      name: string;
+      role: string;
+      location: string;
+    }>(
+      fetch(`${API_URL}client/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      })
+    );
+  },
+
+  getMyProfile: async () => {
+    const token = getToken();
+    return handleFetchRequest<{
+      clientId: string;
+      name: string;
+      role: string;
+      location: string;
+      isOnline: boolean;
+      lastSeenAt: string;
+    }>(
+      fetch(`${API_URL}client/me`, {
+        method: "GET",
+        headers: { Authorization: `Bearer ${token}` },
+      })
+    );
+  },
+
+  updateMyProfile: async (data: {
+    name?: string;
+    role?: string;
+    location?: string;
+  }) => {
+    const token = getToken();
+    return handleFetchRequest<{
+      clientId: string;
+      name: string;
+      role: string;
+      location: string;
+      isOnline: boolean;
+      lastSeenAt: string;
+    }>(
+      fetch(`${API_URL}client/me`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(data),
+      })
+    );
+  },
+
+  listOnlineClients: async () => {
+    const token = getToken();
+    return handleFetchRequest<
+      Array<{
+        clientId: string;
+        name: string;
+        role: string;
+        location: string;
+        isOnline: boolean;
+        lastSeenAt: string;
+      }>
+    >(
+      fetch(`${API_URL}client/list`, {
+        method: "GET",
+        headers: { Authorization: `Bearer ${token}` },
+      })
+    );
+  },
+
+  // P2P Call API (M2)
+
+  initiateCall: async (calleeId: string) => {
+    const token = getToken();
+    return handleFetchRequest<{
+      callId: string;
+      sdpOffer: string;
+      calleeId: string;
+      calleeName: string;
+    }>(
+      fetch(`${API_URL}call`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ calleeId }),
+      })
+    );
+  },
+
+  completeCallerSignaling: async (callId: string, sdpAnswer: string) => {
+    const token = getToken();
+    return handleFetchRequest<void>(
+      fetch(`${API_URL}call/${callId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ sdpAnswer }),
+      })
+    );
+  },
+
+  joinCall: async (callId: string) => {
+    const token = getToken();
+    return handleFetchRequest<{
+      callId: string;
+      sdpOffer: string;
+      callerId: string;
+      callerName: string;
+    }>(
+      fetch(`${API_URL}call/${callId}/join`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+    );
+  },
+
+  completeCalleeSignaling: async (callId: string, sdpAnswer: string) => {
+    const token = getToken();
+    return handleFetchRequest<void>(
+      fetch(`${API_URL}call/${callId}/answer`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ sdpAnswer }),
+      })
+    );
+  },
+
+  endCall: async (callId: string) => {
+    const token = getToken();
+    return handleFetchRequest<{
+      callId: string;
+      message: string;
+    }>(
+      fetch(`${API_URL}call/${callId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+    );
+  },
+
+  getActiveCalls: async () => {
+    const token = getToken();
+    return handleFetchRequest<{
+      calls: Array<{
+        callId: string;
+        callerId: string;
+        callerName: string;
+        calleeId: string;
+        calleeName: string;
+        state: string;
+        direction: "incoming" | "outgoing";
+        createdAt: string;
+      }>;
+    }>(
+      fetch(`${API_URL}call/active`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
         },
       })
     );
