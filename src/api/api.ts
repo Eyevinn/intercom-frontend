@@ -294,7 +294,7 @@ export const API = {
     );
   },
 
-  // Client Registry API (SR POC - M1)
+  // Client Registry API (Intercom 2)
   registerClient: async (data: {
     name: string;
     role: string;

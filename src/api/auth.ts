@@ -1,11 +1,11 @@
 /**
- * Auth/Token Management for SR Open Intercom
+ * Auth/Token Management for Intercom 2
  *
  * - JWT token stored in memory (not localStorage — tokens are sensitive)
  * - clientId stored in localStorage (persistent ID per decision D2)
  */
 
-const CLIENT_ID_STORAGE_KEY = "sr-intercom-client-id";
+const CLIENT_ID_STORAGE_KEY = "intercom2-client-id";
 
 let currentToken: string | null = null;
 
