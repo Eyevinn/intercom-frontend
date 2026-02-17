@@ -176,14 +176,39 @@ const globalReducer: Reducer<TGlobalState, TGlobalStateAction> = (
       };
     }
     case "CALL_STARTED": {
-      const { callId } = action.payload;
-      if (!state.p2pCalls[callId]) return state;
+      const { callId, callerId, callerName, calleeId, calleeName } =
+        action.payload;
+      const existing = state.p2pCalls[callId];
+      if (!existing) {
+        const direction =
+          state.currentClient?.clientId === callerId
+            ? ("outgoing" as const)
+            : ("incoming" as const);
+        return {
+          ...state,
+          p2pCalls: {
+            ...state.p2pCalls,
+            [callId]: {
+            callId,
+            callerId,
+            callerName,
+            calleeId,
+            calleeName,
+            direction,
+            state: "active" as const,
+            peerConnection: null,
+            audioElement: null,
+            isTalking: false,
+          },
+        },
+      };
+      }
       return {
         ...state,
         p2pCalls: {
           ...state.p2pCalls,
           [callId]: {
-            ...state.p2pCalls[callId],
+            ...existing,
             state: "active" as const,
           },
         },

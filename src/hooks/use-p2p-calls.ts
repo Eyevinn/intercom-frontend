@@ -25,6 +25,28 @@ export function useP2PCalls() {
   const [{ currentClient, websocket, p2pCalls }, dispatch] = useGlobalState();
   const peerConnectionsRef = useRef<Map<string, RTCPeerConnection>>(new Map());
 
+  const waitForIceGatheringComplete = useCallback((pc: RTCPeerConnection) => {
+    if (pc.iceGatheringState === "complete") {
+      return Promise.resolve();
+    }
+    return new Promise<void>((resolve) => {
+      const timeout = window.setTimeout(() => {
+        pc.removeEventListener("icegatheringstatechange", onStateChange);
+        resolve();
+      }, 2500);
+
+      const onStateChange = () => {
+        if (pc.iceGatheringState === "complete") {
+          window.clearTimeout(timeout);
+          pc.removeEventListener("icegatheringstatechange", onStateChange);
+          resolve();
+        }
+      };
+
+      pc.addEventListener("icegatheringstatechange", onStateChange);
+    });
+  }, []);
+
   /**
    * Create an RTCPeerConnection and handle incoming audio.
    */
@@ -38,6 +60,8 @@ export function useP2PCalls() {
       const audioElement = new Audio();
       audioElement.srcObject = event.streams[0] || new MediaStream([event.track]);
       audioElement.autoplay = true;
+      audioElement.playsInline = true;
+      audioElement.muted = false;
       audioElement.play().catch(() => {
         // Autoplay might be blocked by browser policy
         console.warn("Audio autoplay blocked for call", callId);
@@ -58,6 +82,15 @@ export function useP2PCalls() {
       }
     };
 
+    pc.onconnectionstatechange = () => {
+      if (pc.connectionState === "connected") {
+        dispatch({
+          type: "UPDATE_P2P_CALL",
+          payload: { callId, updates: { state: "active" } },
+        });
+      }
+    };
+
     peerConnectionsRef.current.set(callId, pc);
     return pc;
   }, [dispatch]);
@@ -74,6 +107,21 @@ export function useP2PCalls() {
 
       // 2. Create RTCPeerConnection
       const pc = createPeerConnection(callId);
+
+      // Add to state early so call_started events don't get dropped
+      const p2pCall: TP2PCall = {
+        callId,
+        callerId: currentClient.clientId,
+        callerName: currentClient.name,
+        calleeId,
+        calleeName,
+        direction: "outgoing",
+        state: "setting_up",
+        peerConnection: pc,
+        audioElement: null,
+        isTalking: false,
+      };
+      dispatch({ type: "SET_P2P_CALL", payload: p2pCall });
 
       // 3. Add local audio track (pre-opened, muted for PTT)
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -92,22 +140,8 @@ export function useP2PCalls() {
       await pc.setLocalDescription(answer);
 
       // 6. PATCH /call/:id → send SDP answer
+      await waitForIceGatheringComplete(pc);
       await API.completeCallerSignaling(callId, answer.sdp!);
-
-      // 7. Add to state
-      const p2pCall: TP2PCall = {
-        callId,
-        callerId: currentClient.clientId,
-        callerName: currentClient.name,
-        calleeId,
-        calleeName,
-        direction: "outgoing",
-        state: "setting_up",
-        peerConnection: pc,
-        audioElement: null,
-      };
-
-      dispatch({ type: "SET_P2P_CALL", payload: p2pCall });
     } catch (err) {
       console.error("Failed to initiate call:", err);
       dispatch({
@@ -115,7 +149,7 @@ export function useP2PCalls() {
         payload: { error: new Error(`Failed to initiate call: ${err}`) },
       });
     }
-  }, [currentClient, createPeerConnection, dispatch]);
+  }, [currentClient, createPeerConnection, dispatch, waitForIceGatheringComplete]);
 
   /**
    * Handle an incoming call (CALLEE flow, called automatically).
@@ -141,6 +175,7 @@ export function useP2PCalls() {
       await pc.setLocalDescription(answer);
 
       // 5. PATCH /call/:id/answer → send SDP answer
+      await waitForIceGatheringComplete(pc);
       await API.completeCalleeSignaling(callId, answer.sdp!);
 
       // 6. Update state with peer connection
@@ -191,25 +226,54 @@ export function useP2PCalls() {
     const pc = peerConnectionsRef.current.get(callId);
     if (!pc) return;
 
-    // Toggle the audio track
-    const senders = pc.getSenders();
-    for (const sender of senders) {
-      if (sender.track && sender.track.kind === "audio") {
-        sender.track.enabled = talking;
+    dispatch({
+      type: "UPDATE_P2P_CALL",
+      payload: { callId, updates: { isTalking: talking } },
+    });
+
+    const ensureLocalAudioSender = async () => {
+      const senders = pc.getSenders();
+      const hasAudioSender = senders.some(
+        (sender) => sender.track && sender.track.kind === "audio"
+      );
+      if (hasAudioSender) return;
+
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const audioTrack = stream.getAudioTracks()[0];
+        audioTrack.enabled = false;
+        pc.addTrack(audioTrack, stream);
+      } catch (err) {
+        console.error("Failed to get local audio for PTT:", err);
       }
+    };
+
+    const toggleTracks = () => {
+      const senders = pc.getSenders();
+      for (const sender of senders) {
+        if (sender.track && sender.track.kind === "audio") {
+          sender.track.enabled = talking;
+        }
+      }
+    };
+
+    if (talking) {
+      ensureLocalAudioSender().finally(toggleTracks);
+    } else {
+      toggleTracks();
     }
 
     // Send talk_start/talk_stop via WebSocket
     if (websocket && websocket.readyState === WebSocket.OPEN) {
       if (talking) {
         // Collect all active outgoing call IDs
-        const outgoingCallIds = Object.keys(p2pCalls).filter(
-          (id) => p2pCalls[id].direction === "outgoing" && p2pCalls[id].state === "active"
+        const activeCallIds = Object.keys(p2pCalls).filter(
+          (id) => p2pCalls[id].state === "active"
         );
 
         websocket.send(JSON.stringify({
           type: "talk_start",
-          callIds: outgoingCallIds,
+          callIds: activeCallIds,
         }));
       } else {
         websocket.send(JSON.stringify({

@@ -55,6 +55,9 @@ export const ResponsiveFormContainer = styled(FormContainer)`
 
     ${mediaQueries.isSmallScreen} {
       flex: 0 0 calc(100%);
+      min-width: 0;
+      width: 100%;
+      padding: 1.5rem;
     }
   }
 `;

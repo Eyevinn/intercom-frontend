@@ -61,6 +61,9 @@ export const CollapsibleItemWrapper = styled.div`
 
   ${mediaQueries.isSmallScreen} {
     flex: 0 0 calc(100%);
+    min-width: 0;
+    width: 100%;
+    margin-right: 0;
   }
 `;
 

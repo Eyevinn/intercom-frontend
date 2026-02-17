@@ -22,6 +22,7 @@ const Button = styled(PrimaryButton)`
 
   &.mobile {
     user-select: none;
+    touch-action: none;
   }
 
   @keyframes pulse {
@@ -46,11 +47,32 @@ export const LongPressToTalkButton = ({
       onPointerDown={(e) => {
         e.preventDefault();
         e.stopPropagation();
+        if (e.currentTarget.setPointerCapture) {
+          e.currentTarget.setPointerCapture(e.pointerId);
+        }
         onStartTalking?.();
+      }}
+      onPointerCancel={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onStopTalking?.();
+      }}
+      onPointerLeave={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onStopTalking?.();
+      }}
+      onLostPointerCapture={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onStopTalking?.();
       }}
       onPointerUp={(e) => {
         e.preventDefault();
         e.stopPropagation();
+        if (e.currentTarget.hasPointerCapture?.(e.pointerId)) {
+          e.currentTarget.releasePointerCapture(e.pointerId);
+        }
         onStopTalking?.();
       }}
     >

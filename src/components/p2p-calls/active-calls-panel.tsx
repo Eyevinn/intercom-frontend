@@ -124,7 +124,8 @@ export const ActiveCallsPanel: FC = () => {
       {activeCalls.map((call) => {
         const otherName =
           call.direction === "outgoing" ? call.calleeName : call.callerName;
-        const isOutgoing = call.direction === "outgoing";
+          const isOutgoing = call.direction === "outgoing";
+          const isTalking = Boolean(call.isTalking);
 
         return (
           <CallCard key={call.callId} direction={call.direction}>
@@ -142,9 +143,9 @@ export const ActiveCallsPanel: FC = () => {
               </div>
             </CallInfo>
             <ButtonGroup>
-              {isOutgoing && call.state === "active" && (
+              {call.state === "active" && (
                 <PTTButton
-                  active={false}
+                  active={isTalking}
                   onMouseDown={() => togglePTT(call.callId, true)}
                   onMouseUp={() => togglePTT(call.callId, false)}
                   onMouseLeave={() => togglePTT(call.callId, false)}

@@ -2,15 +2,17 @@ import { useCallback, useState } from "react";
 
 type UsePushToTalkOptions = {
   muteInput: (mute: boolean) => void;
+  canTalk?: boolean;
 };
 
-export function usePushToTalk({ muteInput }: UsePushToTalkOptions) {
+export function usePushToTalk({ muteInput, canTalk = true }: UsePushToTalkOptions) {
   const [isTalking, setIsTalking] = useState<boolean>(false);
 
   const startTalking = useCallback(() => {
+    if (!canTalk) return;
     muteInput(false);
     setIsTalking(true);
-  }, [muteInput]);
+  }, [canTalk, muteInput]);
 
   const stopTalking = useCallback(() => {
     muteInput(true);

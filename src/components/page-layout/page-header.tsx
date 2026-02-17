@@ -18,6 +18,14 @@ const HeaderContainer = styled(DisplayContainer)`
     height: 2.5rem;
     width: 2.5rem;
   }
+
+  @media (max-width: 768px) {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: #242424;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.25);
+  }
 `;
 
 const HeaderLeftSide = styled.div`

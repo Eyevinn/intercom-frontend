@@ -176,6 +176,9 @@ export const CallWrapper = styled.div<{ isSomeoneSpeaking: boolean }>`
 
   ${mediaQueries.isSmallScreen} {
     flex: 0 0 calc(100%);
+    min-width: 0;
+    max-width: 100%;
+    width: 100%;
   }
 `;
 

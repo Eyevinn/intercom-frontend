@@ -230,7 +230,10 @@ export const ProductionLine = ({
     isTalking,
     handleLongPressStart,
     handleLongPressEnd,
-  } = usePushToTalk({ muteInput });
+  } = usePushToTalk({
+    muteInput,
+    canTalk: Boolean(inputAudioStream && inputAudioStream !== "no-device"),
+  });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = parseFloat(e.target.value);

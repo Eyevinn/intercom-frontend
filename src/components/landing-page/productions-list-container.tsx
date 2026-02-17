@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import styled from "@emotion/styled";
 import { useNavigate } from "react-router-dom";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
@@ -36,6 +36,7 @@ const HeaderButtonText = styled.p`
 export const ProductionsListContainer = () => {
   const [{ reloadProductionList }] = useGlobalState();
   const navigate = useNavigate();
+  const [showMobileList, setShowMobileList] = useState<boolean>(false);
 
   const { productions, doInitialLoad, error, setIntervalLoad } =
     useFetchProductionList({
@@ -85,7 +86,24 @@ export const ProductionsListContainer = () => {
         )}
       </PageHeader>
       {!!productions?.productions.length && (
-        <ProductionsList productions={productions.productions} error={error} />
+        <>
+          {isMobile && (
+            <HeaderButton
+              onClick={() => setShowMobileList((prev) => !prev)}
+              style={{ marginLeft: "1rem", marginTop: "0.5rem" }}
+            >
+              <HeaderButtonText>
+                {showMobileList ? "Dölj kanaler" : "Visa kanaler"}
+              </HeaderButtonText>
+            </HeaderButton>
+          )}
+          {(!isMobile || showMobileList) && (
+            <ProductionsList
+              productions={productions.productions}
+              error={error}
+            />
+          )}
+        </>
       )}
     </>
   );

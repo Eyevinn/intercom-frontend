@@ -13,6 +13,7 @@ export type TP2PCall = {
   state: "setting_up" | "active" | "ended";
   peerConnection: RTCPeerConnection | null;
   audioElement: HTMLAudioElement | null;
+  isTalking?: boolean;
 };
 
 export type TCallIncoming = {

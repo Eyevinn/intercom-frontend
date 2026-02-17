@@ -35,6 +35,13 @@ const CallsContainer = styled.div`
   form {
     margin: 0;
   }
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 0 1rem 1rem 1rem;
+    gap: 1.5rem;
+  }
 `;
 
 export const CallsPage = () => {

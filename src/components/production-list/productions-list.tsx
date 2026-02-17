@@ -8,6 +8,10 @@ const ListWrapper = styled.div`
   flex-wrap: wrap;
   padding: 0 0 0 2rem;
   align-items: flex-start;
+
+  @media (max-width: 768px) {
+    padding: 0 1rem 1rem 1rem;
+  }
 `;
 
 type TProductionsList = {
