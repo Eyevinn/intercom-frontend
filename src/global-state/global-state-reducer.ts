@@ -189,19 +189,19 @@ const globalReducer: Reducer<TGlobalState, TGlobalStateAction> = (
           p2pCalls: {
             ...state.p2pCalls,
             [callId]: {
-            callId,
-            callerId,
-            callerName,
-            calleeId,
-            calleeName,
-            direction,
-            state: "active" as const,
-            peerConnection: null,
-            audioElement: null,
-            isTalking: false,
+              callId,
+              callerId,
+              callerName,
+              calleeId,
+              calleeName,
+              direction,
+              state: "active" as const,
+              peerConnection: null,
+              audioElement: null,
+              isTalking: false,
+            },
           },
-        },
-      };
+        };
       }
       return {
         ...state,
@@ -284,7 +284,7 @@ const globalReducer: Reducer<TGlobalState, TGlobalStateAction> = (
       };
     }
     case "SET_ACTIVE_TALKS": {
-      const talksRecord: Record<string, typeof action.payload[number]> = {};
+      const talksRecord: Record<string, (typeof action.payload)[number]> = {};
       for (const talk of action.payload) {
         talksRecord[talk.clientId] = talk;
       }

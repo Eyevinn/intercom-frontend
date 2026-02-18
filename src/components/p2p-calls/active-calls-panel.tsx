@@ -110,8 +110,9 @@ export const ActiveCallsPanel: FC = () => {
         !joiningCallsRef.current.has(call.callId)
       ) {
         joiningCallsRef.current.add(call.callId);
-        handleIncomingCall(call.callId, call.callerId, call.callerName)
-          .finally(() => joiningCallsRef.current.delete(call.callId));
+        handleIncomingCall(call.callId, call.callerId, call.callerName).finally(
+          () => joiningCallsRef.current.delete(call.callId)
+        );
       }
     }
   }, [activeCalls, handleIncomingCall]);
@@ -124,8 +125,8 @@ export const ActiveCallsPanel: FC = () => {
       {activeCalls.map((call) => {
         const otherName =
           call.direction === "outgoing" ? call.calleeName : call.callerName;
-          const isOutgoing = call.direction === "outgoing";
-          const isTalking = Boolean(call.isTalking);
+        const isOutgoing = call.direction === "outgoing";
+        const isTalking = Boolean(call.isTalking);
 
         return (
           <CallCard key={call.callId} direction={call.direction}>

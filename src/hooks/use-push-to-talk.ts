@@ -5,7 +5,10 @@ type UsePushToTalkOptions = {
   canTalk?: boolean;
 };
 
-export function usePushToTalk({ muteInput, canTalk = true }: UsePushToTalkOptions) {
+export function usePushToTalk({
+  muteInput,
+  canTalk = true,
+}: UsePushToTalkOptions) {
   const [isTalking, setIsTalking] = useState<boolean>(false);
 
   const startTalking = useCallback(() => {

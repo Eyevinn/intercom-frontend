@@ -47,7 +47,8 @@ const ConnectionStatus = styled.div<{ connected: boolean }>`
   align-items: center;
   gap: 0.5rem;
   font-size: 1.1rem;
-  color: ${({ connected }) => connected ? 'rgba(29, 185, 84, 0.8)' : 'rgba(249, 108, 108, 0.8)'};
+  color: ${({ connected }) =>
+    connected ? "rgba(29, 185, 84, 0.8)" : "rgba(249, 108, 108, 0.8)"};
   margin-bottom: 0.8rem;
 `;
 
@@ -55,7 +56,7 @@ const StatusDot = styled.span<{ connected: boolean }>`
   width: 0.6rem;
   height: 0.6rem;
   border-radius: 50%;
-  background: ${({ connected }) => connected ? '#1db954' : '#f96c6c'};
+  background: ${({ connected }) => (connected ? "#1db954" : "#f96c6c")};
 `;
 
 const ClientCard = styled.div<{ isCurrentUser: boolean }>`
@@ -89,8 +90,13 @@ const InCallDot = styled.span`
   margin-right: 0.5rem;
   animation: pulse 1.5s ease-in-out infinite;
   @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.4;
+    }
   }
 `;
 
@@ -170,7 +176,8 @@ const CallIndicator = styled.span`
 `;
 
 export const ClientList: FC = () => {
-  const [{ clients, currentClient, p2pCalls, activeTalks, websocket }] = useGlobalState();
+  const [{ clients, currentClient, p2pCalls, activeTalks, websocket }] =
+    useGlobalState();
   const { initiateCall, endCall } = useP2PCalls();
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -211,7 +218,9 @@ export const ClientList: FC = () => {
       )}
       {filteredClients.length === 0 ? (
         <EmptyState>
-          {searchQuery ? "No clients match your search" : "No other clients online"}
+          {searchQuery
+            ? "No clients match your search"
+            : "No other clients online"}
         </EmptyState>
       ) : (
         filteredClients.map((client) => {
@@ -231,9 +240,11 @@ export const ClientList: FC = () => {
           const clientTalk = activeTalks[client.clientId];
 
           // Check if the current user is being talked to by this client
-          const currentUserBeingTalkedTo = currentClient && activeTalks[client.clientId]?.targets.some(
-            (target) => target.clientId === currentClient.clientId
-          );
+          const currentUserBeingTalkedTo =
+            currentClient &&
+            activeTalks[client.clientId]?.targets.some(
+              (target) => target.clientId === currentClient.clientId
+            );
 
           return (
             <ClientCard key={client.clientId} isCurrentUser={isCurrentUser}>
@@ -248,13 +259,12 @@ export const ClientList: FC = () => {
                 </ClientMeta>
                 {clientTalk && (
                   <TalkingIndicator>
-                    🎙 Talking to {clientTalk.targets.map((t) => t.clientName).join(", ")}
+                    🎙 Talking to{" "}
+                    {clientTalk.targets.map((t) => t.clientName).join(", ")}
                   </TalkingIndicator>
                 )}
                 {currentUserBeingTalkedTo && (
-                  <TalkingIndicator>
-                    📢 Talking to you
-                  </TalkingIndicator>
+                  <TalkingIndicator>📢 Talking to you</TalkingIndicator>
                 )}
               </ClientInfo>
               {!isCurrentUser &&

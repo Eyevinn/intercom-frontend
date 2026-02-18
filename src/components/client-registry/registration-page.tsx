@@ -135,7 +135,9 @@ export const RegistrationPage: FC<RegistrationPageProps> = ({
           <FormInput
             type="text"
             value={form.name}
-            onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
+            onChange={(e) =>
+              setForm((prev) => ({ ...prev, name: e.target.value }))
+            }
             placeholder="Your name"
             required
             autoFocus
@@ -146,7 +148,9 @@ export const RegistrationPage: FC<RegistrationPageProps> = ({
           <DecorativeLabel>Role</DecorativeLabel>
           <FormSelect
             value={form.role}
-            onChange={(e) => setForm((prev) => ({ ...prev, role: e.target.value }))}
+            onChange={(e) =>
+              setForm((prev) => ({ ...prev, role: e.target.value }))
+            }
             required
           >
             {ROLE_OPTIONS.map((opt) => (

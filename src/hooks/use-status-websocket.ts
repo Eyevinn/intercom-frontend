@@ -80,16 +80,21 @@ type StatusWebSocketMessage =
       talks: Array<{
         clientId: string;
         clientName: string;
-        targets: Array<{ clientId: string; clientName: string; callId: string }>;
+        targets: Array<{
+          clientId: string;
+          clientName: string;
+          callId: string;
+        }>;
         startedAt: string;
       }>;
       timestamp: string;
     };
 
 function getWebSocketUrl(): string {
-  const backendUrl = (
-    import.meta.env.VITE_BACKEND_URL as string
-  ).replace(/\/+$/, "");
+  const backendUrl = (import.meta.env.VITE_BACKEND_URL as string).replace(
+    /\/+$/,
+    ""
+  );
 
   let wsBase: string;
   if (backendUrl.startsWith("https://")) {
@@ -236,10 +241,7 @@ export function useStatusWebSocket(dispatch: Dispatch<TGlobalStateAction>) {
         // Exponential backoff: 1s, 2s, 4s, 8s, 16s, 30s max
         const delay = reconnectDelayRef.current;
         reconnectTimeoutRef.current = setTimeout(() => {
-          reconnectDelayRef.current = Math.min(
-            delay * 2,
-            30000
-          );
+          reconnectDelayRef.current = Math.min(delay * 2, 30000);
           connect();
         }, delay);
       };
