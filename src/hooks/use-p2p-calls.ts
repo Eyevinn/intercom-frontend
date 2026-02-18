@@ -62,7 +62,10 @@ export function useP2PCalls() {
         audioElement.srcObject =
           event.streams[0] || new MediaStream([event.track]);
         audioElement.autoplay = true;
-        audioElement.playsInline = true;
+        // We can't set playsInline on Audio elements in all browsers; ignore if not present
+        if ("playsInline" in audioElement) {
+          (audioElement as any).playsInline = true;
+        }
         audioElement.muted = false;
         audioElement.play().catch(() => {
           // Autoplay might be blocked by browser policy
