@@ -2,7 +2,7 @@ import { Dispatch, Reducer, useReducer } from "react";
 import { TGlobalStateAction } from "./global-state-actions";
 import { TGlobalState } from "./types";
 
-const initialGlobalState: TGlobalState = {
+export const initialGlobalState: TGlobalState = {
   production: null,
   error: { callErrors: null, globalError: null },
   reloadProductionList: false,
@@ -17,7 +17,7 @@ const initialGlobalState: TGlobalState = {
   websocket: null,
 };
 
-const globalReducer: Reducer<TGlobalState, TGlobalStateAction> = (
+export const globalReducer: Reducer<TGlobalState, TGlobalStateAction> = (
   state,
   action
 ): TGlobalState => {
@@ -120,6 +120,17 @@ const globalReducer: Reducer<TGlobalState, TGlobalStateAction> = (
       return {
         ...state,
         websocket: action.payload,
+      };
+    case "HEARTBEAT_ERROR":
+      return {
+        ...state,
+        error: {
+          ...state.error,
+          callErrors: {
+            ...state.error.callErrors,
+            [action.payload.sessionId]: action.payload.error,
+          },
+        },
       };
     default:
       return state;
