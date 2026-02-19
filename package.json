@@ -9,6 +9,8 @@
     "lint": "eslint ./src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "prepare": "husky install",
     "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "pretty": "prettier --write --ignore-unknown .",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "postversion": "git push && git push --tags"
@@ -31,6 +33,10 @@
   "devDependencies": {
     "@commitlint/cli": "^20.2.0",
     "@commitlint/config-conventional": "^20.0.0",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
     "@types/react": "^19.2.8",
     "@types/react-dom": "^19.2.3",
     "@typescript-eslint/eslint-plugin": "^7.18.0",
@@ -46,12 +52,14 @@
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^4.6.2",
     "eslint-plugin-react-refresh": "^0.4.7",
+    "happy-dom": "^20.6.3",
     "husky": "^9.0.11",
     "lint-staged": "^16.2.6",
     "prettier": "^3.7.0",
     "typescript": "5.4.5",
     "vite": "^7.3.1",
-    "vite-plugin-svgr": "^4.5.0"
+    "vite-plugin-svgr": "^4.5.0",
+    "vitest": "^4.0.18"
   },
   "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }
