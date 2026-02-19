@@ -1,8 +1,5 @@
 import { describe, it, expect } from "vitest";
-import {
-  globalReducer,
-  initialGlobalState,
-} from "./global-state-reducer.ts";
+import { globalReducer, initialGlobalState } from "./global-state-reducer.ts";
 import { TGlobalStateAction } from "./global-state-actions.ts";
 import { CallState, TGlobalState } from "./types.ts";
 
@@ -38,7 +35,7 @@ function createMockCallState(overrides: Partial<CallState> = {}): CallState {
 function stateWithCall(
   id: string,
   callOverrides: Partial<CallState> = {},
-  stateOverrides: Partial<TGlobalState> = {},
+  stateOverrides: Partial<TGlobalState> = {}
 ): TGlobalState {
   return {
     ...initialGlobalState,
@@ -243,8 +240,8 @@ describe("globalReducer", () => {
       });
 
       expect(Object.keys(state.calls)).toHaveLength(2);
-      expect(state.calls["c1"].sessionId).toBe("s1");
-      expect(state.calls["c2"].sessionId).toBe("s2");
+      expect(state.calls.c1.sessionId).toBe("s1");
+      expect(state.calls.c2.sessionId).toBe("s2");
     });
   });
 
@@ -475,10 +472,10 @@ describe("globalReducer", () => {
         },
       ];
 
-      for (const action of actions) {
+      actions.forEach((action) => {
         const next = globalReducer(initialGlobalState, action);
         expect(next).not.toBe(initialGlobalState);
-      }
+      });
     });
   });
 });

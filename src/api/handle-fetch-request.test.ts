@@ -8,7 +8,7 @@ import { handleFetchRequest } from "./handle-fetch-request.ts";
 function mockResponse(
   status: number,
   body: unknown,
-  contentType = "application/json",
+  contentType = "application/json"
 ): Response {
   const headers = new Headers({ "content-type": contentType });
   return {
@@ -32,7 +32,7 @@ describe("handleFetchRequest", () => {
       const response = mockResponse(200, data);
 
       const result = await handleFetchRequest<typeof data>(
-        Promise.resolve(response),
+        Promise.resolve(response)
       );
 
       expect(result).toEqual(data);
@@ -42,7 +42,7 @@ describe("handleFetchRequest", () => {
       const response = mockResponse(200, "ok", "text/plain");
 
       const result = await handleFetchRequest<string>(
-        Promise.resolve(response),
+        Promise.resolve(response)
       );
 
       expect(result).toBe("ok");
@@ -53,7 +53,7 @@ describe("handleFetchRequest", () => {
       const response = mockResponse(201, data);
 
       const result = await handleFetchRequest<typeof data>(
-        Promise.resolve(response),
+        Promise.resolve(response)
       );
 
       expect(result).toEqual(data);
@@ -64,7 +64,7 @@ describe("handleFetchRequest", () => {
       const response = mockResponse(399, data);
 
       const result = await handleFetchRequest<typeof data>(
-        Promise.resolve(response),
+        Promise.resolve(response)
       );
 
       expect(result).toEqual(data);
@@ -76,7 +76,7 @@ describe("handleFetchRequest", () => {
       const response = mockResponse(500, "Internal Server Error", "text/plain");
 
       await expect(
-        handleFetchRequest(Promise.resolve(response)),
+        handleFetchRequest(Promise.resolve(response))
       ).rejects.toThrow("Internal Server Error");
     });
 
@@ -84,7 +84,7 @@ describe("handleFetchRequest", () => {
       const response = mockResponse(400, { message: "Bad request data" });
 
       await expect(
-        handleFetchRequest(Promise.resolve(response)),
+        handleFetchRequest(Promise.resolve(response))
       ).rejects.toThrow("Bad request data");
     });
 
@@ -92,7 +92,7 @@ describe("handleFetchRequest", () => {
       const response = mockResponse(404, null, "");
 
       await expect(
-        handleFetchRequest(Promise.resolve(response)),
+        handleFetchRequest(Promise.resolve(response))
       ).rejects.toThrow("Response Code: 404");
     });
 
@@ -111,7 +111,7 @@ describe("handleFetchRequest", () => {
       const response = mockResponse(400, { message: "Bad request" });
 
       await expect(
-        handleFetchRequest(Promise.resolve(response)),
+        handleFetchRequest(Promise.resolve(response))
       ).rejects.toThrow();
     });
 
@@ -119,7 +119,7 @@ describe("handleFetchRequest", () => {
       const response = mockResponse(100, null, "");
 
       await expect(
-        handleFetchRequest(Promise.resolve(response)),
+        handleFetchRequest(Promise.resolve(response))
       ).rejects.toThrow();
     });
   });
@@ -129,7 +129,7 @@ describe("handleFetchRequest", () => {
       const networkError = new Error("Network error");
 
       await expect(
-        handleFetchRequest(Promise.reject(networkError)),
+        handleFetchRequest(Promise.reject(networkError))
       ).rejects.toThrow("Network error");
     });
   });

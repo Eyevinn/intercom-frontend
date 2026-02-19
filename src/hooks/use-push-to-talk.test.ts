@@ -140,7 +140,7 @@ describe("usePushToTalk", () => {
   describe("cleanup", () => {
     it("should clear timeout on unmount", () => {
       const { result, unmount } = renderHook(() =>
-        usePushToTalk({ muteInput }),
+        usePushToTalk({ muteInput })
       );
 
       act(() => {
