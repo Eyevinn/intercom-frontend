@@ -75,21 +75,26 @@ export const CreateProductionPage = () => {
     lines,
   });
 
-  const validateLineNameUniqueness = (defaultLineValue: string) => {
-    const normalizedDefault = normalizeLineName(defaultLineValue);
-
+  const validateLineNameUniqueness = (index: number) => {
     return (value: string) => {
       const normalized = normalizeLineName(value);
+      if (!normalized) return true;
 
-      return (
-        !normalizedDefault ||
-        normalized !== normalizedDefault ||
-        "Line name must be unique within this production"
+      const normalizedDefault = normalizeLineName(defaultLine);
+      if (normalizedDefault && normalized === normalizedDefault) {
+        return "Line name must be unique within this production";
+      }
+
+      const hasDuplicateInLines = lines?.some(
+        (line, i) => i !== index && normalizeLineName(line.name) === normalized
       );
+      if (hasDuplicateInLines) {
+        return "Line name must be unique within this production";
+      }
+
+      return true;
     };
   };
-
-  const lineNameValidator = validateLineNameUniqueness(defaultLine);
 
   useEffect(() => {
     const fieldsToValidate = fields
@@ -198,7 +203,7 @@ export const CreateProductionPage = () => {
                   // eslint-disable-next-line
                   {...register(`lines.${index}.name`, {
                     ...lineNameRequiredValidation,
-                    validate: lineNameValidator,
+                    validate: validateLineNameUniqueness(index),
                   })}
                   className={
                     index === fields.length - 1 ? "additional-line" : ""
