@@ -77,7 +77,7 @@ export const useEstablishSession = ({
       });
 
     return () => {
-      const current = reqRef.current;
+      const { current } = reqRef;
       const timeoutId = window.setTimeout(() => {
         if (reqRef.current === current) {
           if (current) current.cancelled = true;

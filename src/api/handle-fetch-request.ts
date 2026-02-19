@@ -18,7 +18,7 @@ export const handleFetchRequest = async <T>(
   const isSuccess = isSuccessful(response);
 
   if (!isSuccess) {
-    const status = response.status;
+    const { status } = response;
     let err: Error;
     if (text) {
       err = new Error(text);

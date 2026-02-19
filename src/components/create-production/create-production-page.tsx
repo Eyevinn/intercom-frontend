@@ -138,7 +138,7 @@ export const CreateProductionPage = () => {
   useEffect(() => {
     if (!success || !data?.name) {
       setShowConfirmation(false);
-      return;
+      return undefined;
     }
 
     setShowConfirmation(true);
