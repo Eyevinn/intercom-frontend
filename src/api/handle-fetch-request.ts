@@ -18,17 +18,17 @@ export const handleFetchRequest = async <T>(
   const isSuccess = isSuccessful(response);
 
   if (!isSuccess) {
+    const status = response.status;
+    let err: Error;
     if (text) {
-      throw new Error(text);
+      err = new Error(text);
+    } else if (json && "message" in json) {
+      err = new Error(json.message);
+    } else {
+      err = new Error(`Response Code: ${status} - ${response.statusText}.`);
     }
-
-    if (json && "message" in json) {
-      throw new Error(json.message);
-    }
-
-    throw new Error(
-      `Response Code: ${response.status} - ${response.statusText}.`
-    );
+    (err as Error & { status?: number }).status = status;
+    throw err;
   }
 
   return text || json;
