@@ -17,7 +17,7 @@ export const ModalOverlay = styled.div`
 export const ModalContent = styled.div`
   background: #383838;
   border-radius: 0.5rem;
-  padding: 2rem;
+  padding: 1.5rem;
   width: 80%;
   max-width: 40rem;
   box-shadow: 0 0.4rem 0.8rem rgba(0, 0, 0, 0.2);
@@ -84,6 +84,50 @@ export const HotkeyRow = styled.div`
 export const HotkeyLabel = styled.span`
   white-space: nowrap;
   font-size: 1.4rem;
+`;
+
+export const HotkeyLabelWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  position: relative;
+`;
+
+export const HotkeyWarningWrapper = styled.div`
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  cursor: help;
+
+  svg {
+    width: 1.6rem;
+    height: 1.6rem;
+    fill: #ebca6a;
+  }
+
+  &:hover .hotkey-tooltip {
+    visibility: visible;
+    opacity: 1;
+  }
+`;
+
+export const HotkeyTooltip = styled.span`
+  visibility: hidden;
+  opacity: 0;
+  position: absolute;
+  bottom: 130%;
+  left: 0;
+  background: #32383b;
+  color: white;
+  padding: 0.4rem 0.8rem;
+  border-radius: 0.4rem;
+  font-size: 1.2rem;
+  white-space: normal;
+  width: 20rem;
+  border: 0.1rem solid #6d6d6d;
+  z-index: 20;
+  transition: opacity 0.15s ease;
+  pointer-events: none;
 `;
 
 export const HotkeyInput = styled(FormInput)`

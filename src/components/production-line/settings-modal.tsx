@@ -1,12 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { ErrorMessage } from "@hookform/error-message";
-import {
-  PrimaryButton,
-  FormContainer,
-  StyledWarningMessage,
-} from "../form-elements/form-elements";
-import { RemoveIcon } from "../../assets/icons/icon";
+import { PrimaryButton, FormContainer } from "../form-elements/form-elements";
+import { RemoveIcon, WarningIcon } from "../../assets/icons/icon";
 import { useUpdateGlobalHotkey } from "./use-update-global-hotkey";
 import { useCheckForDuplicateHotkey } from "./use-check-for-duplicate-hotkey";
 import { Hotkeys } from "./types";
@@ -20,6 +15,9 @@ import {
   ButtonDiv,
   HotkeyRow,
   HotkeyLabel,
+  HotkeyLabelWrapper,
+  HotkeyWarningWrapper,
+  HotkeyTooltip,
   HotkeyInput,
 } from "./settings-modal-components";
 
@@ -184,10 +182,23 @@ export const SettingsModal = ({
     label: string,
     formError: boolean,
     formWarning: string
-  ) => (
-    <React.Fragment key={field}>
-      <HotkeyRow>
-        <HotkeyLabel>{label}</HotkeyLabel>
+  ) => {
+    const validationError = errors[field]?.message as string | undefined;
+    const activeWarning =
+      validationError || (formError && formWarning ? formWarning : "");
+    return (
+      <HotkeyRow key={field}>
+        <HotkeyLabelWrapper>
+          <HotkeyLabel>{label}</HotkeyLabel>
+          {activeWarning && (
+            <HotkeyWarningWrapper>
+              <WarningIcon />
+              <HotkeyTooltip className="hotkey-tooltip">
+                {activeWarning}
+              </HotkeyTooltip>
+            </HotkeyWarningWrapper>
+          )}
+        </HotkeyLabelWrapper>
         <HotkeyInput
           // eslint-disable-next-line
           {...register(field, {
@@ -205,20 +216,8 @@ export const SettingsModal = ({
           placeholder="Key"
         />
       </HotkeyRow>
-      <ErrorMessage
-        errors={errors}
-        name={field}
-        as={<StyledWarningMessage className="error-message" />}
-      />
-      {formError && formWarning && (
-        <ErrorMessage
-          errors={{ [field]: { message: formWarning } }}
-          name={field}
-          as={StyledWarningMessage}
-        />
-      )}
-    </React.Fragment>
-  );
+    );
+  };
 
   return (
     <ModalOverlay onClick={onClose}>

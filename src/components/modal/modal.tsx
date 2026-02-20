@@ -16,7 +16,7 @@ const ModalWrapper = styled.div`
 
 const ModalContent = styled.div`
   background-color: #3d3d3d;
-  padding: 2rem;
+  padding: 1.5rem;
   border-radius: 0.8rem;
   border: solid 0.1rem #868686;
   box-shadow: 0 0.2rem 2rem rgba(123, 123, 123, 0.1);
@@ -63,15 +63,17 @@ const CloseButton = styled.button`
 interface ModalProps {
   onClose: () => void;
   title?: string;
+  titleExtra?: React.ReactNode;
   children: React.ReactNode;
 }
 
-export const Modal = ({ onClose, title, children }: ModalProps) => {
+export const Modal = ({ onClose, title, titleExtra, children }: ModalProps) => {
   return (
     <ModalWrapper>
       <ModalContent>
         <ModalHeader>
           {title && <ModalTitle>{title}</ModalTitle>}
+          {titleExtra}
           <CloseButton onClick={onClose}>
             <RemoveIcon />
           </CloseButton>

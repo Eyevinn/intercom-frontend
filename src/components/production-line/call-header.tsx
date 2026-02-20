@@ -8,7 +8,6 @@ import {
   WhipIcon,
 } from "../../assets/icons/icon";
 import {
-  ProductionName,
   ParticipantCount,
   ParticipantCountWrapper,
   ProductionNameWrapper,
@@ -19,11 +18,46 @@ import { TLine } from "./types";
 import { TBasicProductionResponse } from "../../api/api";
 import { KebabMenu } from "./kebab-menu";
 
+const CallHeaderTexts = styled(HeaderTexts)`
+  justify-content: flex-start;
+  gap: 0.5rem;
+  overflow: visible;
+`;
+
+const CallProductionNameWrapper = styled(ProductionNameWrapper)`
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+`;
+
+const CallNameRow = styled.div`
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  overflow: hidden;
+  font-size: 1.4rem;
+  font-weight: bold;
+`;
+
+const CallProductionNameText = styled.span`
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex-shrink: 1;
+  min-width: 0;
+`;
+
+const CallLineNameText = styled.span`
+  white-space: nowrap;
+  flex-shrink: 0;
+`;
+
 const HeaderActionsRow = styled.div`
   display: flex;
   align-items: center;
   gap: 0.5rem;
   flex-shrink: 0;
+  margin-left: auto;
 `;
 
 const ChevronButton = styled.div`
@@ -61,14 +95,6 @@ export const CallHeaderComponent = ({
   showHotkeys?: boolean;
   onOpenHotkeys?: () => void;
 }) => {
-  const truncatedProductionName =
-    production && production.name.length > 20
-      ? `${production.name.slice(0, 20)}...`
-      : production?.name;
-
-  const truncatedLineName =
-    line && line.name.length > 40 ? `${line.name.slice(0, 40)}...` : line?.name;
-
   const totalUsers = useMemo(() => {
     return line?.participants.filter((p) => !p.isWhip).length || 0;
   }, [line]);
@@ -79,7 +105,7 @@ export const CallHeaderComponent = ({
 
   return (
     <CallHeader open={open} onClick={setOpen}>
-      <HeaderTexts
+      <CallHeaderTexts
         open={open}
         isProgramOutputLine={line?.programOutputLine || false}
         className={(line?.participants.length || 0) > 0 ? "active" : ""}
@@ -89,30 +115,18 @@ export const CallHeaderComponent = ({
             <TVIcon />
           </AudioFeedIcon>
         )}
-        <ProductionNameWrapper>
-          <ProductionName title={`${production?.name} / ${line?.name}`}>
-            <span className="production-name-container">
-              {`${truncatedProductionName}/ ${truncatedLineName}`}
-            </span>
-          </ProductionName>
-        </ProductionNameWrapper>
+        <CallProductionNameWrapper>
+          <CallNameRow title={`${production?.name} / ${line?.name}`}>
+            <CallProductionNameText>{production?.name}</CallProductionNameText>
+            <CallLineNameText>{`\u00A0/ ${line?.name}`}</CallLineNameText>
+          </CallNameRow>
+        </CallProductionNameWrapper>
 
         <HeaderActionsRow>
-          {totalWhipSessions > 0 && (
-            <ParticipantCountWrapper
-              className={totalWhipSessions > 0 ? "whip" : ""}
-            >
-              <WhipIcon />
-              <ParticipantCount>{totalWhipSessions}</ParticipantCount>
-            </ParticipantCountWrapper>
-          )}
-          <ParticipantCountWrapper className={totalUsers > 0 ? "active" : ""}>
-            <UsersIcon />
-            <ParticipantCount>{totalUsers}</ParticipantCount>
-          </ParticipantCountWrapper>
           {production && line && (
             <div
               onClick={(e) => e.stopPropagation()}
+              onMouseDown={(e) => e.stopPropagation()}
               onKeyDown={(e) => e.stopPropagation()}
               role="presentation"
             >
@@ -126,11 +140,23 @@ export const CallHeaderComponent = ({
               />
             </div>
           )}
-          <ChevronButton>
-            {open ? <ChevronUpIcon /> : <ChevronDownIcon />}
-          </ChevronButton>
+          {totalWhipSessions > 0 && (
+            <ParticipantCountWrapper
+              className={totalWhipSessions > 0 ? "whip" : ""}
+            >
+              <WhipIcon />
+              <ParticipantCount>{totalWhipSessions}</ParticipantCount>
+            </ParticipantCountWrapper>
+          )}
+          <ParticipantCountWrapper className={totalUsers > 0 ? "active" : ""}>
+            <UsersIcon />
+            <ParticipantCount>{totalUsers}</ParticipantCount>
+          </ParticipantCountWrapper>
         </HeaderActionsRow>
-      </HeaderTexts>
+        <ChevronButton>
+          {open ? <ChevronUpIcon /> : <ChevronDownIcon />}
+        </ChevronButton>
+      </CallHeaderTexts>
       {line?.programOutputLine && open && (
         <AudioFeedIcon open={open}>
           <TVIcon />
