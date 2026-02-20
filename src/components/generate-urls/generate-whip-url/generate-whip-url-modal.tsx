@@ -8,7 +8,6 @@ import {
   CombinedInputWrapper,
   InputWrapper,
   LinkLabel,
-  ModalHeader,
   ModalNoteWrapper,
   ModalText,
   ModalTextBold,
@@ -68,9 +67,8 @@ export const GenerateWhipUrlModal = ({
   };
 
   return (
-    <Modal onClose={onClose}>
+    <Modal onClose={onClose} title="Generate WHIP URL">
       <div ref={modalRef}>
-        <ModalHeader>Generate WHIP URL</ModalHeader>
         <ModalText>
           Enter a username to generate a WHIP URL for connecting to the server.
         </ModalText>

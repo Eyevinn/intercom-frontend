@@ -6,7 +6,6 @@ import { RefreshButton } from "../../refresh-button/refresh-button";
 import {
   InputWrapper,
   LinkLabel,
-  ModalHeader,
   ModalNoteWrapper,
   ModalText,
   ModalTextBold,
@@ -53,11 +52,11 @@ export const ShareLineLinkModal = ({
   };
 
   return (
-    <Modal onClose={onClose}>
+    <Modal
+      onClose={onClose}
+      title={`Share ${isCopyProduction ? "Production URLs" : "Line URL"}`}
+    >
       <div ref={modalRef}>
-        <ModalHeader>
-          Share {isCopyProduction ? "Production URLs" : "Line URL"}
-        </ModalHeader>
         <ModalText>
           Share {isCopyProduction ? "these production links" : "this line link"}{" "}
           with someone you wish to join your{" "}

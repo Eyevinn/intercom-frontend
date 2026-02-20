@@ -5,8 +5,9 @@ const RemoveLineBtn = styled.button`
   cursor: pointer;
   background: transparent;
   border: transparent;
-  position: ${({ isCreatingLine }: { isCreatingLine?: boolean }) =>
-    isCreatingLine ? "absolute" : "relative"};
+  position: relative;
+  padding: 0;
+  flex-shrink: 0;
 
   svg {
     width: 2.5rem;
@@ -16,17 +17,11 @@ const RemoveLineBtn = styled.button`
 
 export const RemoveLineButton = ({
   removeLine,
-  isCreatingLine,
 }: {
   removeLine: () => void;
-  isCreatingLine?: boolean;
 }) => {
   return (
-    <RemoveLineBtn
-      isCreatingLine={isCreatingLine}
-      type="button"
-      onClick={() => removeLine()}
-    >
+    <RemoveLineBtn type="button" onClick={() => removeLine()}>
       <RemoveIcon />
     </RemoveLineBtn>
   );

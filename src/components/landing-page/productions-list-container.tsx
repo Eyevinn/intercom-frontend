@@ -6,7 +6,7 @@ import { useRefreshAnimation } from "./use-refresh-animation.ts";
 import { useFetchProductionList } from "./use-fetch-production-list.ts";
 import { ProductionsList } from "../production-list/productions-list.tsx";
 import { PageHeader } from "../page-layout/page-header.tsx";
-import { AddIcon, EditIcon } from "../../assets/icons/icon.tsx";
+import { AddIcon, EditIcon, HeadsetIcon } from "../../assets/icons/icon.tsx";
 import { PrimaryButton } from "../form-elements/form-elements";
 import { isMobile } from "../../bowser.ts";
 
@@ -21,7 +21,7 @@ const HeaderButton = styled(PrimaryButton)`
   }
 
   svg {
-    fill: #482307;
+    fill: #1a1a1a;
     height: 2rem;
     width: 2rem;
   }
@@ -31,6 +31,47 @@ const HeaderButtonText = styled.p`
   display: inline-block;
   margin-right: 0.5rem;
   font-weight: bold;
+`;
+
+const ManageButton = styled(HeaderButton)`
+  background: transparent;
+  border: 0.2rem solid rgba(89, 203, 232, 1);
+  color: rgba(89, 203, 232, 1);
+  box-shadow: none;
+
+  svg {
+    fill: rgba(89, 203, 232, 1);
+  }
+
+  &:hover {
+    background: rgba(89, 203, 232, 0.1);
+  }
+`;
+
+const EmptyState = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 6rem 2rem;
+  color: rgba(255, 255, 255, 0.6);
+
+  svg {
+    width: 4.8rem;
+    height: 4.8rem;
+    fill: rgba(89, 203, 232, 0.4);
+    margin-bottom: 1.5rem;
+  }
+`;
+
+const EmptyStateText = styled.p`
+  font-size: 1.8rem;
+  margin-bottom: 2rem;
+`;
+
+const EmptyStateButton = styled(PrimaryButton)`
+  font-size: 1.6rem;
+  padding: 1rem 2rem;
 `;
 
 export const ProductionsListContainer = () => {
@@ -69,14 +110,12 @@ export const ProductionsListContainer = () => {
   return (
     <>
       <PageHeader title="Productions" loading={showRefreshing}>
-        {!isMobile && (
+        {!isMobile && !!productions?.productions.length && (
           <>
-            {!!productions?.productions.length && (
-              <HeaderButton onClick={goToManage}>
-                <HeaderButtonText>Manage</HeaderButtonText>
-                <EditIcon />
-              </HeaderButton>
-            )}
+            <ManageButton onClick={goToManage}>
+              <HeaderButtonText>Manage</HeaderButtonText>
+              <EditIcon />
+            </ManageButton>
             <HeaderButton onClick={goToCreate}>
               <HeaderButtonText>Create</HeaderButtonText>
               <AddIcon />
@@ -84,6 +123,15 @@ export const ProductionsListContainer = () => {
           </>
         )}
       </PageHeader>
+      {productions && !productions.productions.length && (
+        <EmptyState>
+          <HeadsetIcon />
+          <EmptyStateText>No productions yet</EmptyStateText>
+          <EmptyStateButton onClick={goToCreate}>
+            Create your first production
+          </EmptyStateButton>
+        </EmptyState>
+      )}
       {!!productions?.productions.length && (
         <ProductionsList productions={productions.productions} error={error} />
       )}

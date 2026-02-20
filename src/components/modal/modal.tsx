@@ -1,4 +1,5 @@
 import styled from "@emotion/styled";
+import { RemoveIcon } from "../../assets/icons/icon";
 
 const ModalWrapper = styled.div`
   position: fixed;
@@ -14,9 +15,8 @@ const ModalWrapper = styled.div`
 `;
 
 const ModalContent = styled.div`
-  position: relative;
   background-color: #3d3d3d;
-  padding: 2rem;
+  padding: 1.75rem;
   border-radius: 0.8rem;
   border: solid 0.1rem #868686;
   box-shadow: 0 0.2rem 2rem rgba(123, 123, 123, 0.1);
@@ -25,27 +25,59 @@ const ModalContent = styled.div`
   animation: slideIn 0.3s ease-out;
 `;
 
-const CloseButton = styled.button`
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  background: none;
-  border: none;
+const ModalHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+`;
+
+const ModalTitle = styled.h2`
   font-size: 2rem;
+  font-weight: 600;
+  margin: 0;
+`;
+
+const CloseButton = styled.button`
+  background: transparent;
+  border: none;
+  padding: 0;
   cursor: pointer;
-  color: gray;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-left: auto;
+
+  svg {
+    width: 2.5rem;
+    fill: #f96c6c;
+  }
+
+  &:hover svg {
+    fill: #c44c4c;
+  }
 `;
 
 interface ModalProps {
   onClose: () => void;
+  title?: string;
+  titleExtra?: React.ReactNode;
   children: React.ReactNode;
 }
 
-export const Modal = ({ onClose, children }: ModalProps) => {
+export const Modal = ({ onClose, title, titleExtra, children }: ModalProps) => {
   return (
     <ModalWrapper>
       <ModalContent>
-        <CloseButton onClick={onClose}>&times;</CloseButton>
+        <ModalHeader>
+          {title && <ModalTitle>{title}</ModalTitle>}
+          {titleExtra}
+          <CloseButton onClick={onClose}>
+            <RemoveIcon />
+          </CloseButton>
+        </ModalHeader>
         {children}
       </ModalContent>
     </ModalWrapper>

@@ -138,8 +138,11 @@ export const PersonText = styled.div`
 `;
 
 export const CheckboxWrapper = styled.div`
-  margin-bottom: 3rem;
-  margin-top: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+  flex-shrink: 0;
 `;
 
 export const AddLineSectionForm = styled.form`
@@ -147,7 +150,27 @@ export const AddLineSectionForm = styled.form`
   border: 1px grey solid;
   border-radius: 0.5rem;
   padding: 1rem;
-  position: relative;
+  overflow: visible;
+`;
+
+export const ManageLineInputRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+
+  > *:first-child {
+    flex: 1;
+    min-width: 0;
+  }
+
+  label {
+    margin-bottom: 0;
+  }
+
+  input,
+  select {
+    margin-bottom: 0;
+  }
 `;
 
 export const CreateLineButton = styled(PrimaryButton)`
@@ -163,11 +186,13 @@ export const AddLineHeader = styled.div`
 export const RemoveIconWrapper = styled.div`
   width: 2.5rem;
   height: 2.5rem;
-  position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
+  flex-shrink: 0;
   &:hover {
     cursor: pointer;
+  }
+
+  svg {
+    fill: #f96c6c;
   }
 `;
 

@@ -4,14 +4,19 @@ import { PrimaryButton } from "../form-elements/form-elements";
 
 const StyledBackBtn = styled(PrimaryButton)`
   margin-top: 1rem;
-  background: rgba(50, 56, 59, 1);
-  color: white;
-  border: 0.2rem solid #6d6d6d;
+  background: transparent;
+  color: #f96c6c;
+  border: 0.2rem solid rgba(249, 108, 108, 0.5);
   position: relative;
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: none;
+
+  &:hover:not(:disabled) {
+    background: rgba(249, 108, 108, 0.1);
+  }
 
   svg {
     width: 2.5rem;

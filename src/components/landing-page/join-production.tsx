@@ -23,6 +23,7 @@ type TProps = {
   className?: string;
   updateUserSettings?: boolean;
   isFirstConnection?: string;
+  hideUsername?: boolean;
 };
 
 export const JoinProduction = ({
@@ -33,6 +34,7 @@ export const JoinProduction = ({
   className,
   updateUserSettings = false,
   isFirstConnection,
+  hideUsername,
 }: TProps) => {
   const [joinProductionOptions, setJoinProductionOptions] =
     useState<TJoinProductionOptions | null>(null);
@@ -76,6 +78,7 @@ export const JoinProduction = ({
           closeAddCallView={closeAddCallView}
           updateUserSettings={updateUserSettings}
           isFirstConnection={isFirstConnection}
+          hideUsername={hideUsername}
         />
       )}
     </ResponsiveFormContainer>

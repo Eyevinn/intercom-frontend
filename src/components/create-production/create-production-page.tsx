@@ -5,28 +5,39 @@ import {
   useForm,
   useWatch,
 } from "react-hook-form";
+import { ErrorMessage } from "@hookform/error-message";
 import { useEffect, useState } from "react";
 import { DisplayContainerHeader } from "../landing-page/display-container-header.tsx";
-import { FormInput } from "../form-elements/form-elements.ts";
-import { useGlobalState } from "../../global-state/context-provider.tsx";
 import {
-  ListItemWrapper,
-  ResponsiveFormContainer,
-} from "../generic-components.ts";
+  FormInput,
+  PrimaryButton,
+  StyledWarningMessage,
+} from "../form-elements/form-elements.ts";
+import { useGlobalState } from "../../global-state/context-provider.tsx";
+import { ResponsiveFormContainer } from "../generic-components.ts";
 import { RemoveLineButton } from "../remove-line-button/remove-line-button.tsx";
 import { useFetchProduction } from "../landing-page/use-fetch-production.ts";
 import { NavigateToRootButton } from "../navigate-to-root-button/navigate-to-root-button.tsx";
 import { isMobile } from "../../bowser.ts";
 import { Checkbox } from "../checkbox/checkbox.tsx";
+import { AddIcon } from "../../assets/icons/icon.tsx";
 import { FormValues, useCreateProduction } from "./use-create-production.tsx";
 import {
   HeaderWrapper,
   CheckboxWrapper,
   ProductionConfirmation,
   FetchErrorMessage,
+  LineCard,
+  LineCardHeader,
+  LineNumber,
+  AddLineCard,
+  LineInputRow,
+  TooltipWrapper,
+  TooltipContent,
+  CreateButtonWrapper,
 } from "./create-production-components.ts";
 import { FormItem } from "../user-settings-form/form-item.tsx";
-import { CreateProductionButtons } from "./create-production-buttons.tsx";
+import { Spinner } from "../loader/loader.tsx";
 import {
   normalizeLineName,
   useHasDuplicateLineName,
@@ -45,7 +56,7 @@ export const CreateProductionPage = () => {
     reset,
     trigger,
   } = useForm<FormValues>({
-    mode: "onTouched",
+    mode: "onSubmit",
     defaultValues: {
       productionName: "",
       defaultLine: "",
@@ -138,7 +149,7 @@ export const CreateProductionPage = () => {
   useEffect(() => {
     if (!success || !data?.name) {
       setShowConfirmation(false);
-      return;
+      return undefined;
     }
 
     setShowConfirmation(true);
@@ -156,6 +167,7 @@ export const CreateProductionPage = () => {
         label="Production Name"
         fieldName="productionName"
         errors={errors}
+        errorStyle={{ marginTop: "5px", marginBottom: 0 }}
       >
         <FormInput
           // eslint-disable-next-line
@@ -165,85 +177,109 @@ export const CreateProductionPage = () => {
           })}
           autoComplete="off"
           placeholder="Production Name"
+          style={{ marginBottom: 0 }}
         />
       </FormItem>
-      <FormItem label="Line" fieldName="defaultLine" errors={errors}>
-        <FormInput
-          // eslint-disable-next-line
-          {...register(`defaultLine`, lineNameRequiredValidation)}
-          autoComplete="off"
-          placeholder="Line Name"
-        />
-        <Controller
-          name="defaultLineProgramOutput"
-          control={control}
-          render={({ field }) => (
-            <CheckboxWrapper>
-              <Checkbox
-                label="This line will be used for an audio feed"
-                checked={field.value || false}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  field.onChange(e.target.checked)
-                }
-              />
-            </CheckboxWrapper>
-          )}
-        />
-      </FormItem>
-      {fields.map((field, index) => (
-        <div key={field.id}>
-          <FormItem
-            label="Line"
-            fieldName={`lines.${index}.name`}
-            errors={errors}
-          >
-            <ListItemWrapper>
-              <>
-                <FormInput
-                  // eslint-disable-next-line
-                  {...register(`lines.${index}.name`, {
-                    ...lineNameRequiredValidation,
-                    validate: validateLineNameUniqueness(index),
-                  })}
-                  className={
-                    index === fields.length - 1 ? "additional-line" : ""
-                  }
-                  autoComplete="off"
-                  placeholder="Line Name"
-                />
-                {index === fields.length - 1 && (
-                  <RemoveLineButton
-                    isCreatingLine
-                    removeLine={() => remove(index)}
-                  />
-                )}
-              </>
-              <Controller
-                name={`lines.${index}.programOutputLine`}
-                control={control}
-                render={({ field: controllerField }) => (
-                  <CheckboxWrapper>
-                    <Checkbox
-                      label="This line will be used for an audio feed"
-                      checked={controllerField.value || false}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                        controllerField.onChange(e.target.checked)
-                      }
-                    />
-                  </CheckboxWrapper>
-                )}
-              />
-            </ListItemWrapper>
+      <LineCard style={{ marginTop: "1.5rem" }}>
+        <LineCardHeader>
+          <LineNumber>Line 1</LineNumber>
+        </LineCardHeader>
+        <LineInputRow>
+          <FormItem>
+            <FormInput
+              // eslint-disable-next-line
+              {...register(`defaultLine`, lineNameRequiredValidation)}
+              autoComplete="off"
+              placeholder="Line Name"
+            />
           </FormItem>
-        </div>
+          <Controller
+            name="defaultLineProgramOutput"
+            control={control}
+            render={({ field }) => (
+              <CheckboxWrapper>
+                <Checkbox
+                  label="Audio Feed"
+                  checked={field.value || false}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    field.onChange(e.target.checked)
+                  }
+                />
+                <TooltipWrapper>
+                  ⓘ
+                  <TooltipContent className="tooltip-content">
+                    In an <strong>Audio Feed</strong> line, listeners are not
+                    able to talk. Only the <strong>Audio Feed</strong> will be
+                    heard.
+                  </TooltipContent>
+                </TooltipWrapper>
+              </CheckboxWrapper>
+            )}
+          />
+        </LineInputRow>
+        <ErrorMessage
+          errors={errors}
+          name="defaultLine"
+          as={<StyledWarningMessage style={{ marginTop: "0.5rem" }} />}
+        />
+      </LineCard>
+      {fields.map((field, index) => (
+        <LineCard key={field.id}>
+          <LineCardHeader>
+            <LineNumber>Line {index + 2}</LineNumber>
+            <RemoveLineButton removeLine={() => remove(index)} />
+          </LineCardHeader>
+          <LineInputRow>
+            <FormItem>
+              <FormInput
+                // eslint-disable-next-line
+                {...register(`lines.${index}.name`, {
+                  ...lineNameRequiredValidation,
+                  validate: validateLineNameUniqueness(index),
+                })}
+                autoComplete="off"
+                placeholder="Line Name"
+              />
+            </FormItem>
+            <Controller
+              name={`lines.${index}.programOutputLine`}
+              control={control}
+              render={({ field: controllerField }) => (
+                <CheckboxWrapper>
+                  <Checkbox
+                    label="Audio Feed"
+                    checked={controllerField.value || false}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      controllerField.onChange(e.target.checked)
+                    }
+                  />
+                  <TooltipWrapper>
+                    ⓘ
+                    <TooltipContent className="tooltip-content">
+                      In an <strong>Audio Feed</strong> line, listeners are not
+                      able to talk. Only the <strong>Audio Feed</strong> will be
+                      heard.
+                    </TooltipContent>
+                  </TooltipWrapper>
+                </CheckboxWrapper>
+              )}
+            />
+          </LineInputRow>
+          <ErrorMessage
+            errors={errors}
+            name={`lines.${index}.name`}
+            as={<StyledWarningMessage style={{ marginTop: "0.5rem" }} />}
+          />
+        </LineCard>
       ))}
-      <CreateProductionButtons
-        loading={loading}
-        handleAddLine={() => append({ name: "" })}
-        handleSubmit={handleSubmit(onSubmit)}
-        isAddLineDisabled={hasDuplicateWithDefaultLine}
-        isCreateDisabled={hasDuplicateWithDefaultLine}
-      />
+      <AddLineCard
+        type="button"
+        onClick={() => append({ name: "" })}
+        disabled={hasDuplicateWithDefaultLine}
+      >
+        <AddIcon />
+        Add Line
+      </AddLineCard>
       {showConfirmation && data?.name && (
         <>
           <ProductionConfirmation>
@@ -258,6 +294,17 @@ export const CreateProductionPage = () => {
           )}
         </>
       )}
+      <CreateButtonWrapper>
+        <PrimaryButton
+          type="submit"
+          className={loading ? "with-loader" : ""}
+          onClick={handleSubmit(onSubmit)}
+          disabled={hasDuplicateWithDefaultLine}
+        >
+          Create Production
+          {loading && <Spinner className="create-production" />}
+        </PrimaryButton>
+      </CreateButtonWrapper>
     </ResponsiveFormContainer>
   );
 };

@@ -81,6 +81,10 @@ export const InnerDiv = styled.div`
   display: flex;
   flex-direction: column;
   position: relative;
+
+  .expanded > & {
+    overflow: visible;
+  }
 `;
 
 export const EditNameIconWrapper = styled.div`
