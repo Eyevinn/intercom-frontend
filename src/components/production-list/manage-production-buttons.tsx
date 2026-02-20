@@ -107,18 +107,19 @@ export const ManageProductionButtons: FC<ManageProductionButtonsProps> = (
 
   useEffect(() => {
     if (successfullCreateLine) {
-      dispatch({
-        type: "PRODUCTION_UPDATED",
-      });
+      dispatch({ type: "PRODUCTION_UPDATED" });
       setLastCreatedLineName(pendingLineNameRef.current);
       setShowLineConfirmation(true);
       setAddLineOpen(false);
       setNewLine(null);
-      const id = setTimeout(() => setShowLineConfirmation(false), 4000);
-      return () => clearTimeout(id);
     }
-    return undefined;
   }, [successfullCreateLine, dispatch]);
+
+  useEffect(() => {
+    if (!showLineConfirmation) return undefined;
+    const id = setTimeout(() => setShowLineConfirmation(false), 4000);
+    return () => clearTimeout(id);
+  }, [showLineConfirmation]);
 
   const onSubmit: SubmitHandler<Line> = (values) => {
     if (values) {
@@ -193,9 +194,13 @@ export const ManageProductionButtons: FC<ManageProductionButtonsProps> = (
               </TooltipWrapper>
             </CheckboxWrapper>
           </ManageLineInputRow>
-          <ErrorMessage errors={errors} name="name" as={StyledWarningMessage} />
+          <ErrorMessage
+            errors={errors}
+            name="name"
+            as={<StyledWarningMessage style={{ marginTop: "0.5rem" }} />}
+          />
           {hasDuplicateWithExistingLines && (
-            <StyledWarningMessage style={{ marginBottom: "1rem" }}>
+            <StyledWarningMessage style={{ marginTop: "0.5rem", marginBottom: "1rem" }}>
               Line name must be unique within this production.
             </StyledWarningMessage>
           )}

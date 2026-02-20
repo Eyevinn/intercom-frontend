@@ -181,8 +181,19 @@ export const SettingsModal = ({
     formWarning: string
   ) => {
     const validationError = errors[field]?.message as string | undefined;
+    const currentValues = watch();
+    const currentValue = currentValues[field];
+    const localDuplicate =
+      currentValue &&
+      Object.entries(currentValues).some(
+        ([k, v]) => k !== field && v === currentValue
+      )
+        ? `The hotkey "${currentValue}" is already assigned.`
+        : "";
     const activeWarning =
-      validationError || (formError && formWarning ? formWarning : "");
+      validationError ||
+      localDuplicate ||
+      (formError && formWarning ? formWarning : "");
     return (
       <HotkeyRow key={field}>
         <HotkeyLabelWrapper>
