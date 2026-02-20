@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 import { ErrorMessage } from "@hookform/error-message";
-import { FC, useEffect, useState } from "react";
+import { FC, useEffect, useRef, useState } from "react";
 import { Controller, SubmitHandler, useForm, useWatch } from "react-hook-form";
 import { TBasicProductionResponse } from "../../api/api";
 import { RemoveIcon } from "../../assets/icons/icon";
@@ -65,6 +65,7 @@ export const ManageProductionButtons: FC<ManageProductionButtonsProps> = (
     useState<boolean>(false);
   const [addLineOpen, setAddLineOpen] = useState<boolean>(false);
   const [newLine, setNewLine] = useState<Line | null>(null);
+  const pendingLineNameRef = useRef<string>("");
   const [showLineConfirmation, setShowLineConfirmation] =
     useState<boolean>(false);
   const [lastCreatedLineName, setLastCreatedLineName] = useState<string>("");
@@ -108,7 +109,7 @@ export const ManageProductionButtons: FC<ManageProductionButtonsProps> = (
       dispatch({
         type: "PRODUCTION_UPDATED",
       });
-      setLastCreatedLineName(newLine?.name ?? "");
+      setLastCreatedLineName(pendingLineNameRef.current);
       setShowLineConfirmation(true);
       setAddLineOpen(false);
       setNewLine(null);
@@ -116,10 +117,11 @@ export const ManageProductionButtons: FC<ManageProductionButtonsProps> = (
       return () => clearTimeout(id);
     }
     return undefined;
-  }, [successfullCreateLine, dispatch, newLine?.name]);
+  }, [successfullCreateLine, dispatch]);
 
   const onSubmit: SubmitHandler<Line> = (values) => {
     if (values) {
+      pendingLineNameRef.current = values.name;
       setNewLine(values);
     }
   };

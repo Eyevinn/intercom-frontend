@@ -22,6 +22,7 @@ export const ButtonWrapper = styled.div`
 export const ProductionConfirmation = styled.div`
   background: #91fa8c;
   padding: 1rem;
+  margin-top: 1rem;
   margin-bottom: 1rem;
   border-radius: 0.5rem;
   border: 1px solid #b2ffa1;

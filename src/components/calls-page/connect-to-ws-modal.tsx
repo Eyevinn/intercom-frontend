@@ -1,6 +1,5 @@
 import styled from "@emotion/styled";
 import { useState } from "react";
-import { HelpIcon } from "../../assets/icons/icon";
 import { PrimaryButton, SecondaryButton } from "../form-elements/form-elements";
 import { Modal } from "../modal/modal";
 import { Tooltip } from "../tooltip/tooltip";
@@ -98,7 +97,7 @@ export const ConnectToWsModal = ({
             target="_blank"
             rel="noopener noreferrer"
           >
-            <HelpIcon />
+            ⓘ
           </a>
         </Tooltip>
       }

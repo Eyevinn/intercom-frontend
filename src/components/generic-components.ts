@@ -32,6 +32,10 @@ export const DisplayContainer = styled.div`
 export const ResponsiveFormContainer = styled(FormContainer)`
   padding: 0 2rem;
 
+  &.modal {
+    padding: 0;
+  }
+
   &.desktop {
     margin: auto;
     margin-top: 15rem;

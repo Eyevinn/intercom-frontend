@@ -37,7 +37,7 @@ export const UserSettings: FC<UserSettingsProps> = (props) => {
   };
 
   return (
-    <ResponsiveFormContainer className={className}>
+    <ResponsiveFormContainer className={hideTitle ? "modal" : className}>
       {!hideTitle &&
         (hasBackButton ? (
           <HeaderWrapper>
