@@ -31,6 +31,8 @@ export const LandingPage = ({ setApiError }: { setApiError: () => void }) => {
           buttonText={showSettings ? "Save" : "Next"}
           className={isMobile ? "" : "desktop"}
           onSave={() => setShowSettings(false)}
+          showBackButton={showSettings}
+          onBack={() => setShowSettings(false)}
         />
       )) || (
         <>

@@ -37,7 +37,7 @@ const KebabButton = styled.button`
 const DropdownMenu = styled.div`
   position: absolute;
   top: 100%;
-  right: 0;
+  left: 0;
   z-index: 10;
   min-width: 14rem;
   background: #32383b;
@@ -148,18 +148,6 @@ export const KebabMenu = ({
       </KebabButton>
       {isOpen && (
         <DropdownMenu>
-          <DropdownItem
-            type="button"
-            onClick={() => {
-              setActiveModal("whip-whep");
-              setIsOpen(false);
-            }}
-          >
-            WHIP/WHEP
-          </DropdownItem>
-          <DropdownItem type="button" onClick={handleShareClick}>
-            Share
-          </DropdownItem>
           {showHotkeys && onOpenHotkeys && (
             <DropdownItem
               type="button"
@@ -171,6 +159,18 @@ export const KebabMenu = ({
               Hotkeys
             </DropdownItem>
           )}
+          <DropdownItem type="button" onClick={handleShareClick}>
+            Share
+          </DropdownItem>
+          <DropdownItem
+            type="button"
+            onClick={() => {
+              setActiveModal("whip-whep");
+              setIsOpen(false);
+            }}
+          >
+            WebRTC
+          </DropdownItem>
         </DropdownMenu>
       )}
       {activeModal === "whip-whep" && (

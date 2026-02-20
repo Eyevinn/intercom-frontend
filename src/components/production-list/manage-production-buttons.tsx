@@ -200,7 +200,9 @@ export const ManageProductionButtons: FC<ManageProductionButtonsProps> = (
             as={<StyledWarningMessage style={{ marginTop: "0.5rem" }} />}
           />
           {hasDuplicateWithExistingLines && (
-            <StyledWarningMessage style={{ marginTop: "0.5rem", marginBottom: "1rem" }}>
+            <StyledWarningMessage
+              style={{ marginTop: "0.5rem", marginBottom: "1rem" }}
+            >
               Line name must be unique within this production.
             </StyledWarningMessage>
           )}

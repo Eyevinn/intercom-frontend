@@ -17,7 +17,7 @@ import { ConfirmationModal } from "../verify-decision/confirmation-modal.tsx";
 import { CallHeaderComponent } from "./call-header.tsx";
 import { CollapsableSection } from "./collapsable-section.tsx";
 import { ExitCallButton } from "./exit-call-button.tsx";
-import { HotkeysComponent } from "./hotkeys-component.tsx";
+import { SettingsModal } from "./settings-modal.tsx";
 import { LongPressToTalkButton } from "./long-press-to-talk-button.tsx";
 import { MinifiedUserControls } from "./minified-user-controls.tsx";
 import {
@@ -90,7 +90,7 @@ export const ProductionLine = ({
   const [userId, setUserId] = useState("");
   const [userName, setUserName] = useState("");
   const [open, setOpen] = useState<boolean>(!isMobile);
-  const [hotkeysOpen, setHotkeysOpen] = useState(false);
+  const [hotkeysModalOpen, setHotkeysModalOpen] = useState(false);
   const {
     joinProductionOptions,
     audiooutput,
@@ -472,7 +472,7 @@ export const ProductionLine = ({
                   !isTablet
                 )
               }
-              onOpenHotkeys={() => setHotkeysOpen(true)}
+              onOpenHotkeys={() => setHotkeysModalOpen(true)}
             />
           )}
           {!open && joinProductionOptions && (
@@ -541,21 +541,6 @@ export const ProductionLine = ({
                           />
                         </CollapsableSection>
                       )}
-                      {hotkeysOpen &&
-                        inputAudioStream &&
-                        inputAudioStream !== "no-device" &&
-                        !isMobile &&
-                        !isTablet && (
-                          <CollapsableSection title="Hotkeys" startOpen>
-                            <HotkeysComponent
-                              callId={id}
-                              savedHotkeys={savedHotkeys}
-                              customGlobalMute={customGlobalMute}
-                              line={line}
-                              joinProductionOptions={joinProductionOptions}
-                            />
-                          </CollapsableSection>
-                        )}
                       <CollapsableSection title="Participants" startOpen>
                         {line && (
                           <UserList
@@ -610,6 +595,19 @@ export const ProductionLine = ({
               )}
             </InnerDiv>
           </ExpandableSection>
+          {hotkeysModalOpen && savedHotkeys && joinProductionOptions && (
+            <SettingsModal
+              isOpen={hotkeysModalOpen}
+              callId={id}
+              savedHotkeys={savedHotkeys}
+              customGlobalMute={customGlobalMute}
+              lineName={line?.name}
+              programOutPutLine={line?.programOutputLine}
+              isProgramUser={joinProductionOptions.isProgramUser}
+              onClose={() => setHotkeysModalOpen(false)}
+              onSave={() => setHotkeysModalOpen(false)}
+            />
+          )}
         </CallContainer>
       )}
     </CallWrapper>
