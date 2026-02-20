@@ -109,11 +109,8 @@ export const SettingsModal = ({
           const isGlobalStateDuplicate = currentValues[field]
             ? globalStateDuplicates?.includes(currentValues[field])
             : false;
-          const isGlobalMute =
-            field === "globalMuteHotkey" &&
-            customGlobalMute === currentValues[field];
 
-          if (isGlobalStateDuplicate && !isGlobalMute) {
+          if (isGlobalStateDuplicate) {
             acc[field] = "This key is used in another connected line.";
           } else {
             acc[field] = "";

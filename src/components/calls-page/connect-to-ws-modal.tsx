@@ -2,7 +2,10 @@ import styled from "@emotion/styled";
 import { useState } from "react";
 import { PrimaryButton, SecondaryButton } from "../form-elements/form-elements";
 import { Modal } from "../modal/modal";
-import { Tooltip } from "../tooltip/tooltip";
+import {
+  TooltipWrapper,
+  TooltipContent,
+} from "../create-production/create-production-components";
 
 const ButtonWrapper = styled.div`
   display: flex;
@@ -91,15 +94,18 @@ export const ConnectToWsModal = ({
       onClose={onClose}
       title="Connect to Companion WebSocket"
       titleExtra={
-        <Tooltip tooltipText="View user guide">
-          <a
-            href="https://docs.osaas.io/osaas.wiki/User-Guide%3A-Cloud-Intercom.html#controlling-your-calls-with-an-elgato-stream-deck-using-companion"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            ⓘ
-          </a>
-        </Tooltip>
+        <TooltipWrapper>
+          ⓘ
+          <TooltipContent className="tooltip-content">
+            <a
+              href="https://docs.osaas.io/osaas.wiki/User-Guide%3A-Cloud-Intercom.html#controlling-your-calls-with-an-elgato-stream-deck-using-companion"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              View user guide
+            </a>
+          </TooltipContent>
+        </TooltipWrapper>
       }
     >
       <ModalText>

@@ -70,6 +70,10 @@ export const ButtonWrapper = styled.div`
   margin: 2rem 0 2rem 0;
   display: flex;
   justify-content: flex-end;
+
+  .modal & {
+    margin-bottom: 0;
+  }
 `;
 
 export const ListItemWrapper = styled.div`
