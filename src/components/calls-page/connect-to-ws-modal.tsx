@@ -7,7 +7,8 @@ import { Tooltip } from "../tooltip/tooltip";
 
 const ButtonWrapper = styled.div`
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
+  gap: 1rem;
   margin-top: 1rem;
 `;
 

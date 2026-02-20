@@ -16,7 +16,7 @@ const ModalWrapper = styled.div`
 
 const ModalContent = styled.div`
   background-color: #3d3d3d;
-  padding: 1.5rem;
+  padding: 1.75rem;
   border-radius: 0.8rem;
   border: solid 0.1rem #868686;
   box-shadow: 0 0.2rem 2rem rgba(123, 123, 123, 0.1);

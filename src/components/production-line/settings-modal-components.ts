@@ -17,7 +17,7 @@ export const ModalOverlay = styled.div`
 export const ModalContent = styled.div`
   background: #383838;
   border-radius: 0.5rem;
-  padding: 1.5rem;
+  padding: 1.75rem;
   width: 80%;
   max-width: 40rem;
   box-shadow: 0 0.4rem 0.8rem rgba(0, 0, 0, 0.2);

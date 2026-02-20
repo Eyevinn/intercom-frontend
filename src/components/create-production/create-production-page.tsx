@@ -280,17 +280,6 @@ export const CreateProductionPage = () => {
         <AddIcon />
         Add Line
       </AddLineCard>
-      <CreateButtonWrapper>
-        <PrimaryButton
-          type="submit"
-          className={loading ? "with-loader" : ""}
-          onClick={handleSubmit(onSubmit)}
-          disabled={hasDuplicateWithDefaultLine}
-        >
-          Create Production
-          {loading && <Spinner className="create-production" />}
-        </PrimaryButton>
-      </CreateButtonWrapper>
       {showConfirmation && data?.name && (
         <>
           <ProductionConfirmation>
@@ -305,6 +294,17 @@ export const CreateProductionPage = () => {
           )}
         </>
       )}
+      <CreateButtonWrapper>
+        <PrimaryButton
+          type="submit"
+          className={loading ? "with-loader" : ""}
+          onClick={handleSubmit(onSubmit)}
+          disabled={hasDuplicateWithDefaultLine}
+        >
+          Create Production
+          {loading && <Spinner className="create-production" />}
+        </PrimaryButton>
+      </CreateButtonWrapper>
     </ResponsiveFormContainer>
   );
 };

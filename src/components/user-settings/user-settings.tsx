@@ -11,13 +11,24 @@ interface UserSettingsProps {
   className?: string;
   needsConfirmation?: boolean;
   onSave?: () => void;
+  showBackButton?: boolean;
+  onBack?: () => void;
+  hideTitle?: boolean;
 }
 
 export const UserSettings: FC<UserSettingsProps> = (props) => {
-  const { buttonText, className, onSave, needsConfirmation } = props;
+  const {
+    buttonText,
+    className,
+    onSave,
+    needsConfirmation,
+    showBackButton,
+    onBack,
+    hideTitle,
+  } = props;
   const [{ devices, userSettings }] = useGlobalState();
 
-  const isStandalone = !onSave;
+  const hasBackButton = showBackButton ?? !onSave;
 
   const defaultValues = {
     username: userSettings?.username,
@@ -27,14 +38,15 @@ export const UserSettings: FC<UserSettingsProps> = (props) => {
 
   return (
     <ResponsiveFormContainer className={className}>
-      {isStandalone ? (
-        <HeaderWrapper>
-          <NavigateToRootButton />
+      {!hideTitle &&
+        (hasBackButton ? (
+          <HeaderWrapper>
+            <NavigateToRootButton onNavigate={onBack} />
+            <DisplayContainerHeader>User Settings</DisplayContainerHeader>
+          </HeaderWrapper>
+        ) : (
           <DisplayContainerHeader>User Settings</DisplayContainerHeader>
-        </HeaderWrapper>
-      ) : (
-        <DisplayContainerHeader>User Settings</DisplayContainerHeader>
-      )}
+        ))}
       {devices && (
         <UserSettingsForm
           buttonText={buttonText || "Save"}
