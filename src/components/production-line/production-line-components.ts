@@ -40,6 +40,14 @@ export const ButtonIcon = styled.div`
   }
 `;
 
+export const ButtonLabel = styled.span`
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: white;
+  display: block;
+  margin-top: 0.2rem;
+`;
+
 export const UserControlBtn = styled(ActionButton)`
   background: rgba(50, 56, 59, 1);
   border: 0.2rem solid #6d6d6d;

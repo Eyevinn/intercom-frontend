@@ -37,7 +37,7 @@ const CheckboxComponent = styled.input`
     display: flex;
     justify-content: center;
     align-items: center;
-    color: #482307;
+    color: #1a1a1a;
     font-size: 1.6rem;
     font-weight: bold;
   }
