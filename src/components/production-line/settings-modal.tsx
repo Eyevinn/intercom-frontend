@@ -3,21 +3,24 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { ErrorMessage } from "@hookform/error-message";
 import {
   PrimaryButton,
-  FormInput,
   FormContainer,
   StyledWarningMessage,
 } from "../form-elements/form-elements";
+import { RemoveIcon } from "../../assets/icons/icon";
 import { useUpdateGlobalHotkey } from "./use-update-global-hotkey";
 import { useCheckForDuplicateHotkey } from "./use-check-for-duplicate-hotkey";
 import { Hotkeys } from "./types";
-import { FormItem } from "../user-settings-form/form-item";
 import {
   ModalOverlay,
   ModalContent,
+  ModalHeaderRow,
   ModalHeader,
   ModalCloseButton,
   CancelButton,
   ButtonDiv,
+  HotkeyRow,
+  HotkeyLabel,
+  HotkeyInput,
 } from "./settings-modal-components";
 
 type TSettingsModalProps = {
@@ -182,27 +185,30 @@ export const SettingsModal = ({
     formError: boolean,
     formWarning: string
   ) => (
-    <FormItem
-      label={label}
-      fieldName={field}
-      errors={errors}
-      errorClassName="error-message"
-    >
-      <FormInput
-        // eslint-disable-next-line
-        {...register(field, {
-          required: "Hotkey is required",
-          minLength: 1,
-          validate: (value) => {
-            return validateFieldsLocally(value, field);
-          },
-          onChange: (e) => {
-            setValue(field, e.target.value);
-            setHotkeys((prev) => ({ ...prev, [field]: e.target.value }));
-            updateFieldErrors(field, e.target.value);
-          },
-        })}
-        placeholder="Enter hotkey"
+    <React.Fragment key={field}>
+      <HotkeyRow>
+        <HotkeyLabel>{label}</HotkeyLabel>
+        <HotkeyInput
+          // eslint-disable-next-line
+          {...register(field, {
+            required: "Hotkey is required",
+            minLength: 1,
+            validate: (value) => {
+              return validateFieldsLocally(value, field);
+            },
+            onChange: (e) => {
+              setValue(field, e.target.value);
+              setHotkeys((prev) => ({ ...prev, [field]: e.target.value }));
+              updateFieldErrors(field, e.target.value);
+            },
+          })}
+          placeholder="Key"
+        />
+      </HotkeyRow>
+      <ErrorMessage
+        errors={errors}
+        name={field}
+        as={<StyledWarningMessage className="error-message" />}
       />
       {formError && formWarning && (
         <ErrorMessage
@@ -211,14 +217,18 @@ export const SettingsModal = ({
           as={StyledWarningMessage}
         />
       )}
-    </FormItem>
+    </React.Fragment>
   );
 
   return (
     <ModalOverlay onClick={onClose}>
       <ModalContent onClick={stopPropagation}>
-        <ModalCloseButton onClick={onClose}>X</ModalCloseButton>
-        <ModalHeader>Hotkey settings for line: {lineName}</ModalHeader>
+        <ModalHeaderRow>
+          <ModalHeader>Hotkey settings for line: {lineName}</ModalHeader>
+          <ModalCloseButton onClick={onClose}>
+            <RemoveIcon />
+          </ModalCloseButton>
+        </ModalHeaderRow>
         <FormContainer>
           {(programOutPutLine ? isProgramUser : !isProgramUser) &&
             renderFormInput(
@@ -271,7 +281,7 @@ export const SettingsModal = ({
               Cancel
             </CancelButton>
             <PrimaryButton type="button" onClick={handleSubmit(onSubmit)}>
-              Save settings
+              Save hotkeys
             </PrimaryButton>
           </ButtonDiv>
         </FormContainer>

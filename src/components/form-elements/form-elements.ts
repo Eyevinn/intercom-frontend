@@ -54,7 +54,7 @@ export const FormInput = styled.input`
 export const FormSelect = styled.select`
   width: 100%;
   font-size: 1.6rem;
-  padding: 0.5rem;
+  padding: 0.5rem 3.5rem 0.5rem 0.5rem;
   ${sharedMargin};
   border: 1px solid #6d6d6d;
   border-radius: 0.5rem;
@@ -254,7 +254,6 @@ export const SecondaryButton = styled(ActionButton)`
 
 export const SectionTitle = styled.div`
   display: flex;
-  justify-content: space-between;
   align-items: center;
   height: 3rem;
   font-weight: bold;

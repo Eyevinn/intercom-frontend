@@ -5,9 +5,14 @@ import {
   useForm,
   useWatch,
 } from "react-hook-form";
+import { ErrorMessage } from "@hookform/error-message";
 import { useEffect, useState } from "react";
 import { DisplayContainerHeader } from "../landing-page/display-container-header.tsx";
-import { FormInput, PrimaryButton } from "../form-elements/form-elements.ts";
+import {
+  FormInput,
+  PrimaryButton,
+  StyledWarningMessage,
+} from "../form-elements/form-elements.ts";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { ResponsiveFormContainer } from "../generic-components.ts";
 import { RemoveLineButton } from "../remove-line-button/remove-line-button.tsx";
@@ -28,6 +33,7 @@ import {
   AddLineCard,
   LineInputRow,
   TooltipWrapper,
+  TooltipContent,
   CreateButtonWrapper,
 } from "./create-production-components.ts";
 import { FormItem } from "../user-settings-form/form-item.tsx";
@@ -161,6 +167,7 @@ export const CreateProductionPage = () => {
         label="Production Name"
         fieldName="productionName"
         errors={errors}
+        errorStyle={{ marginTop: "5px", marginBottom: 0 }}
       >
         <FormInput
           // eslint-disable-next-line
@@ -170,14 +177,15 @@ export const CreateProductionPage = () => {
           })}
           autoComplete="off"
           placeholder="Production Name"
+          style={{ marginBottom: 0 }}
         />
       </FormItem>
-      <LineCard>
+      <LineCard style={{ marginTop: "1.5rem" }}>
         <LineCardHeader>
           <LineNumber>Line 1</LineNumber>
         </LineCardHeader>
         <LineInputRow>
-          <FormItem fieldName="defaultLine" errors={errors}>
+          <FormItem>
             <FormInput
               // eslint-disable-next-line
               {...register(`defaultLine`, lineNameRequiredValidation)}
@@ -197,13 +205,23 @@ export const CreateProductionPage = () => {
                     field.onChange(e.target.checked)
                   }
                 />
-                <TooltipWrapper data-tooltip="This line will be used for an audio feed">
+                <TooltipWrapper>
                   ⓘ
+                  <TooltipContent className="tooltip-content">
+                    In an <strong>Audio Feed</strong> line, listeners are not
+                    able to talk. Only the <strong>Audio Feed</strong> will be
+                    heard.
+                  </TooltipContent>
                 </TooltipWrapper>
               </CheckboxWrapper>
             )}
           />
         </LineInputRow>
+        <ErrorMessage
+          errors={errors}
+          name="defaultLine"
+          as={<StyledWarningMessage style={{ marginTop: "0.5rem" }} />}
+        />
       </LineCard>
       {fields.map((field, index) => (
         <LineCard key={field.id}>
@@ -212,7 +230,7 @@ export const CreateProductionPage = () => {
             <RemoveLineButton removeLine={() => remove(index)} />
           </LineCardHeader>
           <LineInputRow>
-            <FormItem fieldName={`lines.${index}.name`} errors={errors}>
+            <FormItem>
               <FormInput
                 // eslint-disable-next-line
                 {...register(`lines.${index}.name`, {
@@ -235,13 +253,23 @@ export const CreateProductionPage = () => {
                       controllerField.onChange(e.target.checked)
                     }
                   />
-                  <TooltipWrapper data-tooltip="This line will be used for an audio feed">
+                  <TooltipWrapper>
                     ⓘ
+                    <TooltipContent className="tooltip-content">
+                      In an <strong>Audio Feed</strong> line, listeners are not
+                      able to talk. Only the <strong>Audio Feed</strong> will be
+                      heard.
+                    </TooltipContent>
                   </TooltipWrapper>
                 </CheckboxWrapper>
               )}
             />
           </LineInputRow>
+          <ErrorMessage
+            errors={errors}
+            name={`lines.${index}.name`}
+            as={<StyledWarningMessage style={{ marginTop: "0.5rem" }} />}
+          />
         </LineCard>
       ))}
       <AddLineCard

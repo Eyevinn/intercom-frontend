@@ -15,6 +15,7 @@ export const FormItem = ({
   errors,
   productionLabel,
   errorClassName,
+  errorStyle,
   children,
 }: {
   label?: string;
@@ -22,6 +23,7 @@ export const FormItem = ({
   errors?: FieldErrors<TUserSettings | FormValues>;
   productionLabel?: string;
   errorClassName?: string;
+  errorStyle?: React.CSSProperties;
   children: React.ReactNode;
 }) => {
   const Wrapper = productionLabel ? React.Fragment : FormLabel;
@@ -36,7 +38,12 @@ export const FormItem = ({
         <ErrorMessage
           errors={errors}
           name={fieldName}
-          as={<StyledWarningMessage className={errorClassName || ""} />}
+          as={
+            <StyledWarningMessage
+              className={errorClassName || ""}
+              style={errorStyle}
+            />
+          }
         />
       )}
     </>

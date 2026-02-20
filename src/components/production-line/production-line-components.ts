@@ -57,10 +57,12 @@ export const UserControlBtn = styled(ActionButton)`
 
 export const LongPressWrapper = styled.div`
   touch-action: none;
+  margin-bottom: 1rem;
 `;
 
 export const PTTWrapper = styled(LongPressWrapper)`
   width: 100%;
+  margin-bottom: 0;
   button {
     padding: 1rem;
     line-height: 2rem;

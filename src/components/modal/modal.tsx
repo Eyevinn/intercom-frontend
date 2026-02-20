@@ -1,4 +1,5 @@
 import styled from "@emotion/styled";
+import { RemoveIcon } from "../../assets/icons/icon";
 
 const ModalWrapper = styled.div`
   position: fixed;
@@ -14,7 +15,6 @@ const ModalWrapper = styled.div`
 `;
 
 const ModalContent = styled.div`
-  position: relative;
   background-color: #3d3d3d;
   padding: 2rem;
   border-radius: 0.8rem;
@@ -25,15 +25,29 @@ const ModalContent = styled.div`
   animation: slideIn 0.3s ease-out;
 `;
 
+const ModalHeader = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1rem;
+`;
+
 const CloseButton = styled.button`
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  background: none;
+  background: transparent;
   border: none;
-  font-size: 2rem;
+  padding: 0;
   cursor: pointer;
-  color: gray;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  svg {
+    width: 2.5rem;
+    fill: #f96c6c;
+  }
+
+  &:hover svg {
+    fill: #c44c4c;
+  }
 `;
 
 interface ModalProps {
@@ -45,7 +59,11 @@ export const Modal = ({ onClose, children }: ModalProps) => {
   return (
     <ModalWrapper>
       <ModalContent>
-        <CloseButton onClick={onClose}>&times;</CloseButton>
+        <ModalHeader>
+          <CloseButton onClick={onClose}>
+            <RemoveIcon />
+          </CloseButton>
+        </ModalHeader>
         {children}
       </ModalContent>
     </ModalWrapper>

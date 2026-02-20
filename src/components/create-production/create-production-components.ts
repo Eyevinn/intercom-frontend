@@ -79,6 +79,15 @@ export const LineInputRow = styled.div`
     flex: 1;
     min-width: 0;
   }
+
+  label {
+    margin-bottom: 0;
+  }
+
+  input,
+  select {
+    margin-bottom: 0;
+  }
 `;
 
 export const TooltipWrapper = styled.span`
@@ -87,22 +96,32 @@ export const TooltipWrapper = styled.span`
   align-items: center;
   cursor: help;
 
-  &:hover::after {
-    content: attr(data-tooltip);
-    position: absolute;
-    bottom: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    background: #32383b;
-    color: white;
-    padding: 0.5rem 1rem;
-    border-radius: 0.4rem;
-    font-size: 1.2rem;
-    white-space: nowrap;
-    border: 0.1rem solid #6d6d6d;
-    z-index: 10;
-    margin-bottom: 0.4rem;
+  &:hover .tooltip-content {
+    visibility: visible;
+    opacity: 1;
   }
+`;
+
+export const TooltipContent = styled.span`
+  visibility: hidden;
+  opacity: 0;
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #32383b;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0.4rem;
+  font-size: 1.2rem;
+  white-space: normal;
+  width: min(30rem, 90vw);
+  text-align: center;
+  border: 0.1rem solid #6d6d6d;
+  z-index: 10;
+  margin-bottom: 0.4rem;
+  transition: opacity 0.15s ease;
+  pointer-events: none;
 `;
 
 export const CreateButtonWrapper = styled.div`

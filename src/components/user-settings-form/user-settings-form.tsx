@@ -194,7 +194,7 @@ export const UserSettingsForm = ({
 
   return (
     <div style={{ minWidth: updateUserSettings ? "40rem" : "" }}>
-      {!preSelected && isJoinProduction && (
+      {!preSelected && isJoinProduction && productions && (
         <FormItem label="Production Name" errors={errors}>
           <FormSelect
             // eslint-disable-next-line
@@ -207,12 +207,11 @@ export const UserSettingsForm = ({
               );
             }}
           >
-            {productions &&
-              productions.productions.map((p) => (
-                <option key={p.productionId} value={p.productionId}>
-                  {p.name}
-                </option>
-              ))}
+            {productions.productions.map((p) => (
+              <option key={p.productionId} value={p.productionId}>
+                {p.name}
+              </option>
+            ))}
           </FormSelect>
           {productionListFetchError && (
             <FetchErrorMessage>
@@ -248,7 +247,7 @@ export const UserSettingsForm = ({
                 </option>
               ))}
           </FormSelect>
-          {!production && (
+          {!production && productions && (
             <StyledWarningMessage>
               Please enter a production id
             </StyledWarningMessage>
