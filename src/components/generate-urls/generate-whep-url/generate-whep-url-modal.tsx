@@ -8,7 +8,6 @@ import {
   CombinedInputWrapper,
   InputWrapper,
   LinkLabel,
-  ModalHeader,
   ModalNoteWrapper,
   ModalText,
   ModalTextBold,
@@ -68,9 +67,8 @@ export const GenerateWhepUrlModal = ({
   };
 
   return (
-    <Modal onClose={onClose}>
+    <Modal onClose={onClose} title="Generate WHEP URL">
       <div ref={modalRef}>
-        <ModalHeader>Generate WHEP URL</ModalHeader>
         <ModalText>
           Enter a username to generate a WHEP URL for connecting to the server.
         </ModalText>

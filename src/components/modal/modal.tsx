@@ -27,8 +27,16 @@ const ModalContent = styled.div`
 
 const ModalHeader = styled.div`
   display: flex;
-  justify-content: flex-end;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
   margin-bottom: 1rem;
+`;
+
+const ModalTitle = styled.h2`
+  font-size: 2rem;
+  font-weight: 600;
+  margin: 0;
 `;
 
 const CloseButton = styled.button`
@@ -39,6 +47,8 @@ const CloseButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
+  margin-left: auto;
 
   svg {
     width: 2.5rem;
@@ -52,14 +62,16 @@ const CloseButton = styled.button`
 
 interface ModalProps {
   onClose: () => void;
+  title?: string;
   children: React.ReactNode;
 }
 
-export const Modal = ({ onClose, children }: ModalProps) => {
+export const Modal = ({ onClose, title, children }: ModalProps) => {
   return (
     <ModalWrapper>
       <ModalContent>
         <ModalHeader>
+          {title && <ModalTitle>{title}</ModalTitle>}
           <CloseButton onClick={onClose}>
             <RemoveIcon />
           </CloseButton>

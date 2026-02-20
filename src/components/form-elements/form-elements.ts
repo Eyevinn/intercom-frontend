@@ -54,13 +54,18 @@ export const FormInput = styled.input`
 export const FormSelect = styled.select`
   width: 100%;
   font-size: 1.6rem;
-  padding: 0.5rem 3.5rem 0.5rem 0.5rem;
+  padding: 0.5rem 3rem 0.5rem 0.5rem;
   ${sharedMargin};
   border: 1px solid #6d6d6d;
   border-radius: 0.5rem;
   background: #32383b;
   color: white;
   cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23aaa' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
   &.ingest {
     display: flex;
     align-items: center;

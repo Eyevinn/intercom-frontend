@@ -222,7 +222,7 @@ export const UserSettingsForm = ({
           )}
         </FormItem>
       )}
-      {!preSelected && isJoinProduction && (
+      {!preSelected && isJoinProduction && productions && (
         <FormItem label="Line">
           <FormSelect
             // eslint-disable-next-line
@@ -247,7 +247,7 @@ export const UserSettingsForm = ({
                 </option>
               ))}
           </FormSelect>
-          {!production && productions && (
+          {!production && (
             <StyledWarningMessage>
               Please enter a production id
             </StyledWarningMessage>

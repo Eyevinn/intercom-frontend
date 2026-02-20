@@ -56,7 +56,7 @@ export const CreateProductionPage = () => {
     reset,
     trigger,
   } = useForm<FormValues>({
-    mode: "onTouched",
+    mode: "onSubmit",
     defaultValues: {
       productionName: "",
       defaultLine: "",
