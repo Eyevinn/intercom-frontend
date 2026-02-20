@@ -36,7 +36,11 @@ export const FetchErrorMessage = styled.div`
 `;
 
 export const CheckboxWrapper = styled.div`
-  margin-bottom: 3rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+  flex-shrink: 0;
 `;
 
 export const ButtonContainer = styled(FlexContainer)`
@@ -46,7 +50,7 @@ export const ButtonContainer = styled(FlexContainer)`
 export const LineCard = styled.div`
   border: 0.2rem solid #6d6d6d;
   border-radius: 1rem;
-  padding: 1.5rem;
+  padding: 1.5rem 1.5rem 1rem 1.5rem;
   margin-bottom: 1rem;
   background: rgba(50, 56, 59, 0.3);
 `;
@@ -64,6 +68,48 @@ export const LineNumber = styled.span`
   color: rgba(255, 255, 255, 0.5);
   text-transform: uppercase;
   letter-spacing: 0.05rem;
+`;
+
+export const LineInputRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+
+  > *:first-child {
+    flex: 1;
+    min-width: 0;
+  }
+`;
+
+export const TooltipWrapper = styled.span`
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  cursor: help;
+
+  &:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #32383b;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 0.4rem;
+    font-size: 1.2rem;
+    white-space: nowrap;
+    border: 0.1rem solid #6d6d6d;
+    z-index: 10;
+    margin-bottom: 0.4rem;
+  }
+`;
+
+export const CreateButtonWrapper = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1rem;
+  margin-bottom: 1.5rem;
 `;
 
 export const AddLineCard = styled.button`

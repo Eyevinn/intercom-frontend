@@ -26,6 +26,9 @@ import {
   LineCardHeader,
   LineNumber,
   AddLineCard,
+  LineInputRow,
+  TooltipWrapper,
+  CreateButtonWrapper,
 } from "./create-production-components.ts";
 import { FormItem } from "../user-settings-form/form-item.tsx";
 import { Spinner } from "../loader/loader.tsx";
@@ -173,62 +176,72 @@ export const CreateProductionPage = () => {
         <LineCardHeader>
           <LineNumber>Line 1</LineNumber>
         </LineCardHeader>
-        <FormItem fieldName="defaultLine" errors={errors}>
-          <FormInput
-            // eslint-disable-next-line
-            {...register(`defaultLine`, lineNameRequiredValidation)}
-            autoComplete="off"
-            placeholder="Line Name"
-          />
+        <LineInputRow>
+          <FormItem fieldName="defaultLine" errors={errors}>
+            <FormInput
+              // eslint-disable-next-line
+              {...register(`defaultLine`, lineNameRequiredValidation)}
+              autoComplete="off"
+              placeholder="Line Name"
+            />
+          </FormItem>
           <Controller
             name="defaultLineProgramOutput"
             control={control}
             render={({ field }) => (
               <CheckboxWrapper>
                 <Checkbox
-                  label="This line will be used for an audio feed"
+                  label="Audio Feed"
                   checked={field.value || false}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                     field.onChange(e.target.checked)
                   }
                 />
+                <TooltipWrapper data-tooltip="This line will be used for an audio feed">
+                  ⓘ
+                </TooltipWrapper>
               </CheckboxWrapper>
             )}
           />
-        </FormItem>
+        </LineInputRow>
       </LineCard>
       {fields.map((field, index) => (
         <LineCard key={field.id}>
           <LineCardHeader>
             <LineNumber>Line {index + 2}</LineNumber>
-            <RemoveLineButton isCreatingLine removeLine={() => remove(index)} />
+            <RemoveLineButton removeLine={() => remove(index)} />
           </LineCardHeader>
-          <FormItem fieldName={`lines.${index}.name`} errors={errors}>
-            <FormInput
-              // eslint-disable-next-line
-              {...register(`lines.${index}.name`, {
-                ...lineNameRequiredValidation,
-                validate: validateLineNameUniqueness(index),
-              })}
-              autoComplete="off"
-              placeholder="Line Name"
-            />
+          <LineInputRow>
+            <FormItem fieldName={`lines.${index}.name`} errors={errors}>
+              <FormInput
+                // eslint-disable-next-line
+                {...register(`lines.${index}.name`, {
+                  ...lineNameRequiredValidation,
+                  validate: validateLineNameUniqueness(index),
+                })}
+                autoComplete="off"
+                placeholder="Line Name"
+              />
+            </FormItem>
             <Controller
               name={`lines.${index}.programOutputLine`}
               control={control}
               render={({ field: controllerField }) => (
                 <CheckboxWrapper>
                   <Checkbox
-                    label="This line will be used for an audio feed"
+                    label="Audio Feed"
                     checked={controllerField.value || false}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                       controllerField.onChange(e.target.checked)
                     }
                   />
+                  <TooltipWrapper data-tooltip="This line will be used for an audio feed">
+                    ⓘ
+                  </TooltipWrapper>
                 </CheckboxWrapper>
               )}
             />
-          </FormItem>
+          </LineInputRow>
         </LineCard>
       ))}
       <AddLineCard
@@ -239,7 +252,7 @@ export const CreateProductionPage = () => {
         <AddIcon />
         Add Line
       </AddLineCard>
-      <div style={{ marginTop: "1rem" }}>
+      <CreateButtonWrapper>
         <PrimaryButton
           type="submit"
           className={loading ? "with-loader" : ""}
@@ -249,7 +262,7 @@ export const CreateProductionPage = () => {
           Create Production
           {loading && <Spinner className="create-production" />}
         </PrimaryButton>
-      </div>
+      </CreateButtonWrapper>
       {showConfirmation && data?.name && (
         <>
           <ProductionConfirmation>

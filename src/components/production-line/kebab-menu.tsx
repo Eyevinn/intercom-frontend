@@ -1,7 +1,10 @@
 import styled from "@emotion/styled";
-import { useEffect, useRef, useState } from "react";
-import { GenerateWhipUrlModal } from "../generate-urls/generate-whip-url/generate-whip-url-modal";
-import { GenerateWhepUrlModal } from "../generate-urls/generate-whep-url/generate-whep-url-modal";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { GenerateWhipWhepUrlModal } from "../generate-urls/generate-whip-whep-url-modal";
+import { ShareLineLinkModal } from "../generate-urls/share-line-link/share-line-link-modal";
+import { useShareUrl } from "../../hooks/use-share-url";
+import { TBasicProductionResponse } from "../../api/api";
+import { TLine } from "./types";
 
 const MenuWrapper = styled.div`
   position: relative;
@@ -69,12 +72,26 @@ const DropdownItem = styled.button`
 type KebabMenuProps = {
   productionId: string;
   lineId: string;
+  production: TBasicProductionResponse | null;
+  line: TLine | null;
+  showHotkeys?: boolean;
+  onOpenHotkeys?: () => void;
 };
 
-export const KebabMenu = ({ productionId, lineId }: KebabMenuProps) => {
+export const KebabMenu = ({
+  productionId,
+  lineId,
+  production,
+  line,
+  showHotkeys,
+  onOpenHotkeys,
+}: KebabMenuProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [activeModal, setActiveModal] = useState<"whip" | "whep" | null>(null);
+  const [activeModal, setActiveModal] = useState<"whip-whep" | "share" | null>(
+    null
+  );
   const menuRef = useRef<HTMLDivElement>(null);
+  const { shareUrl, url } = useShareUrl();
 
   useEffect(() => {
     if (!isOpen) return undefined;
@@ -100,6 +117,26 @@ export const KebabMenu = ({ productionId, lineId }: KebabMenuProps) => {
     };
   }, [isOpen]);
 
+  const handleShareClick = useCallback(() => {
+    if (production && line) {
+      shareUrl({
+        productionId: production.productionId,
+        lineId: line.id,
+      });
+    }
+    setActiveModal("share");
+    setIsOpen(false);
+  }, [production, line, shareUrl]);
+
+  const handleShareRefresh = useCallback(() => {
+    if (production && line) {
+      shareUrl({
+        productionId: production.productionId,
+        lineId: line.id,
+      });
+    }
+  }, [production, line, shareUrl]);
+
   return (
     <MenuWrapper ref={menuRef}>
       <KebabButton
@@ -114,34 +151,39 @@ export const KebabMenu = ({ productionId, lineId }: KebabMenuProps) => {
           <DropdownItem
             type="button"
             onClick={() => {
-              setActiveModal("whip");
+              setActiveModal("whip-whep");
               setIsOpen(false);
             }}
           >
-            WHIP URL
+            WHIP/WHEP
           </DropdownItem>
-          <DropdownItem
-            type="button"
-            onClick={() => {
-              setActiveModal("whep");
-              setIsOpen(false);
-            }}
-          >
-            WHEP URL
+          <DropdownItem type="button" onClick={handleShareClick}>
+            Share
           </DropdownItem>
+          {showHotkeys && onOpenHotkeys && (
+            <DropdownItem
+              type="button"
+              onClick={() => {
+                onOpenHotkeys();
+                setIsOpen(false);
+              }}
+            >
+              Hotkeys
+            </DropdownItem>
+          )}
         </DropdownMenu>
       )}
-      {activeModal === "whip" && (
-        <GenerateWhipUrlModal
+      {activeModal === "whip-whep" && (
+        <GenerateWhipWhepUrlModal
           productionId={productionId}
           lineId={lineId}
           onClose={() => setActiveModal(null)}
         />
       )}
-      {activeModal === "whep" && (
-        <GenerateWhepUrlModal
-          productionId={productionId}
-          lineId={lineId}
+      {activeModal === "share" && (
+        <ShareLineLinkModal
+          urls={[url]}
+          onRefresh={handleShareRefresh}
           onClose={() => setActiveModal(null)}
         />
       )}

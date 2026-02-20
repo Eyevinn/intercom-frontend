@@ -41,6 +41,9 @@ export const ResponsiveFormContainer = styled(FormContainer)`
   &.calls-page {
     margin: 0;
     padding: 2rem;
+    border: 0.1rem solid rgba(109, 109, 109, 0.3);
+    border-radius: 1rem;
+    background: rgba(50, 56, 59, 0.4);
     flex: 0 0 calc(25% - 2rem);
     ${isMobile ? `flex-grow: 1;` : `flex-grow: 0;`}
     min-width: 30rem;

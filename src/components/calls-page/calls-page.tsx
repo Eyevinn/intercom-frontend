@@ -207,6 +207,7 @@ export const CallsPage = () => {
               addAdditionalCallId={productionId}
               closeAddCallView={() => setAddCallActive(false)}
               className="calls-page"
+              hideUsername
             />
           )}
           <ProductionLines

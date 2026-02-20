@@ -90,6 +90,7 @@ export const ProductionLine = ({
   const [userId, setUserId] = useState("");
   const [userName, setUserName] = useState("");
   const [open, setOpen] = useState<boolean>(!isMobile);
+  const [hotkeysOpen, setHotkeysOpen] = useState(false);
   const {
     joinProductionOptions,
     audiooutput,
@@ -463,6 +464,15 @@ export const ProductionLine = ({
               line={line}
               production={production}
               setOpen={() => setOpen(!open)}
+              showHotkeys={
+                !!(
+                  inputAudioStream &&
+                  inputAudioStream !== "no-device" &&
+                  !isMobile &&
+                  !isTablet
+                )
+              }
+              onOpenHotkeys={() => setHotkeysOpen(true)}
             />
           )}
           {!open && joinProductionOptions && (
@@ -531,11 +541,12 @@ export const ProductionLine = ({
                           />
                         </CollapsableSection>
                       )}
-                      {inputAudioStream &&
+                      {hotkeysOpen &&
+                        inputAudioStream &&
                         inputAudioStream !== "no-device" &&
                         !isMobile &&
                         !isTablet && (
-                          <CollapsableSection title="Hotkeys">
+                          <CollapsableSection title="Hotkeys" startOpen>
                             <HotkeysComponent
                               callId={id}
                               savedHotkeys={savedHotkeys}
@@ -545,7 +556,7 @@ export const ProductionLine = ({
                             />
                           </CollapsableSection>
                         )}
-                      <CollapsableSection title="Participants">
+                      <CollapsableSection title="Participants" startOpen>
                         {line && (
                           <UserList
                             sessionId={sessionId}

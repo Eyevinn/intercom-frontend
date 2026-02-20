@@ -23,6 +23,7 @@ import {
   CreateLineButton,
   RemoveIconWrapper,
 } from "./production-list-components";
+import { TooltipWrapper } from "../create-production/create-production-components";
 import {
   ButtonsWrapper,
   DeleteButton,
@@ -173,7 +174,7 @@ export const ManageProductionButtons: FC<ManageProductionButtonsProps> = (
                 control={control}
                 render={({ field: controllerField }) => (
                   <Checkbox
-                    label="This line will be used for an audio feed"
+                    label="Audio Feed"
                     checked={controllerField.value || false}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                       controllerField.onChange(e.target.checked)
@@ -181,6 +182,9 @@ export const ManageProductionButtons: FC<ManageProductionButtonsProps> = (
                   />
                 )}
               />
+              <TooltipWrapper data-tooltip="This line will be used for an audio feed">
+                ⓘ
+              </TooltipWrapper>
             </CheckboxWrapper>
           </FormLabel>
           <ErrorMessage errors={errors} name="name" as={StyledWarningMessage} />

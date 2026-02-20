@@ -1,3 +1,4 @@
+import styled from "@emotion/styled";
 import { useMemo } from "react";
 import {
   UsersIcon,
@@ -12,23 +13,53 @@ import {
   ParticipantCountWrapper,
   ProductionNameWrapper,
 } from "../production-list/production-list-components";
-import { HeaderTexts, HeaderIcon } from "../shared/shared-components";
+import { HeaderTexts } from "../shared/shared-components";
 import { AudioFeedIcon, CallHeader } from "./production-line-components";
 import { TLine } from "./types";
 import { TBasicProductionResponse } from "../../api/api";
-import { CopyLink } from "../production-list/copy-link";
 import { KebabMenu } from "./kebab-menu";
+
+const HeaderActionsRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+`;
+
+const ChevronButton = styled.div`
+  display: flex;
+  align-items: center;
+  height: 3rem;
+  width: 3rem;
+  flex-shrink: 0;
+  justify-content: center;
+  border-radius: 0.5rem;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background: rgba(89, 203, 232, 0.1);
+    color: #59cbe8;
+  }
+
+  svg {
+    transform: translateY(1.5px);
+  }
+`;
 
 export const CallHeaderComponent = ({
   open,
   line,
   production,
   setOpen,
+  showHotkeys,
+  onOpenHotkeys,
 }: {
   open: boolean;
   line: TLine | null;
   production: TBasicProductionResponse | null;
   setOpen: () => void;
+  showHotkeys?: boolean;
+  onOpenHotkeys?: () => void;
 }) => {
   const truncatedProductionName =
     production && production.name.length > 20
@@ -64,13 +95,9 @@ export const CallHeaderComponent = ({
               {`${truncatedProductionName}/ ${truncatedLineName}`}
             </span>
           </ProductionName>
-
-          {production && line && (
-            <CopyLink production={production} line={line} />
-          )}
         </ProductionNameWrapper>
 
-        <div>
+        <HeaderActionsRow>
           {totalWhipSessions > 0 && (
             <ParticipantCountWrapper
               className={totalWhipSessions > 0 ? "whip" : ""}
@@ -83,7 +110,26 @@ export const CallHeaderComponent = ({
             <UsersIcon />
             <ParticipantCount>{totalUsers}</ParticipantCount>
           </ParticipantCountWrapper>
-        </div>
+          {production && line && (
+            <div
+              onClick={(e) => e.stopPropagation()}
+              onKeyDown={(e) => e.stopPropagation()}
+              role="presentation"
+            >
+              <KebabMenu
+                productionId={production.productionId}
+                lineId={line.id}
+                production={production}
+                line={line}
+                showHotkeys={showHotkeys}
+                onOpenHotkeys={onOpenHotkeys}
+              />
+            </div>
+          )}
+          <ChevronButton>
+            {open ? <ChevronUpIcon /> : <ChevronDownIcon />}
+          </ChevronButton>
+        </HeaderActionsRow>
       </HeaderTexts>
       {line?.programOutputLine && open && (
         <AudioFeedIcon open={open}>
@@ -91,16 +137,6 @@ export const CallHeaderComponent = ({
           Audio feed
         </AudioFeedIcon>
       )}
-      {production && line && (
-        <div
-          onClick={(e) => e.stopPropagation()}
-          onKeyDown={(e) => e.stopPropagation()}
-          role="presentation"
-        >
-          <KebabMenu productionId={production.productionId} lineId={line.id} />
-        </div>
-      )}
-      <HeaderIcon>{open ? <ChevronUpIcon /> : <ChevronDownIcon />}</HeaderIcon>
     </CallHeader>
   );
 };

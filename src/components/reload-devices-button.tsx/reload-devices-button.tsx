@@ -23,20 +23,19 @@ const RefreshIconButton = styled.button<{ isRefreshing: boolean }>`
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 3.6rem;
-  height: 3.6rem;
+  width: 2.4rem;
+  height: 2.4rem;
   border-radius: 50%;
   background: transparent;
-  border: 0.2rem solid #6d6d6d;
+  border: none;
   cursor: pointer;
-  margin-right: 1rem;
   padding: 0;
   transition: all 0.15s ease;
 
   svg,
   .refresh-devices {
-    width: 1.8rem;
-    height: 1.8rem;
+    width: 1.6rem;
+    height: 1.6rem;
     fill: #59cbe8;
     animation: ${({ isRefreshing }) =>
       isRefreshing ? `${spin} 0.8s linear infinite` : "none"};
@@ -44,7 +43,6 @@ const RefreshIconButton = styled.button<{ isRefreshing: boolean }>`
 
   &:hover {
     background: rgba(89, 203, 232, 0.1);
-    border-color: #59cbe8;
   }
 `;
 
