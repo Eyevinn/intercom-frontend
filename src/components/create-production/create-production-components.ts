@@ -42,3 +42,60 @@ export const CheckboxWrapper = styled.div`
 export const ButtonContainer = styled(FlexContainer)`
   gap: 1rem;
 `;
+
+export const LineCard = styled.div`
+  border: 0.2rem solid #6d6d6d;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  background: rgba(50, 56, 59, 0.3);
+`;
+
+export const LineCardHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+`;
+
+export const LineNumber = styled.span`
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.05rem;
+`;
+
+export const AddLineCard = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 1.5rem;
+  border: 0.2rem dashed #6d6d6d;
+  border-radius: 1rem;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 1.4rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover:not(:disabled) {
+    border-color: rgba(89, 203, 232, 0.6);
+    color: rgba(89, 203, 232, 0.8);
+    background: rgba(89, 203, 232, 0.05);
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  svg {
+    width: 1.6rem;
+    height: 1.6rem;
+    fill: currentColor;
+  }
+`;

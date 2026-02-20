@@ -7,11 +7,7 @@ import {
 } from "../../assets/icons/icon";
 import { isIOSMobile, isIpad } from "../../bowser";
 import { VolumeSlider } from "../volume-slider/volume-slider";
-import {
-  ButtonIcon,
-  ButtonLabel,
-  UserControlBtn,
-} from "./production-line-components";
+import { ButtonIcon, UserControlBtn } from "./production-line-components";
 import { TJoinProductionOptions, TLine } from "./types";
 import { TUseAudioInputValues } from "./use-audio-input";
 
@@ -67,9 +63,6 @@ export const UserControls = ({
             >
               {isOutputMuted || value === 0 ? <SpeakerOff /> : <SpeakerOn />}
             </ButtonIcon>
-            <ButtonLabel>
-              {isOutputMuted || value === 0 ? "Muted" : "Listen"}
-            </ButtonLabel>
           </ControlButton>
         )}
 
@@ -82,7 +75,6 @@ export const UserControls = ({
               <ButtonIcon className={isInputMuted ? "mute" : "unmuted"}>
                 {isInputMuted ? <MicMuted /> : <MicUnmuted />}
               </ButtonIcon>
-              <ButtonLabel>{isInputMuted ? "Mic Off" : "Mic On"}</ButtonLabel>
             </ControlButton>
           )}
       </ButtonWrapper>

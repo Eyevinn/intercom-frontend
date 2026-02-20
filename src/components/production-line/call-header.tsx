@@ -17,6 +17,7 @@ import { AudioFeedIcon, CallHeader } from "./production-line-components";
 import { TLine } from "./types";
 import { TBasicProductionResponse } from "../../api/api";
 import { CopyLink } from "../production-list/copy-link";
+import { KebabMenu } from "./kebab-menu";
 
 export const CallHeaderComponent = ({
   open,
@@ -89,6 +90,15 @@ export const CallHeaderComponent = ({
           <TVIcon />
           Audio feed
         </AudioFeedIcon>
+      )}
+      {production && line && (
+        <div
+          onClick={(e) => e.stopPropagation()}
+          onKeyDown={(e) => e.stopPropagation()}
+          role="presentation"
+        >
+          <KebabMenu productionId={production.productionId} lineId={line.id} />
+        </div>
       )}
       <HeaderIcon>{open ? <ChevronUpIcon /> : <ChevronDownIcon />}</HeaderIcon>
     </CallHeader>

@@ -110,14 +110,12 @@ export const ProductionsListContainer = () => {
   return (
     <>
       <PageHeader title="Productions" loading={showRefreshing}>
-        {!isMobile && (
+        {!isMobile && !!productions?.productions.length && (
           <>
-            {!!productions?.productions.length && (
-              <ManageButton onClick={goToManage}>
-                <HeaderButtonText>Manage</HeaderButtonText>
-                <EditIcon />
-              </ManageButton>
-            )}
+            <ManageButton onClick={goToManage}>
+              <HeaderButtonText>Manage</HeaderButtonText>
+              <EditIcon />
+            </ManageButton>
             <HeaderButton onClick={goToCreate}>
               <HeaderButtonText>Create</HeaderButtonText>
               <AddIcon />

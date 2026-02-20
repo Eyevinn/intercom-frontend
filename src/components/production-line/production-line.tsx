@@ -9,8 +9,6 @@ import { CallData } from "../../hooks/use-call-list.ts";
 import { usePushToTalk } from "../../hooks/use-push-to-talk.ts";
 import logger from "../../utils/logger.ts";
 import { DisplayWarning } from "../display-box.tsx";
-import { GenerateWhipUrlButton } from "../generate-urls/generate-whip-url/generate-whip-url-button.tsx";
-import { GenerateWhepUrlButton } from "../generate-urls/generate-whep-url/generate-whep-url-button.tsx";
 import { FlexContainer } from "../generic-components.ts";
 import { useFetchProduction } from "../landing-page/use-fetch-production.ts";
 import { Spinner } from "../loader/loader.tsx";
@@ -30,7 +28,6 @@ import {
   ListWrapper,
   LoaderWrapper,
   LongPressWrapper,
-  UrlButtonsWrapper,
 } from "./production-line-components.ts";
 import { SelectDevices } from "./select-devices.tsx";
 import { SymphonyRtcConnectionComponent } from "./symphony-rtc-connection-component.tsx";
@@ -599,18 +596,6 @@ export const ProductionLine = ({
                     )}
                   </ListWrapper>
                 </FlexContainer>
-              )}
-              {production && line && (
-                <UrlButtonsWrapper>
-                  <GenerateWhipUrlButton
-                    productionId={production.productionId}
-                    lineId={line.id}
-                  />
-                  <GenerateWhepUrlButton
-                    productionId={production.productionId}
-                    lineId={line.id}
-                  />
-                </UrlButtonsWrapper>
               )}
             </InnerDiv>
           </ExpandableSection>

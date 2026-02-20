@@ -4,10 +4,9 @@ import { ChevronDownIcon, ChevronUpIcon } from "../../assets/icons/icon";
 import { FirefoxWarning } from "./firefox-warning";
 
 const SectionWrapper = styled.div`
-  border: 0.2rem #6d6d6d solid;
-  border-radius: 1rem;
-  padding: 1rem;
-  margin-top: 1rem;
+  border-top: 0.1rem solid rgba(109, 109, 109, 0.3);
+  padding: 0.5rem 0;
+  margin-top: 0.5rem;
 `;
 
 const SectionHeader = styled.div`
@@ -15,7 +14,7 @@ const SectionHeader = styled.div`
   justify-content: space-between;
   align-items: center;
   height: 3rem;
-  font-weight: bold;
+  font-weight: 500;
   position: relative;
 
   &:hover {
@@ -23,7 +22,12 @@ const SectionHeader = styled.div`
   }
 `;
 
-const SectionTitle = styled.div``;
+const SectionTitle = styled.div`
+  font-size: 1.2rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05rem;
+  color: rgba(255, 255, 255, 0.6);
+`;
 
 const SectionCollapser = styled.div`
   width: 3rem;
