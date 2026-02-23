@@ -31,7 +31,7 @@ const IconWrapper = styled.div`
     isMinified ? "0" : "1rem"};
 
   svg {
-    fill: #482307;
+    fill: #1a1a1a;
   }
 `;
 

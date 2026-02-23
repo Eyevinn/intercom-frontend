@@ -32,6 +32,10 @@ export const DisplayContainer = styled.div`
 export const ResponsiveFormContainer = styled(FormContainer)`
   padding: 0 2rem;
 
+  &.modal {
+    padding: 0;
+  }
+
   &.desktop {
     margin: auto;
     margin-top: 15rem;
@@ -41,6 +45,9 @@ export const ResponsiveFormContainer = styled(FormContainer)`
   &.calls-page {
     margin: 0;
     padding: 2rem;
+    border: 0.1rem solid rgba(109, 109, 109, 0.3);
+    border-radius: 1rem;
+    background: rgba(50, 56, 59, 0.4);
     flex: 0 0 calc(25% - 2rem);
     ${isMobile ? `flex-grow: 1;` : `flex-grow: 0;`}
     min-width: 30rem;
@@ -63,6 +70,10 @@ export const ButtonWrapper = styled.div`
   margin: 2rem 0 2rem 0;
   display: flex;
   justify-content: flex-end;
+
+  .modal & {
+    margin-bottom: 0;
+  }
 `;
 
 export const ListItemWrapper = styled.div`

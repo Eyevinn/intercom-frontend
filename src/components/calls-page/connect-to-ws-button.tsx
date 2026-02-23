@@ -30,7 +30,7 @@ const ConnectButton = styled(PrimaryButton)<{
   margin-right: 1rem;
 
   svg {
-    fill: #482307;
+    fill: #1a1a1a;
   }
 `;
 

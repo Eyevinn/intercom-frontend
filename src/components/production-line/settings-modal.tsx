@@ -1,23 +1,24 @@
 import React, { useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { ErrorMessage } from "@hookform/error-message";
-import {
-  PrimaryButton,
-  FormInput,
-  FormContainer,
-  StyledWarningMessage,
-} from "../form-elements/form-elements";
+import { PrimaryButton, FormContainer } from "../form-elements/form-elements";
+import { RemoveIcon, WarningIcon } from "../../assets/icons/icon";
 import { useUpdateGlobalHotkey } from "./use-update-global-hotkey";
 import { useCheckForDuplicateHotkey } from "./use-check-for-duplicate-hotkey";
 import { Hotkeys } from "./types";
-import { FormItem } from "../user-settings-form/form-item";
 import {
   ModalOverlay,
   ModalContent,
+  ModalHeaderRow,
   ModalHeader,
   ModalCloseButton,
   CancelButton,
   ButtonDiv,
+  HotkeyRow,
+  HotkeyLabel,
+  HotkeyLabelWrapper,
+  HotkeyWarningWrapper,
+  HotkeyTooltip,
+  HotkeyInput,
 } from "./settings-modal-components";
 
 type TSettingsModalProps = {
@@ -108,11 +109,8 @@ export const SettingsModal = ({
           const isGlobalStateDuplicate = currentValues[field]
             ? globalStateDuplicates?.includes(currentValues[field])
             : false;
-          const isGlobalMute =
-            field === "globalMuteHotkey" &&
-            customGlobalMute === currentValues[field];
 
-          if (isGlobalStateDuplicate && !isGlobalMute) {
+          if (isGlobalStateDuplicate) {
             acc[field] = "This key is used in another connected line.";
           } else {
             acc[field] = "";
@@ -181,44 +179,63 @@ export const SettingsModal = ({
     label: string,
     formError: boolean,
     formWarning: string
-  ) => (
-    <FormItem
-      label={label}
-      fieldName={field}
-      errors={errors}
-      errorClassName="error-message"
-    >
-      <FormInput
-        // eslint-disable-next-line
-        {...register(field, {
-          required: "Hotkey is required",
-          minLength: 1,
-          validate: (value) => {
-            return validateFieldsLocally(value, field);
-          },
-          onChange: (e) => {
-            setValue(field, e.target.value);
-            setHotkeys((prev) => ({ ...prev, [field]: e.target.value }));
-            updateFieldErrors(field, e.target.value);
-          },
-        })}
-        placeholder="Enter hotkey"
-      />
-      {formError && formWarning && (
-        <ErrorMessage
-          errors={{ [field]: { message: formWarning } }}
-          name={field}
-          as={StyledWarningMessage}
+  ) => {
+    const validationError = errors[field]?.message as string | undefined;
+    const currentValues = watch();
+    const currentValue = currentValues[field];
+    const localDuplicate =
+      currentValue &&
+      Object.entries(currentValues).some(
+        ([k, v]) => k !== field && v === currentValue
+      )
+        ? `The hotkey "${currentValue}" is already assigned.`
+        : "";
+    const activeWarning =
+      validationError ||
+      localDuplicate ||
+      (formError && formWarning ? formWarning : "");
+    return (
+      <HotkeyRow key={field}>
+        <HotkeyLabelWrapper>
+          <HotkeyLabel>{label}</HotkeyLabel>
+          {activeWarning && (
+            <HotkeyWarningWrapper>
+              <WarningIcon />
+              <HotkeyTooltip className="hotkey-tooltip">
+                {activeWarning}
+              </HotkeyTooltip>
+            </HotkeyWarningWrapper>
+          )}
+        </HotkeyLabelWrapper>
+        <HotkeyInput
+          // eslint-disable-next-line
+          {...register(field, {
+            required: "Hotkey is required",
+            minLength: 1,
+            validate: (value) => {
+              return validateFieldsLocally(value, field);
+            },
+            onChange: (e) => {
+              setValue(field, e.target.value);
+              setHotkeys((prev) => ({ ...prev, [field]: e.target.value }));
+              updateFieldErrors(field, e.target.value);
+            },
+          })}
+          placeholder="Key"
         />
-      )}
-    </FormItem>
-  );
+      </HotkeyRow>
+    );
+  };
 
   return (
     <ModalOverlay onClick={onClose}>
       <ModalContent onClick={stopPropagation}>
-        <ModalCloseButton onClick={onClose}>X</ModalCloseButton>
-        <ModalHeader>Hotkey settings for line: {lineName}</ModalHeader>
+        <ModalHeaderRow>
+          <ModalHeader>Hotkey settings for line: {lineName}</ModalHeader>
+          <ModalCloseButton onClick={onClose}>
+            <RemoveIcon />
+          </ModalCloseButton>
+        </ModalHeaderRow>
         <FormContainer>
           {(programOutPutLine ? isProgramUser : !isProgramUser) &&
             renderFormInput(
@@ -271,7 +288,7 @@ export const SettingsModal = ({
               Cancel
             </CancelButton>
             <PrimaryButton type="button" onClick={handleSubmit(onSubmit)}>
-              Save settings
+              Save hotkeys
             </PrimaryButton>
           </ButtonDiv>
         </FormContainer>

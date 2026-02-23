@@ -52,6 +52,7 @@ export const UserSettingsForm = ({
   onSave,
   isFirstConnection,
   needsConfirmation,
+  hideUsername,
 }: {
   isJoinProduction?: boolean;
   preSelected?: {
@@ -72,6 +73,7 @@ export const UserSettingsForm = ({
   onSave?: () => void;
   isFirstConnection?: string;
   needsConfirmation?: boolean;
+  hideUsername?: boolean;
 }) => {
   const [production, setProduction] = useState<TProduction | null>(null);
   const [isProgramOutputLine, setIsProgramOutputLine] =
@@ -192,7 +194,7 @@ export const UserSettingsForm = ({
 
   return (
     <div style={{ minWidth: updateUserSettings ? "40rem" : "" }}>
-      {!preSelected && isJoinProduction && (
+      {!preSelected && isJoinProduction && productions && (
         <FormItem label="Production Name" errors={errors}>
           <FormSelect
             // eslint-disable-next-line
@@ -205,12 +207,11 @@ export const UserSettingsForm = ({
               );
             }}
           >
-            {productions &&
-              productions.productions.map((p) => (
-                <option key={p.productionId} value={p.productionId}>
-                  {p.name}
-                </option>
-              ))}
+            {productions.productions.map((p) => (
+              <option key={p.productionId} value={p.productionId}>
+                {p.name}
+              </option>
+            ))}
           </FormSelect>
           {productionListFetchError && (
             <FetchErrorMessage>
@@ -221,7 +222,7 @@ export const UserSettingsForm = ({
           )}
         </FormItem>
       )}
-      {!preSelected && isJoinProduction && (
+      {!preSelected && isJoinProduction && productions && (
         <FormItem label="Line">
           <FormSelect
             // eslint-disable-next-line
@@ -253,21 +254,24 @@ export const UserSettingsForm = ({
           )}
         </FormItem>
       )}
-      <FormItem label="Username" fieldName="username" errors={errors}>
-        <FormInput
-          // eslint-disable-next-line
-          {...register(`username`, {
-            required: "Username is required",
-            minLength: 1,
-          })}
-          placeholder="Username"
-        />
-      </FormItem>
+      {!hideUsername && (
+        <FormItem label="Username" fieldName="username" errors={errors}>
+          <FormInput
+            // eslint-disable-next-line
+            {...register(`username`, {
+              required: !hideUsername ? "Username is required" : false,
+              minLength: 1,
+            })}
+            placeholder="Username"
+          />
+        </FormItem>
+      )}
       {(isFirstConnection || isSupportedBrowser || isSettingsConfig) && (
         <>
           <DevicesSection>
             <SectionTitle>
               {isBrowserSafari ? "Device" : "Devices"}
+              <ReloadDevicesButton />
             </SectionTitle>
             {isBrowserFirefox && <FirefoxWarning type="firefox-warning" />}
           </DevicesSection>
@@ -332,9 +336,6 @@ export const UserSettingsForm = ({
         </>
       )}
       <ButtonWrapper>
-        {(isFirstConnection || isSupportedBrowser || isSettingsConfig) && (
-          <ReloadDevicesButton />
-        )}
         <SubmitButton
           type="button"
           disabled={isJoinProduction ? !isValid : false}

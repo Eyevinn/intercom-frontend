@@ -1,6 +1,5 @@
 import { FC } from "react";
 import { useSubmitOnEnter } from "../../hooks/use-submit-form-enter-press";
-import { DisplayContainerHeader } from "../landing-page/display-container-header";
 import { Modal } from "../modal/modal";
 import { ModalConfirmationText } from "../modal/modal-confirmation-text";
 import { VerifyDecision } from "./verify-decision";
@@ -30,8 +29,7 @@ export const ConfirmationModal: FC<ConfirmationModalProps> = (props) => {
   });
 
   return (
-    <Modal onClose={onCancel}>
-      <DisplayContainerHeader>{title}</DisplayContainerHeader>
+    <Modal onClose={onCancel} title={title}>
       <ModalConfirmationText>{description}</ModalConfirmationText>
       {confirmationText && (
         <ModalConfirmationText className="bold">

@@ -9,8 +9,6 @@ import { CallData } from "../../hooks/use-call-list.ts";
 import { usePushToTalk } from "../../hooks/use-push-to-talk.ts";
 import logger from "../../utils/logger.ts";
 import { DisplayWarning } from "../display-box.tsx";
-import { GenerateWhipUrlButton } from "../generate-urls/generate-whip-url/generate-whip-url-button.tsx";
-import { GenerateWhepUrlButton } from "../generate-urls/generate-whep-url/generate-whep-url-button.tsx";
 import { FlexContainer } from "../generic-components.ts";
 import { useFetchProduction } from "../landing-page/use-fetch-production.ts";
 import { Spinner } from "../loader/loader.tsx";
@@ -19,7 +17,7 @@ import { ConfirmationModal } from "../verify-decision/confirmation-modal.tsx";
 import { CallHeaderComponent } from "./call-header.tsx";
 import { CollapsableSection } from "./collapsable-section.tsx";
 import { ExitCallButton } from "./exit-call-button.tsx";
-import { HotkeysComponent } from "./hotkeys-component.tsx";
+import { SettingsModal } from "./settings-modal.tsx";
 import { LongPressToTalkButton } from "./long-press-to-talk-button.tsx";
 import { MinifiedUserControls } from "./minified-user-controls.tsx";
 import {
@@ -30,7 +28,6 @@ import {
   ListWrapper,
   LoaderWrapper,
   LongPressWrapper,
-  UrlButtonsWrapper,
 } from "./production-line-components.ts";
 import { SelectDevices } from "./select-devices.tsx";
 import { SymphonyRtcConnectionComponent } from "./symphony-rtc-connection-component.tsx";
@@ -93,6 +90,7 @@ export const ProductionLine = ({
   const [userId, setUserId] = useState("");
   const [userName, setUserName] = useState("");
   const [open, setOpen] = useState<boolean>(!isMobile);
+  const [hotkeysModalOpen, setHotkeysModalOpen] = useState(false);
   const {
     joinProductionOptions,
     audiooutput,
@@ -466,6 +464,15 @@ export const ProductionLine = ({
               line={line}
               production={production}
               setOpen={() => setOpen(!open)}
+              showHotkeys={
+                !!(
+                  inputAudioStream &&
+                  inputAudioStream !== "no-device" &&
+                  !isMobile &&
+                  !isTablet
+                )
+              }
+              onOpenHotkeys={() => setHotkeysModalOpen(true)}
             />
           )}
           {!open && joinProductionOptions && (
@@ -534,21 +541,7 @@ export const ProductionLine = ({
                           />
                         </CollapsableSection>
                       )}
-                      {inputAudioStream &&
-                        inputAudioStream !== "no-device" &&
-                        !isMobile &&
-                        !isTablet && (
-                          <CollapsableSection title="Hotkeys">
-                            <HotkeysComponent
-                              callId={id}
-                              savedHotkeys={savedHotkeys}
-                              customGlobalMute={customGlobalMute}
-                              line={line}
-                              joinProductionOptions={joinProductionOptions}
-                            />
-                          </CollapsableSection>
-                        )}
-                      <CollapsableSection title="Participants">
+                      <CollapsableSection title="Participants" startOpen>
                         {line && (
                           <UserList
                             sessionId={sessionId}
@@ -600,20 +593,21 @@ export const ProductionLine = ({
                   </ListWrapper>
                 </FlexContainer>
               )}
-              {production && line && (
-                <UrlButtonsWrapper>
-                  <GenerateWhipUrlButton
-                    productionId={production.productionId}
-                    lineId={line.id}
-                  />
-                  <GenerateWhepUrlButton
-                    productionId={production.productionId}
-                    lineId={line.id}
-                  />
-                </UrlButtonsWrapper>
-              )}
             </InnerDiv>
           </ExpandableSection>
+          {hotkeysModalOpen && savedHotkeys && joinProductionOptions && (
+            <SettingsModal
+              isOpen={hotkeysModalOpen}
+              callId={id}
+              savedHotkeys={savedHotkeys}
+              customGlobalMute={customGlobalMute}
+              lineName={line?.name}
+              programOutPutLine={line?.programOutputLine}
+              isProgramUser={joinProductionOptions.isProgramUser}
+              onClose={() => setHotkeysModalOpen(false)}
+              onSave={() => setHotkeysModalOpen(false)}
+            />
+          )}
         </CallContainer>
       )}
     </CallWrapper>
