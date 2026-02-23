@@ -34,14 +34,18 @@ export default defineConfig({
     },
   },
   projects: [
-    // Desktop — Chromium at three laptop sizes
-    {
-      name: "chromium-13inch",
-      use: {
-        ...devices["Desktop Chrome"],
-        viewport: { width: 1280, height: 800 },
-      },
-    },
+    // Desktop — Chromium at three laptop sizes (local only, CI runs chromium-15inch)
+    ...(process.env.CI
+      ? []
+      : [
+          {
+            name: "chromium-13inch",
+            use: {
+              ...devices["Desktop Chrome"],
+              viewport: { width: 1280, height: 800 },
+            },
+          },
+        ]),
     {
       name: "chromium-15inch",
       use: {
@@ -49,13 +53,17 @@ export default defineConfig({
         viewport: { width: 1440, height: 900 },
       },
     },
-    {
-      name: "chromium-17inch",
-      use: {
-        ...devices["Desktop Chrome"],
-        viewport: { width: 1920, height: 1080 },
-      },
-    },
+    ...(process.env.CI
+      ? []
+      : [
+          {
+            name: "chromium-17inch",
+            use: {
+              ...devices["Desktop Chrome"],
+              viewport: { width: 1920, height: 1080 },
+            },
+          },
+        ]),
     // Desktop — Firefox
     {
       name: "firefox-15inch",
