@@ -5,7 +5,32 @@ import { API } from "../api/api";
 const REAUTH_MAX_ATTEMPTS = 3;
 const REAUTH_RETRY_DELAY_MS = 3000;
 
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+const sleep = (ms: number) =>
+  new Promise<void>((resolve) => {
+    setTimeout(resolve, ms);
+  });
+
+const attemptReauth = async (): Promise<Error | null> => {
+  let lastError: Error | null = null;
+  let attempt = 0;
+
+  while (attempt < REAUTH_MAX_ATTEMPTS) {
+    attempt += 1;
+    try {
+      // eslint-disable-next-line no-await-in-loop
+      await API.reauth();
+      return null;
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error));
+      if (attempt < REAUTH_MAX_ATTEMPTS) {
+        // eslint-disable-next-line no-await-in-loop
+        await sleep(REAUTH_RETRY_DELAY_MS);
+      }
+    }
+  }
+
+  return lastError;
+};
 
 // Set up automatic token refresh every hour
 export const useSetupTokenRefresh = () => {
@@ -20,21 +45,10 @@ export const useSetupTokenRefresh = () => {
 
     // Function to call reauthenticate with retries
     const reauth = async () => {
-      let lastError: Error | null = null;
-      for (let attempt = 1; attempt <= REAUTH_MAX_ATTEMPTS; attempt++) {
-        try {
-          await API.reauth();
-          return;
-        } catch (error) {
-          lastError = error instanceof Error ? error : new Error(String(error));
-          if (attempt < REAUTH_MAX_ATTEMPTS) {
-            await sleep(REAUTH_RETRY_DELAY_MS);
-          }
-        }
-      }
+      const lastError = await attemptReauth();
 
       if (lastError) {
-        const status = (lastError as Error & { status?: number }).status;
+        const { status } = lastError as Error & { status?: number };
         const is500Error = status === 500 || lastError.message.includes("500");
         if (is500Error) {
           // Don't dispatch 500 errors as they're expected when initial OSC token expires
