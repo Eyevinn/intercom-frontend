@@ -2,7 +2,7 @@ import { test, expect } from "../fixtures/base-fixture";
 
 const isWebkitProject = () =>
   ["webkit-15inch", "mobile-iphone-se", "mobile-iphone-14"].includes(
-    test.info().project.name,
+    test.info().project.name
   );
 
 test.describe("User Settings", () => {
@@ -37,9 +37,9 @@ test.describe("User Settings", () => {
   }) => {
     await landingPage.goto();
     // The select element has an option with Mock Microphone
-    const inputSelect = landingPage.page.locator(
-      'select, [role="combobox"]',
-    ).first();
+    const inputSelect = landingPage.page
+      .locator('select, [role="combobox"]')
+      .first();
     await expect(inputSelect).toBeVisible();
     await expect(inputSelect.locator("option")).toHaveCount(1);
   });
@@ -71,20 +71,16 @@ test.describe("User Settings", () => {
     await expect(landingPage.page.getByText("TestUser")).toBeVisible();
   });
 
-  test("can reopen settings from production list", async ({
-    landingPage,
-  }) => {
+  test("can reopen settings from production list", async ({ landingPage }) => {
     await landingPage.gotoWithSettings("TestUser");
     await landingPage.page.getByText("TestUser").click();
 
     await expect(
-      landingPage.page.getByRole("button", { name: "Save" }),
+      landingPage.page.getByRole("button", { name: "Save" })
     ).toBeVisible();
   });
 
-  test("username persists when reopening settings", async ({
-    landingPage,
-  }) => {
+  test("username persists when reopening settings", async ({ landingPage }) => {
     await landingPage.gotoWithSettings("PersistUser");
     await landingPage.page.getByText("PersistUser").click();
 
@@ -94,7 +90,7 @@ test.describe("User Settings", () => {
   test("shows Refresh devices button", async ({ landingPage }) => {
     await landingPage.goto();
     await expect(
-      landingPage.page.getByRole("button", { name: "Refresh devices" }),
+      landingPage.page.getByRole("button", { name: "Refresh devices" })
     ).toBeVisible();
   });
 });

@@ -14,7 +14,7 @@ export class CallsPagePO {
 
   async gotoWithParams(productionId: string, lineId: string) {
     await this.page.goto(
-      `/production-calls/production/${productionId}/line/${lineId}`,
+      `/production-calls/production/${productionId}/line/${lineId}`
     );
   }
 }

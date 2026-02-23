@@ -32,7 +32,7 @@ export class CreateProductionPagePO {
   async fillAndSubmit(
     productionName: string,
     defaultLineName: string,
-    additionalLines: string[] = [],
+    additionalLines: string[] = []
   ) {
     await this.productionNameInput.fill(productionName);
     await this.defaultLineInput.fill(defaultLineName);
@@ -47,14 +47,12 @@ export class CreateProductionPagePO {
   }
 
   async expectConfirmation() {
-    await expect(
-      this.page.getByText(/has been created/i),
-    ).toBeVisible();
+    await expect(this.page.getByText(/has been created/i)).toBeVisible();
   }
 
   async expectDuplicateLineError() {
     await expect(
-      this.page.getByText(/line name must be unique/i),
+      this.page.getByText(/line name must be unique/i)
     ).toBeVisible();
   }
 }

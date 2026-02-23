@@ -17,9 +17,7 @@ test.describe("Responsive Layout", () => {
     await expect(createProductionPage.createButton).toBeVisible();
   });
 
-  test("production list renders on all viewports", async ({
-    landingPage,
-  }) => {
+  test("production list renders on all viewports", async ({ landingPage }) => {
     await landingPage.gotoWithSettings("TestUser");
     await landingPage.expectProductionVisible("Morning Show");
   });

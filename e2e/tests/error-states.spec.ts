@@ -38,7 +38,7 @@ test.describe("Error States", () => {
     await page.goto("/");
     // The app should still render — not crash
     await expect(
-      page.getByRole("button", { name: /open intercom/i }),
+      page.getByRole("button", { name: /open intercom/i })
     ).toBeVisible();
   });
 
@@ -49,7 +49,7 @@ test.describe("Error States", () => {
     // Visit a 404 page
     await page.goto("/does-not-exist");
     await expect(
-      page.getByRole("button", { name: /open intercom/i }),
+      page.getByRole("button", { name: /open intercom/i })
     ).toBeVisible();
   });
 });

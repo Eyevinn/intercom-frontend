@@ -1,7 +1,6 @@
 import { test, expect } from "../fixtures/base-fixture";
 
-const isMobileProject = () =>
-  test.info().project.name.startsWith("mobile-");
+const isMobileProject = () => test.info().project.name.startsWith("mobile-");
 
 test.describe("Landing Page", () => {
   test("shows user settings form on first visit", async ({ landingPage }) => {
@@ -14,7 +13,7 @@ test.describe("Landing Page", () => {
     await landingPage.goto();
     await expect(landingPage.usernameInput).toHaveAttribute(
       "placeholder",
-      "Username",
+      "Username"
     );
   });
 
@@ -54,7 +53,7 @@ test.describe("Landing Page", () => {
   }) => {
     await landingPage.goto();
     await expect(
-      landingPage.page.getByText("User Settings").first(),
+      landingPage.page.getByText("User Settings").first()
     ).toBeVisible();
   });
 });

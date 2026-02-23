@@ -9,7 +9,7 @@ test.describe("Share Link Modal", () => {
 
     // Share modal should appear
     await expect(
-      landingPage.page.getByText("Share Production URLs"),
+      landingPage.page.getByText("Share Production URLs")
     ).toBeVisible();
   });
 
@@ -20,7 +20,7 @@ test.describe("Share Link Modal", () => {
     await landingPage.page.getByTitle("Get share link").first().click();
 
     await expect(
-      landingPage.page.getByText("Each link can only be used once"),
+      landingPage.page.getByText("Each link can only be used once")
     ).toBeVisible();
   });
 
@@ -28,9 +28,7 @@ test.describe("Share Link Modal", () => {
     await landingPage.gotoWithSettings("TestUser");
     await landingPage.page.getByTitle("Get share link").first().click();
 
-    await expect(
-      landingPage.page.getByText(/refresh url/i),
-    ).toBeVisible();
+    await expect(landingPage.page.getByText(/refresh url/i)).toBeVisible();
   });
 });
 
@@ -46,10 +44,10 @@ test.describe("Confirmation Modal", () => {
       .click();
 
     await expect(
-      manageProductionsPage.page.getByRole("button", { name: "Yes" }),
+      manageProductionsPage.page.getByRole("button", { name: "Yes" })
     ).toBeVisible();
     await expect(
-      manageProductionsPage.page.getByRole("button", { name: "Cancel" }),
+      manageProductionsPage.page.getByRole("button", { name: "Cancel" })
     ).toBeVisible();
   });
 
@@ -64,7 +62,7 @@ test.describe("Confirmation Modal", () => {
       .click();
 
     await expect(
-      manageProductionsPage.page.getByText(/Evening News.*Are you sure/i),
+      manageProductionsPage.page.getByText(/Evening News.*Are you sure/i)
     ).toBeVisible();
   });
 });

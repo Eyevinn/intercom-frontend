@@ -1,7 +1,6 @@
 import { test, expect } from "../fixtures/base-fixture";
 
-const isMobileProject = () =>
-  test.info().project.name.startsWith("mobile-");
+const isMobileProject = () => test.info().project.name.startsWith("mobile-");
 
 test.describe("Navigation", () => {
   test("shows 404 for unknown routes", async ({ page, mockApi }) => {
@@ -12,7 +11,7 @@ test.describe("Navigation", () => {
   test("header is visible on landing page", async ({ page, mockApi }) => {
     await page.goto("/");
     await expect(
-      page.getByRole("button", { name: /open intercom/i }),
+      page.getByRole("button", { name: /open intercom/i })
     ).toBeVisible();
   });
 

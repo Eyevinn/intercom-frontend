@@ -7,7 +7,7 @@ test.describe("Calls Page", () => {
     await callsPage.gotoWithParams("1", "10");
     // The calls page should render without crashing
     await expect(callsPage.page).toHaveURL(
-      /production-calls\/production\/1\/line\/10/,
+      /production-calls\/production\/1\/line\/10/
     );
   });
 

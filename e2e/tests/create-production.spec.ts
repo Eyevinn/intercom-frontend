@@ -27,9 +27,7 @@ test.describe("Create Production", () => {
     await createProductionPage.expectConfirmation();
   });
 
-  test("shows duplicate line name error", async ({
-    createProductionPage,
-  }) => {
+  test("shows duplicate line name error", async ({ createProductionPage }) => {
     await createProductionPage.goto();
     await createProductionPage.productionNameInput.fill("My Show");
     await createProductionPage.defaultLineInput.fill("Same Name");
@@ -42,13 +40,13 @@ test.describe("Create Production", () => {
   test("can add additional lines", async ({ createProductionPage }) => {
     await createProductionPage.goto();
     await expect(
-      createProductionPage.page.getByPlaceholder("Line Name"),
+      createProductionPage.page.getByPlaceholder("Line Name")
     ).toHaveCount(1);
 
     await createProductionPage.addLineButton.click();
 
     await expect(
-      createProductionPage.page.getByPlaceholder("Line Name"),
+      createProductionPage.page.getByPlaceholder("Line Name")
     ).toHaveCount(2);
   });
 
@@ -65,7 +63,7 @@ test.describe("Create Production", () => {
   }) => {
     await createProductionPage.goto();
     await expect(
-      createProductionPage.page.getByText("Audio Feed").first(),
+      createProductionPage.page.getByText("Audio Feed").first()
     ).toBeVisible();
   });
 
@@ -124,7 +122,7 @@ test.describe("Create Production", () => {
     await createProductionPage.createButton.click();
 
     await expect(
-      createProductionPage.page.getByText(/production name is required/i),
+      createProductionPage.page.getByText(/production name is required/i)
     ).toBeVisible();
   });
 
@@ -136,7 +134,7 @@ test.describe("Create Production", () => {
     await createProductionPage.createButton.click();
 
     await expect(
-      createProductionPage.page.getByText(/line name is required/i),
+      createProductionPage.page.getByText(/line name is required/i)
     ).toBeVisible();
   });
 
@@ -149,7 +147,7 @@ test.describe("Create Production", () => {
 
     // Confirmation should disappear after ~4 seconds
     await expect(
-      createProductionPage.page.getByText(/has been created/i),
+      createProductionPage.page.getByText(/has been created/i)
     ).toBeHidden({ timeout: 6000 });
   });
 

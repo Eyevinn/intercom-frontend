@@ -23,9 +23,7 @@ test.describe("Production List", () => {
     await expect(morningShowItem.getByText("1")).toBeVisible();
   });
 
-  test("shows Join button on lines when expanded", async ({
-    landingPage,
-  }) => {
+  test("shows Join button on lines when expanded", async ({ landingPage }) => {
     await landingPage.gotoWithSettings("TestUser");
 
     await landingPage.page.getByText("Morning Show").click();
@@ -37,9 +35,7 @@ test.describe("Production List", () => {
     await expect(joinButtons.first()).toBeVisible();
   });
 
-  test("shows participant name on expanded line", async ({
-    landingPage,
-  }) => {
+  test("shows participant name on expanded line", async ({ landingPage }) => {
     await landingPage.gotoWithSettings("TestUser");
     await landingPage.page.getByText("Morning Show").click();
 
@@ -55,10 +51,10 @@ test.describe("Production List", () => {
     await landingPage.gotoWithSettings("TestUser");
 
     await expect(
-      landingPage.page.getByText("No productions yet"),
+      landingPage.page.getByText("No productions yet")
     ).toBeVisible();
     await expect(
-      landingPage.page.getByText("Create your first production"),
+      landingPage.page.getByText("Create your first production")
     ).toBeVisible();
   });
 
@@ -76,7 +72,7 @@ test.describe("Production List", () => {
   test("shows Productions heading", async ({ landingPage }) => {
     await landingPage.gotoWithSettings("TestUser");
     await expect(
-      landingPage.page.getByRole("heading", { name: "Productions" }),
+      landingPage.page.getByRole("heading", { name: "Productions" })
     ).toBeVisible();
   });
 

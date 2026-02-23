@@ -96,7 +96,7 @@ export const setupApiMocks = async (page: Page): Promise<MockApi> => {
       const prodId = lineMatch[1];
       const lineId = lineMatch[2];
       const production = state.productions.find(
-        (p) => p.productionId === prodId,
+        (p) => p.productionId === prodId
       );
       const line = production?.lines.find((l) => l.id === lineId);
       if (line) {
@@ -112,7 +112,7 @@ export const setupApiMocks = async (page: Page): Promise<MockApi> => {
       const prodId = lineMatch[1];
       const lineId = lineMatch[2];
       const production = state.productions.find(
-        (p) => p.productionId === prodId,
+        (p) => p.productionId === prodId
       );
       if (production) {
         production.lines = production.lines.filter((l) => l.id !== lineId);
@@ -123,7 +123,7 @@ export const setupApiMocks = async (page: Page): Promise<MockApi> => {
       const lineId = lineMatch[2];
       const body = route.request().postDataJSON();
       const production = state.productions.find(
-        (p) => p.productionId === prodId,
+        (p) => p.productionId === prodId
       );
       const line = production?.lines.find((l) => l.id === lineId);
       if (line && body.name) {
@@ -149,7 +149,7 @@ export const setupApiMocks = async (page: Page): Promise<MockApi> => {
       const prodId = prodMatch[1];
       const body = route.request().postDataJSON();
       const production = state.productions.find(
-        (p) => p.productionId === prodId,
+        (p) => p.productionId === prodId
       );
       if (production) {
         const newLine = {
@@ -171,7 +171,7 @@ export const setupApiMocks = async (page: Page): Promise<MockApi> => {
     } else if (method === "GET" && prodMatch) {
       const prodId = prodMatch[1];
       const production = state.productions.find(
-        (p) => p.productionId === prodId,
+        (p) => p.productionId === prodId
       );
       route.fulfill({
         status: 200,
@@ -197,7 +197,7 @@ export const setupApiMocks = async (page: Page): Promise<MockApi> => {
             smbConferenceId: `conf-${state.nextProductionId}-${i}`,
             participants: [],
             programOutputLine: l.programOutputLine || false,
-          }),
+          })
         ),
       };
       state.nextProductionId += 1;
@@ -213,50 +213,43 @@ export const setupApiMocks = async (page: Page): Promise<MockApi> => {
   });
 
   // Single production — GET/DELETE/PATCH
-  await page.route(
-    /\/api\/v1\/production\/\d+$/,
-    (route: Route) => {
-      const method = route.request().method();
-      const url = route.request().url();
-      const idMatch = url.match(/production\/(\d+)$/);
-      const id = idMatch?.[1];
+  await page.route(/\/api\/v1\/production\/\d+$/, (route: Route) => {
+    const method = route.request().method();
+    const url = route.request().url();
+    const idMatch = url.match(/production\/(\d+)$/);
+    const id = idMatch?.[1];
 
-      if (method === "GET" && id) {
-        const production = state.productions.find(
-          (p) => p.productionId === id,
-        );
-        if (production) {
-          route.fulfill({
-            status: 200,
-            contentType: "application/json",
-            body: JSON.stringify(production),
-          });
-        } else {
-          route.fulfill({ status: 404, body: "Not found" });
-        }
-      } else if (method === "DELETE" && id) {
-        state.productions = state.productions.filter(
-          (p) => p.productionId !== id,
-        );
-        route.fulfill({ status: 200, body: "Deleted" });
-      } else if (method === "PATCH" && id) {
-        const body = route.request().postDataJSON();
-        const production = state.productions.find(
-          (p) => p.productionId === id,
-        );
-        if (production && body.name) {
-          production.name = body.name;
-        }
+    if (method === "GET" && id) {
+      const production = state.productions.find((p) => p.productionId === id);
+      if (production) {
         route.fulfill({
           status: 200,
           contentType: "application/json",
           body: JSON.stringify(production),
         });
       } else {
-        route.continue();
+        route.fulfill({ status: 404, body: "Not found" });
       }
-    },
-  );
+    } else if (method === "DELETE" && id) {
+      state.productions = state.productions.filter(
+        (p) => p.productionId !== id
+      );
+      route.fulfill({ status: 200, body: "Deleted" });
+    } else if (method === "PATCH" && id) {
+      const body = route.request().postDataJSON();
+      const production = state.productions.find((p) => p.productionId === id);
+      if (production && body.name) {
+        production.name = body.name;
+      }
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(production),
+      });
+    } else {
+      route.continue();
+    }
+  });
 
   return {
     state,

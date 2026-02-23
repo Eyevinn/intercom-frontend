@@ -1,9 +1,7 @@
 import { test, expect } from "../fixtures/base-fixture";
 
 test.describe("Manage Productions", () => {
-  test("displays existing productions", async ({
-    manageProductionsPage,
-  }) => {
+  test("displays existing productions", async ({ manageProductionsPage }) => {
     await manageProductionsPage.goto();
     await manageProductionsPage.expectProductionVisible("Morning Show");
     await manageProductionsPage.expectProductionVisible("Evening News");
@@ -18,9 +16,7 @@ test.describe("Manage Productions", () => {
     await expect(manageProductionsPage.page).toHaveURL("/");
   });
 
-  test("navigates back to landing page", async ({
-    manageProductionsPage,
-  }) => {
+  test("navigates back to landing page", async ({ manageProductionsPage }) => {
     await manageProductionsPage.goto();
     await manageProductionsPage.backButton.click();
     await expect(manageProductionsPage.page).toHaveURL("/");
@@ -31,7 +27,7 @@ test.describe("Manage Productions", () => {
   }) => {
     await manageProductionsPage.goto();
     await expect(
-      manageProductionsPage.page.getByText("Manage Productions"),
+      manageProductionsPage.page.getByText("Manage Productions")
     ).toBeVisible();
   });
 
@@ -43,7 +39,7 @@ test.describe("Manage Productions", () => {
 
     const deleteProductionBtns = manageProductionsPage.page.getByRole(
       "button",
-      { name: "Delete Production" },
+      { name: "Delete Production" }
     );
     await expect(deleteProductionBtns.first()).toBeVisible();
   });
@@ -57,7 +53,7 @@ test.describe("Manage Productions", () => {
     await expect(
       manageProductionsPage.page
         .getByRole("button", { name: "Add Line" })
-        .first(),
+        .first()
     ).toBeVisible();
   });
 
@@ -75,14 +71,14 @@ test.describe("Manage Productions", () => {
 
     await expect(
       manageProductionsPage.page.getByText(
-        /you are about to delete the production/i,
-      ),
+        /you are about to delete the production/i
+      )
     ).toBeVisible();
     await expect(
-      manageProductionsPage.page.getByRole("button", { name: "Yes" }),
+      manageProductionsPage.page.getByRole("button", { name: "Yes" })
     ).toBeVisible();
     await expect(
-      manageProductionsPage.page.getByRole("button", { name: "Cancel" }),
+      manageProductionsPage.page.getByRole("button", { name: "Cancel" })
     ).toBeVisible();
   });
 
@@ -101,8 +97,8 @@ test.describe("Manage Productions", () => {
 
     await expect(
       manageProductionsPage.page.getByText(
-        /you are about to delete the production/i,
-      ),
+        /you are about to delete the production/i
+      )
     ).toBeHidden();
     await manageProductionsPage.expectProductionVisible("Evening News");
   });
@@ -121,13 +117,11 @@ test.describe("Manage Productions", () => {
       .click();
 
     await expect(
-      manageProductionsPage.page.getByText("Evening News", { exact: true }),
+      manageProductionsPage.page.getByText("Evening News", { exact: true })
     ).not.toBeVisible({ timeout: 5000 });
   });
 
-  test("shows Delete button for lines", async ({
-    manageProductionsPage,
-  }) => {
+  test("shows Delete button for lines", async ({ manageProductionsPage }) => {
     await manageProductionsPage.goto();
     await manageProductionsPage.page.getByText("Morning Show").click();
 
@@ -166,9 +160,7 @@ test.describe("Manage Productions", () => {
     await deleteButtons.nth(1).click();
 
     await expect(
-      manageProductionsPage.page.getByText(
-        /you are about to delete the line/i,
-      ),
+      manageProductionsPage.page.getByText(/you are about to delete the line/i)
     ).toBeVisible();
   });
 
@@ -182,7 +174,7 @@ test.describe("Manage Productions", () => {
       .click({ force: true });
 
     await expect(
-      manageProductionsPage.page.getByPlaceholder("Line Name"),
+      manageProductionsPage.page.getByPlaceholder("Line Name")
     ).toBeVisible();
 
     await manageProductionsPage.page
@@ -193,7 +185,7 @@ test.describe("Manage Productions", () => {
       .click();
 
     await expect(
-      manageProductionsPage.page.getByText(/has been created/i),
+      manageProductionsPage.page.getByText(/has been created/i)
     ).toBeVisible();
   });
 
