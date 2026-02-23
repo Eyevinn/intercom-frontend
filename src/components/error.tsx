@@ -31,7 +31,7 @@ const CloseErrorButton = styled.button`
 
 export const ErrorBanner: FC = () => {
   const [callError, setCallError] = useState<string[] | null>(null);
-  const [{ error }, dispatch] = useGlobalState();
+  const [{ error, apiError }, dispatch] = useGlobalState();
 
   useEffect(() => {
     const displayedMessages = new Set<string>();
@@ -58,6 +58,8 @@ export const ErrorBanner: FC = () => {
       });
     }
   };
+
+  if (apiError) return null;
 
   return (
     <>
