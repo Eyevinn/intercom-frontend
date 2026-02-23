@@ -165,11 +165,12 @@ export const CallsPage = () => {
         )}
 
         {showSettings && (
-          <Modal onClose={() => setShowSettings(false)}>
+          <Modal onClose={() => setShowSettings(false)} title="User Settings">
             <UserSettings
               buttonText="Save"
               needsConfirmation
               onSave={() => setShowSettings(false)}
+              hideTitle
             />
           </Modal>
         )}
@@ -207,6 +208,7 @@ export const CallsPage = () => {
               addAdditionalCallId={productionId}
               closeAddCallView={() => setAddCallActive(false)}
               className="calls-page"
+              hideUsername
             />
           )}
           <ProductionLines

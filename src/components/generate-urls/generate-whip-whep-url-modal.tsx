@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-import { generateWhepUrl } from "../../../utils/generateWhepUrl";
-import { CopyButton } from "../../copy-button/copy-button";
-import { DecorativeLabel } from "../../form-elements/form-elements";
-import { Modal } from "../../modal/modal";
-import { RefreshButton } from "../../refresh-button/refresh-button";
+import { generateWhipUrl } from "../../utils/generateWhipUrl";
+import { generateWhepUrl } from "../../utils/generateWhepUrl";
+import { CopyButton } from "../copy-button/copy-button";
+import { DecorativeLabel } from "../form-elements/form-elements";
+import { Modal } from "../modal/modal";
+import { RefreshButton } from "../refresh-button/refresh-button";
 import {
   CombinedInputWrapper,
   InputWrapper,
@@ -13,29 +14,31 @@ import {
   ModalTextBold,
   ModalTextItalic,
   Wrapper,
-} from "../generate-urls-components";
+} from "./generate-urls-components";
 
-type TGenerateWhepUrlModalProps = {
+type TGenerateWhipWhepUrlModalProps = {
   productionId: string;
   lineId: string;
   onClose: () => void;
 };
 
-export const GenerateWhepUrlModal = ({
+export const GenerateWhipWhepUrlModal = ({
   productionId,
   lineId,
   onClose,
-}: TGenerateWhepUrlModalProps) => {
+}: TGenerateWhipWhepUrlModalProps) => {
   const modalRef = useRef<HTMLDivElement>(null);
   const [username, setUsername] = useState("");
+  const [whipUrl, setWhipUrl] = useState("");
   const [whepUrl, setWhepUrl] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const generateUrl = useCallback(() => {
+  const generateUrls = useCallback(() => {
     if (username.trim()) {
-      const url = generateWhepUrl(productionId, lineId, username.trim());
-      setWhepUrl(url);
+      setWhipUrl(generateWhipUrl(productionId, lineId, username.trim()));
+      setWhepUrl(generateWhepUrl(productionId, lineId, username.trim()));
     } else {
+      setWhipUrl("");
       setWhepUrl("");
     }
   }, [username, productionId, lineId]);
@@ -55,31 +58,51 @@ export const GenerateWhepUrlModal = ({
   }, [onClose]);
 
   useEffect(() => {
-    generateUrl();
-  }, [generateUrl]);
+    generateUrls();
+  }, [generateUrls]);
 
   const handleRefresh = () => {
     setIsLoading(true);
-    generateUrl();
+    generateUrls();
     setTimeout(() => {
       setIsLoading(false);
     }, 500);
   };
 
   return (
-    <Modal onClose={onClose} title="Generate WHEP URL">
+    <Modal onClose={onClose} title="Generate WHIP/WHEP URLs">
       <div ref={modalRef}>
         <ModalText>
-          Enter a username to generate a WHEP URL for connecting to the server.
+          Enter a username to generate WHIP and WHEP URLs for connecting to the
+          server.
         </ModalText>
         <ModalNoteWrapper>
           <ModalTextBold>Note:</ModalTextBold>
           <ModalTextItalic>
-            This URL is tied to the username and will update if you refresh.
+            These URLs are tied to the username and will update if you refresh.
           </ModalTextItalic>
         </ModalNoteWrapper>
 
         <Wrapper>
+          <InputWrapper>
+            <LinkLabel>
+              <DecorativeLabel>WHIP URL</DecorativeLabel>
+              <CombinedInputWrapper>
+                <span>{generateWhipUrl(productionId, lineId, "")}</span>
+                <input
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="username"
+                />
+              </CombinedInputWrapper>
+            </LinkLabel>
+            <CopyButton
+              urls={[whipUrl]}
+              className="share-line-link-modal"
+              disabled={!whipUrl}
+            />
+          </InputWrapper>
+
           <InputWrapper>
             <LinkLabel>
               <DecorativeLabel>WHEP URL</DecorativeLabel>
@@ -101,7 +124,7 @@ export const GenerateWhepUrlModal = ({
         </Wrapper>
 
         <RefreshButton
-          label="Refresh URL"
+          label="Refresh URLs"
           isLoading={isLoading}
           onRefresh={handleRefresh}
         />

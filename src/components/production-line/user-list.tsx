@@ -91,15 +91,20 @@ const OnlineIndicator = styled.div`
 
 const MuteParticipantButton = styled.button`
   width: 3rem;
+  height: 3rem;
   padding: 0.3rem;
   margin: 0;
   background: #302b2b;
   border: 0.1rem solid #707070;
   border-radius: 0.4rem;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   svg {
     fill: #f96c6c;
+    display: block;
   }
 `;
 

@@ -1,30 +1,17 @@
 import styled from "@emotion/styled";
 import { useState } from "react";
-import { HelpIcon } from "../../assets/icons/icon";
 import { PrimaryButton, SecondaryButton } from "../form-elements/form-elements";
 import { Modal } from "../modal/modal";
-import { Tooltip } from "../tooltip/tooltip";
+import {
+  TooltipWrapper,
+  TooltipContent,
+} from "../create-production/create-production-components";
 
 const ButtonWrapper = styled.div`
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
+  gap: 1rem;
   margin-top: 1rem;
-`;
-
-const HeaderWrapper = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding-right: 1rem;
-  margin-bottom: 1rem;
-`;
-
-const ModalHeader = styled.h2`
-  font-size: 1.8rem;
-  font-weight: 800;
-  margin: 0;
-  display: flex;
-  align-items: center;
 `;
 
 const ModalText = styled.p`
@@ -103,19 +90,24 @@ export const ConnectToWsModal = ({
   };
 
   return (
-    <Modal onClose={onClose}>
-      <HeaderWrapper>
-        <ModalHeader>Connect to Companion WebSocket</ModalHeader>
-        <Tooltip tooltipText="View user guide">
-          <a
-            href="https://docs.osaas.io/osaas.wiki/User-Guide%3A-Cloud-Intercom.html#controlling-your-calls-with-an-elgato-stream-deck-using-companion"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <HelpIcon />
-          </a>
-        </Tooltip>
-      </HeaderWrapper>
+    <Modal
+      onClose={onClose}
+      title="Connect to Companion WebSocket"
+      titleExtra={
+        <TooltipWrapper>
+          ⓘ
+          <TooltipContent className="tooltip-content">
+            <a
+              href="https://docs.osaas.io/osaas.wiki/User-Guide%3A-Cloud-Intercom.html#controlling-your-calls-with-an-elgato-stream-deck-using-companion"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              View user guide
+            </a>
+          </TooltipContent>
+        </TooltipWrapper>
+      }
+    >
       <ModalText>
         To connect to the WebSocket server, please enter it&apos;s address:
       </ModalText>

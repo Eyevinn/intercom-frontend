@@ -1,4 +1,5 @@
 import styled from "@emotion/styled";
+import chevronDownUrl from "../../assets/icons/chevron_down.svg?url";
 
 export const FormContainer = styled.form``;
 
@@ -54,13 +55,19 @@ export const FormInput = styled.input`
 export const FormSelect = styled.select`
   width: 100%;
   font-size: 1.6rem;
-  padding: 0.5rem;
+  padding: 0.5rem 3rem 0.5rem 0.5rem;
   ${sharedMargin};
   border: 1px solid #6d6d6d;
   border-radius: 0.5rem;
   background: #32383b;
   color: white;
   cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("${chevronDownUrl}");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 1.2rem;
   &.ingest {
     display: flex;
     align-items: center;
@@ -116,7 +123,7 @@ export const ActionButton = styled.button`
   border: 0 solid #e5e7eb;
   border-radius: 0.5rem;
   box-sizing: border-box;
-  color: #482307;
+  color: #1a1a1a;
   column-gap: 1rem;
   cursor: pointer;
   display: flex;
@@ -254,7 +261,6 @@ export const SecondaryButton = styled(ActionButton)`
 
 export const SectionTitle = styled.div`
   display: flex;
-  justify-content: space-between;
   align-items: center;
   height: 3rem;
   font-weight: bold;

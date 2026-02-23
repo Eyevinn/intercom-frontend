@@ -1,27 +1,51 @@
 import styled from "@emotion/styled";
+import { keyframes } from "@emotion/react";
 import { useEffect, useState } from "react";
 import { RefreshIcon } from "../../assets/icons/icon";
-import { isBrowserFirefox, isMobile, isBrowserSafari } from "../../bowser";
+import { isBrowserFirefox, isMobile } from "../../bowser";
 import { useGlobalState } from "../../global-state/context-provider";
 import { useDevicePermissions } from "../../hooks/use-device-permission";
 import { useFetchDevices } from "../../hooks/use-fetch-devices";
-import { DisplayContainerHeader } from "../landing-page/display-container-header";
-import { PrimaryButton } from "../form-elements/form-elements";
 import { Spinner } from "../loader/loader";
 import { Modal } from "../modal/modal";
 
-export const StyledRefreshBtn = styled(PrimaryButton)`
-  margin-right: 1.5rem;
+const spin = keyframes`
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+`;
+
+const RefreshIconButton = styled.button<{ isRefreshing: boolean }>`
   display: flex;
   align-items: center;
-  min-width: 16rem;
-  min-height: 4.4rem;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 0.5rem;
+  transform: translateY(1px);
+  transition: all 0.15s ease;
+  flex-shrink: 0;
 
   svg,
   .refresh-devices {
     width: 2rem;
     height: 2rem;
-    fill: #242424;
+    fill: #59cbe8;
+    animation: ${spin} 0.8s linear infinite;
+    animation-play-state: ${({ isRefreshing }) =>
+      isRefreshing ? "running" : "paused"};
+  }
+
+  &:hover {
+    background: rgba(89, 203, 232, 0.1);
   }
 `;
 
@@ -64,18 +88,20 @@ export const ReloadDevicesButton = () => {
 
   return (
     <>
-      <StyledRefreshBtn
+      <RefreshIconButton
         type="button"
-        title={isBrowserSafari ? "Refresh device" : "Refresh devices"}
+        title="Refresh devices"
         onClick={() => reloadDevices()}
+        isRefreshing={deviceRefresh}
       >
-        <div>{isBrowserSafari ? "Refresh Device" : "Refresh Devices"}</div>
         {!deviceRefresh && <RefreshIcon />}
         {deviceRefresh && <Spinner className="refresh-devices" />}
-      </StyledRefreshBtn>
+      </RefreshIconButton>
       {firefoxWarningModalOpen && (
-        <Modal onClose={() => setFirefoxWarningModalOpen(false)}>
-          <DisplayContainerHeader>Reset permissions</DisplayContainerHeader>
+        <Modal
+          onClose={() => setFirefoxWarningModalOpen(false)}
+          title="Reset permissions"
+        >
           <p>
             To reload devices Firefox needs the permission to be manually reset,
             please remove permission and reload page instead.

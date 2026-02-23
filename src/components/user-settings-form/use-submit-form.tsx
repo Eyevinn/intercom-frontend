@@ -48,6 +48,7 @@ export const useSubmitForm = ({
 
       const options: TJoinProductionOptions = {
         ...payload,
+        username: payload.username || userSettings?.username || "",
         audioinput: payload?.audioinput || userSettings?.audioinput,
         lineUsedForProgramOutput: selectedLine?.programOutputLine || false,
         isProgramUser: isProgramUser || false,

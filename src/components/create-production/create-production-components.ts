@@ -22,6 +22,7 @@ export const ButtonWrapper = styled.div`
 export const ProductionConfirmation = styled.div`
   background: #91fa8c;
   padding: 1rem;
+  margin-top: 1rem;
   margin-bottom: 1rem;
   border-radius: 0.5rem;
   border: 1px solid #b2ffa1;
@@ -36,9 +37,136 @@ export const FetchErrorMessage = styled.div`
 `;
 
 export const CheckboxWrapper = styled.div`
-  margin-bottom: 3rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+  flex-shrink: 0;
 `;
 
 export const ButtonContainer = styled(FlexContainer)`
   gap: 1rem;
+`;
+
+export const LineCard = styled.div`
+  border: 0.2rem solid #6d6d6d;
+  border-radius: 1rem;
+  padding: 1.5rem 1.5rem 1rem 1.5rem;
+  margin-bottom: 1rem;
+  background: rgba(50, 56, 59, 0.3);
+`;
+
+export const LineCardHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+`;
+
+export const LineNumber = styled.span`
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.05rem;
+`;
+
+export const LineInputRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+
+  > *:first-of-type {
+    flex: 1;
+    min-width: 0;
+  }
+
+  label {
+    margin-bottom: 0;
+  }
+
+  input,
+  select {
+    margin-bottom: 0;
+  }
+`;
+
+export const TooltipWrapper = styled.span`
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  cursor: help;
+
+  &:hover .tooltip-content {
+    visibility: visible;
+    opacity: 1;
+  }
+`;
+
+export const TooltipContent = styled.span`
+  visibility: hidden;
+  opacity: 0;
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #32383b;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0.4rem;
+  font-size: 1.2rem;
+  white-space: normal;
+  width: min(30rem, 90vw);
+  text-align: center;
+  border: 0.1rem solid #6d6d6d;
+  z-index: 10;
+  padding-bottom: 0.9rem;
+  margin-bottom: 0;
+  transition: opacity 0.15s ease;
+
+  a {
+    color: #59cbe8;
+    text-decoration: underline;
+  }
+`;
+
+export const CreateButtonWrapper = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1rem;
+  margin-bottom: 1.5rem;
+`;
+
+export const AddLineCard = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 1.5rem;
+  border: 0.2rem dashed #6d6d6d;
+  border-radius: 1rem;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 1.4rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover:not(:disabled) {
+    border-color: rgba(89, 203, 232, 0.6);
+    color: rgba(89, 203, 232, 0.8);
+    background: rgba(89, 203, 232, 0.05);
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  svg {
+    width: 1.6rem;
+    height: 1.6rem;
+    fill: currentColor;
+  }
 `;
