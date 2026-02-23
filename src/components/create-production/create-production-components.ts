@@ -76,7 +76,7 @@ export const LineInputRow = styled.div`
   align-items: center;
   gap: 1rem;
 
-  > *:first-child {
+  > *:first-of-type {
     flex: 1;
     min-width: 0;
   }
@@ -120,9 +120,14 @@ export const TooltipContent = styled.span`
   text-align: center;
   border: 0.1rem solid #6d6d6d;
   z-index: 10;
-  margin-bottom: 0.4rem;
+  padding-bottom: 0.9rem;
+  margin-bottom: 0;
   transition: opacity 0.15s ease;
-  pointer-events: none;
+
+  a {
+    color: #59cbe8;
+    text-decoration: underline;
+  }
 `;
 
 export const CreateButtonWrapper = styled.div`

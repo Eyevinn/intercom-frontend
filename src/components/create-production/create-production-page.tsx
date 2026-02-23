@@ -55,6 +55,7 @@ export const CreateProductionPage = () => {
     handleSubmit,
     reset,
     trigger,
+    clearErrors,
   } = useForm<FormValues>({
     mode: "onSubmit",
     defaultValues: {
@@ -108,16 +109,27 @@ export const CreateProductionPage = () => {
   };
 
   useEffect(() => {
-    const fieldsToValidate = fields
-      .map((_, i) => (lines?.[i]?.name ? `lines.${i}.name` : null))
-      .filter((field): field is `lines.${number}.name` => Boolean(field));
+    const populated: `lines.${number}.name`[] = [];
+    const empty: `lines.${number}.name`[] = [];
 
-    if (fieldsToValidate.length > 0) {
+    fields.forEach((_, i) => {
+      const field = `lines.${i}.name` as `lines.${number}.name`;
+      if (lines?.[i]?.name?.trim()) {
+        populated.push(field);
+      } else {
+        empty.push(field);
+      }
+    });
+
+    if (empty.length > 0) {
+      clearErrors(empty);
+    }
+    if (populated.length > 0) {
       Promise.all(
-        fieldsToValidate.map((field) => trigger(field, { shouldFocus: false }))
+        populated.map((field) => trigger(field, { shouldFocus: false }))
       );
     }
-  }, [defaultLine, lines, trigger, fields]);
+  }, [defaultLine, lines, trigger, clearErrors, fields]);
 
   const { loading, success, data } = useCreateProduction({
     createNewProduction,

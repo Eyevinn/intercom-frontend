@@ -23,17 +23,8 @@ export const useCheckForDuplicateHotkey = ({ callId, hotkeys }: TProps) => {
       const hotkeysInGlobalState = Object.entries(callState.hotkeys);
       const hotkeysLocalState = Object.entries(hotkeys);
 
-      hotkeysInGlobalState.forEach(([globalKey, globalValue]) => {
-        hotkeysLocalState.forEach(([localKey, localValue]) => {
-          // Skip comparison if both keys are "globalMuteHotkey"
-          if (
-            globalKey === "globalMuteHotkey" &&
-            localKey === "globalMuteHotkey"
-          ) {
-            return;
-          }
-
-          // Add duplicate if values match
+      hotkeysInGlobalState.forEach(([, globalValue]) => {
+        hotkeysLocalState.forEach(([, localValue]) => {
           if (globalValue === localValue) {
             newDuplicates.add(localValue);
           }
@@ -41,13 +32,7 @@ export const useCheckForDuplicateHotkey = ({ callId, hotkeys }: TProps) => {
       });
     });
 
-    // Update state with unique duplicates
-    setHotkeysDuplicate((prev) => {
-      const updatedDuplicates = prev
-        ? new Set([...prev, ...Array.from(newDuplicates)])
-        : newDuplicates;
-      return Array.from(updatedDuplicates);
-    });
+    setHotkeysDuplicate(Array.from(newDuplicates));
   }, [callId, calls, hotkeys]);
 
   return hotkeysDuplicate;

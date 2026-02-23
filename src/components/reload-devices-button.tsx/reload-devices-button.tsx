@@ -39,8 +39,9 @@ const RefreshIconButton = styled.button<{ isRefreshing: boolean }>`
     width: 2rem;
     height: 2rem;
     fill: #59cbe8;
-    animation: ${({ isRefreshing }) =>
-      isRefreshing ? `${spin} 0.8s linear infinite` : "none"};
+    animation: ${spin} 0.8s linear infinite;
+    animation-play-state: ${({ isRefreshing }) =>
+      isRefreshing ? "running" : "paused"};
   }
 
   &:hover {

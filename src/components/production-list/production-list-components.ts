@@ -158,7 +158,7 @@ export const ManageLineInputRow = styled.div`
   align-items: center;
   gap: 1rem;
 
-  > *:first-child {
+  > *:first-of-type {
     flex: 1;
     min-width: 0;
   }

@@ -77,6 +77,8 @@ export const ManageProductionButtons: FC<ManageProductionButtonsProps> = (
     handleSubmit,
     control,
     setValue,
+    trigger,
+    clearErrors,
   } = useForm<Line>({
     defaultValues: {
       name: "",
@@ -134,6 +136,14 @@ export const ManageProductionButtons: FC<ManageProductionButtonsProps> = (
     candidateName: lineName,
     lines: production.lines,
   });
+
+  useEffect(() => {
+    if (lineName?.trim()) {
+      trigger("name", { shouldFocus: false });
+    } else {
+      clearErrors("name");
+    }
+  }, [hasDuplicateWithExistingLines, lineName, trigger, clearErrors]);
 
   const handleAddLineOpen = () => {
     setAddLineOpen(!addLineOpen);
@@ -199,13 +209,6 @@ export const ManageProductionButtons: FC<ManageProductionButtonsProps> = (
             name="name"
             as={<StyledWarningMessage style={{ marginTop: "0.5rem" }} />}
           />
-          {hasDuplicateWithExistingLines && (
-            <StyledWarningMessage
-              style={{ marginTop: "0.5rem", marginBottom: "1rem" }}
-            >
-              Line name must be unique within this production.
-            </StyledWarningMessage>
-          )}
           <CreateLineButton
             onClick={handleSubmit(onSubmit)}
             disabled={hasDuplicateWithExistingLines}
