@@ -128,6 +128,11 @@ export const UserList = ({
 
   const isWhipOnLine = participants.some((p) => p.isWhip);
 
+  const getStatusClass = (isActive: boolean, isWhip: boolean) => {
+    if (!isActive) return "inactive";
+    return isWhip ? "whip" : "user";
+  };
+
   return (
     <Container>
       <ListWrapper>
@@ -146,9 +151,7 @@ export const UserList = ({
                   }
                 >
                   <OnlineIndicator
-                    className={
-                      p.isActive ? (p.isWhip ? "whip" : "user") : "inactive"
-                    }
+                    className={getStatusClass(p.isActive, p.isWhip)}
                   >
                     {(p.isWhip && <WhipIcon />) || <UserIcon />}
                   </OnlineIndicator>

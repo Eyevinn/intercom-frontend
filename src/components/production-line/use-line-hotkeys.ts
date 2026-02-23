@@ -46,12 +46,10 @@ export const useLineHotkeys = ({
         } else {
           muteInput(false);
         }
+      } else if (stopTalking) {
+        stopTalking();
       } else {
-        if (stopTalking) {
-          stopTalking();
-        } else {
-          muteInput(true);
-        }
+        muteInput(true);
       }
       e.preventDefault();
     },

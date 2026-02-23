@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { isMobile } from "../../../bowser";
 import { GenerateUrlButton } from "../generate-url-button";
 import { GenerateWhepUrlModal } from "./generate-whep-url-modal";
@@ -15,25 +16,28 @@ export const GenerateWhepUrlButton = ({
     if (isMinified) {
       if (isMobile) {
         return "WHEP";
-      } else {
-        return "WHEP URL";
       }
-    } else {
-      return "Get WHEP URL";
+      return "WHEP URL";
     }
+    return "Get WHEP URL";
   };
+
+  const renderModalContent = useCallback(
+    (onClose: () => void) => (
+      <GenerateWhepUrlModal
+        productionId={productionId}
+        lineId={lineId}
+        onClose={onClose}
+      />
+    ),
+    [productionId, lineId]
+  );
 
   return (
     <GenerateUrlButton
       isMinified={isMinified}
       label={renderButtonLabel()}
-      modalContent={(onClose) => (
-        <GenerateWhepUrlModal
-          productionId={productionId}
-          lineId={lineId}
-          onClose={onClose}
-        />
-      )}
+      modalContent={renderModalContent}
     />
   );
 };
