@@ -37,10 +37,12 @@ test.describe("Confirmation Modal", () => {
     manageProductionsPage,
   }) => {
     await manageProductionsPage.goto();
-    await manageProductionsPage.page.getByText("Evening News").click();
-    await manageProductionsPage.page
+    const eveningNews = manageProductionsPage.page
+      .locator("div")
+      .filter({ hasText: /^Evening News/ });
+    await eveningNews.first().click();
+    await eveningNews
       .getByRole("button", { name: "Delete Production" })
-      .last()
       .click();
 
     await expect(
@@ -55,10 +57,12 @@ test.describe("Confirmation Modal", () => {
     manageProductionsPage,
   }) => {
     await manageProductionsPage.goto();
-    await manageProductionsPage.page.getByText("Evening News").click();
-    await manageProductionsPage.page
+    const eveningNews = manageProductionsPage.page
+      .locator("div")
+      .filter({ hasText: /^Evening News/ });
+    await eveningNews.first().click();
+    await eveningNews
       .getByRole("button", { name: "Delete Production" })
-      .last()
       .click();
 
     await expect(

@@ -20,7 +20,8 @@ test.describe("Production List", () => {
       .locator("div")
       .filter({ hasText: "Morning Show" })
       .first();
-    await expect(morningShowItem.getByText("1")).toBeVisible();
+    // Use exact match to avoid strict mode violation from multiple "1" elements
+    await expect(morningShowItem.getByText("1", { exact: true }).first()).toBeVisible();
   });
 
   test("shows Join button on lines when expanded", async ({ landingPage }) => {

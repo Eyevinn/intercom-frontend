@@ -61,12 +61,14 @@ test.describe("Manage Productions", () => {
     manageProductionsPage,
   }) => {
     await manageProductionsPage.goto();
-    await manageProductionsPage.page.getByText("Evening News").click();
+    const eveningNews = manageProductionsPage.page
+      .locator("div")
+      .filter({ hasText: /^Evening News/ });
+    await eveningNews.first().click();
 
     // Evening News has no participants — Delete Production is enabled
-    await manageProductionsPage.page
+    await eveningNews
       .getByRole("button", { name: "Delete Production" })
-      .last()
       .click();
 
     await expect(
@@ -84,11 +86,13 @@ test.describe("Manage Productions", () => {
 
   test("can cancel delete production", async ({ manageProductionsPage }) => {
     await manageProductionsPage.goto();
-    await manageProductionsPage.page.getByText("Evening News").click();
+    const eveningNews = manageProductionsPage.page
+      .locator("div")
+      .filter({ hasText: /^Evening News/ });
+    await eveningNews.first().click();
 
-    await manageProductionsPage.page
+    await eveningNews
       .getByRole("button", { name: "Delete Production" })
-      .last()
       .click();
 
     await manageProductionsPage.page
@@ -105,11 +109,13 @@ test.describe("Manage Productions", () => {
 
   test("can delete a production", async ({ manageProductionsPage }) => {
     await manageProductionsPage.goto();
-    await manageProductionsPage.page.getByText("Evening News").click();
+    const eveningNews = manageProductionsPage.page
+      .locator("div")
+      .filter({ hasText: /^Evening News/ });
+    await eveningNews.first().click();
 
-    await manageProductionsPage.page
+    await eveningNews
       .getByRole("button", { name: "Delete Production" })
-      .last()
       .click();
 
     await manageProductionsPage.page
@@ -166,12 +172,12 @@ test.describe("Manage Productions", () => {
 
   test("can add a line in manage mode", async ({ manageProductionsPage }) => {
     await manageProductionsPage.goto();
-    await manageProductionsPage.page.getByText("Evening News").click();
+    const eveningNews = manageProductionsPage.page
+      .locator("div")
+      .filter({ hasText: /^Evening News/ });
+    await eveningNews.first().click();
 
-    await manageProductionsPage.page
-      .getByRole("button", { name: "Add Line" })
-      .last()
-      .click({ force: true });
+    await eveningNews.getByRole("button", { name: "Add Line" }).click();
 
     await expect(
       manageProductionsPage.page.getByPlaceholder("Line Name")
