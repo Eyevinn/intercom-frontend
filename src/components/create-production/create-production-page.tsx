@@ -217,9 +217,8 @@ export const CreateProductionPage = () => {
                   }
                 />
                 <InfoTooltip>
-                  In an <strong>Audio Feed</strong> line, listeners are not
-                  able to talk. Only the <strong>Audio Feed</strong> will be
-                  heard.
+                  In an <strong>Audio Feed</strong> line, listeners are not able
+                  to talk. Only the <strong>Audio Feed</strong> will be heard.
                 </InfoTooltip>
               </CheckboxWrapper>
             )}

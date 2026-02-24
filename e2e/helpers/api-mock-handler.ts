@@ -31,10 +31,7 @@ export const setupApiMocks = async (page: Page): Promise<MockApi> => {
       if (typeof input === "string" && input.includes("0.0.0.0")) {
         input = input.replace("0.0.0.0", "localhost");
       } else if (input instanceof Request && input.url.includes("0.0.0.0")) {
-        input = new Request(
-          input.url.replace("0.0.0.0", "localhost"),
-          input
-        );
+        input = new Request(input.url.replace("0.0.0.0", "localhost"), input);
       }
       return originalFetch(input, init);
     };

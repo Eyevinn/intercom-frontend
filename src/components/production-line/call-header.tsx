@@ -207,7 +207,6 @@ export const CallHeaderComponent = ({
             <CallLineNameText>{line?.name}</CallLineNameText>
           </CallNameRow>
         </CallProductionNameWrapper>
-
       </CallHeaderTexts>
       <HeaderActionsRow>
         {production && line && (
@@ -230,10 +229,7 @@ export const CallHeaderComponent = ({
               </div>
             </DesktopOnly>
             <MobileOnly>
-              <ShareButton
-                title="Share line link"
-                onClick={handleShareClick}
-              >
+              <ShareButton title="Share line link" onClick={handleShareClick}>
                 <ShareIcon />
               </ShareButton>
             </MobileOnly>

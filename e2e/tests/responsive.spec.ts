@@ -5,8 +5,7 @@ import {
   LONG_PARTICIPANT_NAME,
 } from "../fixtures/mock-data";
 
-const isMobileProject = () =>
-  test.info().project.name.startsWith("mobile-");
+const isMobileProject = () => test.info().project.name.startsWith("mobile-");
 const isSmallViewport = () => {
   const viewport = test.info().project.use.viewport;
   return viewport != null && viewport.width <= 768;
@@ -173,9 +172,7 @@ test.describe("Responsive Layout", () => {
 
     test("Line 1 card label is visible", async ({ createProductionPage }) => {
       await createProductionPage.goto();
-      await expect(
-        createProductionPage.page.getByText("Line 1")
-      ).toBeVisible();
+      await expect(createProductionPage.page.getByText("Line 1")).toBeVisible();
     });
 
     test("Add Line button spans full width", async ({
@@ -199,9 +196,7 @@ test.describe("Responsive Layout", () => {
       const input =
         await createProductionPage.productionNameInput.boundingBox();
       expect(input).not.toBeNull();
-      expect(input!.x + input!.width).toBeLessThanOrEqual(
-        viewport.width + 1
-      );
+      expect(input!.x + input!.width).toBeLessThanOrEqual(viewport.width + 1);
     });
 
     test("added line cards are visible and numbered", async ({
@@ -209,13 +204,9 @@ test.describe("Responsive Layout", () => {
     }) => {
       await createProductionPage.goto();
       await createProductionPage.addLineButton.click();
-      await expect(
-        createProductionPage.page.getByText("Line 2")
-      ).toBeVisible();
+      await expect(createProductionPage.page.getByText("Line 2")).toBeVisible();
       await createProductionPage.addLineButton.click();
-      await expect(
-        createProductionPage.page.getByText("Line 3")
-      ).toBeVisible();
+      await expect(createProductionPage.page.getByText("Line 3")).toBeVisible();
     });
 
     test("Audio Feed checkbox is visible alongside line input", async ({
@@ -350,9 +341,7 @@ test.describe("Responsive Layout", () => {
       await page.getByText(truncatedProductionName).first().click();
 
       // The participant name should be visible (shown inline, may be CSS-truncated)
-      const participantEl = page
-        .getByText(LONG_PARTICIPANT_NAME)
-        .first();
+      const participantEl = page.getByText(LONG_PARTICIPANT_NAME).first();
       await expect(participantEl).toBeVisible();
 
       // The participant element should not overflow the viewport
