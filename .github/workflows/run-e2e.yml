@@ -52,8 +52,8 @@ jobs:
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps chromium firefox webkit
 
-      - name: Run E2E Tests (Shard ${{ matrix.shard }}/3)
-        run: npx playwright test --shard=${{ matrix.shard }}/3
+      - name: Run E2E Tests (Shard ${{ matrix.shard }}/2)
+        run: npx playwright test --shard=${{ matrix.shard }}/2
         env:
           CI: true
 

@@ -93,11 +93,5 @@ export default defineConfig({
         ...devices["iPhone SE"],
       },
     },
-    {
-      name: "mobile-iphone-14",
-      use: {
-        ...devices["iPhone 14"],
-      },
-    },
   ],
 });
