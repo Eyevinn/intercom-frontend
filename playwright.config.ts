@@ -93,5 +93,15 @@ export default defineConfig({
         ...devices["iPhone SE"],
       },
     },
+    ...(process.env.CI
+      ? []
+      : [
+          {
+            name: "mobile-iphone-14",
+            use: {
+              ...devices["iPhone 14"],
+            },
+          },
+        ]),
   ],
 });

@@ -113,6 +113,35 @@ Stop container
 docker stop frontend
 ```
 
+## E2E Testing
+
+End-to-end tests use [Playwright](https://playwright.dev/). CI runs a focused subset; locally you get additional screen sizes and devices.
+
+### Test Matrix
+
+| Project | Browser | Viewport | CI | Local |
+|---|---|---|:---:|:---:|
+| `chromium-13inch` | Chromium | 1280×800 | — | ✓ |
+| `chromium-15inch` | Chromium | 1440×900 | ✓ | ✓ |
+| `chromium-17inch` | Chromium | 1920×1080 | — | ✓ |
+| `firefox-15inch` | Firefox | 1440×900 | ✓ | ✓ |
+| `webkit-15inch` | WebKit (Safari) | 1440×900 | ✓ | ✓ |
+| `mobile-iphone-se` | WebKit | 375×667 | ✓ | ✓ |
+| `mobile-iphone-14` | WebKit | 390×844 | — | ✓ |
+
+### Scripts
+
+| Script | What it does |
+|---|---|
+| `yarn e2e` | Run all projects (4 in CI, 7 locally) |
+| `yarn e2e:ui` | Interactive Playwright debugger |
+| `yarn e2e:headed` | All projects with visible browser windows |
+| `yarn e2e:chromium` | Chromium 15" only |
+| `yarn e2e:firefox` | Firefox 15" only |
+| `yarn e2e:webkit` | WebKit 15" only |
+| `yarn e2e:mobile` | Both mobile devices |
+| `yarn e2e:report` | Open last HTML test report |
+
 ## Contributing
 
 Contributions are welcome.

@@ -8,7 +8,7 @@ import { ProductionsList } from "../production-list/productions-list.tsx";
 import { PageHeader } from "../page-layout/page-header.tsx";
 import { AddIcon, EditIcon, HeadsetIcon } from "../../assets/icons/icon.tsx";
 import { PrimaryButton } from "../form-elements/form-elements";
-import { isMobile } from "../../bowser.ts";
+import { HideOnSmallScreen } from "../generic-components";
 
 const HeaderButton = styled(PrimaryButton)`
   margin-left: 1rem;
@@ -110,8 +110,8 @@ export const ProductionsListContainer = () => {
   return (
     <>
       <PageHeader title="Productions" loading={showRefreshing}>
-        {!isMobile && !!productions?.productions.length && (
-          <>
+        {!!productions?.productions.length && (
+          <HideOnSmallScreen>
             <ManageButton onClick={goToManage}>
               <HeaderButtonText>Manage</HeaderButtonText>
               <EditIcon />
@@ -120,7 +120,7 @@ export const ProductionsListContainer = () => {
               <HeaderButtonText>Create</HeaderButtonText>
               <AddIcon />
             </HeaderButton>
-          </>
+          </HideOnSmallScreen>
         )}
       </PageHeader>
       {productions && !productions.productions.length && (

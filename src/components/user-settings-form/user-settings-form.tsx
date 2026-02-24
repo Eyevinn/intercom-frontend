@@ -193,7 +193,7 @@ export const UserSettingsForm = ({
   });
 
   return (
-    <div style={{ minWidth: updateUserSettings ? "40rem" : "" }}>
+    <div style={{ minWidth: updateUserSettings ? "min(40rem, 100%)" : "" }}>
       {!preSelected && isJoinProduction && productions && (
         <FormItem label="Production Name" errors={errors}>
           <FormSelect

@@ -22,6 +22,24 @@ export const setupApiMocks = async (page: Page): Promise<MockApi> => {
     nextProductionId: 100,
   };
 
+  // WebKit blocks requests to 0.0.0.0 as a restricted network host.
+  // Rewrite any 0.0.0.0 URLs to localhost before fetch fires, so the
+  // Playwright route mocks can intercept them normally.
+  await page.addInitScript(() => {
+    const originalFetch = window.fetch;
+    window.fetch = (input, init) => {
+      if (typeof input === "string" && input.includes("0.0.0.0")) {
+        input = input.replace("0.0.0.0", "localhost");
+      } else if (input instanceof Request && input.url.includes("0.0.0.0")) {
+        input = new Request(
+          input.url.replace("0.0.0.0", "localhost"),
+          input
+        );
+      }
+      return originalFetch(input, init);
+    };
+  });
+
   // Reauth — always succeeds
   await page.route("**/api/v1/reauth", (route: Route) => {
     route.fulfill({ status: 200, body: "" });

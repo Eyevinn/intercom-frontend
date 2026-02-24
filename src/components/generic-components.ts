@@ -31,15 +31,17 @@ export const DisplayContainer = styled.div`
 
 export const ResponsiveFormContainer = styled(FormContainer)`
   padding: 0 2rem;
+  max-width: 100%;
 
   &.modal {
     padding: 0;
+    max-width: none;
   }
 
   &.desktop {
     margin: auto;
     margin-top: 15rem;
-    width: 50rem;
+    width: min(50rem, calc(100vw - 4rem));
   }
 
   &.calls-page {
@@ -78,4 +80,12 @@ export const ButtonWrapper = styled.div`
 
 export const ListItemWrapper = styled.div`
   position: relative;
+`;
+
+export const HideOnSmallScreen = styled.span`
+  display: contents;
+
+  ${mediaQueries.isSmallScreen} {
+    display: none;
+  }
 `;
