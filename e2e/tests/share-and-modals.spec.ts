@@ -32,18 +32,24 @@ test.describe("Share Link Modal", () => {
   });
 });
 
+const isMobile = () => test.info().project.name.startsWith("mobile-");
+
 test.describe("Confirmation Modal", () => {
+  test.beforeEach(() => {
+    test.skip(
+      isMobile(),
+      "Manage productions page is not accessible on mobile"
+    );
+  });
+
   test("delete production modal has Yes and Cancel buttons", async ({
     manageProductionsPage,
   }) => {
     await manageProductionsPage.goto();
-    const eveningNews = manageProductionsPage.page
-      .locator("div")
-      .filter({ hasText: /^Evening News/ });
-    await eveningNews.first().click();
-    await eveningNews
-      .getByRole("button", { name: "Delete Production" })
-      .click();
+    await manageProductionsPage.expandProduction("Evening News");
+
+    const card = manageProductionsPage.getProductionCard("Evening News");
+    await card.getByRole("button", { name: "Delete Production" }).click();
 
     await expect(
       manageProductionsPage.page.getByRole("button", { name: "Yes" })
@@ -57,13 +63,10 @@ test.describe("Confirmation Modal", () => {
     manageProductionsPage,
   }) => {
     await manageProductionsPage.goto();
-    const eveningNews = manageProductionsPage.page
-      .locator("div")
-      .filter({ hasText: /^Evening News/ });
-    await eveningNews.first().click();
-    await eveningNews
-      .getByRole("button", { name: "Delete Production" })
-      .click();
+    await manageProductionsPage.expandProduction("Evening News");
+
+    const card = manageProductionsPage.getProductionCard("Evening News");
+    await card.getByRole("button", { name: "Delete Production" }).click();
 
     await expect(
       manageProductionsPage.page.getByText(/Evening News.*Are you sure/i)

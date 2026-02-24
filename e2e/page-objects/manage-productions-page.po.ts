@@ -21,6 +21,29 @@ export class ManageProductionsPagePO {
     return this.page.getByText(name).first();
   }
 
+  /**
+   * Get the collapsible card container for a production by name.
+   * Manage productions is desktop-only (skipped on mobile projects).
+   */
+  getProductionCard(name: string): Locator {
+    return this.page
+      .locator("div")
+      .filter({ hasText: new RegExp(`^${name}`) })
+      .first();
+  }
+
+  /**
+   * Expand a production card by clicking it, then wait for buttons to appear.
+   */
+  async expandProduction(name: string) {
+    await this.page.getByText(name, { exact: true }).click();
+    await expect(
+      this.getProductionCard(name).getByRole("button", {
+        name: "Delete Production",
+      })
+    ).toBeVisible();
+  }
+
   async expectProductionVisible(name: string) {
     await expect(this.getProductionItem(name)).toBeVisible();
   }

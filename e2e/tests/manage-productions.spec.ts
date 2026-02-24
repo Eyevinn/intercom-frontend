@@ -1,6 +1,14 @@
 import { test, expect } from "../fixtures/base-fixture";
 
+const isMobile = () => test.info().project.name.startsWith("mobile-");
+
 test.describe("Manage Productions", () => {
+  test.beforeEach(() => {
+    test.skip(
+      isMobile(),
+      "Manage productions page is not accessible on mobile"
+    );
+  });
   test("displays existing productions", async ({ manageProductionsPage }) => {
     await manageProductionsPage.goto();
     await manageProductionsPage.expectProductionVisible("Morning Show");
@@ -61,15 +69,10 @@ test.describe("Manage Productions", () => {
     manageProductionsPage,
   }) => {
     await manageProductionsPage.goto();
-    const eveningNews = manageProductionsPage.page
-      .locator("div")
-      .filter({ hasText: /^Evening News/ });
-    await eveningNews.first().click();
+    await manageProductionsPage.expandProduction("Evening News");
 
-    // Evening News has no participants — Delete Production is enabled
-    await eveningNews
-      .getByRole("button", { name: "Delete Production" })
-      .click();
+    const card = manageProductionsPage.getProductionCard("Evening News");
+    await card.getByRole("button", { name: "Delete Production" }).click();
 
     await expect(
       manageProductionsPage.page.getByText(
@@ -86,14 +89,10 @@ test.describe("Manage Productions", () => {
 
   test("can cancel delete production", async ({ manageProductionsPage }) => {
     await manageProductionsPage.goto();
-    const eveningNews = manageProductionsPage.page
-      .locator("div")
-      .filter({ hasText: /^Evening News/ });
-    await eveningNews.first().click();
+    await manageProductionsPage.expandProduction("Evening News");
 
-    await eveningNews
-      .getByRole("button", { name: "Delete Production" })
-      .click();
+    const card = manageProductionsPage.getProductionCard("Evening News");
+    await card.getByRole("button", { name: "Delete Production" }).click();
 
     await manageProductionsPage.page
       .getByRole("button", { name: "Cancel" })
@@ -109,14 +108,10 @@ test.describe("Manage Productions", () => {
 
   test("can delete a production", async ({ manageProductionsPage }) => {
     await manageProductionsPage.goto();
-    const eveningNews = manageProductionsPage.page
-      .locator("div")
-      .filter({ hasText: /^Evening News/ });
-    await eveningNews.first().click();
+    await manageProductionsPage.expandProduction("Evening News");
 
-    await eveningNews
-      .getByRole("button", { name: "Delete Production" })
-      .click();
+    const card = manageProductionsPage.getProductionCard("Evening News");
+    await card.getByRole("button", { name: "Delete Production" }).click();
 
     await manageProductionsPage.page
       .getByRole("button", { name: "Yes" })
@@ -172,12 +167,10 @@ test.describe("Manage Productions", () => {
 
   test("can add a line in manage mode", async ({ manageProductionsPage }) => {
     await manageProductionsPage.goto();
-    const eveningNews = manageProductionsPage.page
-      .locator("div")
-      .filter({ hasText: /^Evening News/ });
-    await eveningNews.first().click();
+    await manageProductionsPage.expandProduction("Evening News");
 
-    await eveningNews.getByRole("button", { name: "Add Line" }).click();
+    const card = manageProductionsPage.getProductionCard("Evening News");
+    await card.getByRole("button", { name: "Add Line" }).click();
 
     await expect(
       manageProductionsPage.page.getByPlaceholder("Line Name")
