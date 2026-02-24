@@ -20,6 +20,13 @@ export type MockProduction = {
   lines: MockLine[];
 };
 
+export const LONG_PRODUCTION_NAME =
+  "The Incredibly Long Production Name That Should Definitely Be Truncated Properly";
+export const LONG_LINE_NAME =
+  "Super Long Line Name That Exceeds Any Reasonable Display Width For Testing";
+export const LONG_PARTICIPANT_NAME =
+  "Bartholomew Aloysius Cornelius De Villeneuve III Esquire";
+
 export const mockProductions: MockProduction[] = [
   {
     name: "Morning Show",
@@ -58,6 +65,27 @@ export const mockProductions: MockProduction[] = [
         id: "20",
         smbConferenceId: "conf-20",
         participants: [],
+        programOutputLine: false,
+      },
+    ],
+  },
+  {
+    name: LONG_PRODUCTION_NAME,
+    productionId: "3",
+    lines: [
+      {
+        name: LONG_LINE_NAME,
+        id: "30",
+        smbConferenceId: "conf-30",
+        participants: [
+          {
+            name: LONG_PARTICIPANT_NAME,
+            sessionId: "sess-30",
+            endpointId: "ep-30",
+            isActive: true,
+            isWhip: false,
+          },
+        ],
         programOutputLine: false,
       },
     ],

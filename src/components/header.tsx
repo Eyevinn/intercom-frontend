@@ -3,6 +3,7 @@ import { FC, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { HeadsetIcon } from "../assets/icons/icon.tsx";
 import { backgroundColour } from "../css-helpers/defaults.ts";
+import { mediaQueries } from "./generic-components.ts";
 import { useGlobalState } from "../global-state/context-provider.tsx";
 import { useAudioCue } from "./production-line/use-audio-cue.ts";
 import { ConfirmationModal } from "./verify-decision/confirmation-modal.tsx";
@@ -31,6 +32,15 @@ const HomeButton = styled.button`
     margin-right: 1rem;
     margin-left: 1rem;
     fill: #59cbe8;
+  }
+
+  ${mediaQueries.isSmallScreen} {
+    font-size: 2rem;
+
+    svg {
+      width: 2rem;
+      height: 2rem;
+    }
   }
 `;
 

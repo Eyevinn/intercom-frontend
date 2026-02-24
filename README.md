@@ -44,7 +44,9 @@ LOGGER LEVELS
 
 ### Preview
 
-<img width="2329" height="1276" alt="image" src="https://github.com/user-attachments/assets/c784ac70-2caa-4bca-9a1d-4d0ef883b7bb" />
+<img alt="Production list" src="https://github.com/user-attachments/assets/25bbcff9-5175-4fae-9eed-07fa9c166d6b" />
+<img alt="Manage productions" src="https://github.com/user-attachments/assets/528306ed-d94f-47da-8f60-0cddf89b97cd" />
+<img alt="Active calls" src="https://github.com/user-attachments/assets/73b0be7c-1c70-4516-8c3c-8fde1b68c3c6" />
 
 ### Open Intercom Server in Open Source Cloud
 
@@ -113,34 +115,47 @@ Stop container
 docker stop frontend
 ```
 
+## Scripts
+
+| Script            | What it does                                 |
+| ----------------- | -------------------------------------------- |
+| `yarn dev`        | Start Vite dev server with HMR               |
+| `yarn build`      | Type-check and build for production          |
+| `yarn start`      | Serve the production build locally           |
+| `yarn test`       | Run unit tests (Vitest)                      |
+| `yarn test:watch` | Run unit tests in watch mode                 |
+| `yarn lint`       | Run ESLint on `src/`                         |
+| `yarn pretty`     | Format all files with Prettier               |
+| `yarn typecheck`  | Type-check without emitting (`tsc --noEmit`) |
+
 ## E2E Testing
 
 End-to-end tests use [Playwright](https://playwright.dev/). CI runs a focused subset; locally you get additional screen sizes and devices.
 
 ### Test Matrix
 
-| Project | Browser | Viewport | CI | Local |
-|---|---|---|:---:|:---:|
-| `chromium-13inch` | Chromium | 1280×800 | — | ✓ |
-| `chromium-15inch` | Chromium | 1440×900 | ✓ | ✓ |
-| `chromium-17inch` | Chromium | 1920×1080 | — | ✓ |
-| `firefox-15inch` | Firefox | 1440×900 | ✓ | ✓ |
-| `webkit-15inch` | WebKit (Safari) | 1440×900 | ✓ | ✓ |
-| `mobile-iphone-se` | WebKit | 375×667 | ✓ | ✓ |
-| `mobile-iphone-14` | WebKit | 390×844 | — | ✓ |
+| Project            | Browser         | Viewport  | CI  | Local |
+| ------------------ | --------------- | --------- | :-: | :---: |
+| `chromium-13inch`  | Chromium        | 1280×800  |  —  |   ✓   |
+| `chromium-15inch`  | Chromium        | 1440×900  |  ✓  |   ✓   |
+| `chromium-17inch`  | Chromium        | 1920×1080 |  —  |   ✓   |
+| `firefox-15inch`   | Firefox         | 1440×900  |  ✓  |   ✓   |
+| `webkit-15inch`    | WebKit (Safari) | 1440×900  |  ✓  |   ✓   |
+| `mobile-iphone-se` | WebKit          | 375×667   |  ✓  |   ✓   |
+| `mobile-iphone-14` | WebKit          | 390×844   |  —  |   ✓   |
 
 ### Scripts
 
-| Script | What it does |
-|---|---|
-| `yarn e2e` | Run all projects (4 in CI, 7 locally) |
-| `yarn e2e:ui` | Interactive Playwright debugger |
-| `yarn e2e:headed` | All projects with visible browser windows |
-| `yarn e2e:chromium` | Chromium 15" only |
-| `yarn e2e:firefox` | Firefox 15" only |
-| `yarn e2e:webkit` | WebKit 15" only |
-| `yarn e2e:mobile` | Both mobile devices |
-| `yarn e2e:report` | Open last HTML test report |
+| Script              | What it does                              |
+| ------------------- | ----------------------------------------- |
+| `yarn e2e`          | Run all projects (4 in CI, 7 locally)     |
+| `yarn e2e:ui`       | Interactive Playwright debugger           |
+| `yarn e2e:headed`   | All projects with visible browser windows |
+| `yarn e2e:chromium` | Chromium 15" only                         |
+| `yarn e2e:firefox`  | Firefox 15" only                          |
+| `yarn e2e:webkit`   | WebKit 15" only                           |
+| `yarn e2e:mobile`   | Both mobile devices                       |
+| `yarn e2e:report`   | Open last HTML test report                |
 
 ## Contributing
 

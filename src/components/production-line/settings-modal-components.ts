@@ -36,6 +36,9 @@ export const ModalHeader = styled.h2`
   font-size: 2rem;
   margin: 0;
   font-weight: 600;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  min-width: 0;
 `;
 
 export const ModalCloseButton = styled.button`

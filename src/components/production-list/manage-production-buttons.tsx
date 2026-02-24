@@ -24,10 +24,7 @@ import {
   RemoveIconWrapper,
   ManageLineInputRow,
 } from "./production-list-components";
-import {
-  TooltipWrapper,
-  TooltipContent,
-} from "../create-production/create-production-components";
+import { InfoTooltip } from "../info-tooltip/info-tooltip";
 import {
   ButtonsWrapper,
   DeleteButton,
@@ -43,6 +40,8 @@ const LineConfirmation = styled.div`
   border-radius: 0.5rem;
   border: 1px solid #b2ffa1;
   color: #1a1a1a;
+  overflow-wrap: break-word;
+  word-break: break-word;
 `;
 
 interface ManageProductionButtonsProps {
@@ -195,13 +194,10 @@ export const ManageProductionButtons: FC<ManageProductionButtonsProps> = (
                   />
                 )}
               />
-              <TooltipWrapper>
-                ⓘ
-                <TooltipContent className="tooltip-content">
-                  In an <strong>Audio Feed</strong> line, listeners are not able
-                  to talk. Only the <strong>Audio Feed</strong> will be heard.
-                </TooltipContent>
-              </TooltipWrapper>
+              <InfoTooltip>
+                In an <strong>Audio Feed</strong> line, listeners are not able
+                to talk. Only the <strong>Audio Feed</strong> will be heard.
+              </InfoTooltip>
             </CheckboxWrapper>
           </ManageLineInputRow>
           <ErrorMessage

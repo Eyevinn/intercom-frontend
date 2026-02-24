@@ -8,6 +8,7 @@ export const HeaderWrapper = styled.div`
   align-items: center;
   justify-content: space-between;
   padding: 2rem;
+  overflow: hidden;
 `;
 
 export const HeaderTexts = styled.div`
@@ -60,7 +61,8 @@ export const CollapsibleItemWrapper = styled.div`
   }
 
   ${mediaQueries.isSmallScreen} {
-    flex: 0 0 calc(100%);
+    flex: 0 0 calc(100% - 2rem);
+    min-width: 0;
   }
 `;
 
@@ -81,10 +83,6 @@ export const InnerDiv = styled.div`
   display: flex;
   flex-direction: column;
   position: relative;
-
-  .expanded > & {
-    overflow: visible;
-  }
 `;
 
 export const EditNameIconWrapper = styled.div`

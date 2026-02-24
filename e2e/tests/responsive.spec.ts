@@ -1,4 +1,9 @@
 import { test, expect } from "../fixtures/base-fixture";
+import {
+  LONG_PRODUCTION_NAME,
+  LONG_LINE_NAME,
+  LONG_PARTICIPANT_NAME,
+} from "../fixtures/mock-data";
 
 const isMobileProject = () =>
   test.info().project.name.startsWith("mobile-");
@@ -282,6 +287,94 @@ test.describe("Responsive Layout", () => {
       await expect(
         landingPage.page.getByRole("button", { name: /join/i }).first()
       ).toBeVisible();
+    });
+  });
+
+  test.describe("Long name truncation", () => {
+    // The component truncates names > 40 chars with "..."
+    const truncatedProductionName = `${LONG_PRODUCTION_NAME.slice(0, 40)}...`;
+    const truncatedLineName = `${LONG_LINE_NAME.slice(0, 40)}...`;
+
+    test("long production name is truncated and does not overflow", async ({
+      landingPage,
+    }) => {
+      await landingPage.gotoWithSettings("TestUser");
+      const page = landingPage.page;
+      const viewport = page.viewportSize()!;
+
+      // The truncated name should be visible
+      const nameEl = page.getByText(truncatedProductionName).first();
+      await expect(nameEl).toBeVisible();
+
+      // Full name should NOT appear in the DOM text
+      await expect(page.getByText(LONG_PRODUCTION_NAME)).toHaveCount(0);
+
+      // The card containing it should not overflow
+      const card = nameEl.locator("../..");
+      const box = await card.boundingBox();
+      expect(box).not.toBeNull();
+      expect(box!.x + box!.width).toBeLessThanOrEqual(viewport.width + 1);
+    });
+
+    test("long line name is truncated and does not overflow", async ({
+      landingPage,
+    }) => {
+      await landingPage.gotoWithSettings("TestUser");
+      const page = landingPage.page;
+      const viewport = page.viewportSize()!;
+
+      // Expand the long-name production
+      await page.getByText(truncatedProductionName).first().click();
+
+      // The truncated line name should be visible
+      const lineEl = page.getByText(truncatedLineName).first();
+      await expect(lineEl).toBeVisible();
+
+      // Full line name should NOT appear in the DOM text
+      await expect(page.getByText(LONG_LINE_NAME)).toHaveCount(0);
+
+      // The line block should not overflow
+      const box = await lineEl.boundingBox();
+      expect(box).not.toBeNull();
+      expect(box!.x + box!.width).toBeLessThanOrEqual(viewport.width + 1);
+    });
+
+    test("long participant name does not overflow line block", async ({
+      landingPage,
+    }) => {
+      await landingPage.gotoWithSettings("TestUser");
+      const page = landingPage.page;
+      const viewport = page.viewportSize()!;
+
+      // Expand the long-name production
+      await page.getByText(truncatedProductionName).first().click();
+
+      // The participant name should be visible (shown inline, may be CSS-truncated)
+      const participantEl = page
+        .getByText(LONG_PARTICIPANT_NAME)
+        .first();
+      await expect(participantEl).toBeVisible();
+
+      // The participant element should not overflow the viewport
+      const box = await participantEl.boundingBox();
+      expect(box).not.toBeNull();
+      expect(box!.x + box!.width).toBeLessThanOrEqual(viewport.width + 1);
+    });
+
+    test("long production name card does not overflow on manage page", async ({
+      manageProductionsPage,
+    }) => {
+      const page = manageProductionsPage.page;
+      await manageProductionsPage.goto();
+      const viewport = page.viewportSize()!;
+
+      const nameEl = page.getByText(truncatedProductionName).first();
+      await expect(nameEl).toBeVisible();
+
+      const card = nameEl.locator("../..");
+      const box = await card.boundingBox();
+      expect(box).not.toBeNull();
+      expect(box!.x + box!.width).toBeLessThanOrEqual(viewport.width + 1);
     });
   });
 

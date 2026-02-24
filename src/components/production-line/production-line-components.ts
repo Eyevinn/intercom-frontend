@@ -151,7 +151,7 @@ export const CallWrapper = styled.div<{ isSomeoneSpeaking: boolean }>`
   flex: 0 0 calc(25% - 2rem);
   ${isMobile ? `flex-grow: 1;` : `flex-grow: 0;`}
   min-width: 35rem;
-  max-width: 49rem;
+  max-width: min(49rem, 100%);
   background-color: transparent;
   border-radius: 1rem;
   border-left: ${({ isSomeoneSpeaking }) =>
@@ -167,7 +167,9 @@ export const CallWrapper = styled.div<{ isSomeoneSpeaking: boolean }>`
   }
 
   ${mediaQueries.isSmallScreen} {
-    flex: 0 0 calc(100%);
+    flex: 0 1 100%;
+    min-width: 0;
+    max-width: 100%;
   }
 `;
 
@@ -176,6 +178,8 @@ export const CallContainer = styled(CollapsibleItemWrapper)<{
 }>`
   margin: 0;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   border-radius: 1rem;
@@ -187,6 +191,7 @@ export const CallContainer = styled(CollapsibleItemWrapper)<{
 
 export const CallHeader = styled(HeaderWrapper)`
   position: relative;
+  overflow: visible;
   margin-bottom: ${({ open }: { open: boolean }) =>
     open && (isMobile || isIpad) ? "2rem" : ""};
 `;

@@ -94,6 +94,8 @@ export const FormLabel = styled.label`
 export const DecorativeLabel = styled.span`
   display: block;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   padding: 0 1rem 1rem 0;
 `;
 
