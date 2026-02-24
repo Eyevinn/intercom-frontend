@@ -21,7 +21,9 @@ test.describe("Production List", () => {
       .filter({ hasText: "Morning Show" })
       .first();
     // Use exact match to avoid strict mode violation from multiple "1" elements
-    await expect(morningShowItem.getByText("1", { exact: true }).first()).toBeVisible();
+    await expect(
+      morningShowItem.getByText("1", { exact: true }).first()
+    ).toBeVisible();
   });
 
   test("shows Join button on lines when expanded", async ({ landingPage }) => {
