@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { CopyButton } from "../../copy-button/copy-button";
 import { DecorativeLabel, FormInput } from "../../form-elements/form-elements";
 import { Modal } from "../../modal/modal";
@@ -27,6 +27,7 @@ export const ShareLineLinkModal = ({
   onClose,
 }: TShareLineLinkModalProps) => {
   const modalRef = useRef<HTMLDivElement>(null);
+  const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -43,13 +44,20 @@ export const ShareLineLinkModal = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [onClose]);
 
-  const handleRefresh = async () => {
+  useEffect(() => {
+    return () => {
+      if (refreshTimerRef.current !== null)
+        clearTimeout(refreshTimerRef.current);
+    };
+  }, []);
+
+  const handleRefresh = useCallback(() => {
     setIsLoading(true);
     onRefresh();
-    setTimeout(() => {
+    refreshTimerRef.current = setTimeout(() => {
       setIsLoading(false);
     }, 1000);
-  };
+  }, [onRefresh]);
 
   return (
     <Modal

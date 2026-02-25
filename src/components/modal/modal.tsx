@@ -72,12 +72,17 @@ interface ModalProps {
 
 export const Modal = ({ onClose, title, titleExtra, children }: ModalProps) => {
   return (
-    <ModalWrapper>
-      <ModalContent>
+    <ModalWrapper onClick={onClose}>
+      <ModalContent
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
+        onClick={(e) => e.stopPropagation()}
+      >
         <ModalHeader>
           {title && <ModalTitle>{title}</ModalTitle>}
           {titleExtra}
-          <CloseButton onClick={onClose}>
+          <CloseButton onClick={onClose} aria-label="Close dialog">
             <RemoveIcon />
           </CloseButton>
         </ModalHeader>

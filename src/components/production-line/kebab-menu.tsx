@@ -142,15 +142,19 @@ export const KebabMenu = ({
       <KebabButton
         type="button"
         onClick={() => setIsOpen(!isOpen)}
+        aria-label="More options"
+        aria-expanded={isOpen}
+        aria-haspopup="menu"
         title="More options"
       >
         ⋮
       </KebabButton>
       {isOpen && (
-        <DropdownMenu>
+        <DropdownMenu role="menu">
           {showHotkeys && onOpenHotkeys && (
             <DropdownItem
               type="button"
+              role="menuitem"
               onClick={() => {
                 onOpenHotkeys();
                 setIsOpen(false);
@@ -159,11 +163,16 @@ export const KebabMenu = ({
               Hotkeys
             </DropdownItem>
           )}
-          <DropdownItem type="button" onClick={handleShareClick}>
+          <DropdownItem
+            type="button"
+            role="menuitem"
+            onClick={handleShareClick}
+          >
             Share
           </DropdownItem>
           <DropdownItem
             type="button"
+            role="menuitem"
             onClick={() => {
               setActiveModal("whip-whep");
               setIsOpen(false);

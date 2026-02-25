@@ -11,10 +11,15 @@ export const ErrorPage = () => {
         <h1>Oops!</h1>
         <p>Sorry, an unexpected error has occurred.</p>
         <p>
-          <i>{`${error.name} ${error.message}`}</i>
+          <i>{error.message || "An unexpected error occurred"}</i>
         </p>
       </div>
     );
   }
-  return <div>{`Oops ${JSON.stringify(error)}`}</div>;
+  return (
+    <div>
+      <h1>Oops!</h1>
+      <p>An unexpected error occurred.</p>
+    </div>
+  );
 };

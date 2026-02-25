@@ -198,7 +198,13 @@ export const useRtcConnection = ({
   callId,
 }: TRtcConnectionOptions) => {
   const [rtcPeerConnection] = useState<RTCPeerConnection>(
-    () => new RTCPeerConnection()
+    () =>
+      new RTCPeerConnection({
+        iceServers: [
+          { urls: "stun:stun.l.google.com:19302" },
+          { urls: "stun:stun1.l.google.com:19302" },
+        ],
+      })
   );
   const [, dispatch] = useGlobalState();
   const [connectionState, setConnectionState] =
@@ -283,7 +289,6 @@ export const useRtcConnection = ({
     callId,
   ]);
 
-  // Debug hook for logging RTC events TODO remove
   useRtcDebugLogger(rtcPeerConnection);
 
   return { connectionState, audioElements };

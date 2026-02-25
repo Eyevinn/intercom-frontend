@@ -33,6 +33,8 @@ export const GenerateWhipWhepUrlModal = ({
   const [whepUrl, setWhepUrl] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const generateUrls = useCallback(() => {
     if (username.trim()) {
       setWhipUrl(generateWhipUrl(productionId, lineId, username.trim()));
@@ -61,10 +63,17 @@ export const GenerateWhipWhepUrlModal = ({
     generateUrls();
   }, [generateUrls]);
 
+  useEffect(() => {
+    return () => {
+      if (refreshTimerRef.current !== null)
+        clearTimeout(refreshTimerRef.current);
+    };
+  }, []);
+
   const handleRefresh = () => {
     setIsLoading(true);
     generateUrls();
-    setTimeout(() => {
+    refreshTimerRef.current = setTimeout(() => {
       setIsLoading(false);
     }, 500);
   };
@@ -90,6 +99,7 @@ export const GenerateWhipWhepUrlModal = ({
               <CombinedInputWrapper>
                 <span>{generateWhipUrl(productionId, lineId, "")}</span>
                 <input
+                  aria-label="WHIP username"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   placeholder="username"
@@ -109,6 +119,7 @@ export const GenerateWhipWhepUrlModal = ({
               <CombinedInputWrapper>
                 <span>{generateWhepUrl(productionId, lineId, "")}</span>
                 <input
+                  aria-label="WHEP username"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   placeholder="username"
