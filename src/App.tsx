@@ -94,6 +94,7 @@ const AppContent = ({
                   <li>Firefox 113+</li>
                   <li>Safari 16.4+</li>
                   <li>Samsung Internet 21+</li>
+                  <li>Opera 101+</li>
                 </ul>
                 <p>
                   If you are using one of the recommended browsers, then it is

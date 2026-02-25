@@ -21,6 +21,7 @@ export const isValidBrowser = browser.satisfies({
   firefox: ">=113",
   safari: ">=16.4",
   samsung: ">=21",
+  opera: ">=101",
 });
 
 export const isBrowserFirefox = browserName.toLowerCase() === "firefox";

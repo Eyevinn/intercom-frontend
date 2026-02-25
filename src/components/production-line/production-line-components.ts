@@ -170,6 +170,7 @@ export const CallWrapper = styled.div<{ isSomeoneSpeaking: boolean }>`
     flex: 0 1 100%;
     min-width: 0;
     max-width: 100%;
+    margin-bottom: 0;
   }
 `;
 
