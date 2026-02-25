@@ -28,6 +28,13 @@ const DisplayBoxText = styled.div`
     line-height: 1.4;
     padding: 0 0 1rem;
   }
+
+  ul {
+    font-size: 1.6rem;
+    line-height: 1.4;
+    margin: 0.25rem 0 1.5rem;
+    padding-left: 2.5rem;
+  }
 `;
 
 const DisplayBoxButton = styled(PrimaryButton)`

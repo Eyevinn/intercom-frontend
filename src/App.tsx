@@ -86,8 +86,15 @@ const AppContent = ({
               <>
                 <p>
                   To use this application it is recommended to use one of the
-                  following browsers: Chrome, Edge, Firefox or Safari.
+                  following browsers:
                 </p>
+                <ul>
+                  <li>Chrome 115+</li>
+                  <li>Edge 115+</li>
+                  <li>Firefox 113+</li>
+                  <li>Safari 16.4+</li>
+                  <li>Samsung Internet 21+</li>
+                </ul>
                 <p>
                   If you are using one of the recommended browsers, then it is
                   an older version and should be updated before continuing.

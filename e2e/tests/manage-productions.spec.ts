@@ -43,7 +43,7 @@ test.describe("Manage Productions", () => {
     manageProductionsPage,
   }) => {
     await manageProductionsPage.goto();
-    await manageProductionsPage.page.getByText("Evening News").click();
+    await manageProductionsPage.expandProduction("Evening News");
 
     const deleteProductionBtns = manageProductionsPage.page.getByRole(
       "button",
@@ -56,7 +56,7 @@ test.describe("Manage Productions", () => {
     manageProductionsPage,
   }) => {
     await manageProductionsPage.goto();
-    await manageProductionsPage.page.getByText("Evening News").click();
+    await manageProductionsPage.expandProduction("Evening News");
 
     await expect(
       manageProductionsPage.page
@@ -124,9 +124,10 @@ test.describe("Manage Productions", () => {
 
   test("shows Delete button for lines", async ({ manageProductionsPage }) => {
     await manageProductionsPage.goto();
-    await manageProductionsPage.page.getByText("Morning Show").click();
+    await manageProductionsPage.expandProduction("Morning Show");
 
-    const deleteButtons = manageProductionsPage.page.getByRole("button", {
+    const card = manageProductionsPage.getProductionCard("Morning Show");
+    const deleteButtons = card.getByRole("button", {
       name: "Delete",
       exact: true,
     });
@@ -137,10 +138,11 @@ test.describe("Manage Productions", () => {
     manageProductionsPage,
   }) => {
     await manageProductionsPage.goto();
-    await manageProductionsPage.page.getByText("Morning Show").click();
+    await manageProductionsPage.expandProduction("Morning Show");
 
     // Host Line has Alice — its Delete button should be disabled
-    const deleteButtons = manageProductionsPage.page.getByRole("button", {
+    const card = manageProductionsPage.getProductionCard("Morning Show");
+    const deleteButtons = card.getByRole("button", {
       name: "Delete",
       exact: true,
     });
@@ -151,10 +153,11 @@ test.describe("Manage Productions", () => {
     manageProductionsPage,
   }) => {
     await manageProductionsPage.goto();
-    await manageProductionsPage.page.getByText("Morning Show").click();
+    await manageProductionsPage.expandProduction("Morning Show");
 
     // Click Delete on Guest Line (second delete button — enabled, no participants)
-    const deleteButtons = manageProductionsPage.page.getByRole("button", {
+    const card = manageProductionsPage.getProductionCard("Morning Show");
+    const deleteButtons = card.getByRole("button", {
       name: "Delete",
       exact: true,
     });
@@ -192,12 +195,12 @@ test.describe("Manage Productions", () => {
     manageProductionsPage,
   }) => {
     await manageProductionsPage.goto();
-    await manageProductionsPage.page.getByText("Morning Show").click();
+    await manageProductionsPage.expandProduction("Morning Show");
 
     // Morning Show has 1 participant (Alice) — Delete Production should be disabled
-    const deleteProdBtns = manageProductionsPage.page.getByRole("button", {
-      name: "Delete Production",
-    });
-    await expect(deleteProdBtns.first()).toBeDisabled();
+    const card = manageProductionsPage.getProductionCard("Morning Show");
+    await expect(
+      card.getByRole("button", { name: "Delete Production" })
+    ).toBeDisabled();
   });
 });

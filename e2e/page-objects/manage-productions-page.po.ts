@@ -33,14 +33,44 @@ export class ManageProductionsPagePO {
   }
 
   /**
-   * Expand a production card by clicking it, then wait for buttons to appear.
+   * Expand a production card, then wait for the "Delete Production" button.
+   *
+   * In manage mode the production name is wrapped in EditNameForm — clicking
+   * it can trigger inline-edit instead of expand/collapse on Firefox. We
+   * avoid this by clicking the **participant count** element (e.g. "0", "1")
+   * which lives inside the HeaderWrapper (triggers handleHeaderClick) but
+   * outside the `.name-edit-button` guard.
    */
   async expandProduction(name: string) {
-    await this.page.getByText(name, { exact: true }).click();
+    // Find the participant count text next to the production name.
+    // Each production header shows a count like "0" or "1". We locate it
+    // relative to the production name by finding the card, then its count.
+    const card = this.getProductionCard(name);
+    const nameEl = card.getByText(name, { exact: true });
+    await expect(nameEl).toBeVisible();
+
+    // The participant count is a sibling element to the name area, rendered
+    // as a small number. We click the name with a position offset that lands
+    // on the right side of the header (past the name, onto the count/chevron
+    // area), staying within the HeaderWrapper onClick zone.
+    await nameEl.click({ position: { x: 0, y: 0 }, trial: true });
+    const nameBox = await nameEl.boundingBox();
+    const cardBox = await card.boundingBox();
+
+    if (nameBox && cardBox) {
+      // Click at the right edge of the card header, well past the name text
+      // but within the card. This hits the participant count or chevron area.
+      await this.page.mouse.click(
+        cardBox.x + cardBox.width - 20,
+        nameBox.y + nameBox.height / 2
+      );
+    } else {
+      // Fallback: click the name text directly
+      await nameEl.click();
+    }
+
     await expect(
-      this.getProductionCard(name).getByRole("button", {
-        name: "Delete Production",
-      })
+      card.getByRole("button", { name: "Delete Production" })
     ).toBeVisible();
   }
 

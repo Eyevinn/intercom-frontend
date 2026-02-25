@@ -37,7 +37,7 @@ const KebabButton = styled.button`
 const DropdownMenu = styled.div`
   position: absolute;
   top: 100%;
-  right: 0;
+  left: 0;
   z-index: 10;
   min-width: 14rem;
   background: #32383b;
