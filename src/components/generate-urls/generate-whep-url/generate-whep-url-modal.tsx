@@ -86,6 +86,7 @@ export const GenerateWhepUrlModal = ({
               <CombinedInputWrapper>
                 <span>{generateWhepUrl(productionId, lineId, "")}</span>
                 <input
+                  aria-label="WHEP username"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   placeholder="username"

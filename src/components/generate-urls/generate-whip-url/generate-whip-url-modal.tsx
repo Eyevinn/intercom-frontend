@@ -86,6 +86,7 @@ export const GenerateWhipUrlModal = ({
               <CombinedInputWrapper>
                 <span>{generateWhipUrl(productionId, lineId, "")}</span>
                 <input
+                  aria-label="WHIP username"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   placeholder="username"

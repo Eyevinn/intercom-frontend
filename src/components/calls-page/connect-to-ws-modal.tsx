@@ -60,7 +60,7 @@ export const ConnectToWsModal = ({
   onClose,
 }: ConnectToWsModalProps) => {
   const [hostPort, setHostPort] = useState<string>("");
-  const PROTOCOL = "ws://";
+  const PROTOCOL = window.location.protocol === "https:" ? "wss://" : "ws://";
 
   if (!isOpen) return null;
 
@@ -77,7 +77,16 @@ export const ConnectToWsModal = ({
     setHostPort(withoutProtocol);
   };
 
-  const submit = () => handleConnect(`${PROTOCOL}${hostPort}`);
+  const isValidHostPort = (input: string): boolean => {
+    const pattern = /^([a-zA-Z0-9.-]+|\[[\da-fA-F:]+\])(:\d{1,5})?$/;
+    return pattern.test(input);
+  };
+
+  const submit = () => {
+    if (hostPort && isValidHostPort(hostPort)) {
+      handleConnect(`${PROTOCOL}${hostPort}`);
+    }
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
@@ -118,7 +127,10 @@ export const ConnectToWsModal = ({
       </InputGroup>
       <ButtonWrapper>
         <SecondaryButton onClick={onClose}>Cancel</SecondaryButton>
-        <PrimaryButton onClick={submit} disabled={!hostPort}>
+        <PrimaryButton
+          onClick={submit}
+          disabled={!hostPort || !isValidHostPort(hostPort)}
+        >
           Connect
         </PrimaryButton>
       </ButtonWrapper>

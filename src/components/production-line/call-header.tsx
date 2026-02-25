@@ -229,7 +229,12 @@ export const CallHeaderComponent = ({
               </div>
             </DesktopOnly>
             <MobileOnly>
-              <ShareButton title="Share line link" onClick={handleShareClick}>
+              <ShareButton
+                role="button"
+                aria-label="Share line link"
+                title="Share line link"
+                onClick={handleShareClick}
+              >
                 <ShareIcon />
               </ShareButton>
             </MobileOnly>
@@ -248,7 +253,10 @@ export const CallHeaderComponent = ({
           <ParticipantCount>{totalUsers}</ParticipantCount>
         </ParticipantCountWrapper>
       </HeaderActionsRow>
-      <ChevronButton>
+      <ChevronButton
+        role="button"
+        aria-label={open ? "Collapse call details" : "Expand call details"}
+      >
         {open ? <ChevronUpIcon /> : <ChevronDownIcon />}
       </ChevronButton>
       {line?.programOutputLine && open && (

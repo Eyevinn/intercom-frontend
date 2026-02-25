@@ -65,7 +65,7 @@ export const ErrorBanner: FC = () => {
     <>
       {error.globalError && (
         <ErrorDisplay>
-          {`${error.globalError.name}: ${error.globalError.message}`}{" "}
+          {error.globalError.message || "An unexpected error occurred"}{" "}
           <CloseErrorButton
             type="button"
             onClick={() =>
@@ -94,5 +94,9 @@ export const ErrorBanner: FC = () => {
 };
 
 export const LocalError = ({ error }: { error: Error }) => {
-  return <ErrorDisplay>{`${error.name}: ${error.message}`} </ErrorDisplay>;
+  return (
+    <ErrorDisplay>
+      {error.message || "An unexpected error occurred"}{" "}
+    </ErrorDisplay>
+  );
 };

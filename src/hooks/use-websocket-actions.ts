@@ -1,3 +1,5 @@
+import logger from "../utils/logger";
+
 export const useWebsocketActions = ({
   callIndexMap,
   callActionHandlers,
@@ -16,22 +18,21 @@ export const useWebsocketActions = ({
     }
 
     if (typeof index !== "number") {
-      console.warn(
-        "Missing or invalid index for call-specific action:",
-        action
+      logger.red(
+        `Missing or invalid index for call-specific action: ${action}`
       );
       return;
     }
 
     const callId = callIndexMap.current[index];
     if (!callId) {
-      console.warn("No callId found for index:", index);
+      logger.red(`No callId found for index: ${index}`);
       return;
     }
 
     const handlers = callActionHandlers.current[callId];
     if (!handlers) {
-      console.warn(`No handlers found for callId: ${callId}`);
+      logger.red(`No handlers found for callId: ${callId}`);
       return;
     }
 
@@ -39,7 +40,7 @@ export const useWebsocketActions = ({
     if (handler) {
       handler();
     } else {
-      console.warn(`Unknown action: ${action}`);
+      logger.red(`Unknown action: ${action}`);
     }
   };
 };
