@@ -8,7 +8,7 @@ const UserSettingsWrapper = styled.div`
   position: absolute;
   top: 0;
   right: 0;
-  padding: 1.6rem 2rem 1rem 0;
+  padding: 1rem 2rem 1rem 0;
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -22,6 +22,7 @@ const UserSettingsWrapper = styled.div`
   svg {
     width: 2.5rem;
     flex-shrink: 0;
+    fill: rgba(89, 203, 232, 1);
   }
 
   &.mobile {
@@ -35,11 +36,7 @@ const Username = styled.div`
   margin-right: 0.5rem;
   text-overflow: ellipsis;
   overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  line-height: 1.2;
-  max-height: calc(1.2em * 2);
+  white-space: nowrap;
 `;
 
 interface UserSettingsButtonProps {

@@ -13,12 +13,15 @@ const isIOS = (): boolean => {
 export const isMobile = deviceInfo.platform.type === "mobile";
 export const isIOSMobile = isIOS() && isMobile;
 
+console.log(browser);
+
 export const isValidBrowser = browser.satisfies({
   chrome: ">=115",
   edge: ">=115",
   firefox: ">=113",
   safari: ">=16.4",
   samsung: ">=21",
+  opera: ">=101",
 });
 
 export const isBrowserFirefox = browserName.toLowerCase() === "firefox";

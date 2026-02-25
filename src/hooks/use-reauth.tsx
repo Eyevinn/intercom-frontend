@@ -38,6 +38,11 @@ export const useSetupTokenRefresh = () => {
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const setupTokenRefresh = useCallback(() => {
+    // Skip reauth in local development — no OSC token service available
+    if (import.meta.env.DEV) {
+      return () => {};
+    }
+
     // Clear any existing interval
     if (intervalRef.current) {
       clearInterval(intervalRef.current);

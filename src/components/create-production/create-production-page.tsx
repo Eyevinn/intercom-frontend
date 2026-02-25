@@ -32,11 +32,10 @@ import {
   LineNumber,
   AddLineCard,
   LineInputRow,
-  TooltipWrapper,
-  TooltipContent,
   CreateButtonWrapper,
 } from "./create-production-components.ts";
 import { FormItem } from "../user-settings-form/form-item.tsx";
+import { InfoTooltip } from "../info-tooltip/info-tooltip.tsx";
 import { Spinner } from "../loader/loader.tsx";
 import {
   normalizeLineName,
@@ -217,14 +216,10 @@ export const CreateProductionPage = () => {
                     field.onChange(e.target.checked)
                   }
                 />
-                <TooltipWrapper>
-                  ⓘ
-                  <TooltipContent className="tooltip-content">
-                    In an <strong>Audio Feed</strong> line, listeners are not
-                    able to talk. Only the <strong>Audio Feed</strong> will be
-                    heard.
-                  </TooltipContent>
-                </TooltipWrapper>
+                <InfoTooltip>
+                  In an <strong>Audio Feed</strong> line, listeners are not able
+                  to talk. Only the <strong>Audio Feed</strong> will be heard.
+                </InfoTooltip>
               </CheckboxWrapper>
             )}
           />
@@ -265,14 +260,11 @@ export const CreateProductionPage = () => {
                       controllerField.onChange(e.target.checked)
                     }
                   />
-                  <TooltipWrapper>
-                    ⓘ
-                    <TooltipContent className="tooltip-content">
-                      In an <strong>Audio Feed</strong> line, listeners are not
-                      able to talk. Only the <strong>Audio Feed</strong> will be
-                      heard.
-                    </TooltipContent>
-                  </TooltipWrapper>
+                  <InfoTooltip>
+                    In an <strong>Audio Feed</strong> line, listeners are not
+                    able to talk. Only the <strong>Audio Feed</strong> will be
+                    heard.
+                  </InfoTooltip>
                 </CheckboxWrapper>
               )}
             />

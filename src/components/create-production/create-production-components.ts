@@ -107,7 +107,7 @@ export const TooltipContent = styled.span`
   visibility: hidden;
   opacity: 0;
   position: absolute;
-  bottom: 100%;
+  top: 100%;
   left: 50%;
   transform: translateX(-50%);
   background: #32383b;
@@ -120,8 +120,7 @@ export const TooltipContent = styled.span`
   text-align: center;
   border: 0.1rem solid #6d6d6d;
   z-index: 10;
-  padding-bottom: 0.9rem;
-  margin-bottom: 0;
+  margin-top: 0.4rem;
   transition: opacity 0.15s ease;
 
   a {

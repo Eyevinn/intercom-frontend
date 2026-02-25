@@ -88,6 +88,7 @@ export const ProductionsListItem = ({
       expandedContent={expandedContent}
       onHeaderClick={handleHeaderClick}
       className={totalUsers > 0 ? "active" : ""}
+      testId={`production-${production.name}`}
     />
   );
 };

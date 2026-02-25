@@ -18,6 +18,7 @@ type CollapsibleItemProps = {
     setOpen: (open: boolean) => void
   ) => void;
   className?: string;
+  testId?: string;
 };
 
 export const CollapsibleItem = ({
@@ -25,6 +26,7 @@ export const CollapsibleItem = ({
   expandedContent,
   onHeaderClick,
   className,
+  testId,
 }: CollapsibleItemProps) => {
   const [open, setOpen] = useState<boolean>(false);
 
@@ -37,12 +39,12 @@ export const CollapsibleItem = ({
   };
 
   return (
-    <CollapsibleItemWrapper className={className}>
+    <CollapsibleItemWrapper className={className} data-testid={testId}>
       <HeaderWrapper onClick={handleHeaderClick}>
         <HeaderTexts open={open} isProgramOutputLine={false}>
           {headerContent}
         </HeaderTexts>
-        <HeaderIcon>
+        <HeaderIcon data-testid="chevron">
           {open ? <ChevronUpIcon /> : <ChevronDownIcon />}
         </HeaderIcon>
       </HeaderWrapper>

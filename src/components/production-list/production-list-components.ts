@@ -60,6 +60,8 @@ export const Lineblock = styled.div`
   align-items: center;
   gap: 0.5rem;
   min-height: 6.5rem;
+  min-width: 0;
+  overflow: hidden;
 `;
 
 export const LineBlockTexts = styled.div`
@@ -118,6 +120,8 @@ export const LineBlockParticipant = styled.div`
   margin-top: 0.5rem;
   display: flex;
   align-items: center;
+  min-width: 0;
+  overflow: hidden;
 
   svg {
     fill: #7be27b;
@@ -135,6 +139,10 @@ export const LineBlockParticipant = styled.div`
 
 export const PersonText = styled.div`
   margin-left: 0.5rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
 `;
 
 export const CheckboxWrapper = styled.div`

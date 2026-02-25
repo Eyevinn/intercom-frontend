@@ -31,6 +31,12 @@ const CallsContainer = styled.div`
   align-items: flex-start;
   gap: 2rem;
   padding: 0 2rem 2rem 2rem;
+  max-width: 100%;
+
+  @media (max-width: 768px) {
+    gap: 1rem;
+    padding: 0 1rem 1rem 1rem;
+  }
 
   form {
     margin: 0;

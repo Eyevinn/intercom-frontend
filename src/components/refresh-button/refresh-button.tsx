@@ -6,6 +6,7 @@ import { Spinner } from "../loader/loader";
 const RefreshButtonWrapper = styled.div`
   display: flex;
   justify-self: flex-end;
+  margin-top: 1.5rem;
 `;
 
 const StyledRefreshBtn = styled(PrimaryButton)`

@@ -20,8 +20,8 @@ const ModalContent = styled.div`
   border-radius: 0.8rem;
   border: solid 0.1rem #868686;
   box-shadow: 0 0.2rem 2rem rgba(123, 123, 123, 0.1);
-  width: fit-content;
-  max-width: 90%;
+  width: 90%;
+  max-width: 45rem;
   animation: slideIn 0.3s ease-out;
 `;
 
@@ -37,6 +37,9 @@ const ModalTitle = styled.h2`
   font-size: 2rem;
   font-weight: 600;
   margin: 0;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  min-width: 0;
 `;
 
 const CloseButton = styled.button`

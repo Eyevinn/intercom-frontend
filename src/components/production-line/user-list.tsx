@@ -48,10 +48,18 @@ const UserWrapper = styled.div<TUserProps>`
   ${({ isYou }) => (isYou ? `background: #353434;` : "")}
 `;
 
+const UserName = styled.span`
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+`;
+
 const User = styled.div`
   display: flex;
   align-items: center;
-  max-width: 29rem;
+  min-width: 0;
+  overflow: hidden;
 `;
 
 const IsTalkingIndicator = styled.div<TIsTalkingIndicator>`
@@ -93,7 +101,7 @@ const MuteParticipantButton = styled.button`
   width: 3rem;
   height: 3rem;
   padding: 0.3rem;
-  margin: 0;
+  margin: 0 0 0 0.5rem;
   background: #302b2b;
   border: 0.1rem solid #707070;
   border-radius: 0.4rem;
@@ -101,6 +109,7 @@ const MuteParticipantButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 
   svg {
     fill: #f96c6c;
@@ -161,7 +170,9 @@ export const UserList = ({
                     {(p.isWhip && <WhipIcon />) || <UserIcon />}
                   </OnlineIndicator>
                 </IsTalkingIndicator>
-                {truncatedUsername} {p.isActive ? "" : "(inactive)"}
+                <UserName>
+                  {truncatedUsername} {p.isActive ? "" : "(inactive)"}
+                </UserName>
               </User>
               {!isYou && p.isActive && !programOutputLine && !p.isWhip && (
                 <MuteParticipantButton
