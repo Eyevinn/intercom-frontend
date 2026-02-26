@@ -186,8 +186,6 @@ export const CallHeaderComponent = ({
   return (
     <CallHeader open={open} onClick={setOpen}>
       <CallHeaderTexts
-        open={open}
-        isProgramOutputLine={line?.programOutputLine || false}
         className={(line?.participants.length || 0) > 0 ? "active" : ""}
       >
         {!open && line?.programOutputLine && (

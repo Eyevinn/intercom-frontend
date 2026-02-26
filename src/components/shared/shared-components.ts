@@ -19,13 +19,6 @@ export const HeaderTexts = styled.div`
   gap: 0.5rem;
   min-width: 0;
   overflow: hidden;
-  margin-left: ${({
-    open,
-    isProgramOutputLine,
-  }: {
-    open: boolean;
-    isProgramOutputLine: boolean;
-  }) => (!open && isProgramOutputLine ? "1.5rem" : "0")};
 `;
 
 export const HeaderIcon = styled.div`
