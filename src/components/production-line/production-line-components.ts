@@ -112,10 +112,19 @@ export const AudioFeedIcon = styled.div`
   align-items: center;
   color: #59cbe8;
   font-size: 1.2rem;
-  gap: 1rem;
-  position: absolute;
-  top: ${({ open }: { open: boolean }) => (open ? "5rem" : "2.35rem")};
-  left: ${({ open }: { open: boolean }) => (open ? "2rem" : "1.5rem")};
+  gap: ${({ open }: { open: boolean }) => (open ? "1rem" : "0.5rem")};
+  flex-shrink: 0;
+
+  ${({ open }: { open: boolean }) =>
+    open
+      ? `
+    position: absolute;
+    top: 5rem;
+    left: 2rem;
+  `
+      : `
+    position: static;
+  `}
 
   svg {
     fill: #59cbe8 !important;
@@ -154,7 +163,7 @@ export const CallWrapper = styled.div<{ isSomeoneSpeaking: boolean }>`
   max-width: min(49rem, 100%);
   background-color: transparent;
   border-radius: 1rem;
-  border-left: ${({ isSomeoneSpeaking }) =>
+  border: ${({ isSomeoneSpeaking }) =>
     isSomeoneSpeaking ? "0.3rem solid #f96c6c" : "0.3rem solid transparent"};
   transition: border-color 0.3s ease;
 
@@ -185,6 +194,7 @@ export const CallContainer = styled(CollapsibleItemWrapper)<{
   flex-direction: column;
   border-radius: 1rem;
   border: 0.1rem solid rgba(109, 109, 109, 0.3);
+  overflow: hidden;
 
   background: ${({ isProgramLine }) =>
     isProgramLine ? "rgba(73, 67, 124, 0.2)" : "rgba(50, 56, 59, 0.4)"};

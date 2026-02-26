@@ -41,9 +41,7 @@ export const CollapsibleItem = ({
   return (
     <CollapsibleItemWrapper className={className} data-testid={testId}>
       <HeaderWrapper onClick={handleHeaderClick}>
-        <HeaderTexts open={open} isProgramOutputLine={false}>
-          {headerContent}
-        </HeaderTexts>
+        <HeaderTexts>{headerContent}</HeaderTexts>
         <HeaderIcon data-testid="chevron">
           {open ? <ChevronUpIcon /> : <ChevronDownIcon />}
         </HeaderIcon>
