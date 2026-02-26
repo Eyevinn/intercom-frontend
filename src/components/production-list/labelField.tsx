@@ -15,11 +15,7 @@ export const LabelField = ({
   managementMode: boolean;
 }) => {
   return isLabelProductionName ? (
-    <HeaderText
-      production={production}
-      line={line}
-      managementMode={managementMode}
-    />
+    <HeaderText production={production} />
   ) : (
     <LineBlock managementMode={managementMode} line={line} />
   );

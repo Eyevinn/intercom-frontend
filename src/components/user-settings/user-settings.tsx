@@ -32,7 +32,10 @@ export const UserSettings: FC<UserSettingsProps> = (props) => {
 
   const defaultValues = {
     username: userSettings?.username,
-    audioinput: userSettings?.audioinput,
+    audioinput:
+      userSettings?.audioinput ??
+      devices.input?.find((d) => d.deviceId === "default")?.deviceId ??
+      devices.input?.[0]?.deviceId,
     audiooutput: userSettings?.audiooutput,
   };
 

@@ -74,7 +74,6 @@ const HeaderActionsRow = styled.div`
   align-items: center;
   gap: 0.5rem;
   flex-shrink: 0;
-  margin-left: auto;
 `;
 
 const DesktopOnly = styled.div`
@@ -210,35 +209,23 @@ export const CallHeaderComponent = ({
       </CallHeaderTexts>
       <HeaderActionsRow>
         {production && line && (
-          <>
-            <DesktopOnly>
-              <div
-                onClick={(e) => e.stopPropagation()}
-                onMouseDown={(e) => e.stopPropagation()}
-                onKeyDown={(e) => e.stopPropagation()}
-                role="presentation"
-              >
-                <KebabMenu
-                  productionId={production.productionId}
-                  lineId={line.id}
-                  production={production}
-                  line={line}
-                  showHotkeys={showHotkeys}
-                  onOpenHotkeys={onOpenHotkeys}
-                />
-              </div>
-            </DesktopOnly>
-            <MobileOnly>
-              <ShareButton
-                role="button"
-                aria-label="Share line link"
-                title="Share line link"
-                onClick={handleShareClick}
-              >
-                <ShareIcon />
-              </ShareButton>
-            </MobileOnly>
-          </>
+          <DesktopOnly>
+            <div
+              onClick={(e) => e.stopPropagation()}
+              onMouseDown={(e) => e.stopPropagation()}
+              onKeyDown={(e) => e.stopPropagation()}
+              role="presentation"
+            >
+              <KebabMenu
+                productionId={production.productionId}
+                lineId={line.id}
+                production={production}
+                line={line}
+                showHotkeys={showHotkeys}
+                onOpenHotkeys={onOpenHotkeys}
+              />
+            </div>
+          </DesktopOnly>
         )}
         {totalWhipSessions > 0 && (
           <ParticipantCountWrapper
@@ -252,6 +239,18 @@ export const CallHeaderComponent = ({
           <UsersIcon />
           <ParticipantCount>{totalUsers}</ParticipantCount>
         </ParticipantCountWrapper>
+        {production && line && (
+          <MobileOnly>
+            <ShareButton
+              role="button"
+              aria-label="Share line link"
+              title="Share line link"
+              onClick={handleShareClick}
+            >
+              <ShareIcon />
+            </ShareButton>
+          </MobileOnly>
+        )}
       </HeaderActionsRow>
       <ChevronButton
         role="button"

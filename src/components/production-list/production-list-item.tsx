@@ -11,6 +11,7 @@ import { CollapsibleItem } from "../shared/collapsible-item";
 import { LabelField } from "./labelField";
 import { ProductionListExpandedContent } from "./production-list-expanded-content";
 import { useHandleHeaderClick } from "../shared/use-handle-header-click";
+import { CopyLink } from "./copy-link";
 
 type ProductionsListItemProps = {
   production: TBasicProductionResponse;
@@ -57,7 +58,7 @@ export const ProductionsListItem = ({
           />
         )}
       />
-      <div>
+      <div style={{ display: "flex", alignItems: "center" }}>
         {totalWhipSessions > 0 && (
           <ParticipantCountWrapper
             className={totalWhipSessions > 0 ? "whip" : ""}
@@ -70,6 +71,13 @@ export const ProductionsListItem = ({
           <UsersIcon />
           <ParticipantCount>{totalUsers}</ParticipantCount>
         </ParticipantCountWrapper>
+        {!managementMode && (
+          <CopyLink
+            production={production}
+            line={production.lines?.[0] ?? ({} as TLine)}
+            isCopyProduction
+          />
+        )}
       </div>
     </>
   );

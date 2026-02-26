@@ -1,6 +1,4 @@
-import { TLine } from "../production-line/types";
 import { TBasicProductionResponse } from "../../api/api";
-import { CopyLink } from "./copy-link";
 import {
   ProductionName,
   ProductionNameWrapper,
@@ -8,12 +6,8 @@ import {
 
 export const HeaderText = ({
   production,
-  line,
-  managementMode,
 }: {
   production: TBasicProductionResponse;
-  line: TLine;
-  managementMode: boolean;
 }) => {
   return (
     <ProductionNameWrapper>
@@ -22,9 +16,6 @@ export const HeaderText = ({
           ? `${production.name.slice(0, 40)}...`
           : production.name}
       </ProductionName>
-      {!managementMode && (
-        <CopyLink production={production} line={line} isCopyProduction />
-      )}
     </ProductionNameWrapper>
   );
 };

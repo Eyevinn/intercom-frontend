@@ -4,6 +4,27 @@ import { errorColour } from "../css-helpers/defaults";
 import { useGlobalState } from "../global-state/context-provider";
 import logger from "../utils/logger";
 
+const formatErrorMessage = (
+  error: (Error & { status?: number }) | null | undefined
+): string => {
+  if (!error) return "An unexpected error occurred";
+  const message = error.message || "An unexpected error occurred";
+  if (error.status) {
+    return `Error: ${error.status} - ${message}`;
+  }
+  return `Error: ${message}`;
+};
+
+const formatCallErrorMessage = (
+  message: string,
+  error: (Error & { status?: number }) | null | undefined
+): string => {
+  if (error?.status) {
+    return `Error: ${error.status} - ${message}`;
+  }
+  return `Error: ${message}`;
+};
+
 const ErrorDisplay = styled.div`
   width: 100%;
   background: ${errorColour};
@@ -37,9 +58,15 @@ export const ErrorBanner: FC = () => {
     const displayedMessages = new Set<string>();
     if (error.callErrors) {
       Object.entries(error.callErrors).forEach(([, singleError]) => {
-        if (singleError && !displayedMessages.has(singleError.message)) {
-          logger.red(`Error: ${singleError.message}`); // Display only unique errors
-          displayedMessages.add(singleError.message);
+        if (singleError) {
+          const formatted = formatCallErrorMessage(
+            singleError.message,
+            singleError as Error & { status?: number }
+          );
+          if (!displayedMessages.has(formatted)) {
+            logger.red(formatted);
+            displayedMessages.add(formatted);
+          }
         }
       });
       const uniqueErrors = Array.from(displayedMessages);
@@ -65,7 +92,7 @@ export const ErrorBanner: FC = () => {
     <>
       {error.globalError && (
         <ErrorDisplay>
-          {error.globalError.message || "An unexpected error occurred"}{" "}
+          {formatErrorMessage(error.globalError as Error & { status?: number })}{" "}
           <CloseErrorButton
             type="button"
             onClick={() =>
@@ -96,7 +123,7 @@ export const ErrorBanner: FC = () => {
 export const LocalError = ({ error }: { error: Error }) => {
   return (
     <ErrorDisplay>
-      {error.message || "An unexpected error occurred"}{" "}
+      {formatErrorMessage(error as Error & { status?: number })}{" "}
     </ErrorDisplay>
   );
 };
