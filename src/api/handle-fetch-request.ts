@@ -25,7 +25,7 @@ export const handleFetchRequest = async <T>(
     } else if (json && "message" in json) {
       err = new Error(json.message);
     } else {
-      err = new Error(`Response Code: ${status} - ${response.statusText}.`);
+      err = new Error(response.statusText || "Unknown error");
     }
     (err as Error & { status?: number }).status = status;
     throw err;

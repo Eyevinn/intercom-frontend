@@ -93,7 +93,7 @@ describe("handleFetchRequest", () => {
 
       await expect(
         handleFetchRequest(Promise.resolve(response))
-      ).rejects.toThrow("Response Code: 404");
+      ).rejects.toThrow("Error");
     });
 
     it("should attach the status code to the error object", async () => {

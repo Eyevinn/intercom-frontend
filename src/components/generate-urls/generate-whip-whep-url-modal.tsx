@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState } from "react";
 import { generateWhipUrl } from "../../utils/generateWhipUrl";
 import { generateWhepUrl } from "../../utils/generateWhepUrl";
 import { CopyButton } from "../copy-button/copy-button";
@@ -28,22 +28,29 @@ export const GenerateWhipWhepUrlModal = ({
   onClose,
 }: TGenerateWhipWhepUrlModalProps) => {
   const modalRef = useRef<HTMLDivElement>(null);
-  const [username, setUsername] = useState("");
+  const [whipUsername, setWhipUsername] = useState("");
+  const [whepUsername, setWhepUsername] = useState("");
   const [whipUrl, setWhipUrl] = useState("");
   const [whepUrl, setWhepUrl] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const generateUrls = useCallback(() => {
-    if (username.trim()) {
-      setWhipUrl(generateWhipUrl(productionId, lineId, username.trim()));
-      setWhepUrl(generateWhepUrl(productionId, lineId, username.trim()));
-    } else {
-      setWhipUrl("");
-      setWhepUrl("");
-    }
-  }, [username, productionId, lineId]);
+  useEffect(() => {
+    setWhipUrl(
+      whipUsername.trim()
+        ? generateWhipUrl(productionId, lineId, whipUsername.trim())
+        : ""
+    );
+  }, [whipUsername, productionId, lineId]);
+
+  useEffect(() => {
+    setWhepUrl(
+      whepUsername.trim()
+        ? generateWhepUrl(productionId, lineId, whepUsername.trim())
+        : ""
+    );
+  }, [whepUsername, productionId, lineId]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -60,10 +67,6 @@ export const GenerateWhipWhepUrlModal = ({
   }, [onClose]);
 
   useEffect(() => {
-    generateUrls();
-  }, [generateUrls]);
-
-  useEffect(() => {
     return () => {
       if (refreshTimerRef.current !== null)
         clearTimeout(refreshTimerRef.current);
@@ -72,7 +75,16 @@ export const GenerateWhipWhepUrlModal = ({
 
   const handleRefresh = () => {
     setIsLoading(true);
-    generateUrls();
+    setWhipUrl(
+      whipUsername.trim()
+        ? generateWhipUrl(productionId, lineId, whipUsername.trim())
+        : ""
+    );
+    setWhepUrl(
+      whepUsername.trim()
+        ? generateWhepUrl(productionId, lineId, whepUsername.trim())
+        : ""
+    );
     refreshTimerRef.current = setTimeout(() => {
       setIsLoading(false);
     }, 500);
@@ -100,8 +112,8 @@ export const GenerateWhipWhepUrlModal = ({
                 <span>{generateWhipUrl(productionId, lineId, "")}</span>
                 <input
                   aria-label="WHIP username"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  value={whipUsername}
+                  onChange={(e) => setWhipUsername(e.target.value)}
                   placeholder="username"
                 />
               </CombinedInputWrapper>
@@ -120,8 +132,8 @@ export const GenerateWhipWhepUrlModal = ({
                 <span>{generateWhepUrl(productionId, lineId, "")}</span>
                 <input
                   aria-label="WHEP username"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  value={whepUsername}
+                  onChange={(e) => setWhepUsername(e.target.value)}
                   placeholder="username"
                 />
               </CombinedInputWrapper>

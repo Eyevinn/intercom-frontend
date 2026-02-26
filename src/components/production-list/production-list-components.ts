@@ -22,7 +22,6 @@ export const ParticipantCountWrapper = styled.div`
   align-items: center;
   gap: 0.1rem;
   margin-right: 1rem;
-  transform: translateY(1.5px);
 
   svg {
     height: 1.5rem;

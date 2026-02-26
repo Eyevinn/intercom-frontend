@@ -13,8 +13,6 @@ const isIOS = (): boolean => {
 export const isMobile = deviceInfo.platform.type === "mobile";
 export const isIOSMobile = isIOS() && isMobile;
 
-console.log(browser);
-
 export const isValidBrowser = browser.satisfies({
   chrome: ">=115",
   edge: ">=115",

@@ -14,8 +14,9 @@ export const HeaderWrapper = styled.div`
 export const HeaderTexts = styled.div`
   width: 100%;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
+  gap: 0.5rem;
   min-width: 0;
   overflow: hidden;
   margin-left: ${({
