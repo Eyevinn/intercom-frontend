@@ -31,11 +31,16 @@ const UserWrapper = styled.div<TUserProps>`
   border: transparent;
   border-bottom: 0.1rem solid #464646;
 
-  &:first-of-type {
+  &:only-of-type {
+    border-radius: 1rem;
+    border-bottom: 0;
+  }
+
+  &:first-of-type:not(:only-of-type) {
     border-radius: 1rem 1rem 0 0;
   }
 
-  &:last-of-type {
+  &:last-of-type:not(:only-of-type) {
     border-radius: 0 0 1rem 1rem;
     border-bottom: 0;
   }

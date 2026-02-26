@@ -1,5 +1,6 @@
 import styled from "@emotion/styled";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { GenerateWhipWhepUrlModal } from "../generate-urls/generate-whip-whep-url-modal";
 import { ShareLineLinkModal } from "../generate-urls/share-line-link/share-line-link-modal";
 import { useShareUrl } from "../../hooks/use-share-url";
@@ -7,7 +8,6 @@ import { TBasicProductionResponse } from "../../api/api";
 import { TLine } from "./types";
 
 const MenuWrapper = styled.div`
-  position: relative;
   display: inline-flex;
 `;
 
@@ -34,18 +34,17 @@ const KebabButton = styled.button`
   }
 `;
 
-const DropdownMenu = styled.div`
-  position: absolute;
-  top: 100%;
-  left: 0;
-  z-index: 10;
+const DropdownMenu = styled.div<{ top: number; left: number }>`
+  position: fixed;
+  top: ${({ top }) => top}px;
+  left: ${({ left }) => left}px;
+  z-index: 100;
   min-width: 14rem;
   background: #32383b;
   border: 0.1rem solid #6d6d6d;
   border-radius: 0.5rem;
   box-shadow: 0 0.4rem 1.2rem rgba(0, 0, 0, 0.3);
   overflow: hidden;
-  margin-top: 0.4rem;
 `;
 
 const DropdownItem = styled.button`
@@ -90,14 +89,31 @@ export const KebabMenu = ({
   const [activeModal, setActiveModal] = useState<"whip-whep" | "share" | null>(
     null
   );
+  const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0 });
   const menuRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const { shareUrl, url } = useShareUrl();
+
+  const openMenu = useCallback(() => {
+    if (buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setDropdownPos({ top: rect.bottom + 4, left: rect.left });
+    }
+    setIsOpen(true);
+  }, []);
 
   useEffect(() => {
     if (!isOpen) return undefined;
 
     const handleClickOutside = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+      const target = e.target as Node;
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(target) &&
+        dropdownRef.current &&
+        !dropdownRef.current.contains(target)
+      ) {
         setIsOpen(false);
       }
     };
@@ -140,8 +156,9 @@ export const KebabMenu = ({
   return (
     <MenuWrapper ref={menuRef}>
       <KebabButton
+        ref={buttonRef}
         type="button"
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => (isOpen ? setIsOpen(false) : openMenu())}
         aria-label="More options"
         aria-expanded={isOpen}
         aria-haspopup="menu"
@@ -149,39 +166,46 @@ export const KebabMenu = ({
       >
         ⋮
       </KebabButton>
-      {isOpen && (
-        <DropdownMenu role="menu">
-          {showHotkeys && onOpenHotkeys && (
+      {isOpen &&
+        createPortal(
+          <DropdownMenu
+            ref={dropdownRef}
+            role="menu"
+            top={dropdownPos.top}
+            left={dropdownPos.left}
+          >
+            {showHotkeys && onOpenHotkeys && (
+              <DropdownItem
+                type="button"
+                role="menuitem"
+                onClick={() => {
+                  onOpenHotkeys();
+                  setIsOpen(false);
+                }}
+              >
+                Hotkeys
+              </DropdownItem>
+            )}
+            <DropdownItem
+              type="button"
+              role="menuitem"
+              onClick={handleShareClick}
+            >
+              Share
+            </DropdownItem>
             <DropdownItem
               type="button"
               role="menuitem"
               onClick={() => {
-                onOpenHotkeys();
+                setActiveModal("whip-whep");
                 setIsOpen(false);
               }}
             >
-              Hotkeys
+              WebRTC
             </DropdownItem>
-          )}
-          <DropdownItem
-            type="button"
-            role="menuitem"
-            onClick={handleShareClick}
-          >
-            Share
-          </DropdownItem>
-          <DropdownItem
-            type="button"
-            role="menuitem"
-            onClick={() => {
-              setActiveModal("whip-whep");
-              setIsOpen(false);
-            }}
-          >
-            WebRTC
-          </DropdownItem>
-        </DropdownMenu>
-      )}
+          </DropdownMenu>,
+          document.body
+        )}
       {activeModal === "whip-whep" && (
         <GenerateWhipWhepUrlModal
           productionId={productionId}
