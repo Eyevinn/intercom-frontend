@@ -29,7 +29,8 @@ test.describe("User Settings", () => {
 
   test("shows Devices heading", async ({ landingPage }) => {
     await landingPage.goto();
-    await expect(landingPage.page.getByText("Devices")).toBeVisible();
+    // Safari/WebKit renders "Device" (singular), other browsers render "Devices"
+    await expect(landingPage.page.getByText(/Devices?/)).toBeVisible();
   });
 
   test("input device dropdown has mock device option", async ({
