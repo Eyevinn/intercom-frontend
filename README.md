@@ -117,16 +117,16 @@ docker stop frontend
 
 ## Scripts
 
-| Script            | What it does                                 |
-| ----------------- | -------------------------------------------- |
+| Script               | What it does                                 |
+| -------------------- | -------------------------------------------- |
 | `npm run dev`        | Start Vite dev server with HMR               |
-| `npm runbuild`      | Type-check and build for production          |
-| `npm runstart`      | Serve the production build locally           |
-| `npm runtest`       | Run unit tests (Vitest)                      |
-| `npm runtest:watch` | Run unit tests in watch mode                 |
-| `npm runlint`       | Run ESLint on `src/`                         |
-| `npm runpretty`     | Format all files with Prettier               |
-| `npm runtypecheck`  | Type-check without emitting (`tsc --noEmit`) |
+| `npm run build`      | Type-check and build for production          |
+| `npm start`          | Serve the production build locally           |
+| `npm test`           | Run unit tests (Vitest)                      |
+| `npm run test:watch` | Run unit tests in watch mode                 |
+| `npm run lint`       | Run ESLint on `src/`                         |
+| `npm run pretty`     | Format all files with Prettier               |
+| `npm run typecheck`  | Type-check without emitting (`tsc --noEmit`) |
 
 ## E2E Testing
 
@@ -146,16 +146,16 @@ End-to-end tests use [Playwright](https://playwright.dev/). CI runs a focused su
 
 ### Scripts
 
-| Script              | What it does                              |
-| ------------------- | ----------------------------------------- |
-| `npm rune2e`          | Run all projects (4 in CI, 7 locally)     |
-| `npm rune2e:ui`       | Interactive Playwright debugger           |
-| `npm rune2e:headed`   | All projects with visible browser windows |
-| `npm rune2e:chromium` | Chromium 15" only                         |
-| `npm rune2e:firefox`  | Firefox 15" only                          |
-| `npm rune2e:webkit`   | WebKit 15" only                           |
-| `npm rune2e:mobile`   | Both mobile devices                       |
-| `npm rune2e:report`   | Open last HTML test report                |
+| Script                 | What it does                              |
+| ---------------------- | ----------------------------------------- |
+| `npm run e2e`          | Run all projects (4 in CI, 7 locally)     |
+| `npm run e2e:ui`       | Interactive Playwright debugger           |
+| `npm run e2e:headed`   | All projects with visible browser windows |
+| `npm run e2e:chromium` | Chromium 15" only                         |
+| `npm run e2e:firefox`  | Firefox 15" only                          |
+| `npm run e2e:webkit`   | WebKit 15" only                           |
+| `npm run e2e:mobile`   | Both mobile devices                       |
+| `npm run e2e:report`   | Open last HTML test report                |
 
 ## Contributing
 
