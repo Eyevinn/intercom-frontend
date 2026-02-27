@@ -20,9 +20,9 @@ Available as an open web service in [Eyevinn Open Source Cloud](https://www.osaa
 
 ## Get Started
 
-Pre-requisites: [Node v20](https://nodejs.org/), [Yarn Classic](https://classic.yarnpkg.com/)
+Pre-requisites: [Node v20](https://nodejs.org/)
 
-`yarn` to install packages
+`npm install` to install packages
 
 `cp .env.local.sample .env.local` to set up the local environment (do not skip!)
 
@@ -40,7 +40,7 @@ LOGGER LEVELS
 3 = data logs
 ```
 
-`yarn dev` to start a dev server
+`npm run dev` to start a dev server
 
 ### Preview
 
@@ -80,7 +80,7 @@ export VITE_BACKEND_URL=https://<instance>.eyevinn-intercom-manager.auto.dev.osa
 Then you start the dev server with the `VITE_BACKEND_API_KEY` environment variable set. Either on the comand line or stored in the shell with `export VITE_BACKEND_API_KEY=<service-access-token>`. The token expires after a while so you might need to refresh the token using the same command above.
 
 ```bash
-% VITE_BACKEND_API_KEY=<service-access-token> yarn dev
+% VITE_BACKEND_API_KEY=<service-access-token> npm run dev
 ```
 
 As the Open Source Cloud platform apply same-origin principle you need to disable that check in your browser when developing locally. Example below on how to start Chrome on MacOS with this check disabled.
@@ -119,14 +119,14 @@ docker stop frontend
 
 | Script            | What it does                                 |
 | ----------------- | -------------------------------------------- |
-| `yarn dev`        | Start Vite dev server with HMR               |
-| `yarn build`      | Type-check and build for production          |
-| `yarn start`      | Serve the production build locally           |
-| `yarn test`       | Run unit tests (Vitest)                      |
-| `yarn test:watch` | Run unit tests in watch mode                 |
-| `yarn lint`       | Run ESLint on `src/`                         |
-| `yarn pretty`     | Format all files with Prettier               |
-| `yarn typecheck`  | Type-check without emitting (`tsc --noEmit`) |
+| `npm run dev`        | Start Vite dev server with HMR               |
+| `npm runbuild`      | Type-check and build for production          |
+| `npm runstart`      | Serve the production build locally           |
+| `npm runtest`       | Run unit tests (Vitest)                      |
+| `npm runtest:watch` | Run unit tests in watch mode                 |
+| `npm runlint`       | Run ESLint on `src/`                         |
+| `npm runpretty`     | Format all files with Prettier               |
+| `npm runtypecheck`  | Type-check without emitting (`tsc --noEmit`) |
 
 ## E2E Testing
 
@@ -148,14 +148,14 @@ End-to-end tests use [Playwright](https://playwright.dev/). CI runs a focused su
 
 | Script              | What it does                              |
 | ------------------- | ----------------------------------------- |
-| `yarn e2e`          | Run all projects (4 in CI, 7 locally)     |
-| `yarn e2e:ui`       | Interactive Playwright debugger           |
-| `yarn e2e:headed`   | All projects with visible browser windows |
-| `yarn e2e:chromium` | Chromium 15" only                         |
-| `yarn e2e:firefox`  | Firefox 15" only                          |
-| `yarn e2e:webkit`   | WebKit 15" only                           |
-| `yarn e2e:mobile`   | Both mobile devices                       |
-| `yarn e2e:report`   | Open last HTML test report                |
+| `npm rune2e`          | Run all projects (4 in CI, 7 locally)     |
+| `npm rune2e:ui`       | Interactive Playwright debugger           |
+| `npm rune2e:headed`   | All projects with visible browser windows |
+| `npm rune2e:chromium` | Chromium 15" only                         |
+| `npm rune2e:firefox`  | Firefox 15" only                          |
+| `npm rune2e:webkit`   | WebKit 15" only                           |
+| `npm rune2e:mobile`   | Both mobile devices                       |
+| `npm rune2e:report`   | Open last HTML test report                |
 
 ## Contributing
 
