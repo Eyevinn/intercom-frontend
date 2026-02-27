@@ -8,12 +8,11 @@ RUN apt-get update
 RUN apt-get install -y curl
 RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
 RUN apt-get install -y nodejs
-RUN npm install -g yarn
 RUN mkdir /app
 WORKDIR /app
 
 COPY . .
-RUN yarn --immutable
+RUN npm ci
 
 COPY ./nginx/nginx.conf /etc/nginx/conf.d/default.conf
 RUN chmod +x /app/scripts/entrypoint.sh
