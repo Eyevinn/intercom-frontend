@@ -45,10 +45,6 @@ export const useFetchProductionList = (filter?: GetProductionListFilter) => {
           setError(null);
         })
         .catch((e) => {
-          if (aborted) return;
-
-          setIntervalLoad(false);
-          setDoInitialLoad(false);
           dispatch({
             type: "API_NOT_AVAILABLE",
           });
