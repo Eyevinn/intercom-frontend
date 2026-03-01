@@ -45,6 +45,19 @@ export const useFetchProductionList = (filter?: GetProductionListFilter) => {
           setError(null);
         })
         .catch((e) => {
+          if (aborted) return;
+
+          setIntervalLoad(false);
+          setDoInitialLoad(false);
+
+          const status = (e as Error & { status?: number }).status;
+          if (status === 401) {
+            API.reauth().catch(() => {
+              // Reauth failed — next interval poll will retry
+            });
+            return;
+          }
+
           dispatch({
             type: "API_NOT_AVAILABLE",
           });
