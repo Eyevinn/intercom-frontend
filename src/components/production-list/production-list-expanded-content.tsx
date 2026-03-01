@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import { TBasicProductionResponse } from "../../api/api";
 import { AudioFeedModal } from "../audio-feed-modal/audio-feed-modal";
 import {

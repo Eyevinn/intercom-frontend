@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import styled from "@emotion/styled";
 import { SecondaryButton } from "../form-elements/form-elements";
 

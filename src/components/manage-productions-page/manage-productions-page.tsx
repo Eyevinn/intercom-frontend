@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import { useGlobalState } from "../../global-state/context-provider";
 import { useFetchProductionList } from "../landing-page/use-fetch-production-list";
 import { useRefreshAnimation } from "../landing-page/use-refresh-animation";

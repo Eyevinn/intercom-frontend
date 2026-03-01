@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import styled from "@emotion/styled";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { useRefreshAnimation } from "./use-refresh-animation.ts";
 import { useFetchProductionList } from "./use-fetch-production-list.ts";
