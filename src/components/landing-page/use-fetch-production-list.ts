@@ -50,7 +50,7 @@ export const useFetchProductionList = (filter?: GetProductionListFilter) => {
           setIntervalLoad(false);
           setDoInitialLoad(false);
 
-          const status = (e as Error & { status?: number }).status;
+          const { status } = e as Error & { status?: number };
           if (status === 401) {
             API.reauth().catch(() => {
               // Reauth failed — next interval poll will retry
