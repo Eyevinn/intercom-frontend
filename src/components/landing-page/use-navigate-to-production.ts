@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import { TJoinProductionOptions } from "../production-line/types.ts";
 
 // Navigates to a production line as soon as a new production is pushed to the global state

@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import { BackArrow } from "../../assets/icons/icon";
 
 const StyledBackBtn = styled.div`

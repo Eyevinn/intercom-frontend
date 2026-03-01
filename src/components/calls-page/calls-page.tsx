@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 import { useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams } from "react-router";
 import { useGlobalState } from "../../global-state/context-provider";
 import { useCallList } from "../../hooks/use-call-list";
 import { JoinProduction } from "../landing-page/join-production";

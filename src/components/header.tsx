@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 import { FC, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router";
 import { HeadsetIcon } from "../assets/icons/icon.tsx";
 import { backgroundColour } from "../css-helpers/defaults.ts";
 import { mediaQueries } from "./generic-components.ts";

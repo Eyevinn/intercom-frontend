@@ -1,5 +1,5 @@
 import { SubmitHandler, useForm, useWatch } from "react-hook-form";
-import { useParams } from "react-router-dom";
+import { useParams } from "react-router";
 import { isBrowserFirefox, isMobile, isBrowserSafari } from "../../bowser";
 import { useGlobalState } from "../../global-state/context-provider";
 import {
