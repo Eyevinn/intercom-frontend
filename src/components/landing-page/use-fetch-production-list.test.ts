@@ -4,6 +4,7 @@ import { createElement, type ReactNode } from "react";
 import { useFetchProductionList } from "./use-fetch-production-list.ts";
 import { GlobalStateContext } from "../../global-state/context-provider.tsx";
 import { TGlobalState } from "../../global-state/types.ts";
+import { API } from "../../api/api.ts";
 
 // ── Mock API ────────────────────────────────────────────────────────────────
 
@@ -13,8 +14,6 @@ vi.mock("../../api/api.ts", () => ({
     reauth: vi.fn(),
   },
 }));
-
-import { API } from "../../api/api.ts";
 
 const mockListProductions = API.listProductions as ReturnType<typeof vi.fn>;
 const mockReauth = API.reauth as ReturnType<typeof vi.fn>;
@@ -39,7 +38,7 @@ const wrapper = ({ children }: { children: ReactNode }) =>
   createElement(
     GlobalStateContext.Provider,
     { value: [mockState, mockDispatch] },
-    children,
+    children
   );
 
 const emptyProductionList = {
@@ -80,7 +79,7 @@ describe("useFetchProductionList", () => {
 
       const { result } = renderHook(
         () => useFetchProductionList({ limit: "30", extended: "true" }),
-        { wrapper },
+        { wrapper }
       );
 
       // Initial load fires immediately (doInitialLoad starts true)
@@ -98,7 +97,7 @@ describe("useFetchProductionList", () => {
 
       const { result } = renderHook(
         () => useFetchProductionList({ limit: "30", extended: "true" }),
-        { wrapper },
+        { wrapper }
       );
 
       // Drain initial fetch
@@ -122,14 +121,16 @@ describe("useFetchProductionList", () => {
 
       renderHook(
         () => useFetchProductionList({ limit: "30", extended: "true" }),
-        { wrapper },
+        { wrapper }
       );
 
       await act(async () => {
         await Promise.resolve();
       });
 
-      expect(mockDispatch).toHaveBeenCalledWith({ type: "PRODUCTION_LIST_FETCHED" });
+      expect(mockDispatch).toHaveBeenCalledWith({
+        type: "PRODUCTION_LIST_FETCHED",
+      });
     });
 
     it("does not dispatch API_NOT_AVAILABLE on success", async () => {
@@ -137,7 +138,7 @@ describe("useFetchProductionList", () => {
 
       renderHook(
         () => useFetchProductionList({ limit: "30", extended: "true" }),
-        { wrapper },
+        { wrapper }
       );
 
       await act(async () => {
@@ -145,7 +146,7 @@ describe("useFetchProductionList", () => {
       });
 
       expect(mockDispatch).not.toHaveBeenCalledWith(
-        expect.objectContaining({ type: "API_NOT_AVAILABLE" }),
+        expect.objectContaining({ type: "API_NOT_AVAILABLE" })
       );
     });
   });
@@ -158,7 +159,7 @@ describe("useFetchProductionList", () => {
 
       renderHook(
         () => useFetchProductionList({ limit: "30", extended: "true" }),
-        { wrapper },
+        { wrapper }
       );
 
       await act(async () => {
@@ -173,7 +174,7 @@ describe("useFetchProductionList", () => {
 
       renderHook(
         () => useFetchProductionList({ limit: "30", extended: "true" }),
-        { wrapper },
+        { wrapper }
       );
 
       await act(async () => {
@@ -181,7 +182,7 @@ describe("useFetchProductionList", () => {
       });
 
       expect(mockDispatch).not.toHaveBeenCalledWith(
-        expect.objectContaining({ type: "API_NOT_AVAILABLE" }),
+        expect.objectContaining({ type: "API_NOT_AVAILABLE" })
       );
     });
 
@@ -190,7 +191,7 @@ describe("useFetchProductionList", () => {
 
       const { result } = renderHook(
         () => useFetchProductionList({ limit: "30", extended: "true" }),
-        { wrapper },
+        { wrapper }
       );
 
       await act(async () => {
@@ -208,7 +209,7 @@ describe("useFetchProductionList", () => {
 
       const { result } = renderHook(
         () => useFetchProductionList({ limit: "30", extended: "true" }),
-        { wrapper },
+        { wrapper }
       );
 
       // Initial fetch (doInitialLoad=true)
@@ -219,12 +220,18 @@ describe("useFetchProductionList", () => {
       expect(mockListProductions).toHaveBeenCalledTimes(1);
 
       // Simulate 3 consecutive interval ticks with 401 errors
-      for (let i = 0; i < 3; i++) {
-        await act(async () => {
-          result.current.setIntervalLoad(true);
-          await Promise.resolve();
-        });
-      }
+      await act(async () => {
+        result.current.setIntervalLoad(true);
+        await Promise.resolve();
+      });
+      await act(async () => {
+        result.current.setIntervalLoad(true);
+        await Promise.resolve();
+      });
+      await act(async () => {
+        result.current.setIntervalLoad(true);
+        await Promise.resolve();
+      });
 
       // Each tick must cause exactly one fetch — not a growing cascade.
       // Total: 1 initial + 3 interval ticks = 4
@@ -238,7 +245,7 @@ describe("useFetchProductionList", () => {
 
       const { result } = renderHook(
         () => useFetchProductionList({ limit: "30", extended: "true" }),
-        { wrapper },
+        { wrapper }
       );
 
       // Initial fetch → 401
@@ -267,7 +274,7 @@ describe("useFetchProductionList", () => {
 
       renderHook(
         () => useFetchProductionList({ limit: "30", extended: "true" }),
-        { wrapper },
+        { wrapper }
       );
 
       await act(async () => {
@@ -282,7 +289,7 @@ describe("useFetchProductionList", () => {
 
       const { result } = renderHook(
         () => useFetchProductionList({ limit: "30", extended: "true" }),
-        { wrapper },
+        { wrapper }
       );
 
       await act(async () => {
@@ -297,7 +304,7 @@ describe("useFetchProductionList", () => {
 
       renderHook(
         () => useFetchProductionList({ limit: "30", extended: "true" }),
-        { wrapper },
+        { wrapper }
       );
 
       await act(async () => {
@@ -318,12 +325,12 @@ describe("useFetchProductionList", () => {
       mockListProductions.mockReturnValue(
         new Promise<typeof emptyProductionList>((res) => {
           resolveList = res;
-        }),
+        })
       );
 
       const { result, unmount } = renderHook(
         () => useFetchProductionList({ limit: "30", extended: "true" }),
-        { wrapper },
+        { wrapper }
       );
 
       // Fetch is in flight — unmount before it resolves
@@ -346,9 +353,9 @@ describe("useFetchProductionList", () => {
     it("does not fire additional fetches after unmount when setIntervalLoad is called externally", async () => {
       mockListProductions.mockResolvedValue(emptyProductionList);
 
-      const { result, unmount } = renderHook(
+      const { unmount } = renderHook(
         () => useFetchProductionList({ limit: "30", extended: "true" }),
-        { wrapper },
+        { wrapper }
       );
 
       // Drain initial fetch
@@ -381,7 +388,7 @@ describe("useFetchProductionList", () => {
 
       const { result } = renderHook(
         () => useFetchProductionList({ limit: "30", extended: "true" }),
-        { wrapper },
+        { wrapper }
       );
 
       // Initial load
@@ -390,15 +397,16 @@ describe("useFetchProductionList", () => {
       });
       expect(mockListProductions).toHaveBeenCalledTimes(1);
 
-      // Simulate 10 interval ticks — each should add exactly 1 fetch
-      for (let tick = 1; tick <= 10; tick++) {
+      // Simulate 10 interval ticks — each should add exactly 1 fetch.
+      // Sequential reduce avoids await-in-loop while preserving tick-by-tick assertions.
+      await [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].reduce(async (chain, tick) => {
+        await chain;
         await act(async () => {
           result.current.setIntervalLoad(true);
           await Promise.resolve();
         });
-
         expect(mockListProductions).toHaveBeenCalledTimes(tick + 1);
-      }
+      }, Promise.resolve());
 
       // Total: 11 fetches for 1 initial + 10 interval ticks.
       // If there were a flood (self-triggering), this would be much higher.
@@ -410,7 +418,7 @@ describe("useFetchProductionList", () => {
 
       const { result } = renderHook(
         () => useFetchProductionList({ limit: "30", extended: "true" }),
-        { wrapper },
+        { wrapper }
       );
 
       // Initial load → 1 fetch → 1 reauth call
@@ -420,12 +428,18 @@ describe("useFetchProductionList", () => {
       expect(mockReauth).toHaveBeenCalledTimes(1);
 
       // 3 more interval ticks → 3 more reauth calls (one per tick, not cascading)
-      for (let tick = 0; tick < 3; tick++) {
-        await act(async () => {
-          result.current.setIntervalLoad(true);
-          await Promise.resolve();
-        });
-      }
+      await act(async () => {
+        result.current.setIntervalLoad(true);
+        await Promise.resolve();
+      });
+      await act(async () => {
+        result.current.setIntervalLoad(true);
+        await Promise.resolve();
+      });
+      await act(async () => {
+        result.current.setIntervalLoad(true);
+        await Promise.resolve();
+      });
 
       expect(mockReauth).toHaveBeenCalledTimes(4);
     });
