@@ -10,6 +10,6 @@ fi
 
 echo "VITE_BACKEND_URL=$API_URL"
 
-VITE_BACKEND_URL=$API_URL yarn build && \
+VITE_BACKEND_URL=$API_URL npm run build && \
   cp -r /app/dist/* /usr/share/nginx/html/ && \
   nginx -g 'daemon off;'

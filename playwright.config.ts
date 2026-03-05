@@ -24,7 +24,7 @@ export default defineConfig({
     timezoneId: "UTC",
   },
   webServer: {
-    command: "yarn dev",
+    command: "npm run dev",
     url: BASE_URL,
     reuseExistingServer: !process.env.CI,
     timeout: 30_000,
