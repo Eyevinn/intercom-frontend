@@ -35,26 +35,32 @@ export const useInitiateProductionCall = ({
         // Wait for devices to refresh and get the updated devices
         const updatedDevices = await getUpdatedDevices();
 
-        const inputDeviceExists = updatedDevices.input.some(
-          (device) =>
-            device.deviceId === payload.joinProductionOptions.audioinput
-        );
+        // Only validate devices if enumeration returned results.
+        // On quick page load, permission may not yet be confirmed, causing
+        // getUpdatedDevices() to return empty arrays — skip validation in
+        // that case and let getUserMedia handle truly unavailable devices.
+        if (updatedDevices.input.length > 0) {
+          const inputDeviceExists = updatedDevices.input.some(
+            (device) =>
+              device.deviceId === payload.joinProductionOptions.audioinput
+          );
 
-        const outputDeviceExists = updatedDevices.output.some(
-          (device) => device.deviceId === payload.audiooutput
-        );
+          const outputDeviceExists = updatedDevices.output.some(
+            (device) => device.deviceId === payload.audiooutput
+          );
 
-        if (
-          !inputDeviceExists ||
-          (!outputDeviceExists && !isBrowserSafari && !isMobile && !isIpad)
-        ) {
-          dispatch({
-            type: "ERROR",
-            payload: {
-              error: new Error("Selected devices are not available"),
-            },
-          });
-          return false;
+          if (
+            !inputDeviceExists ||
+            (!outputDeviceExists && !isBrowserSafari && !isMobile && !isIpad)
+          ) {
+            dispatch({
+              type: "ERROR",
+              payload: {
+                error: new Error("Selected devices are not available"),
+              },
+            });
+            return false;
+          }
         }
 
         const uuid = globalThis.crypto.randomUUID();

@@ -137,19 +137,15 @@ export const UserSettingsForm = ({
     if (preSelected || !isJoinProduction) return;
 
     if (!production) {
-      reset({
-        lineId: "",
-      });
+      setValue("lineId", "");
 
       return;
     }
 
-    const lineId = production.lines[0]?.id?.toString() || undefined;
+    const lineId = production.lines[0]?.id?.toString() ?? "";
 
-    reset({
-      lineId,
-    });
-  }, [preSelected, production, reset, isJoinProduction]);
+    setValue("lineId", lineId, { shouldValidate: true });
+  }, [preSelected, production, setValue, isJoinProduction]);
 
   useEffect(() => {
     if (defaultValues && "productionId" in defaultValues) {
