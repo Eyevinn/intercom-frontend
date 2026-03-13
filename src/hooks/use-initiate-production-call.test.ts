@@ -3,6 +3,9 @@ import { renderHook, act } from "@testing-library/react";
 import { type Dispatch } from "react";
 import { useInitiateProductionCall } from "./use-initiate-production-call";
 import { type TGlobalStateAction } from "../global-state/global-state-actions";
+import { useFetchDevices } from "./use-fetch-devices";
+import { useDevicePermissions } from "./use-device-permission";
+import * as bowser from "../bowser";
 
 // ── Module mocks ─────────────────────────────────────────────────────────────
 
@@ -26,10 +29,6 @@ vi.mock("../utils/logger", () => ({
 
 // ── Typed mock references ────────────────────────────────────────────────────
 
-import { useFetchDevices } from "./use-fetch-devices";
-import { useDevicePermissions } from "./use-device-permission";
-import * as bowser from "../bowser";
-
 const mockUseFetchDevices = vi.mocked(useFetchDevices);
 const mockUseDevicePermissions = vi.mocked(useDevicePermissions);
 
@@ -38,11 +37,21 @@ const mockUseDevicePermissions = vi.mocked(useDevicePermissions);
 const FAKE_UUID = "test-uuid-1234";
 
 function makeDevice(deviceId: string): MediaDeviceInfo {
-  return { deviceId, label: deviceId, kind: "audioinput", groupId: "" } as MediaDeviceInfo;
+  return {
+    deviceId,
+    label: deviceId,
+    kind: "audioinput",
+    groupId: "",
+  } as MediaDeviceInfo;
 }
 
 function makeOutputDevice(deviceId: string): MediaDeviceInfo {
-  return { deviceId, label: deviceId, kind: "audiooutput", groupId: "" } as MediaDeviceInfo;
+  return {
+    deviceId,
+    label: deviceId,
+    kind: "audiooutput",
+    groupId: "",
+  } as MediaDeviceInfo;
 }
 
 const defaultJoinOptions = {
@@ -71,8 +80,13 @@ describe("useInitiateProductionCall", () => {
 
     vi.stubGlobal("crypto", { randomUUID: vi.fn().mockReturnValue(FAKE_UUID) });
 
-    mockUseDevicePermissions.mockReturnValue({ permission: true, denied: false });
-    mockUseFetchDevices.mockReturnValue([mockGetUpdatedDevices] as unknown as ReturnType<typeof mockUseFetchDevices>);
+    mockUseDevicePermissions.mockReturnValue({
+      permission: true,
+      denied: false,
+    });
+    mockUseFetchDevices.mockReturnValue([
+      mockGetUpdatedDevices,
+    ] as unknown as ReturnType<typeof mockUseFetchDevices>);
   });
 
   afterEach(() => {
@@ -87,7 +101,7 @@ describe("useInitiateProductionCall", () => {
       mockGetUpdatedDevices.mockResolvedValue({ input: [], output: [] });
 
       const { result } = renderHook(() =>
-        useInitiateProductionCall({ dispatch: mockDispatch }),
+        useInitiateProductionCall({ dispatch: mockDispatch })
       );
 
       let returnValue: boolean | undefined;
@@ -100,11 +114,11 @@ describe("useInitiateProductionCall", () => {
       expect(returnValue).toBe(true);
 
       expect(mockDispatch).not.toHaveBeenCalledWith(
-        expect.objectContaining({ type: "ERROR" }),
+        expect.objectContaining({ type: "ERROR" })
       );
 
       expect(mockDispatch).toHaveBeenCalledWith(
-        expect.objectContaining({ type: "ADD_CALL" }),
+        expect.objectContaining({ type: "ADD_CALL" })
       );
       expect(mockDispatch).toHaveBeenCalledWith({
         type: "SELECT_PRODUCTION_ID",
@@ -123,7 +137,7 @@ describe("useInitiateProductionCall", () => {
       });
 
       const { result } = renderHook(() =>
-        useInitiateProductionCall({ dispatch: mockDispatch }),
+        useInitiateProductionCall({ dispatch: mockDispatch })
       );
 
       let returnValue: boolean | undefined;
@@ -138,14 +152,14 @@ describe("useInitiateProductionCall", () => {
         expect.objectContaining({
           type: "ADD_CALL",
           payload: expect.objectContaining({ id: FAKE_UUID }),
-        }),
+        })
       );
       expect(mockDispatch).toHaveBeenCalledWith({
         type: "SELECT_PRODUCTION_ID",
         payload: "prod-1",
       });
       expect(mockDispatch).not.toHaveBeenCalledWith(
-        expect.objectContaining({ type: "ERROR" }),
+        expect.objectContaining({ type: "ERROR" })
       );
     });
   });
@@ -160,7 +174,7 @@ describe("useInitiateProductionCall", () => {
       });
 
       const { result } = renderHook(() =>
-        useInitiateProductionCall({ dispatch: mockDispatch }),
+        useInitiateProductionCall({ dispatch: mockDispatch })
       );
 
       let returnValue: boolean | undefined;
@@ -176,13 +190,15 @@ describe("useInitiateProductionCall", () => {
         payload: { error: expect.any(Error) },
       });
       const dispatchMock = mockDispatch as unknown as ReturnType<typeof vi.fn>;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const errorCall = dispatchMock.mock.calls.find((call: any[]) => call[0]?.type === "ERROR");
+      const errorCall = dispatchMock.mock.calls.find(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (call: any[]) => call[0]?.type === "ERROR"
+      );
       expect(errorCall?.[0].payload.error.message).toBe(
-        "Selected devices are not available",
+        "Selected devices are not available"
       );
       expect(mockDispatch).not.toHaveBeenCalledWith(
-        expect.objectContaining({ type: "ADD_CALL" }),
+        expect.objectContaining({ type: "ADD_CALL" })
       );
     });
   });
@@ -197,7 +213,7 @@ describe("useInitiateProductionCall", () => {
       });
 
       const { result } = renderHook(() =>
-        useInitiateProductionCall({ dispatch: mockDispatch }),
+        useInitiateProductionCall({ dispatch: mockDispatch })
       );
 
       let returnValue: boolean | undefined;
@@ -209,13 +225,15 @@ describe("useInitiateProductionCall", () => {
 
       expect(returnValue).toBe(false);
       const dispatchMock2 = mockDispatch as unknown as ReturnType<typeof vi.fn>;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const errorCall = dispatchMock2.mock.calls.find((call: any[]) => call[0]?.type === "ERROR");
+      const errorCall = dispatchMock2.mock.calls.find(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (call: any[]) => call[0]?.type === "ERROR"
+      );
       expect(errorCall?.[0].payload.error.message).toBe(
-        "Selected devices are not available",
+        "Selected devices are not available"
       );
       expect(mockDispatch).not.toHaveBeenCalledWith(
-        expect.objectContaining({ type: "ADD_CALL" }),
+        expect.objectContaining({ type: "ADD_CALL" })
       );
     });
   });
@@ -232,7 +250,7 @@ describe("useInitiateProductionCall", () => {
       });
 
       const { result } = renderHook(() =>
-        useInitiateProductionCall({ dispatch: mockDispatch }),
+        useInitiateProductionCall({ dispatch: mockDispatch })
       );
 
       let returnValue: boolean | undefined;
@@ -244,10 +262,10 @@ describe("useInitiateProductionCall", () => {
 
       expect(returnValue).toBe(true);
       expect(mockDispatch).toHaveBeenCalledWith(
-        expect.objectContaining({ type: "ADD_CALL" }),
+        expect.objectContaining({ type: "ADD_CALL" })
       );
       expect(mockDispatch).not.toHaveBeenCalledWith(
-        expect.objectContaining({ type: "ERROR" }),
+        expect.objectContaining({ type: "ERROR" })
       );
 
       // Reset so subsequent tests are unaffected
@@ -263,7 +281,7 @@ describe("useInitiateProductionCall", () => {
       mockGetUpdatedDevices.mockRejectedValue(thrownError);
 
       const { result } = renderHook(() =>
-        useInitiateProductionCall({ dispatch: mockDispatch }),
+        useInitiateProductionCall({ dispatch: mockDispatch })
       );
 
       let returnValue: boolean | undefined;
@@ -279,7 +297,7 @@ describe("useInitiateProductionCall", () => {
         payload: { error: thrownError },
       });
       expect(mockDispatch).not.toHaveBeenCalledWith(
-        expect.objectContaining({ type: "ADD_CALL" }),
+        expect.objectContaining({ type: "ADD_CALL" })
       );
     });
   });

@@ -2,6 +2,9 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, act } from "@testing-library/react";
 import { UserSettingsForm } from "./user-settings-form";
 import { TGlobalState } from "../../global-state/types";
+import { useGlobalState } from "../../global-state/context-provider";
+import { useFetchProductionList } from "../landing-page/use-fetch-production-list";
+import { useSubmitForm } from "./use-submit-form";
 
 // ── Module mocks ─────────────────────────────────────────────────────────────
 
@@ -37,10 +40,6 @@ vi.mock("../../bowser", () => ({
 }));
 
 // ── Typed mock references ────────────────────────────────────────────────────
-
-import { useGlobalState } from "../../global-state/context-provider";
-import { useFetchProductionList } from "../landing-page/use-fetch-production-list";
-import { useSubmitForm } from "./use-submit-form";
 
 const mockUseGlobalState = vi.mocked(useGlobalState);
 const mockUseFetchProductionList = vi.mocked(useFetchProductionList);
@@ -113,7 +112,7 @@ describe("UserSettingsForm — lineId auto-selection fix", () => {
           isJoinProduction
           buttonText="Join"
           defaultValues={defaultValues}
-        />,
+        />
       );
     });
 
@@ -129,7 +128,7 @@ describe("UserSettingsForm — lineId auto-selection fix", () => {
         isJoinProduction
         buttonText="Join"
         defaultValues={defaultValues}
-      />,
+      />
     );
 
     // The production select is the first combobox rendered.
@@ -158,7 +157,7 @@ describe("UserSettingsForm — lineId auto-selection fix", () => {
           isJoinProduction
           buttonText="Join"
           defaultValues={defaultValues}
-        />,
+        />
       );
     });
 
