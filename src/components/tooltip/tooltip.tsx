@@ -26,10 +26,7 @@ const IconWrapper = styled.div`
   }
 
   &.firefox-warning {
-    position: absolute;
-    left: 6.5rem;
-    bottom: 0.5rem;
-    width: auto;
+    margin-left: 0.5rem;
   }
 `;
 
