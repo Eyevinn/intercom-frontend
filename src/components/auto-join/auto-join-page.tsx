@@ -42,9 +42,9 @@ export const AutoJoinPage = () => {
     const audioinput =
       userSettings?.audioinput || devices?.input?.[0]?.deviceId;
 
-    const joinAll = async () => {
-      for (const call of calls) {
-        await initiateProductionCall({
+    Promise.all(
+      calls.map((call) =>
+        initiateProductionCall({
           payload: {
             joinProductionOptions: {
               productionId: call.productionId,
@@ -56,12 +56,9 @@ export const AutoJoinPage = () => {
             },
             audiooutput,
           },
-        });
-      }
-      navigate("/production-calls");
-    };
-
-    joinAll();
+        })
+      )
+    ).then(() => navigate("/production-calls"));
   }, [searchParams, userSettings, devices, navigate, initiateProductionCall]);
 
   return null;

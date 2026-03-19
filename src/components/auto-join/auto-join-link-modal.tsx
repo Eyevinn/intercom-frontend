@@ -35,7 +35,10 @@ type TAutoJoinLinkModalProps = {
   onClose: () => void;
 };
 
-export const AutoJoinLinkModal = ({ url, onClose }: TAutoJoinLinkModalProps) => {
+export const AutoJoinLinkModal = ({
+  url,
+  onClose,
+}: TAutoJoinLinkModalProps) => {
   const modalRef = useRef<HTMLDivElement>(null);
   const [includeCompanion, setIncludeCompanion] = useState(false);
 
@@ -43,7 +46,10 @@ export const AutoJoinLinkModal = ({ url, onClose }: TAutoJoinLinkModalProps) => 
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+      if (
+        modalRef.current &&
+        !modalRef.current.contains(event.target as Node)
+      ) {
         onClose();
       }
     };
@@ -56,7 +62,8 @@ export const AutoJoinLinkModal = ({ url, onClose }: TAutoJoinLinkModalProps) => 
       <div ref={modalRef}>
         <ModalHeader>Auto Join Link</ModalHeader>
         <ModalText>
-          Share this link to let someone join the same set of calls automatically.
+          Share this link to let someone join the same set of calls
+          automatically.
         </ModalText>
         <CheckboxRow>
           <input
