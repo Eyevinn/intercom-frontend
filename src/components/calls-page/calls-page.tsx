@@ -1,8 +1,12 @@
 import styled from "@emotion/styled";
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router";
+import { ShareIcon } from "../../assets/icons/icon";
 import { useGlobalState } from "../../global-state/context-provider";
+import { useAutoJoinRestore } from "../../hooks/use-auto-join-restore";
 import { useCallList } from "../../hooks/use-call-list";
+import { AutoJoinLinkModal } from "../auto-join/auto-join-link-modal";
+import { CopyIconWrapper } from "../copy-button/copy-components";
 import { JoinProduction } from "../landing-page/join-production";
 import { UserSettingsButton } from "../landing-page/user-settings-button";
 import { Modal } from "../modal/modal";
@@ -46,6 +50,7 @@ const CallsContainer = styled.div`
 export const CallsPage = () => {
   const [productionId, setProductionId] = useState<string | null>(null);
   const [addCallActive, setAddCallActive] = useState<boolean>(false);
+  const [autoJoinModalOpen, setAutoJoinModalOpen] = useState<boolean>(false);
   const [confirmExitModalOpen, setConfirmExitModalOpen] =
     useState<boolean>(false);
   const [isMasterInputMuted, setIsMasterInputMuted] = useState<boolean>(true);
@@ -64,8 +69,19 @@ export const CallsPage = () => {
   const [showSettings, setShowSettings] = useState<boolean>(false);
   const [isSettingGlobalMute, setIsSettingGlobalMute] =
     useState<boolean>(false);
+  const [companionAutoConnectUrl, setCompanionAutoConnectUrl] = useState<
+    string | null
+  >(null);
 
   const { productionId: paramProductionId, lineId: paramLineId } = useParams();
+
+  useEffect(() => {
+    const storedCompanionUrl = localStorage.getItem("companion_auto_connect");
+    if (storedCompanionUrl && !companionAutoConnectUrl) {
+      setCompanionAutoConnectUrl(storedCompanionUrl);
+      localStorage.removeItem("companion_auto_connect");
+    }
+  }, [companionAutoConnectUrl]);
 
   const navigate = useCallsNavigation({
     isEmpty: Object.values(calls).length === 0,
@@ -106,6 +122,7 @@ export const CallsPage = () => {
   }, [calls]);
 
   usePreventPullToRefresh();
+  useAutoJoinRestore();
 
   useEffect(() => {
     if (selectedProductionId) {
@@ -151,6 +168,34 @@ export const CallsPage = () => {
       )}
       <PageHeader
         title={!isEmpty ? "Calls" : ""}
+        titleAction={
+          !isEmpty ? (
+            <>
+              <CopyIconWrapper
+                title="Share auto-join link"
+                onClick={() => setAutoJoinModalOpen(true)}
+                style={{ marginTop: "2px", marginLeft: "2px" }}
+              >
+                <ShareIcon />
+              </CopyIconWrapper>
+              {autoJoinModalOpen && (
+                <AutoJoinLinkModal
+                  url={`${window.location.origin}/auto-join?calls=${Object.values(
+                    calls
+                  )
+                    .map((c) => {
+                      const { productionId: pid, lineId: lid } =
+                        c.joinProductionOptions ?? {};
+                      return pid && lid ? `${pid}:${lid}` : null;
+                    })
+                    .filter(Boolean)
+                    .join(",")}`}
+                  onClose={() => setAutoJoinModalOpen(false)}
+                />
+              )}
+            </>
+          ) : undefined
+        }
         hasNavigateToRoot
         onNavigateToRoot={() => {
           if (isEmpty) {
@@ -193,6 +238,7 @@ export const CallsPage = () => {
           callActionHandlers={callActionHandlers}
           sendCallsStateUpdate={sendCallsStateUpdate}
           resetLastSentCallsState={resetLastSentCallsState}
+          companionAutoConnectUrl={companionAutoConnectUrl}
         />
       </PageHeader>
       <Container>

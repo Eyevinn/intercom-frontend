@@ -71,6 +71,7 @@ interface ConnectToWSButtonProps {
     Record<string, Record<string, () => void>>
   >;
   isMasterInputMuted: boolean;
+  companionAutoConnectUrl: string | null;
   handleToggleGlobalMute: () => void;
   sendCallsStateUpdate: () => void;
   resetLastSentCallsState: () => void;
@@ -80,6 +81,7 @@ export const ConnectToWSButton = ({
   callIndexMap,
   callActionHandlers,
   isMasterInputMuted,
+  companionAutoConnectUrl,
   handleToggleGlobalMute,
   sendCallsStateUpdate,
   resetLastSentCallsState,
@@ -88,6 +90,7 @@ export const ConnectToWSButton = ({
   const [isWSReconnecting, setIsWSReconnecting] = useState(false);
   const [isConnectionConflict, setConnectionConflict] = useState(false);
   const [{ calls }, dispatch] = useGlobalState();
+  const [hasAutoConnected, setHasAutoConnected] = useState(false);
 
   // map call ids to indices for actions
   useEffect(() => {
@@ -128,6 +131,22 @@ export const ConnectToWSButton = ({
     setIsWSReconnecting,
     wsConnect,
   });
+
+  // Auto-connect to Companion if companionAutoConnectUrl is provided
+  useEffect(() => {
+    if (hasAutoConnected || isWSConnected || !companionAutoConnectUrl) {
+      return;
+    }
+
+    setHasAutoConnected(true);
+
+    if (
+      companionAutoConnectUrl.startsWith("ws://") ||
+      companionAutoConnectUrl.startsWith("wss://")
+    ) {
+      wsConnect(companionAutoConnectUrl);
+    }
+  }, [hasAutoConnected, isWSConnected, companionAutoConnectUrl, wsConnect]);
 
   const handleConnect = (url: string) => {
     setConnectionConflict(false);

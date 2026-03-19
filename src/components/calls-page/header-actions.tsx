@@ -52,6 +52,7 @@ type HeaderActionsProps = {
   callActionHandlers: React.MutableRefObject<
     Record<string, Record<string, () => void>>
   >;
+  companionAutoConnectUrl: string | null;
   setIsMasterInputMuted: React.Dispatch<React.SetStateAction<boolean>>;
   setAddCallActive: (addCallActive: boolean) => void;
   setIsSettingGlobalMute: React.Dispatch<React.SetStateAction<boolean>>;
@@ -66,6 +67,7 @@ export const HeaderActions = ({
   callIndexMap,
   callActionHandlers,
   addCallActive,
+  companionAutoConnectUrl,
   setAddCallActive,
   setIsSettingGlobalMute,
   sendCallsStateUpdate,
@@ -86,6 +88,7 @@ export const HeaderActions = ({
           sendCallsStateUpdate={sendCallsStateUpdate}
           resetLastSentCallsState={resetLastSentCallsState}
           handleToggleGlobalMute={handleToggleGlobalMute}
+          companionAutoConnectUrl={companionAutoConnectUrl}
         />
       )}
       {!isEmpty && !isSingleCall && !isMobile && (
