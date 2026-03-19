@@ -268,8 +268,8 @@ export const UserSettingsForm = ({
             <SectionTitle>
               {isBrowserSafari ? "Device" : "Devices"}
               <ReloadDevicesButton />
+              {isBrowserFirefox && <FirefoxWarning type="firefox-warning" />}
             </SectionTitle>
-            {isBrowserFirefox && <FirefoxWarning type="firefox-warning" />}
           </DevicesSection>
           <FormItem label="Input">
             <FormSelect
