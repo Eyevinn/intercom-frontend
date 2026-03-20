@@ -43,7 +43,9 @@ export const AutoJoinLinkModal = ({
   const [includeCompanion, setIncludeCompanion] = useState(false);
   const [username, setUsername] = useState("");
 
-  const usernameParam = username ? `&username=${encodeURIComponent(username)}` : "";
+  const usernameParam = username
+    ? `&username=${encodeURIComponent(username)}`
+    : "";
   const displayUrl = `${url}${usernameParam}${includeCompanion ? COMPANION_SUFFIX : ""}`;
 
   useEffect(() => {
