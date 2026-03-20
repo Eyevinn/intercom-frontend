@@ -1,9 +1,12 @@
 import { handleFetchRequest } from "./handle-fetch-request.ts";
 
-const API_VERSION = import.meta.env.VITE_BACKEND_API_VERSION ?? "api/v1/";
-const API_URL =
-  `${import.meta.env.VITE_BACKEND_URL.replace(/\/+$/, "")}/${API_VERSION}` ||
-  `${window.location.origin}/${API_VERSION}`;
+const API_VERSION = (
+  import.meta.env.VITE_BACKEND_API_VERSION ?? "api/v1"
+).replace(/\/+$/, "");
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+const API_URL = BACKEND_URL
+  ? `${BACKEND_URL.replace(/\/+$/, "")}/${API_VERSION}/`
+  : `${window.location.origin}/${API_VERSION}/`;
 const API_KEY = import.meta.env.VITE_BACKEND_API_KEY;
 
 type TCreateProductionOptions = {

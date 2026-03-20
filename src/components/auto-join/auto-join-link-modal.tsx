@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import styled from "@emotion/styled";
 import { CopyButton } from "../copy-button/copy-button";
-import { FormInput } from "../form-elements/form-elements";
+import { DecorativeLabel, FormInput } from "../form-elements/form-elements";
 import { Modal } from "../modal/modal";
 import {
   InputWrapper,
@@ -41,8 +41,10 @@ export const AutoJoinLinkModal = ({
 }: TAutoJoinLinkModalProps) => {
   const modalRef = useRef<HTMLDivElement>(null);
   const [includeCompanion, setIncludeCompanion] = useState(false);
+  const [username, setUsername] = useState("");
 
-  const displayUrl = includeCompanion ? `${url}${COMPANION_SUFFIX}` : url;
+  const usernameParam = username ? `&username=${encodeURIComponent(username)}` : "";
+  const displayUrl = `${url}${usernameParam}${includeCompanion ? COMPANION_SUFFIX : ""}`;
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -65,6 +67,19 @@ export const AutoJoinLinkModal = ({
           Share this link to let someone join the same set of calls
           automatically.
         </ModalText>
+        <Wrapper>
+          <InputWrapper>
+            <LinkLabel>
+              <DecorativeLabel>Username (optional)</DecorativeLabel>
+              <FormInput
+                type="text"
+                placeholder="Leave empty to use saved settings"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+              />
+            </LinkLabel>
+          </InputWrapper>
+        </Wrapper>
         <CheckboxRow>
           <input
             type="checkbox"

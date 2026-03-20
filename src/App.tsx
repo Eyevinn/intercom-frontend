@@ -108,73 +108,70 @@ const AppContent = ({
           />
         </DisplayBoxPositioningContainer>
       )}
-      {continueToApp && (
-        <>
-          {denied && (
-            <DisplayBoxPositioningContainer>
-              <DisplayWarning
-                text="To use this application it has to be granted access to audio devices. Reload browser and/or reset permissions to try
-            again."
-                title="Permissions have been denied"
-              />
-            </DisplayBoxPositioningContainer>
-          )}
-          {!permission && !denied && (
-            <DisplayBoxPositioningContainer>
-              <DisplayWarning
-                text="To use this application it has to be granted access to audio devices."
-                title="Waiting for device permissions"
-              />
-            </DisplayBoxPositioningContainer>
-          )}
-          {apiError && (
-            <DisplayBoxPositioningContainer>
-              <DisplayWarning
-                text="The server is not available. Reload page to try again."
-                title="Server not available"
-              />
-            </DisplayBoxPositioningContainer>
-          )}
-          {permission && !denied && !apiError && userSettings && (
-            <Routes>
-              <>
-                <Route
-                  path="/"
-                  element={
-                    <LandingPage setApiError={() => setApiError(true)} />
-                  }
-                  errorElement={<ErrorPage />}
-                />
-                <Route
-                  path="/create-production"
-                  element={<CreateProductionPage />}
-                  errorElement={<ErrorPage />}
-                />
-                <Route
-                  path="/manage-productions"
-                  element={
-                    <ManageProductionsPage
-                      setApiError={() => setApiError(true)}
-                    />
-                  }
-                  errorElement={<ErrorPage />}
-                />
-                <Route
-                  path="/auto-join"
-                  element={<AutoJoinPage />}
-                  errorElement={<ErrorPage />}
-                />
-                <Route
-                  path="/production-calls/production/:productionId/line/:lineId"
-                  element={<CallsPage />}
-                  errorElement={<ErrorPage />}
-                />
-                <Route path="*" element={<NotFound />} />
-              </>
-            </Routes>
-          )}
-        </>
+      {continueToApp && denied && (
+        <DisplayBoxPositioningContainer>
+          <DisplayWarning
+            text="To use this application it has to be granted access to audio devices. Reload browser and/or reset permissions to try again."
+            title="Permissions have been denied"
+          />
+        </DisplayBoxPositioningContainer>
       )}
+      {continueToApp && !permission && !denied && (
+        <DisplayBoxPositioningContainer>
+          <DisplayWarning
+            text="To use this application it has to be granted access to audio devices."
+            title="Waiting for device permissions"
+          />
+        </DisplayBoxPositioningContainer>
+      )}
+      {continueToApp && apiError && (
+        <DisplayBoxPositioningContainer>
+          <DisplayWarning
+            text="The server is not available. Reload page to try again."
+            title="Server not available"
+          />
+        </DisplayBoxPositioningContainer>
+      )}
+
+      <Routes>
+        {permission && !denied && !apiError && userSettings && (
+          <>
+            <Route
+              path="/"
+              element={<LandingPage setApiError={() => setApiError(true)} />}
+              errorElement={<ErrorPage />}
+            />
+            <Route
+              path="/create-production"
+              element={<CreateProductionPage />}
+              errorElement={<ErrorPage />}
+            />
+            <Route
+              path="/manage-productions"
+              element={
+                <ManageProductionsPage setApiError={() => setApiError(true)} />
+              }
+              errorElement={<ErrorPage />}
+            />
+            <Route
+              path="/auto-join"
+              element={<AutoJoinPage />}
+              errorElement={<ErrorPage />}
+            />
+            <Route
+              path="/production-calls"
+              element={<CallsPage />}
+              errorElement={<ErrorPage />}
+            />
+            <Route
+              path="/production-calls/production/:productionId/line/:lineId"
+              element={<CallsPage />}
+              errorElement={<ErrorPage />}
+            />
+          </>
+        )}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
     </BrowserRouter>
   );
 };
