@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { FC, PropsWithChildren } from "react";
+import { FC, PropsWithChildren, ReactNode } from "react";
 import { DisplayContainer } from "../generic-components";
 import { DisplayContainerHeader } from "../landing-page/display-container-header";
 import { LoaderDots } from "../loader/loader";
@@ -54,6 +54,7 @@ const RootButtonWrapper = styled.div`
 
 interface PageHeaderProps extends PropsWithChildren {
   title: string;
+  titleAction?: ReactNode;
   hasNavigateToRoot?: boolean;
   onNavigateToRoot?: () => void;
   loading?: boolean;
@@ -62,6 +63,7 @@ interface PageHeaderProps extends PropsWithChildren {
 export const PageHeader: FC<PageHeaderProps> = (props) => {
   const {
     title,
+    titleAction,
     hasNavigateToRoot = false,
     onNavigateToRoot,
     loading = false,
@@ -77,6 +79,7 @@ export const PageHeader: FC<PageHeaderProps> = (props) => {
           </RootButtonWrapper>
         )}
         <CustomContainerHeader>{title}</CustomContainerHeader>
+        {titleAction}
         <LoaderWrapper>
           <LoaderDots className={loading ? "active" : "in-active"} />
         </LoaderWrapper>

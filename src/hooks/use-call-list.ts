@@ -100,7 +100,9 @@ export function useCallList({
           ((data.isProgramOutputLine && !data.isProgramUser) ||
             !data.isProgramOutputLine)) ||
         prev.volume !== data.volume ||
-        prev.isSomeoneSpeaking !== data.isSomeoneSpeaking;
+        prev.isSomeoneSpeaking !== data.isSomeoneSpeaking ||
+        prev.lineName !== data.lineName ||
+        prev.productionName !== data.productionName;
 
       if (!hasChanged) return;
 
