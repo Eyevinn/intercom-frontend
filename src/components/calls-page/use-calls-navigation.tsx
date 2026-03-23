@@ -49,7 +49,10 @@ export const useCallsNavigation = ({
       .filter(Boolean)
       .map((o) => ({ productionId: o!.productionId, lineId: o!.lineId }));
     if (currentCallRefs.length > 0) {
-      navigate(buildCallsUrl(currentCallRefs), { replace: true });
+      const newUrl = buildCallsUrl(currentCallRefs);
+      if (newUrl !== `${window.location.pathname}${window.location.search}`) {
+        navigate(newUrl, { replace: true });
+      }
     }
   }, [calls, isEmpty, navigate]);
 
