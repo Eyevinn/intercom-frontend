@@ -67,10 +67,11 @@ export const CallsPage = () => {
 
   const { productionId: paramProductionId, lineId: paramLineId } = useParams();
 
-  const navigate = useCallsNavigation({
+  const { navigate, pendingCallRefs } = useCallsNavigation({
     isEmpty: Object.values(calls).length === 0,
     paramProductionId,
     paramLineId,
+    calls,
   });
 
   const isEmpty = Object.values(calls).length === 0;
@@ -196,17 +197,36 @@ export const CallsPage = () => {
         />
       </PageHeader>
       <Container>
-        {isEmpty && paramProductionId && paramLineId && (
-          <JoinProduction
-            preSelected={{
-              preSelectedProductionId: paramProductionId,
-              preSelectedLineId: paramLineId,
-            }}
-            customGlobalMute={customGlobalMute}
-            updateUserSettings
-            isFirstConnection={isFirstConnection || undefined}
-          />
+        {isEmpty && pendingCallRefs.length > 0 && (
+          <>
+            {pendingCallRefs.map((ref) => (
+              <JoinProduction
+                key={`${ref.productionId}-${ref.lineId}`}
+                preSelected={{
+                  preSelectedProductionId: ref.productionId,
+                  preSelectedLineId: ref.lineId,
+                }}
+                customGlobalMute={customGlobalMute}
+                updateUserSettings
+                isFirstConnection={isFirstConnection || undefined}
+              />
+            ))}
+          </>
         )}
+        {isEmpty &&
+          !pendingCallRefs.length &&
+          paramProductionId &&
+          paramLineId && (
+            <JoinProduction
+              preSelected={{
+                preSelectedProductionId: paramProductionId,
+                preSelectedLineId: paramLineId,
+              }}
+              customGlobalMute={customGlobalMute}
+              updateUserSettings
+              isFirstConnection={isFirstConnection || undefined}
+            />
+          )}
         <CallsContainer>
           {addCallActive && productionId && (
             <JoinProduction

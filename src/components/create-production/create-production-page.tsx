@@ -7,23 +7,19 @@ import {
 } from "react-hook-form";
 import { ErrorMessage } from "@hookform/error-message";
 import { useEffect, useState } from "react";
-import { DisplayContainerHeader } from "../landing-page/display-container-header.tsx";
 import {
   FormInput,
   PrimaryButton,
   StyledWarningMessage,
 } from "../form-elements/form-elements.ts";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
-import { ResponsiveFormContainer } from "../generic-components.ts";
 import { RemoveLineButton } from "../remove-line-button/remove-line-button.tsx";
 import { useFetchProduction } from "../landing-page/use-fetch-production.ts";
-import { NavigateToRootButton } from "../navigate-to-root-button/navigate-to-root-button.tsx";
 import { isMobile } from "../../bowser.ts";
 import { Checkbox } from "../checkbox/checkbox.tsx";
 import { AddIcon } from "../../assets/icons/icon.tsx";
 import { FormValues, useCreateProduction } from "./use-create-production.tsx";
 import {
-  HeaderWrapper,
   CheckboxWrapper,
   ProductionConfirmation,
   FetchErrorMessage,
@@ -33,6 +29,9 @@ import {
   AddLineCard,
   LineInputRow,
   CreateButtonWrapper,
+  SelectInput,
+  SectionDivider,
+  TwoColumnLayout,
 } from "./create-production-components.ts";
 import { FormItem } from "../user-settings-form/form-item.tsx";
 import { InfoTooltip } from "../info-tooltip/info-tooltip.tsx";
@@ -41,6 +40,14 @@ import {
   normalizeLineName,
   useHasDuplicateLineName,
 } from "../../hooks/use-has-duplicate-line-name.ts";
+import { API } from "../../api/api.ts";
+import { useFetchProductionList } from "../landing-page/use-fetch-production-list.ts";
+import { PageHeader } from "../page-layout/page-header.tsx";
+
+type PresetFormValues = {
+  presetName: string;
+  calls: { productionId: string; lineId: string }[];
+};
 
 export const CreateProductionPage = () => {
   const [, dispatch] = useGlobalState();
@@ -168,12 +175,62 @@ export const CreateProductionPage = () => {
     return () => clearTimeout(id);
   }, [success, data?.name]);
 
-  return (
-    <ResponsiveFormContainer className={isMobile ? "" : "desktop"}>
-      <HeaderWrapper>
-        <NavigateToRootButton />
-        <DisplayContainerHeader>Create Production</DisplayContainerHeader>
-      </HeaderWrapper>
+  // Preset form
+  const [showPresetConfirmation, setShowPresetConfirmation] = useState(false);
+  const [presetLoading, setPresetLoading] = useState(false);
+  const {
+    register: registerPreset,
+    handleSubmit: handleSubmitPreset,
+    control: presetControl,
+    reset: resetPreset,
+    formState: { errors: presetErrors },
+    watch: watchPreset,
+  } = useForm<PresetFormValues>({
+    mode: "onSubmit",
+    defaultValues: {
+      presetName: "",
+      calls: [{ productionId: "", lineId: "" }],
+    },
+  });
+
+  const {
+    fields: callFields,
+    append: appendCall,
+    remove: removeCall,
+  } = useFieldArray({
+    control: presetControl,
+    name: "calls",
+  });
+
+  const presetCalls = watchPreset("calls");
+
+  const { productions: productionList } = useFetchProductionList({
+    limit: "30",
+    extended: "true",
+  });
+
+  const onSubmitPreset: SubmitHandler<PresetFormValues> = async (
+    presetData
+  ) => {
+    setPresetLoading(true);
+    try {
+      await API.createPreset({
+        name: presetData.presetName,
+        calls: presetData.calls,
+      });
+      resetPreset({
+        presetName: "",
+        calls: [{ productionId: "", lineId: "" }],
+      });
+      setShowPresetConfirmation(true);
+      setTimeout(() => setShowPresetConfirmation(false), 4000);
+    } finally {
+      setPresetLoading(false);
+    }
+  };
+
+  const productionForm = (
+    <>
       <FormItem
         label="Production Name"
         fieldName="productionName"
@@ -309,6 +366,125 @@ export const CreateProductionPage = () => {
           {loading && <Spinner className="create-production" />}
         </PrimaryButton>
       </CreateButtonWrapper>
-    </ResponsiveFormContainer>
+    </>
+  );
+
+  const presetForm = (
+    <>
+      <FormItem
+        label="Preset Name"
+        fieldName="presetName"
+        errors={presetErrors}
+        errorStyle={{ marginTop: "5px", marginBottom: 0 }}
+      >
+        <FormInput
+          // eslint-disable-next-line
+          {...registerPreset("presetName", {
+            required: "Preset name is required",
+            minLength: 1,
+          })}
+          autoComplete="off"
+          placeholder="Preset Name"
+          style={{ marginBottom: 0 }}
+        />
+      </FormItem>
+      {callFields.map((field, index) => (
+        <LineCard key={field.id} style={{ marginTop: "1.5rem" }}>
+          <LineCardHeader>
+            <LineNumber>Call {index + 1}</LineNumber>
+            {index > 0 && (
+              <RemoveLineButton removeLine={() => removeCall(index)} />
+            )}
+          </LineCardHeader>
+          <SelectInput
+            // eslint-disable-next-line
+            {...registerPreset(`calls.${index}.productionId`, {
+              required: "Production is required",
+            })}
+          >
+            <option value="">Select production…</option>
+            {productionList?.productions.map((p) => (
+              <option key={p.productionId} value={p.productionId}>
+                {p.name}
+              </option>
+            ))}
+          </SelectInput>
+          {presetErrors.calls?.[index]?.productionId && (
+            <StyledWarningMessage style={{ marginTop: "0.5rem" }}>
+              {presetErrors.calls[index].productionId?.message}
+            </StyledWarningMessage>
+          )}
+          <SelectInput
+            // eslint-disable-next-line
+            {...registerPreset(`calls.${index}.lineId`, {
+              required: "Line is required",
+            })}
+            disabled={!presetCalls?.[index]?.productionId}
+          >
+            <option value="">Select line…</option>
+            {productionList?.productions
+              .find(
+                (p) => p.productionId === presetCalls?.[index]?.productionId
+              )
+              ?.lines.map((l) => (
+                <option key={l.id} value={l.id}>
+                  {l.name}
+                </option>
+              ))}
+          </SelectInput>
+          {presetErrors.calls?.[index]?.lineId && (
+            <StyledWarningMessage style={{ marginTop: "0.5rem" }}>
+              {presetErrors.calls[index].lineId?.message}
+            </StyledWarningMessage>
+          )}
+        </LineCard>
+      ))}
+      <AddLineCard
+        type="button"
+        onClick={() => appendCall({ productionId: "", lineId: "" })}
+      >
+        <AddIcon />
+        Add Call
+      </AddLineCard>
+      {showPresetConfirmation && (
+        <ProductionConfirmation>
+          Preset has been created.
+        </ProductionConfirmation>
+      )}
+      <CreateButtonWrapper>
+        <PrimaryButton
+          type="submit"
+          className={presetLoading ? "with-loader" : ""}
+          onClick={handleSubmitPreset(onSubmitPreset)}
+          disabled={presetLoading}
+        >
+          Create Preset
+          {presetLoading && <Spinner className="create-preset" />}
+        </PrimaryButton>
+      </CreateButtonWrapper>
+    </>
+  );
+
+  if (isMobile) {
+    return (
+      <>
+        <PageHeader title="Create" hasNavigateToRoot />
+        <div style={{ padding: "0 2rem" }}>
+          {productionForm}
+          <SectionDivider />
+          {presetForm}
+        </div>
+      </>
+    );
+  }
+
+  return (
+    <>
+      <PageHeader title="Create" hasNavigateToRoot />
+      <TwoColumnLayout>
+        <div>{productionForm}</div>
+        <div>{presetForm}</div>
+      </TwoColumnLayout>
+    </>
   );
 };

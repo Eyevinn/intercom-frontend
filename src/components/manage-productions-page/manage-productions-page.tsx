@@ -5,6 +5,7 @@ import { useFetchProductionList } from "../landing-page/use-fetch-production-lis
 import { useRefreshAnimation } from "../landing-page/use-refresh-animation";
 import { ProductionsList } from "../production-list/productions-list";
 import { PageHeader } from "../page-layout/page-header";
+import { ManagePresetsList } from "./manage-presets-list";
 
 export const ManageProductionsPage = ({
   setApiError,
@@ -60,6 +61,7 @@ export const ManageProductionsPage = ({
           managementMode
         />
       )}
+      <ManagePresetsList productions={productions?.productions ?? []} />
     </>
   );
 };

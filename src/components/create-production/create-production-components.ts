@@ -169,3 +169,35 @@ export const AddLineCard = styled.button`
     fill: currentColor;
   }
 `;
+
+export const SelectInput = styled.select`
+  width: 100%;
+  font-size: 1.6rem;
+  padding: 0.75rem;
+  margin: 0 0 1rem;
+  border: 0.1rem solid #6d6d6d;
+  border-radius: 0.5rem;
+  background: #32383b;
+  color: white;
+  cursor: pointer;
+  &:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+`;
+
+export const SectionDivider = styled.div`
+  margin-top: 3rem;
+`;
+
+export const TwoColumnLayout = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 20rem;
+  padding: 0 24rem;
+  & > * {
+    flex: 1;
+    min-width: 0;
+  }
+`;

@@ -1,9 +1,12 @@
 import styled from "@emotion/styled";
+import { useState } from "react";
 import { MicMuted, MicUnmuted } from "../../assets/icons/icon";
 import { isMobile, isTablet } from "../../bowser";
 import { PrimaryButton, SecondaryButton } from "../form-elements/form-elements";
 import { ConnectToWSButton } from "./connect-to-ws-button";
 import { useGlobalMuteToggle } from "./use-global-mute-toggle";
+import { ShareUrlModal } from "./share-url-modal";
+import { SavePresetModal } from "./save-preset-modal";
 
 const AddCallContainer = styled.div`
   display: flex;
@@ -75,39 +78,65 @@ export const HeaderActions = ({
     setIsMasterInputMuted,
     setIsSettingGlobalMute,
   });
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [showSavePresetModal, setShowSavePresetModal] = useState(false);
 
   return (
-    <HeaderButtons>
-      {!isEmpty && !isMobile && !isTablet && (
-        <ConnectToWSButton
-          callActionHandlers={callActionHandlers}
-          callIndexMap={callIndexMap}
-          isMasterInputMuted={isMasterInputMuted}
-          sendCallsStateUpdate={sendCallsStateUpdate}
-          resetLastSentCallsState={resetLastSentCallsState}
-          handleToggleGlobalMute={handleToggleGlobalMute}
-        />
-      )}
-      {!isEmpty && !isSingleCall && !isMobile && (
-        <MuteAllCallsBtn
-          type="button"
-          onClick={handleToggleGlobalMute}
-          className={isMasterInputMuted ? "mute" : ""}
-        >
-          {isMasterInputMuted ? "Unmute All" : "Mute All"}
-          {isMasterInputMuted ? <MicMuted /> : <MicUnmuted />}
-        </MuteAllCallsBtn>
-      )}
-      {!isEmpty && (
-        <AddCallContainer>
-          <SecondaryButton
+    <>
+      <HeaderButtons>
+        {!isEmpty && !isMobile && !isTablet && (
+          <ConnectToWSButton
+            callActionHandlers={callActionHandlers}
+            callIndexMap={callIndexMap}
+            isMasterInputMuted={isMasterInputMuted}
+            sendCallsStateUpdate={sendCallsStateUpdate}
+            resetLastSentCallsState={resetLastSentCallsState}
+            handleToggleGlobalMute={handleToggleGlobalMute}
+          />
+        )}
+        {!isEmpty && !isSingleCall && !isMobile && (
+          <MuteAllCallsBtn
             type="button"
-            onClick={() => setAddCallActive(!addCallActive)}
+            onClick={handleToggleGlobalMute}
+            className={isMasterInputMuted ? "mute" : ""}
           >
-            Add Call
-          </SecondaryButton>
-        </AddCallContainer>
+            {isMasterInputMuted ? "Unmute All" : "Mute All"}
+            {isMasterInputMuted ? <MicMuted /> : <MicUnmuted />}
+          </MuteAllCallsBtn>
+        )}
+        {!isEmpty && (
+          <>
+            <SecondaryButton
+              type="button"
+              onClick={() => setShowShareModal(true)}
+            >
+              Share
+            </SecondaryButton>
+            <SecondaryButton
+              type="button"
+              onClick={() => setShowSavePresetModal(true)}
+            >
+              Save Preset
+            </SecondaryButton>
+          </>
+        )}
+        {!isEmpty && (
+          <AddCallContainer>
+            <SecondaryButton
+              type="button"
+              onClick={() => setAddCallActive(!addCallActive)}
+            >
+              Add Call
+            </SecondaryButton>
+          </AddCallContainer>
+        )}
+      </HeaderButtons>
+      {showShareModal && (
+        <ShareUrlModal onClose={() => setShowShareModal(false)} />
       )}
-    </HeaderButtons>
+      {showSavePresetModal && (
+        <SavePresetModal onClose={() => setShowSavePresetModal(false)} />
+      )}
+    </>
   );
 };

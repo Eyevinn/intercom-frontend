@@ -9,6 +9,7 @@ import { PageHeader } from "../page-layout/page-header.tsx";
 import { AddIcon, EditIcon, HeadsetIcon } from "../../assets/icons/icon.tsx";
 import { PrimaryButton } from "../form-elements/form-elements";
 import { HideOnSmallScreen } from "../generic-components";
+import { PresetsList } from "./presets-list";
 
 const HeaderButton = styled(PrimaryButton)`
   margin-left: 1rem;
@@ -135,6 +136,7 @@ export const ProductionsListContainer = () => {
       {!!productions?.productions.length && (
         <ProductionsList productions={productions.productions} error={error} />
       )}
+      <PresetsList productions={productions?.productions ?? []} />
     </>
   );
 };

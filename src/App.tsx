@@ -163,6 +163,11 @@ const AppContent = ({
                   element={<CallsPage />}
                   errorElement={<ErrorPage />}
                 />
+                <Route
+                  path="/calls"
+                  element={<CallsPage />}
+                  errorElement={<ErrorPage />}
+                />
                 <Route path="*" element={<NotFound />} />
               </>
             </Routes>

@@ -187,6 +187,7 @@ export const CreateLineButton = styled(PrimaryButton)`
 export const AddLineHeader = styled.div`
   display: flex;
   justify-content: space-between;
+  align-items: center;
   margin-bottom: 1rem;
 `;
 
