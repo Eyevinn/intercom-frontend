@@ -13,7 +13,7 @@ test.describe("Calls Page", () => {
   test("shows join form when no username is set", async ({ callsPage }) => {
     await callsPage.gotoWithParams("1", "10");
     await expect(
-      callsPage.page.getByRole("heading", { name: /user settings/i })
+      callsPage.page.getByRole("heading", { name: /join production/i })
     ).toBeVisible();
   });
 

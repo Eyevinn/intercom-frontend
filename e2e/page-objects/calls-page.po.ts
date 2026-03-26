@@ -1,8 +1,6 @@
 import { Page, Locator } from "@playwright/test";
 import { type MockApi } from "../helpers/api-mock-handler";
 
-const USER_SETTINGS_KEY = "userSettings";
-
 export class CallsPagePO {
   readonly page: Page;
   readonly mockApi: MockApi;
@@ -24,13 +22,10 @@ export class CallsPagePO {
     username = "TestUser"
   ) {
     await this.page.addInitScript(
-      ({ key, value }: { key: string; value: string }) => {
-        localStorage.setItem(key, value);
+      ({ username }: { username: string }) => {
+        localStorage.setItem("username", username);
       },
-      {
-        key: USER_SETTINGS_KEY,
-        value: JSON.stringify({ username }),
-      }
+      { username }
     );
     await this.page.goto(`/lines?lines=${productionId}:${lineId}`);
   }
