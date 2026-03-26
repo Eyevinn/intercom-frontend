@@ -23,7 +23,10 @@ export class CallsPagePO {
   ) {
     await this.page.addInitScript(
       ({ username }: { username: string }) => {
-        localStorage.setItem("username", username);
+        // storage-ts uses prefix "id" with dot separator and JSON.stringify values
+        localStorage.setItem("id.username", JSON.stringify(username));
+        localStorage.setItem("id.audioinput", JSON.stringify("mock-input-1"));
+        localStorage.setItem("id.audiooutput", JSON.stringify("mock-output-1"));
       },
       { username }
     );

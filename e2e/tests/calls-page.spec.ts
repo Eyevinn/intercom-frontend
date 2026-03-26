@@ -13,7 +13,7 @@ test.describe("Calls Page", () => {
   test("shows join form when no username is set", async ({ callsPage }) => {
     await callsPage.gotoWithParams("1", "10");
     await expect(
-      callsPage.page.getByRole("heading", { name: /join production/i })
+      callsPage.page.getByRole("textbox", { name: /username/i })
     ).toBeVisible();
   });
 
@@ -51,7 +51,7 @@ test.describe("Calls Page", () => {
       .getByRole("button", { name: /save as configuration/i })
       .click();
     await expect(
-      callsPage.page.getByText(/save.*configuration|configuration name/i)
+      callsPage.page.getByRole("heading", { name: /save as configuration/i })
     ).toBeVisible();
   });
 
