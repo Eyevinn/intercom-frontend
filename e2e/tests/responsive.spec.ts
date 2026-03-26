@@ -172,7 +172,9 @@ test.describe("Responsive Layout", () => {
 
     test("Line 1 card label is visible", async ({ createProductionPage }) => {
       await createProductionPage.goto();
-      await expect(createProductionPage.page.getByText("Line 1")).toBeVisible();
+      await expect(
+        createProductionPage.page.getByText("Line 1").first()
+      ).toBeVisible();
     });
 
     test("Add Line button spans full width", async ({

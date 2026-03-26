@@ -14,7 +14,7 @@ export class ManageProductionsPagePO {
   }
 
   async goto() {
-    await this.page.goto("/manage-productions");
+    await this.page.goto("/manage");
   }
 
   getProductionItem(name: string) {

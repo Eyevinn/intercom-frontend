@@ -19,12 +19,12 @@ test.describe("Navigation", () => {
     test.skip(isMobileProject(), "Create button hidden on mobile");
     await landingPage.gotoWithSettings("TestUser");
     await landingPage.createButton.click();
-    await expect(landingPage.page).toHaveURL(/create-production/);
+    await expect(landingPage.page).toHaveURL(/\/create/);
 
     await landingPage.page.goBack();
     await expect(landingPage.page).toHaveURL("/");
 
     await landingPage.page.goForward();
-    await expect(landingPage.page).toHaveURL(/create-production/);
+    await expect(landingPage.page).toHaveURL(/\/create/);
   });
 });

@@ -39,22 +39,17 @@ export const useInitiateProductionCall = ({
         // On quick page load, permission may not yet be confirmed, causing
         // getUpdatedDevices() to return empty arrays — skip validation in
         // that case and let getUserMedia handle truly unavailable devices.
+        // If the stored input device is no longer available, fall back to
+        // the first available device rather than blocking the user.
+        let effectiveAudioInput = payload.joinProductionOptions.audioinput;
+
         if (updatedDevices.input.length > 0) {
           const inputDeviceExists = updatedDevices.input.some(
-            (device) =>
-              device.deviceId === payload.joinProductionOptions.audioinput
+            (device) => device.deviceId === effectiveAudioInput
           );
 
-          // If the stored device is no longer available, fall back to the
-          // first available device rather than blocking the user.
           if (!inputDeviceExists) {
-            payload = {
-              ...payload,
-              joinProductionOptions: {
-                ...payload.joinProductionOptions,
-                audioinput: updatedDevices.input[0].deviceId,
-              },
-            };
+            effectiveAudioInput = updatedDevices.input[0].deviceId;
           }
 
           const outputDeviceExists = updatedDevices.output.some(
@@ -79,7 +74,10 @@ export const useInitiateProductionCall = ({
           payload: {
             id: uuid,
             callState: {
-              joinProductionOptions: payload.joinProductionOptions,
+              joinProductionOptions: {
+                ...payload.joinProductionOptions,
+                audioinput: effectiveAudioInput,
+              },
               audiooutput: payload.audiooutput,
               mediaStreamInput: null,
               dominantSpeaker: null,
