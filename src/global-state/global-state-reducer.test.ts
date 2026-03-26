@@ -58,7 +58,7 @@ describe("globalReducer", () => {
       reloadProductionList: false,
       reloadPresetList: false,
       devices: { input: null, output: null },
-      userSettings: null,
+      userSettings: {},
       selectedProductionId: null,
       calls: {},
       apiError: false,

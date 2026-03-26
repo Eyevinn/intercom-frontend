@@ -11,7 +11,7 @@ export const initialGlobalState: TGlobalState = {
     input: null,
     output: null,
   },
-  userSettings: null,
+  userSettings: {},
   selectedProductionId: null,
   calls: {},
   apiError: false,
