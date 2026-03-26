@@ -79,7 +79,9 @@ test.describe("Create Production", () => {
 
   test("shows line numbers on cards", async ({ createProductionPage }) => {
     await createProductionPage.goto();
-    await expect(createProductionPage.page.getByText("Line 1").first()).toBeVisible();
+    await expect(
+      createProductionPage.page.getByText("Line 1").first()
+    ).toBeVisible();
 
     await createProductionPage.addLineButton.click();
     await expect(createProductionPage.page.getByText("Line 2")).toBeVisible();
