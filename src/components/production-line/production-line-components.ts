@@ -151,7 +151,10 @@ export const LoaderWrapper = styled.div`
   height: 2rem;
 `;
 
-export const CallWrapper = styled.div<{ isSomeoneSpeaking: boolean }>`
+export const CallWrapper = styled.div<{
+  isSomeoneSpeaking: boolean;
+  order?: number;
+}>`
   display: flex;
   justify-content: center;
   align-items: center;
@@ -166,6 +169,7 @@ export const CallWrapper = styled.div<{ isSomeoneSpeaking: boolean }>`
   border: ${({ isSomeoneSpeaking }) =>
     isSomeoneSpeaking ? "0.3rem solid #f96c6c" : "0.3rem solid transparent"};
   transition: border-color 0.3s ease;
+  order: ${({ order }) => order ?? 0};
 
   ${mediaQueries.isLargeScreen} {
     flex: 0 0 calc(33.333% - 2rem);

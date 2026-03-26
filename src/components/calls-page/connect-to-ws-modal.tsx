@@ -1,6 +1,10 @@
 import styled from "@emotion/styled";
-import { useState } from "react";
-import { PrimaryButton, SecondaryButton } from "../form-elements/form-elements";
+import { useEffect, useState } from "react";
+import {
+  FormInput,
+  PrimaryButton,
+  SecondaryButton,
+} from "../form-elements/form-elements";
 import { Modal } from "../modal/modal";
 import { InfoTooltip } from "../info-tooltip/info-tooltip";
 
@@ -31,36 +35,39 @@ const Prefix = styled.span`
   pointer-events: none;
 `;
 
-const HostPortInput = styled.input`
-  width: 100%;
-  padding: 1rem 0.8rem;
-  line-height: 1.6rem;
+const HostPortInput = styled(FormInput)`
   padding-left: calc(2rem + 3.5ch);
-  border-radius: 0.5rem;
-  border: 0.1rem solid #6d6d6d;
-  background: #2a3136;
-  color: #e6edf3;
-  font-size: 1.6rem;
-  outline: none;
-
-  &::placeholder {
-    color: #6b7780;
-  }
+  margin: 0;
 `;
 
 interface ConnectToWsModalProps {
   isOpen: boolean;
   handleConnect: (url: string) => void;
   onClose: () => void;
+  initialUrl?: string;
 }
 
 export const ConnectToWsModal = ({
   isOpen,
   handleConnect,
   onClose,
+  initialUrl,
 }: ConnectToWsModalProps) => {
-  const [hostPort, setHostPort] = useState<string>("");
   const PROTOCOL = "ws://";
+  const toHostPort = (url: string) => {
+    if (url.startsWith("ws://")) return url.slice(5);
+    if (url.startsWith("wss://")) return url.slice(6);
+    return url;
+  };
+  const [hostPort, setHostPort] = useState<string>(
+    initialUrl ? toHostPort(initialUrl) : ""
+  );
+
+  useEffect(() => {
+    if (isOpen && initialUrl) {
+      setHostPort(toHostPort(initialUrl));
+    }
+  }, [isOpen, initialUrl]);
 
   if (!isOpen) return null;
 
@@ -119,7 +126,7 @@ export const ConnectToWsModal = ({
         <HostPortInput
           aria-label="WebSocket host and port"
           type="text"
-          placeholder="host:port"
+          placeholder="localhost:12345"
           value={hostPort}
           onChange={handleChange}
           onKeyDown={handleKeyDown}

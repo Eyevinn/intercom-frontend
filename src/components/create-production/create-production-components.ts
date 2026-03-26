@@ -42,6 +42,10 @@ export const CheckboxWrapper = styled.div`
   gap: 0.5rem;
   white-space: nowrap;
   flex-shrink: 0;
+
+  span {
+    top: 0;
+  }
 `;
 
 export const ButtonContainer = styled(FlexContainer)`
@@ -183,6 +187,20 @@ export const SelectInput = styled.select`
   &:disabled {
     opacity: 0.5;
     cursor: default;
+  }
+`;
+
+export const SectionHeader = styled.h2`
+  font-size: 2rem;
+  font-weight: bold;
+  margin: 0 0 1.5rem;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  span {
+    top: 1px;
   }
 `;
 

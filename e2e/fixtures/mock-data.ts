@@ -92,6 +92,22 @@ export const mockProductions: MockProduction[] = [
   },
 ];
 
+export type MockPreset = {
+  _id: string;
+  name: string;
+  calls: {
+    productionId: string;
+    lineId: string;
+    lineUsedForProgramOutput?: boolean;
+    lineName?: string;
+  }[];
+  createdAt: string;
+  isLocal?: boolean;
+  companionUrl?: string;
+};
+
+export const mockPresets: MockPreset[] = [];
+
 export const mockSessionResponse = {
   sdp: [
     "v=0",

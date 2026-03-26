@@ -252,7 +252,7 @@ export const CallHeaderComponent = ({
       </HeaderActionsRow>
       <ChevronButton
         role="button"
-        aria-label={open ? "Collapse call details" : "Expand call details"}
+        aria-label={open ? "Collapse line details" : "Expand line details"}
       >
         {open ? <ChevronUpIcon /> : <ChevronDownIcon />}
       </ChevronButton>

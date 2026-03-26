@@ -7,6 +7,7 @@ import { TUserSettings } from "../components/user-settings/types.ts";
 
 export interface ErrorState {
   globalError?: Error | null;
+  globalWarning?: string | null;
   callErrors?: Record<string, Error> | null;
 }
 
@@ -38,6 +39,7 @@ export type TGlobalState = {
   production: TProduction | null;
   error: ErrorState;
   reloadProductionList: boolean;
+  reloadPresetList: boolean;
   devices: DevicesState;
   selectedProductionId: string | null;
   apiError: Error | false;

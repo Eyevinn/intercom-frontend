@@ -1,9 +1,9 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import styled from "@emotion/styled";
-import { API, TBasicProductionResponse, TPreset } from "../../api/api";
-import { usePresets } from "../../hooks/use-presets";
+import { TBasicProductionResponse, TPreset } from "../../api/api";
+import { usePresetContext } from "../../contexts/preset-context";
 import { CollapsibleItem } from "../shared/collapsible-item";
-import { PageHeader } from "../page-layout/page-header";
+import { InfoTooltip } from "../info-tooltip/info-tooltip";
 import {
   UsersIcon,
   EditIcon,
@@ -31,6 +31,21 @@ import {
   DeleteButton,
 } from "../delete-button/delete-button-components";
 import { ConfirmationModal } from "../verify-decision/confirmation-modal";
+
+const SectionHeader = styled.h2`
+  font-size: 2rem;
+  font-weight: bold;
+  margin: 0;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 2rem 1.5rem;
+
+  span {
+    top: 1px;
+  }
+`;
 
 const ListWrapper = styled.div`
   display: flex;
@@ -98,7 +113,8 @@ const IconButton = styled.button`
 
   &.save {
     justify-content: center;
-    align-self: center;
+    align-self: flex-start;
+    padding-top: 0.4rem;
   }
 
   &.edit {
@@ -106,8 +122,95 @@ const IconButton = styled.button`
   }
 `;
 
+const CompanionIconButton = styled(IconButton)`
+  align-self: center;
+`;
+
 const Spacer = styled.span`
   flex: 1;
+`;
+
+const LocalBadge = styled.span`
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0.3rem;
+  padding: 0.1rem 0.4rem;
+  flex-shrink: 0;
+`;
+
+const CompanionBadge = styled(LocalBadge)``;
+
+const CompanionEditRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  width: fit-content;
+  margin-left: auto;
+`;
+
+const CompanionLabel = styled.span`
+  font-size: 1.3rem;
+  color: rgba(255, 255, 255, 0.55);
+  font-weight: 600;
+  flex-shrink: 0;
+`;
+
+const CompanionSection = styled.div`
+  width: 100%;
+`;
+
+const CompanionInputWrapper = styled.div`
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 22rem;
+`;
+
+const CompanionPrefix = styled.span`
+  position: absolute;
+  left: 1.2rem;
+  font-size: 1.4rem;
+  line-height: 1rem;
+  color: #9aa3ab;
+  pointer-events: none;
+`;
+
+const CompanionInput = styled(FormInput)`
+  padding-left: calc(2rem + 3.5ch);
+  margin: 0;
+  font-size: 1.4rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+`;
+
+const CompanionUrl = styled.span`
+  font-size: 1.3rem;
+  color: rgba(255, 255, 255, 0.45);
+  max-width: 22rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`;
+
+const EmptyPresetText = styled.p`
+  font-size: 1.2rem;
+  color: rgba(255, 255, 255, 0.45);
+  font-style: italic;
+  margin: 0 0 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+
+  span {
+    font-style: normal;
+  }
 `;
 
 const CallEntryList = styled.ul`
@@ -166,6 +269,16 @@ const NoMarginButtonsWrapper = styled(ButtonsWrapper)`
   margin-bottom: 0;
 `;
 
+const SpacedAddCallForm = styled(AddLineSectionForm)`
+  margin-top: 0;
+  margin-bottom: 1rem;
+`;
+
+const isValidHostPort = (input: string): boolean => {
+  const pattern = /^([a-zA-Z0-9.-]+|\[[\da-fA-F:]+\])(:\d{1,5})?$/;
+  return pattern.test(input);
+};
+
 type ManagePresetCardProps = {
   preset: TPreset;
   productions: TBasicProductionResponse[];
@@ -174,6 +287,7 @@ type ManagePresetCardProps = {
     update: {
       name?: string;
       calls?: { productionId: string; lineId: string }[];
+      companionUrl?: string | null;
     }
   ) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
@@ -197,6 +311,15 @@ const ManagePresetCard = ({
   const [editNameValue, setEditNameValue] = useState("");
   const [savingName, setSavingName] = useState(false);
   const editWrapperRef = useRef<HTMLSpanElement>(null);
+
+  // Companion editing state
+  const [isEditingCompanion, setIsEditingCompanion] = useState(false);
+  const [editCompanionValue, setEditCompanionValue] = useState("");
+  const [savingCompanion, setSavingCompanion] = useState(false);
+
+  const isEditCompanionValid =
+    editCompanionValue.trim() === "" ||
+    isValidHostPort(editCompanionValue.trim());
 
   // Cancel name edit on click-outside
   useEffect(() => {
@@ -255,6 +378,42 @@ const ManagePresetCard = ({
     }
   };
 
+  const handleEditCompanionClick = () => {
+    const current = preset.companionUrl ?? "";
+    setEditCompanionValue(
+      current.startsWith("ws://") ? current.slice(5) : current
+    );
+    setIsEditingCompanion(true);
+  };
+
+  const handleCompanionInputChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    let v = e.target.value;
+    if (v.startsWith("ws://")) v = v.slice(5);
+    else if (v.startsWith("wss://")) v = v.slice(6);
+    setEditCompanionValue(v);
+  };
+
+  const handleSaveCompanion = async () => {
+    const trimmed = editCompanionValue.trim();
+    const newUrl = trimmed ? `ws://${trimmed}` : null;
+    setSavingCompanion(true);
+    try {
+      // eslint-disable-next-line no-underscore-dangle
+      await onUpdate(preset._id, { companionUrl: newUrl });
+      setIsEditingCompanion(false);
+    } finally {
+      setSavingCompanion(false);
+    }
+  };
+
+  const handleCompanionKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Escape") setIsEditingCompanion(false);
+    if (e.key === "Enter" && !savingCompanion && isEditCompanionValid)
+      handleSaveCompanion();
+  };
+
   const resolveCall = (call: { productionId: string; lineId: string }) => {
     const production = productions.find(
       (p) => p.productionId === call.productionId
@@ -298,7 +457,7 @@ const ManagePresetCard = ({
     );
 
     if (alreadyExists) {
-      setAddCallError("This call is already in the preset.");
+      setAddCallError("This line is already in the saved configuration.");
       return;
     }
 
@@ -375,6 +534,8 @@ const ManagePresetCard = ({
         <UsersIcon />
         <ParticipantCount>{totalParticipants}</ParticipantCount>
       </ParticipantCountWrapper>
+      {preset.isLocal && <LocalBadge>Local</LocalBadge>}
+      {preset.companionUrl && <CompanionBadge>Companion</CompanionBadge>}
       <Spacer />
     </>
   );
@@ -382,6 +543,17 @@ const ManagePresetCard = ({
   const expandedContent = (
     <>
       <CallEntryList>
+        {preset.calls.length === 0 && (
+          <li>
+            <EmptyPresetText>
+              No lines in this saved configuration
+              <InfoTooltip>
+                Lines may have been deleted. You can add new lines below or
+                delete this saved configuration.
+              </InfoTooltip>
+            </EmptyPresetText>
+          </li>
+        )}
         {preset.calls.map((call, idx) => {
           const { production, line } = resolveCall(call);
           const lineName = line ? line.name : `Line ${call.lineId}`;
@@ -411,9 +583,9 @@ const ManagePresetCard = ({
       </CallEntryList>
 
       {showAddCall && (
-        <AddLineSectionForm onSubmit={(e) => e.preventDefault()}>
+        <SpacedAddCallForm onSubmit={(e) => e.preventDefault()}>
           <AddLineHeader>
-            <span>Add Call</span>
+            <span>Add Line</span>
             <RemoveIconWrapper
               onClick={() => {
                 setShowAddCall(false);
@@ -438,7 +610,7 @@ const ManagePresetCard = ({
               ))}
             </FullWidthSelect>
           </SpacedRow>
-          <SpacedRow>
+          <SpacedRow style={{ marginBottom: 0 }}>
             <FullWidthSelect
               value={selectedLineId}
               onChange={(e) => {
@@ -464,18 +636,86 @@ const ManagePresetCard = ({
             type="button"
             disabled={!selectedProductionId || !selectedLineId || updating}
             onClick={handleAddCall}
+            style={{ marginTop: "0.5rem" }}
           >
             Add
           </CreateLineButton>
-        </AddLineSectionForm>
+        </SpacedAddCallForm>
       )}
+
+      <CompanionSection>
+        <CompanionEditRow>
+          <CompanionLabel>Companion</CompanionLabel>
+          <InfoTooltip>
+            Automatically connect to <strong>Bitfocus Companion</strong> when
+            joining this saved configuration. Companion lets you control your{" "}
+            <strong>Stream Deck</strong> and other button panels via WebSocket.
+            Enter your local Companion server address to enable this.
+          </InfoTooltip>
+          {isEditingCompanion ? (
+            <>
+              <CompanionInputWrapper>
+                <CompanionPrefix aria-hidden="true">ws://</CompanionPrefix>
+                <CompanionInput
+                  autoFocus
+                  autoComplete="off"
+                  placeholder="localhost:12345"
+                  value={editCompanionValue}
+                  onChange={handleCompanionInputChange}
+                  onKeyDown={handleCompanionKeyDown}
+                  disabled={savingCompanion}
+                />
+              </CompanionInputWrapper>
+              <CompanionIconButton
+                className="save"
+                type="button"
+                disabled={savingCompanion || !isEditCompanionValid}
+                onClick={handleSaveCompanion}
+                title="Save"
+              >
+                <SaveIcon />
+              </CompanionIconButton>
+              <CompanionIconButton
+                type="button"
+                onClick={() => setIsEditingCompanion(false)}
+                title="Cancel"
+              >
+                <RemoveIcon />
+              </CompanionIconButton>
+            </>
+          ) : (
+            <>
+              <CompanionUrl>
+                {preset.companionUrl ?? (
+                  <span style={{ opacity: 0.4, fontStyle: "italic" }}>
+                    Not set
+                  </span>
+                )}
+              </CompanionUrl>
+              <IconButton
+                className="edit"
+                type="button"
+                onClick={handleEditCompanionClick}
+                title="Edit companion URL"
+              >
+                <EditIcon />
+              </IconButton>
+            </>
+          )}
+        </CompanionEditRow>
+        {isEditingCompanion && !isEditCompanionValid && (
+          <StyledWarningMessage role="alert">
+            Enter a valid host:port (e.g. localhost:12345)
+          </StyledWarningMessage>
+        )}
+      </CompanionSection>
 
       <ActionBar>
         <AddCallToggleButton
           type="button"
           onClick={() => setShowAddCall((prev) => !prev)}
         >
-          Add Call
+          Add Line
         </AddCallToggleButton>
         <NoMarginButtonsWrapper>
           <DeleteButton
@@ -483,15 +723,15 @@ const ManagePresetCard = ({
             disabled={updating}
             onClick={() => setShowDeleteConfirm(true)}
           >
-            Delete Preset
+            Delete Saved Configuration
           </DeleteButton>
         </NoMarginButtonsWrapper>
       </ActionBar>
 
       {showDeleteConfirm && (
         <ConfirmationModal
-          title="Delete Preset"
-          description={`You are about to delete the preset: ${preset.name}. Are you sure?`}
+          title="Delete Saved Configuration"
+          description={`You are about to delete the saved configuration: ${preset.name}. Are you sure?`}
           onCancel={() => setShowDeleteConfirm(false)}
           // eslint-disable-next-line no-underscore-dangle
           onConfirm={() => onDelete(preset._id)}
@@ -515,10 +755,7 @@ type ManagePresetsListProps = {
 };
 
 export const ManagePresetsList = ({ productions }: ManagePresetsListProps) => {
-  const { presets, loading, deletePreset } = usePresets();
-  const [localPresets, setLocalPresets] = useState<TPreset[] | null>(null);
-
-  const displayPresets = localPresets ?? presets;
+  const { presets, loading, deletePreset, updatePreset } = usePresetContext();
 
   const handleUpdate = useCallback(
     async (
@@ -526,39 +763,35 @@ export const ManagePresetsList = ({ productions }: ManagePresetsListProps) => {
       update: {
         name?: string;
         calls?: { productionId: string; lineId: string }[];
+        companionUrl?: string | null;
       }
     ) => {
-      const updated = await API.updatePreset(id, update);
-      setLocalPresets((prev) => {
-        const base = prev ?? presets;
-        return base.map((p) =>
-          // eslint-disable-next-line no-underscore-dangle
-          p._id === id ? updated : p
-        );
-      });
+      await updatePreset(id, update);
     },
-    [presets]
+    [updatePreset]
   );
 
   const handleDelete = useCallback(
     async (id: string) => {
       await deletePreset(id);
-      setLocalPresets((prev) => {
-        const base = prev ?? presets;
-        // eslint-disable-next-line no-underscore-dangle
-        return base.filter((p) => p._id !== id);
-      });
     },
-    [deletePreset, presets]
+    [deletePreset]
   );
 
-  if (loading || displayPresets.length === 0) return null;
+  if (loading || presets.length === 0) return null;
 
   return (
     <>
-      <PageHeader title="Manage Presets" />
+      <SectionHeader>
+        Saved Configurations
+        <InfoTooltip>
+          A <strong>saved configuration</strong> is a saved combination of lines
+          you can join with one click. Deleting a line removes it from any saved
+          configurations it belongs to.
+        </InfoTooltip>
+      </SectionHeader>
       <ListWrapper>
-        {displayPresets.map((preset) => (
+        {presets.map((preset) => (
           <ManagePresetCard
             // eslint-disable-next-line no-underscore-dangle
             key={preset._id}

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import logger from "../utils/logger";
 import { useShareLine } from "../components/production-line/use-share-line";
+import { buildCallsUrl } from "../utils/call-url";
 
 export const useShareUrl = () => {
   const [url, setUrl] = useState<string>("");
@@ -13,7 +14,7 @@ export const useShareUrl = () => {
     productionId: string;
     lineId: string;
   }) => {
-    const path = `/production-calls/production/${productionId}/line/${lineId}`;
+    const path = buildCallsUrl([{ productionId, lineId }]);
 
     try {
       const res = await shareLine({ path });

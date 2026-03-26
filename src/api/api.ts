@@ -6,13 +6,20 @@ const API_URL =
   `${window.location.origin}/${API_VERSION}`;
 const API_KEY = import.meta.env.VITE_BACKEND_API_KEY;
 
-type TPresetCall = { productionId: string; lineId: string };
+type TPresetCall = {
+  productionId: string;
+  lineId: string;
+  lineUsedForProgramOutput?: boolean;
+  lineName?: string;
+};
 
 export type TPreset = {
   _id: string;
   name: string;
   calls: TPresetCall[];
   createdAt: string;
+  isLocal?: boolean;
+  companionUrl?: string;
 };
 
 type TCreateProductionOptions = {
@@ -304,6 +311,7 @@ export const API = {
   createPreset: (options: {
     name: string;
     calls: TPresetCall[];
+    companionUrl?: string;
   }): Promise<TPreset> =>
     handleFetchRequest<TPreset>(
       fetch(`${API_URL}preset`, {
@@ -337,7 +345,11 @@ export const API = {
   },
   updatePreset: (
     id: string,
-    update: { name?: string; calls?: TPresetCall[] }
+    update: {
+      name?: string;
+      calls?: TPresetCall[];
+      companionUrl?: string | null;
+    }
   ): Promise<TPreset> =>
     handleFetchRequest<TPreset>(
       fetch(`${API_URL}preset/${id}`, {

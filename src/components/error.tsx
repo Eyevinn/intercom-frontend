@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 import { FC, useEffect, useState } from "react";
-import { errorColour } from "../css-helpers/defaults";
+import { errorColour, warningColour } from "../css-helpers/defaults";
 import { useGlobalState } from "../global-state/context-provider";
 import logger from "../utils/logger";
 
@@ -37,6 +37,10 @@ const ErrorDisplay = styled.div`
   align-content: flex-start;
 `;
 
+const WarningDisplay = styled(ErrorDisplay)`
+  background: ${warningColour};
+`;
+
 const CloseErrorButton = styled.button`
   border: none;
   background: #1a1a1a;
@@ -53,6 +57,16 @@ const CloseErrorButton = styled.button`
 export const ErrorBanner: FC = () => {
   const [callError, setCallError] = useState<string[] | null>(null);
   const [{ error, apiError }, dispatch] = useGlobalState();
+
+  const dismissWarning = () =>
+    dispatch({ type: "WARNING", payload: { message: null } });
+
+  useEffect(() => {
+    if (!error.globalWarning) return undefined;
+    const id = setTimeout(dismissWarning, 10000);
+    return () => clearTimeout(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [error.globalWarning]);
 
   useEffect(() => {
     const displayedMessages = new Set<string>();
@@ -90,6 +104,14 @@ export const ErrorBanner: FC = () => {
 
   return (
     <>
+      {error.globalWarning && (
+        <WarningDisplay>
+          {error.globalWarning}
+          <CloseErrorButton type="button" onClick={dismissWarning}>
+            close
+          </CloseErrorButton>
+        </WarningDisplay>
+      )}
       {error.globalError && (
         <ErrorDisplay>
           {formatErrorMessage(error.globalError as Error & { status?: number })}{" "}

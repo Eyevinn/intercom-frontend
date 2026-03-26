@@ -4,8 +4,9 @@ import { TGlobalState } from "./types";
 
 export const initialGlobalState: TGlobalState = {
   production: null,
-  error: { callErrors: null, globalError: null },
+  error: { callErrors: null, globalError: null, globalWarning: null },
   reloadProductionList: false,
+  reloadPresetList: false,
   devices: {
     input: null,
     output: null,
@@ -51,10 +52,28 @@ export const globalReducer: Reducer<TGlobalState, TGlobalStateAction> = (
         },
       };
     }
+    case "WARNING":
+      return {
+        ...state,
+        error: {
+          ...state.error,
+          globalWarning: action.payload.message,
+        },
+      };
     case "PRODUCTION_UPDATED":
       return {
         ...state,
         reloadProductionList: true,
+      };
+    case "PRESET_UPDATED":
+      return {
+        ...state,
+        reloadPresetList: true,
+      };
+    case "PRESET_LIST_FETCHED":
+      return {
+        ...state,
+        reloadPresetList: false,
       };
     case "API_NOT_AVAILABLE":
       return {

@@ -1,25 +1,33 @@
 import { Page, Route } from "@playwright/test";
 import {
   mockProductions,
+  mockPresets,
   mockSessionResponse,
   type MockProduction,
+  type MockPreset,
 } from "../fixtures/mock-data";
 
 export type MockApiState = {
   productions: MockProduction[];
   nextProductionId: number;
+  presets: MockPreset[];
+  nextPresetId: number;
 };
 
 export type MockApi = {
   state: MockApiState;
   addProduction: (production: MockProduction) => void;
   clearProductions: () => void;
+  addPreset: (preset: MockPreset) => void;
+  clearPresets: () => void;
 };
 
 export const setupApiMocks = async (page: Page): Promise<MockApi> => {
   const state: MockApiState = {
     productions: structuredClone(mockProductions),
     nextProductionId: 100,
+    presets: structuredClone(mockPresets),
+    nextPresetId: 1,
   };
 
   // WebKit blocks requests to 0.0.0.0 as a restricted network host.
@@ -266,6 +274,65 @@ export const setupApiMocks = async (page: Page): Promise<MockApi> => {
     }
   });
 
+  // List presets (GET /preset) and create preset (POST /preset)
+  await page.route("**/api/v1/preset", (route: Route) => {
+    const method = route.request().method();
+    if (method === "GET") {
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ presets: state.presets }),
+      });
+    } else if (method === "POST") {
+      const body = route.request().postDataJSON();
+      const newPreset: MockPreset = {
+        _id: String(state.nextPresetId++),
+        name: body.name,
+        calls: body.calls ?? [],
+        createdAt: new Date().toISOString(),
+        isLocal: false,
+        companionUrl: body.companionUrl,
+      };
+      state.presets.push(newPreset);
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(newPreset),
+      });
+    } else {
+      route.continue();
+    }
+  });
+
+  // Single preset — DELETE/PATCH
+  await page.route(/\/api\/v1\/preset\/[^/]+$/, (route: Route) => {
+    const method = route.request().method();
+    const url = route.request().url();
+    const idMatch = url.match(/preset\/([^/]+)$/);
+    const id = idMatch?.[1];
+
+    if (method === "DELETE" && id) {
+      state.presets = state.presets.filter((p) => p._id !== id);
+      route.fulfill({ status: 204, body: "" });
+    } else if (method === "PATCH" && id) {
+      const body = route.request().postDataJSON();
+      const preset = state.presets.find((p) => p._id === id);
+      if (preset) {
+        if (body.name !== undefined) preset.name = body.name;
+        if (body.calls !== undefined) preset.calls = body.calls;
+        if (body.companionUrl !== undefined)
+          preset.companionUrl = body.companionUrl;
+      }
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(preset ?? {}),
+      });
+    } else {
+      route.continue();
+    }
+  });
+
   return {
     state,
     addProduction: (production: MockProduction) => {
@@ -273,6 +340,12 @@ export const setupApiMocks = async (page: Page): Promise<MockApi> => {
     },
     clearProductions: () => {
       state.productions = [];
+    },
+    addPreset: (preset: MockPreset) => {
+      state.presets.push(preset);
+    },
+    clearPresets: () => {
+      state.presets = [];
     },
   };
 };

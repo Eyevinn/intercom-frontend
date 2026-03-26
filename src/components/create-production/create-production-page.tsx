@@ -1,3 +1,4 @@
+import styled from "@emotion/styled";
 import {
   Controller,
   SubmitHandler,
@@ -31,6 +32,7 @@ import {
   CreateButtonWrapper,
   SelectInput,
   SectionDivider,
+  SectionHeader,
   TwoColumnLayout,
 } from "./create-production-components.ts";
 import { FormItem } from "../user-settings-form/form-item.tsx";
@@ -40,7 +42,7 @@ import {
   normalizeLineName,
   useHasDuplicateLineName,
 } from "../../hooks/use-has-duplicate-line-name.ts";
-import { API } from "../../api/api.ts";
+import { usePresetContext } from "../../contexts/preset-context";
 import { useFetchProductionList } from "../landing-page/use-fetch-production-list.ts";
 import { PageHeader } from "../page-layout/page-header.tsx";
 
@@ -48,6 +50,87 @@ type PresetFormValues = {
   presetName: string;
   calls: { productionId: string; lineId: string }[];
 };
+
+const VisibilityRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+`;
+
+const CompanionInputGroup = styled.div`
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-bottom: 1.5rem;
+`;
+
+const CompanionPrefix = styled.span`
+  position: absolute;
+  left: 1.2rem;
+  font-size: 1.4rem;
+  line-height: 1rem;
+  color: #9aa3ab;
+  pointer-events: none;
+`;
+
+const CompanionHostPortInput = styled(FormInput)`
+  padding-left: calc(2rem + 3.5ch);
+  margin: 0;
+`;
+
+const RadioOption = styled.button<{ active: boolean }>`
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-size: 1.4rem;
+  font-weight: ${({ active }) => (active ? "600" : "400")};
+  color: ${({ active }) =>
+    active ? "rgba(255,255,255,0.95)" : "rgba(255,255,255,0.45)"};
+  transition: color 0.15s;
+
+  &:hover {
+    color: rgba(255, 255, 255, 0.8);
+  }
+`;
+
+const RadioDot = styled.span<{ active: boolean }>`
+  position: relative;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 50%;
+  border: 0.2rem solid
+    ${({ active }) =>
+      active ? "rgba(89, 203, 232, 1)" : "rgba(255,255,255,0.3)"};
+  background: transparent;
+  flex-shrink: 0;
+  transition: border-color 0.15s;
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 0.7rem;
+    height: 0.7rem;
+    border-radius: 50%;
+    background: rgba(89, 203, 232, 1);
+    opacity: ${({ active }) => (active ? 1 : 0)};
+    transition: opacity 0.15s;
+  }
+`;
+
+const isValidHostPort = (input: string): boolean => {
+  const pattern = /^([a-zA-Z0-9.-]+|\[[\da-fA-F:]+\])(:\d{1,5})?$/;
+  return pattern.test(input);
+};
+
+const PRODUCTION_LIST_FILTER = { limit: "30", extended: "true" };
 
 export const CreateProductionPage = () => {
   const [, dispatch] = useGlobalState();
@@ -178,6 +261,26 @@ export const CreateProductionPage = () => {
   // Preset form
   const [showPresetConfirmation, setShowPresetConfirmation] = useState(false);
   const [presetLoading, setPresetLoading] = useState(false);
+  const [isLocalPreset, setIsLocalPreset] = useState(false);
+  const [companionEnabled, setCompanionEnabled] = useState(false);
+  const [companionHostPort, setCompanionHostPort] = useState("");
+  const { createLocalPreset, createPublicPreset } = usePresetContext();
+
+  const handleCompanionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let v = e.target.value.trim();
+    if (v.startsWith("ws://")) v = v.slice(5);
+    else if (v.startsWith("wss://")) v = v.slice(6);
+    setCompanionHostPort(v);
+  };
+
+  const companionUrl = companionHostPort.trim()
+    ? `ws://${companionHostPort.trim()}`
+    : undefined;
+
+  const isCompanionValid =
+    !companionEnabled ||
+    companionHostPort === "" ||
+    isValidHostPort(companionHostPort);
   const {
     register: registerPreset,
     handleSubmit: handleSubmitPreset,
@@ -185,8 +288,10 @@ export const CreateProductionPage = () => {
     reset: resetPreset,
     formState: { errors: presetErrors },
     watch: watchPreset,
+    trigger: triggerPreset,
+    clearErrors: clearPresetErrors,
   } = useForm<PresetFormValues>({
-    mode: "onSubmit",
+    mode: "onChange",
     defaultValues: {
       presetName: "",
       calls: [{ productionId: "", lineId: "" }],
@@ -204,20 +309,76 @@ export const CreateProductionPage = () => {
 
   const presetCalls = watchPreset("calls");
 
-  const { productions: productionList } = useFetchProductionList({
-    limit: "30",
-    extended: "true",
-  });
+  const hasDuplicateCall =
+    presetCalls?.some(
+      (call, i) =>
+        call.productionId &&
+        call.lineId &&
+        presetCalls.some(
+          (other, j) =>
+            j !== i &&
+            other.productionId === call.productionId &&
+            other.lineId === call.lineId
+        )
+    ) ?? false;
+
+  const validateNoDuplicateCall = (index: number) => (lineId: string) => {
+    if (!lineId) return true;
+    const currentProductionId = presetCalls?.[index]?.productionId;
+    if (!currentProductionId) return true;
+    const isDuplicate = presetCalls?.some(
+      (other, j) =>
+        j !== index &&
+        other.productionId === currentProductionId &&
+        other.lineId === lineId
+    );
+    return isDuplicate
+      ? "This line is already in the saved configuration."
+      : true;
+  };
+
+  useEffect(() => {
+    if (!presetCalls) return;
+    const populated: `calls.${number}.lineId`[] = [];
+    const empty: `calls.${number}.lineId`[] = [];
+    callFields.forEach((_, i) => {
+      const field = `calls.${i}.lineId` as `calls.${number}.lineId`;
+      if (presetCalls?.[i]?.lineId) {
+        populated.push(field);
+      } else {
+        empty.push(field);
+      }
+    });
+    if (empty.length > 0) clearPresetErrors(empty);
+    if (populated.length > 0) {
+      Promise.all(
+        populated.map((field) => triggerPreset(field, { shouldFocus: false }))
+      );
+    }
+  }, [presetCalls, callFields, triggerPreset, clearPresetErrors]);
+
+  const { productions: productionList } = useFetchProductionList(
+    PRODUCTION_LIST_FILTER
+  );
 
   const onSubmitPreset: SubmitHandler<PresetFormValues> = async (
     presetData
   ) => {
     setPresetLoading(true);
     try {
-      await API.createPreset({
-        name: presetData.presetName,
-        calls: presetData.calls,
-      });
+      if (isLocalPreset) {
+        createLocalPreset(
+          presetData.presetName,
+          presetData.calls,
+          companionUrl
+        );
+      } else {
+        await createPublicPreset({
+          name: presetData.presetName,
+          calls: presetData.calls,
+          companionUrl,
+        });
+      }
       resetPreset({
         presetName: "",
         calls: [{ productionId: "", lineId: "" }],
@@ -231,8 +392,14 @@ export const CreateProductionPage = () => {
 
   const productionForm = (
     <>
+      <SectionHeader>
+        Production
+        <InfoTooltip>
+          A <strong>production</strong> is a named group of communication lines
+        </InfoTooltip>
+      </SectionHeader>
       <FormItem
-        label="Production Name"
+        label="Name"
         fieldName="productionName"
         errors={errors}
         errorStyle={{ marginTop: "5px", marginBottom: 0 }}
@@ -371,8 +538,80 @@ export const CreateProductionPage = () => {
 
   const presetForm = (
     <>
+      <SectionHeader>
+        Saved Configuration
+        <InfoTooltip>
+          A <strong>saved configuration</strong> is a saved combination of lines
+          you can join with one click. Deleting a line removes it from any saved
+          configurations it belongs to.
+        </InfoTooltip>
+      </SectionHeader>
+      <VisibilityRow>
+        <RadioOption
+          type="button"
+          active={!isLocalPreset}
+          onClick={() => setIsLocalPreset(false)}
+        >
+          <RadioDot active={!isLocalPreset} />
+          Public
+        </RadioOption>
+        <RadioOption
+          type="button"
+          active={isLocalPreset}
+          onClick={() => setIsLocalPreset(true)}
+        >
+          <RadioDot active={isLocalPreset} />
+          Local
+        </RadioOption>
+        <InfoTooltip>
+          <strong>Public</strong> saved configurations are stored on the server
+          and visible to everyone.
+          <br />
+          <strong>Local</strong> saved configurations are stored in your browser
+          only — not visible to others, but can still be shared via URL.
+        </InfoTooltip>
+      </VisibilityRow>
+      <VisibilityRow>
+        <RadioOption
+          type="button"
+          active={companionEnabled}
+          onClick={() => {
+            setCompanionEnabled(!companionEnabled);
+            if (companionEnabled) setCompanionHostPort("");
+          }}
+        >
+          <RadioDot active={companionEnabled} />
+          Auto-connect to Companion
+        </RadioOption>
+        <InfoTooltip>
+          Automatically connect to <strong>Bitfocus Companion</strong> when
+          joining this saved configuration. Companion lets you control your{" "}
+          <strong>Stream Deck</strong> and other button panels via WebSocket.
+          Enter your local Companion server address to enable this.
+        </InfoTooltip>
+      </VisibilityRow>
+      {companionEnabled && (
+        <>
+          <CompanionInputGroup>
+            <CompanionPrefix aria-hidden="true">ws://</CompanionPrefix>
+            <CompanionHostPortInput
+              id="create-companion-url"
+              aria-label="Companion WebSocket host and port"
+              type="text"
+              placeholder="localhost:12345"
+              value={companionHostPort}
+              onChange={handleCompanionChange}
+            />
+          </CompanionInputGroup>
+          {companionHostPort !== "" && !isValidHostPort(companionHostPort) && (
+            <StyledWarningMessage role="alert">
+              Enter a valid host:port (e.g. localhost:12345)
+            </StyledWarningMessage>
+          )}
+        </>
+      )}
       <FormItem
-        label="Preset Name"
+        label="Name"
         fieldName="presetName"
         errors={presetErrors}
         errorStyle={{ marginTop: "5px", marginBottom: 0 }}
@@ -380,18 +619,18 @@ export const CreateProductionPage = () => {
         <FormInput
           // eslint-disable-next-line
           {...registerPreset("presetName", {
-            required: "Preset name is required",
+            required: "Configuration name is required",
             minLength: 1,
           })}
           autoComplete="off"
-          placeholder="Preset Name"
+          placeholder="Configuration name"
           style={{ marginBottom: 0 }}
         />
       </FormItem>
       {callFields.map((field, index) => (
         <LineCard key={field.id} style={{ marginTop: "1.5rem" }}>
           <LineCardHeader>
-            <LineNumber>Call {index + 1}</LineNumber>
+            <LineNumber>Line {index + 1}</LineNumber>
             {index > 0 && (
               <RemoveLineButton removeLine={() => removeCall(index)} />
             )}
@@ -418,8 +657,10 @@ export const CreateProductionPage = () => {
             // eslint-disable-next-line
             {...registerPreset(`calls.${index}.lineId`, {
               required: "Line is required",
+              validate: validateNoDuplicateCall(index),
             })}
             disabled={!presetCalls?.[index]?.productionId}
+            style={{ marginBottom: 0 }}
           >
             <option value="">Select line…</option>
             {productionList?.productions
@@ -432,23 +673,24 @@ export const CreateProductionPage = () => {
                 </option>
               ))}
           </SelectInput>
-          {presetErrors.calls?.[index]?.lineId && (
-            <StyledWarningMessage style={{ marginTop: "0.5rem" }}>
-              {presetErrors.calls[index].lineId?.message}
-            </StyledWarningMessage>
-          )}
+          <ErrorMessage
+            errors={presetErrors}
+            name={`calls.${index}.lineId`}
+            as={<StyledWarningMessage style={{ marginTop: "0.5rem" }} />}
+          />
         </LineCard>
       ))}
       <AddLineCard
         type="button"
         onClick={() => appendCall({ productionId: "", lineId: "" })}
+        disabled={hasDuplicateCall}
       >
         <AddIcon />
-        Add Call
+        Add Line
       </AddLineCard>
       {showPresetConfirmation && (
         <ProductionConfirmation>
-          Preset has been created.
+          Saved configuration has been created.
         </ProductionConfirmation>
       )}
       <CreateButtonWrapper>
@@ -456,9 +698,9 @@ export const CreateProductionPage = () => {
           type="submit"
           className={presetLoading ? "with-loader" : ""}
           onClick={handleSubmitPreset(onSubmitPreset)}
-          disabled={presetLoading}
+          disabled={presetLoading || hasDuplicateCall || !isCompanionValid}
         >
-          Create Preset
+          Create saved configuration
           {presetLoading && <Spinner className="create-preset" />}
         </PrimaryButton>
       </CreateButtonWrapper>

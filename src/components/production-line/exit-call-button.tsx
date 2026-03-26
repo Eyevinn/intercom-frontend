@@ -37,10 +37,10 @@ export const ExitCallButton = ({
   return (
     <StyledBackBtn
       type="button"
-      title="Exit call"
+      title="Exit line"
       onClick={() => resetOnExit()}
     >
-      <ButtonText>Leave Call</ButtonText>
+      <ButtonText>Leave Line</ButtonText>
       <LogoutIcon />
     </StyledBackBtn>
   );

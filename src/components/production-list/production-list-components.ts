@@ -21,7 +21,6 @@ export const ParticipantCountWrapper = styled.div`
   display: inline-flex;
   align-items: center;
   gap: 0.1rem;
-  margin-right: 1rem;
 
   svg {
     height: 1.5rem;
@@ -150,6 +149,10 @@ export const CheckboxWrapper = styled.div`
   gap: 0.5rem;
   white-space: nowrap;
   flex-shrink: 0;
+
+  span {
+    top: 1px;
+  }
 `;
 
 export const AddLineSectionForm = styled.form`

@@ -17,6 +17,7 @@ interface UseWebSocketProps {
   onConnected?: () => void;
   resetLastSentCallsState?: () => void;
   onConflict?: (message?: string) => void;
+  onError?: (message: string) => void;
 }
 
 export function useWebSocket({
@@ -25,6 +26,7 @@ export function useWebSocket({
   onConnected,
   resetLastSentCallsState,
   onConflict,
+  onError,
 }: UseWebSocketProps) {
   const socketRef = useRef<WebSocket | null>(null);
   const [isWSConnected, setIsWSConnected] = useState<boolean>(false);
@@ -36,14 +38,22 @@ export function useWebSocket({
       const ws = new WebSocket(url);
       socketRef.current = ws;
 
-      const timeout = setTimeout(() => {
-        if (ws.readyState !== WebSocket.OPEN) {
+      const connectionErrorMessage =
+        "Could not connect to the WebSocket server";
+      const dispatchConnectionError = () => {
+        if (onError) {
+          onError(connectionErrorMessage);
+        } else {
           dispatch({
             type: "ERROR",
-            payload: {
-              error: new Error("Could not connect to the WebSocket server"),
-            },
+            payload: { error: new Error(connectionErrorMessage) },
           });
+        }
+      };
+
+      const timeout = setTimeout(() => {
+        if (ws.readyState !== WebSocket.OPEN) {
+          dispatchConnectionError();
           ws.close();
         }
       }, 3000);
@@ -79,12 +89,7 @@ export function useWebSocket({
 
       ws.onerror = () => {
         clearTimeout(timeout);
-        dispatch({
-          type: "ERROR",
-          payload: {
-            error: new Error("Could not connect to the WebSocket server"),
-          },
-        });
+        dispatchConnectionError();
         setIsWSConnected(false);
       };
 
@@ -96,7 +101,7 @@ export function useWebSocket({
 
       socketRef.current = ws;
     },
-    [onAction, dispatch, onConnected, onConflict]
+    [onAction, dispatch, onConnected, onConflict, onError]
   );
 
   const wsDisconnect = () => {

@@ -56,4 +56,50 @@ test.describe("Landing Page", () => {
       landingPage.page.getByText("User Settings").first()
     ).toBeVisible();
   });
+
+  test("does not show saved configurations section when no presets exist", async ({
+    landingPage,
+  }) => {
+    await landingPage.gotoWithSettings("TestUser");
+    await expect(
+      landingPage.page.getByText("Saved Configurations")
+    ).toBeHidden();
+  });
+
+  test("shows saved configurations section when presets exist", async ({
+    landingPage,
+    mockApi,
+  }) => {
+    mockApi.addPreset({
+      _id: "preset-1",
+      name: "My Test Preset",
+      calls: [{ productionId: "1", lineId: "10" }],
+      createdAt: new Date().toISOString(),
+    });
+    await landingPage.gotoWithSettings("TestUser");
+    await expect(
+      landingPage.page.getByText("Saved Configurations")
+    ).toBeVisible();
+    await expect(landingPage.page.getByText("My Test Preset")).toBeVisible();
+  });
+
+  test("Join button in preset navigates to calls page", async ({
+    landingPage,
+    mockApi,
+  }) => {
+    mockApi.addPreset({
+      _id: "preset-2",
+      name: "Quick Join Preset",
+      calls: [{ productionId: "1", lineId: "10" }],
+      createdAt: new Date().toISOString(),
+    });
+    await landingPage.gotoWithSettings("TestUser");
+    // Expand the preset card to reveal the Join button
+    await landingPage.page.getByText("Quick Join Preset").click();
+    await landingPage.page
+      .getByRole("button", { name: /^join$/i })
+      .first()
+      .click();
+    await expect(landingPage.page).toHaveURL(/\/lines\?lines=1:10/);
+  });
 });

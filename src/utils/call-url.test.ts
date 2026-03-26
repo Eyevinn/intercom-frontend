@@ -1,18 +1,23 @@
 import { describe, it, expect } from "vitest";
-import { buildCallsUrl, encodeCallsParam, decodeCallsParam } from "./call-url";
+import {
+  buildCallsUrl,
+  encodeCallsParam,
+  decodeCallsParam,
+  parseCompanionParam,
+} from "./call-url";
 
 describe("buildCallsUrl", () => {
-  it("returns /calls when given an empty list", () => {
-    expect(buildCallsUrl([])).toBe("/calls");
+  it("returns /lines when given an empty list", () => {
+    expect(buildCallsUrl([])).toBe("/lines");
   });
 
-  it("produces the /calls?calls=prodId:lineId format for a single call", () => {
+  it("produces the /lines?lines=prodId:lineId format for a single call", () => {
     // Regression: use-navigate-to-production previously navigated to the old
     // /production-calls/production/:id/line/:id URL. This assertion locks in
     // the correct target URL that buildCallsUrl must produce so that the landing
     // page join lands directly on the right route without a flash redirect.
     expect(buildCallsUrl([{ productionId: "prod-1", lineId: "line-2" }])).toBe(
-      "/calls?calls=prod-1:line-2"
+      "/lines?lines=prod-1:line-2"
     );
   });
 
@@ -22,7 +27,7 @@ describe("buildCallsUrl", () => {
         { productionId: "p1", lineId: "l1" },
         { productionId: "p2", lineId: "l2" },
       ])
-    ).toBe("/calls?calls=p1:l1,p2:l2");
+    ).toBe("/lines?lines=p1:l1,p2:l2");
   });
 });
 
@@ -78,7 +83,50 @@ describe("buildCallsUrl round-trip", () => {
       { productionId: "prod-99", lineId: "line-3" },
     ];
     const url = buildCallsUrl(refs);
-    const searchParam = new URLSearchParams(url.split("?")[1]).get("calls");
+    const searchParam = new URLSearchParams(url.split("?")[1]).get("lines");
     expect(decodeCallsParam(searchParam)).toEqual(refs);
+  });
+});
+
+describe("buildCallsUrl — companion URL", () => {
+  it("appends companion param by stripping the ws:// prefix", () => {
+    const url = buildCallsUrl(
+      [{ productionId: "p1", lineId: "l1" }],
+      "ws://localhost:12345"
+    );
+    expect(url).toBe("/lines?lines=p1:l1&companion=localhost:12345");
+  });
+
+  it("strips wss:// prefix from companion URL", () => {
+    const url = buildCallsUrl(
+      [{ productionId: "p1", lineId: "l1" }],
+      "wss://example.com:9000"
+    );
+    expect(url).toBe("/lines?lines=p1:l1&companion=example.com:9000");
+  });
+
+  it("works with empty calls list and a companion URL", () => {
+    const url = buildCallsUrl([], "ws://localhost:12345");
+    expect(url).toBe("/lines?companion=localhost:12345");
+  });
+
+  it("returns the base URL unchanged when companionUrl is undefined", () => {
+    expect(buildCallsUrl([{ productionId: "p1", lineId: "l1" }])).toBe(
+      "/lines?lines=p1:l1"
+    );
+  });
+});
+
+describe("parseCompanionParam", () => {
+  it("returns undefined for null input", () => {
+    expect(parseCompanionParam(null)).toBeUndefined();
+  });
+
+  it("wraps host:port in ws://", () => {
+    expect(parseCompanionParam("localhost:12345")).toBe("ws://localhost:12345");
+  });
+
+  it("wraps a bare hostname in ws://", () => {
+    expect(parseCompanionParam("example.com")).toBe("ws://example.com");
   });
 });

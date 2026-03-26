@@ -56,6 +56,7 @@ type TProductionLine = {
   callActionHandlers: React.MutableRefObject<
     Record<string, Record<string, () => void>>
   >;
+  order?: number;
   setFailedToConnect: () => void;
   registerCallList: (
     callId: string,
@@ -73,6 +74,7 @@ export const ProductionLine = ({
   masterInputMute,
   shouldReduceVolume,
   isSettingGlobalMute,
+  order,
   callActionHandlers,
   setFailedToConnect,
   registerCallList,
@@ -432,6 +434,7 @@ export const ProductionLine = ({
         isActiveParticipant &&
         !isWhipOnLine
       }
+      order={order}
     >
       {joinProductionOptions &&
         loading &&
@@ -584,7 +587,7 @@ export const ProductionLine = ({
                         confirmationText={
                           muteError
                             ? ""
-                            : `This will mute ${userName} for everyone in the call.`
+                            : `This will mute ${userName} for everyone in the line.`
                         }
                         onConfirm={muteParticipant}
                         onCancel={() => setConfirmModalOpen(false)}

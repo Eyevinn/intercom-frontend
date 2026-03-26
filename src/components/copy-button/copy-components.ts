@@ -52,6 +52,7 @@ export const CopyIconWrapper = styled.div<{
   display: flex;
   padding: 0.5rem;
   border-radius: 0.5rem;
+  cursor: pointer;
   transition:
     transform 0.1s ease,
     background 0.2s ease;

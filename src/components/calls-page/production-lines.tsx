@@ -19,6 +19,7 @@ type ProductionLinesProps = {
     isSettingGlobalMute?: boolean
   ) => void;
   deregisterCall: (callId: string) => void;
+  callOrderMap?: Map<string, number>;
 };
 
 export const ProductionLines = ({
@@ -32,6 +33,7 @@ export const ProductionLines = ({
   setAddCallActive,
   registerCallList,
   deregisterCall,
+  callOrderMap,
 }: ProductionLinesProps) => {
   return (
     <>
@@ -52,6 +54,11 @@ export const ProductionLines = ({
               callActionHandlers={callActionHandlers}
               registerCallList={registerCallList}
               deregisterCall={deregisterCall}
+              order={
+                callOrderMap?.get(
+                  `${callState.joinProductionOptions.productionId}:${callState.joinProductionOptions.lineId}`
+                ) ?? Infinity
+              }
             />
           )
       )}
