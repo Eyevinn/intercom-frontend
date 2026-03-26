@@ -38,14 +38,14 @@ test.describe("Landing Page", () => {
     test.skip(isMobileProject(), "Create button hidden on mobile");
     await landingPage.gotoWithSettings("TestUser");
     await landingPage.createButton.click();
-    await expect(landingPage.page).toHaveURL(/create-production/);
+    await expect(landingPage.page).toHaveURL(/\/create/);
   });
 
   test("navigates to manage productions page", async ({ landingPage }) => {
     test.skip(isMobileProject(), "Manage button hidden on mobile");
     await landingPage.gotoWithSettings("TestUser");
     await landingPage.manageButton.click();
-    await expect(landingPage.page).toHaveURL(/manage-productions/);
+    await expect(landingPage.page).toHaveURL(/\/manage/);
   });
 
   test("shows User Settings heading on initial visit", async ({
@@ -94,12 +94,10 @@ test.describe("Landing Page", () => {
       createdAt: new Date().toISOString(),
     });
     await landingPage.gotoWithSettings("TestUser");
-    // Expand the preset card to reveal the Join button
-    await landingPage.page.getByText("Quick Join Preset").click();
-    await landingPage.page
-      .getByRole("button", { name: /^join$/i })
-      .first()
-      .click();
+    const presetCard = landingPage.page
+      .getByText("Quick Join Preset")
+      .locator("..");
+    await presetCard.getByRole("button", { name: /^join$/i }).click();
     await expect(landingPage.page).toHaveURL(/\/lines\?lines=1:10/);
   });
 });

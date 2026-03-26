@@ -45,14 +45,23 @@ export const useInitiateProductionCall = ({
               device.deviceId === payload.joinProductionOptions.audioinput
           );
 
+          // If the stored device is no longer available, fall back to the
+          // first available device rather than blocking the user.
+          if (!inputDeviceExists) {
+            payload = {
+              ...payload,
+              joinProductionOptions: {
+                ...payload.joinProductionOptions,
+                audioinput: updatedDevices.input[0].deviceId,
+              },
+            };
+          }
+
           const outputDeviceExists = updatedDevices.output.some(
             (device) => device.deviceId === payload.audiooutput
           );
 
-          if (
-            !inputDeviceExists ||
-            (!outputDeviceExists && !isBrowserSafari && !isMobile && !isIpad)
-          ) {
+          if (!outputDeviceExists && !isBrowserSafari && !isMobile && !isIpad) {
             dispatch({
               type: "ERROR",
               payload: {
