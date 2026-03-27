@@ -160,10 +160,21 @@ export const CallsPage = () => {
 
   useEffect(() => {
     callIndexMap.current = {};
-    Object.keys(calls).forEach((callId, i) => {
+    const sorted = Object.entries(calls).sort(([, a], [, b]) => {
+      const keyA = a.joinProductionOptions
+        ? `${a.joinProductionOptions.productionId}:${a.joinProductionOptions.lineId}`
+        : "";
+      const keyB = b.joinProductionOptions
+        ? `${b.joinProductionOptions.productionId}:${b.joinProductionOptions.lineId}`
+        : "";
+      const orderA = presetOrderMap.get(keyA) ?? Infinity;
+      const orderB = presetOrderMap.get(keyB) ?? Infinity;
+      return orderA - orderB;
+    });
+    sorted.forEach(([callId], i) => {
       callIndexMap.current[i + 1] = callId;
     });
-  }, [calls]);
+  }, [calls, presetOrderMap]);
 
   useEffect(() => {
     if (splitStartedRef.current) return;

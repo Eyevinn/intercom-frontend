@@ -93,14 +93,6 @@ export const ConnectToWSButton = ({
   const isManualConnectRef = useRef(false);
   const [{ calls }, dispatch] = useGlobalState();
 
-  // map call ids to indices for actions
-  useEffect(() => {
-    const indexMap = callIndexMap.current;
-    Object.keys(calls).forEach((callId, i) => {
-      indexMap[i + 1] = callId;
-    });
-  }, [calls, callIndexMap]);
-
   const handleAction = useWebsocketActions({
     callIndexMap,
     callActionHandlers,

@@ -195,6 +195,7 @@ export const ProductionLine = ({
           false,
         isProgramUser: joinProductionOptions?.isProgramUser || false,
         isSomeoneSpeaking: isSomeoneSpeaking || false,
+        presetOrder: order,
       },
       isSettingGlobalMute
     );
@@ -211,6 +212,7 @@ export const ProductionLine = ({
     isProgramOutputLine,
     isProgramUser,
     isSomeoneSpeaking,
+    order,
   ]);
 
   useEffect(() => {
