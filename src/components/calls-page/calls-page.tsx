@@ -102,6 +102,7 @@ export const CallsPage = () => {
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const { initiateProductionCall } = useInitiateProductionCall({ dispatch });
   const autoJoinTriggeredRef = useRef(false);
+  const pendingProgramKeysRef = useRef<Set<string>>(new Set());
 
   const { productionId: paramProductionId, lineId: paramLineId } = useParams();
   const { search } = useLocation();
@@ -218,6 +219,9 @@ export const CallsPage = () => {
         });
 
         if (program.length > 0) {
+          pendingProgramKeysRef.current = new Set(
+            program.map((p) => `${p.productionId}:${p.lineId}`)
+          );
           setPendingProgramLines(program);
         }
 
@@ -245,9 +249,7 @@ export const CallsPage = () => {
 
     autoJoinTriggeredRef.current = true;
 
-    const programKeys = new Set(
-      pendingProgramLines.map((p) => `${p.productionId}:${p.lineId}`)
-    );
+    const programKeys = pendingProgramKeysRef.current;
 
     const existingKeys = new Set(
       Object.values(calls)
@@ -280,7 +282,6 @@ export const CallsPage = () => {
       });
   }, [
     validatedCallRefs,
-    pendingProgramLines,
     userSettings,
     calls,
     initiateProductionCall,
@@ -469,28 +470,33 @@ export const CallsPage = () => {
               hideDevices
             />
           )}
-          {pendingProgramLines.map((ref) => (
-            <ProgramLineJoinCard
-              key={`${ref.productionId}:${ref.lineId}`}
-              productionId={ref.productionId}
-              lineId={ref.lineId}
-              lineName={ref.lineName}
-              productionName={ref.productionName}
-              presetOrder={ref.presetOrder}
-              customGlobalMute={customGlobalMute}
-              onJoined={() =>
-                setPendingProgramLines((prev) =>
-                  prev.filter(
-                    (r) =>
-                      !(
-                        r.productionId === ref.productionId &&
-                        r.lineId === ref.lineId
-                      )
+          {!!(
+            userSettings &&
+            userSettings.username &&
+            (userSettings.audioinput || userSettings.audiooutput)
+          ) &&
+            pendingProgramLines.map((ref) => (
+              <ProgramLineJoinCard
+                key={`${ref.productionId}:${ref.lineId}`}
+                productionId={ref.productionId}
+                lineId={ref.lineId}
+                lineName={ref.lineName}
+                productionName={ref.productionName}
+                presetOrder={ref.presetOrder}
+                customGlobalMute={customGlobalMute}
+                onJoined={() =>
+                  setPendingProgramLines((prev) =>
+                    prev.filter(
+                      (r) =>
+                        !(
+                          r.productionId === ref.productionId &&
+                          r.lineId === ref.lineId
+                        )
+                    )
                   )
-                )
-              }
-            />
-          ))}
+                }
+              />
+            ))}
           <ProductionLines
             isSettingGlobalMute={isSettingGlobalMute}
             setAddCallActive={setAddCallActive}

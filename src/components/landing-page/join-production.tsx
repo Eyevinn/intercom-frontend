@@ -38,7 +38,6 @@ export const JoinProduction = ({
 }: TProps) => {
   const [joinProductionOptions, setJoinProductionOptions] =
     useState<TJoinProductionOptions | null>(null);
-  const [isProgramUser, setIsProgramUser] = useState(false);
   const [{ devices, userSettings }] = useGlobalState();
 
   const defaultValues = {
@@ -46,7 +45,10 @@ export const JoinProduction = ({
       preSelected?.preSelectedProductionId || addAdditionalCallId || "",
     lineId: preSelected?.preSelectedLineId || undefined,
     username: userSettings?.username,
-    audioinput: userSettings?.audioinput,
+    audioinput:
+      userSettings?.audioinput ??
+      devices.input?.find((d) => d.deviceId === "default")?.deviceId ??
+      devices.input?.[0]?.deviceId,
     audiooutput: userSettings?.audiooutput,
     lineUsedForProgramOutput: false,
   };
@@ -71,8 +73,6 @@ export const JoinProduction = ({
           preSelected={preSelected}
           buttonText="Join"
           defaultValues={defaultValues}
-          isProgramUser={isProgramUser}
-          setIsProgramUser={setIsProgramUser}
           setJoinProductionOptions={setJoinProductionOptions}
           customGlobalMute={customGlobalMute}
           closeAddCallView={closeAddCallView}

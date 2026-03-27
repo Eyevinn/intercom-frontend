@@ -4,7 +4,6 @@ import { useForm, useWatch } from "react-hook-form";
 import { isBrowserFirefox, isBrowserSafari } from "../../bowser";
 import { useGlobalState } from "../../global-state/context-provider";
 import { useSubmitOnEnter } from "../../hooks/use-submit-form-enter-press";
-import { Checkbox } from "../checkbox/checkbox";
 import { ButtonWrapper } from "../generic-components";
 import {
   DevicesSection,
@@ -14,10 +13,7 @@ import {
   SectionTitle,
   StyledWarningMessage,
 } from "../form-elements/form-elements";
-import {
-  CheckboxWrapper,
-  FetchErrorMessage,
-} from "../landing-page/join-production-components";
+import { FetchErrorMessage } from "../landing-page/join-production-components";
 import { TJoinProductionOptions, TProduction } from "../production-line/types";
 import { ReloadDevicesButton } from "../reload-devices-button.tsx/reload-devices-button";
 import { TUserSettings } from "../user-settings/types";
@@ -42,8 +38,6 @@ export const UserSettingsForm = ({
   isJoinProduction,
   preSelected,
   buttonText,
-  isProgramUser,
-  setIsProgramUser,
   defaultValues,
   setJoinProductionOptions,
   customGlobalMute,
@@ -60,8 +54,6 @@ export const UserSettingsForm = ({
     preSelectedLineId: string;
   };
   addAdditionalCallId?: string;
-  isProgramUser?: boolean;
-  setIsProgramUser?: (isProgramUser: boolean) => void;
   buttonText: string;
   defaultValues: TUserSettings | FormValues;
   setJoinProductionOptions?: React.Dispatch<
@@ -76,8 +68,6 @@ export const UserSettingsForm = ({
   hideDevices?: boolean;
 }) => {
   const [production, setProduction] = useState<TProduction | null>(null);
-  const [isProgramOutputLine, setIsProgramOutputLine] =
-    useState<boolean>(false);
   const [confirmModalOpen, setConfirmModalOpen] = useState<boolean>(false);
   const [selectedLineName, setSelectedLineName] = useState<string>("");
   const {
@@ -86,6 +76,7 @@ export const UserSettingsForm = ({
     handleSubmit,
     reset,
     setValue,
+    getValues,
     control,
   } = useForm<FormValues | TUserSettings>({
     defaultValues,
@@ -119,7 +110,7 @@ export const UserSettingsForm = ({
   const { onSubmit } = useSubmitForm({
     isJoinProduction,
     production,
-    isProgramUser,
+    isProgramUser: false,
     setJoinProductionOptions,
     customGlobalMute,
     closeAddCallView,
@@ -135,7 +126,6 @@ export const UserSettingsForm = ({
       const selectedLine = production.lines.find(
         (line) => line.id.toString() === selectedLineId
       );
-      setIsProgramOutputLine(!!selectedLine?.programOutputLine);
       setSelectedLineName(selectedLine?.name ?? "");
     }
   }, [production, selectedLineId, isJoinProduction]);
@@ -172,12 +162,31 @@ export const UserSettingsForm = ({
     }
   }, [defaultValues, productions]);
 
-  // If the device no longer exists set field values to default
+  // If devices have been enumerated and none are available, set to "no-device".
+  // Only do this when devices.input is a non-null empty array (i.e. enumeration
+  // has completed and genuinely returned no input devices). When devices.input
+  // is still null the enumeration hasn't finished yet and we must not
+  // pre-emptively set "no-device" — that value would be sent to the backend and
+  // cause a 500 error.
   useEffect(() => {
-    if (!devices.input?.length) {
+    if (devices.input !== null && devices.input.length === 0) {
       setValue("audioinput", "no-device", { shouldValidate: true });
     }
   }, [devices, setValue]);
+
+  // When real devices arrive, react-hook-form may still hold "no-device" (or a
+  // falsy value) captured from the DOM before enumeration completed. Reset the
+  // field to the default device so the correct device ID is submitted.
+  useEffect(() => {
+    if (!devices.input || devices.input.length === 0) return;
+    const current = getValues("audioinput");
+    if (!current || current === "no-device") {
+      const defaultDevice =
+        devices.input.find((d) => d.deviceId === "default")?.deviceId ??
+        devices.input[0].deviceId;
+      setValue("audioinput", defaultDevice, { shouldValidate: true });
+    }
+  }, [devices.input, getValues, setValue]);
 
   // If user selects a production from the productionlist
   useEffect(() => {
@@ -234,12 +243,6 @@ export const UserSettingsForm = ({
             {...register(`lineId`, {
               required: "Line id is required",
               minLength: 1,
-              onChange: (e) => {
-                const selectedLine = production?.lines.find(
-                  (line) => line.id.toString() === e.target.value
-                );
-                setIsProgramOutputLine(!!selectedLine?.programOutputLine);
-              },
             })}
             style={{
               display: production ? "block" : "none",
@@ -321,28 +324,6 @@ export const UserSettingsForm = ({
                 </StyledWarningMessage>
               )}
             </FormItem>
-          )}
-        </>
-      )}
-      {isProgramOutputLine && isJoinProduction && (
-        <>
-          <p>
-            This is a line for audio feed. Do you wish to join the line as the
-            audio feed or as a listener?
-          </p>
-          {setIsProgramUser && (
-            <CheckboxWrapper>
-              <Checkbox
-                label="Listener"
-                checked={!isProgramUser}
-                onChange={() => setIsProgramUser(false)}
-              />
-              <Checkbox
-                label="Audio feed"
-                checked={isProgramUser}
-                onChange={() => setIsProgramUser(true)}
-              />
-            </CheckboxWrapper>
           )}
         </>
       )}
