@@ -6,6 +6,7 @@ import { useCallList } from "./use-call-list";
 export const useWebsocketReconnect = ({
   calls,
   isMasterInputMuted,
+  everConnected,
   isWSReconnecting,
   isWSConnected,
   isConnectionConflict,
@@ -14,6 +15,7 @@ export const useWebsocketReconnect = ({
 }: {
   calls: Record<string, CallState>;
   isMasterInputMuted: boolean;
+  everConnected: boolean;
   isWSReconnecting: boolean;
   isWSConnected: boolean;
   isConnectionConflict: boolean;
@@ -46,9 +48,10 @@ export const useWebsocketReconnect = ({
     }
 
     const shouldReconnect =
+      everConnected &&
       websocket !== null &&
       websocket.readyState === WebSocket.CLOSED &&
-      websocket.url &&
+      !!websocket.url &&
       !isWSConnected &&
       !isConnectionConflict;
 
@@ -72,6 +75,7 @@ export const useWebsocketReconnect = ({
       if (timeout) window.clearTimeout(timeout);
     };
   }, [
+    everConnected,
     websocket,
     wsConnect,
     isWSConnected,

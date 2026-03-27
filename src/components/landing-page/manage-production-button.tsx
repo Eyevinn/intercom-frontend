@@ -13,10 +13,7 @@ export const ManageProductionButton = () => {
 
   return (
     <ButtonWrapper>
-      <SecondaryButton
-        type="button"
-        onClick={() => navigate("/manage-productions")}
-      >
+      <SecondaryButton type="button" onClick={() => navigate("/manage")}>
         Manage Productions
       </SecondaryButton>
     </ButtonWrapper>

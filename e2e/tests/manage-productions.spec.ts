@@ -35,7 +35,7 @@ test.describe("Manage Productions", () => {
   }) => {
     await manageProductionsPage.goto();
     await expect(
-      manageProductionsPage.page.getByText("Manage Productions")
+      manageProductionsPage.page.getByRole("heading", { name: "Productions" })
     ).toBeVisible();
   });
 

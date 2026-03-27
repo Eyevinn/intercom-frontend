@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
-import { TBasicProductionResponse } from "../../api/api";
+import { TBasicProductionResponse, TPreset } from "../../api/api";
 import { AudioFeedModal } from "../audio-feed-modal/audio-feed-modal";
 import {
   DeleteButton,
@@ -20,6 +20,8 @@ import { useGlobalState } from "../../global-state/context-provider";
 import { useInitiateProductionCall } from "../../hooks/use-initiate-production-call";
 import { ConfirmationModal } from "../verify-decision/confirmation-modal";
 import { TLine } from "../production-line/types";
+import { buildCallsUrl } from "../../utils/call-url";
+import { usePresetContext } from "../../contexts/preset-context";
 
 type ExpandedContentProps = {
   production: TBasicProductionResponse;
@@ -42,6 +44,9 @@ export const ProductionListExpandedContent = ({
 
   const [selectedLine, setSelectedLine] = useState<TLine | null>();
   const [lineRemoveId, setLineRemoveId] = useState<string>("");
+  const affectedPresetsRef = useRef<TPreset[]>([]);
+
+  const { presets, updatePreset } = usePresetContext();
 
   const { initiateProductionCall } = useInitiateProductionCall({
     dispatch,
@@ -62,11 +67,38 @@ export const ProductionListExpandedContent = ({
   }, [successfullDeleteLine, dispatch]);
 
   useEffect(() => {
-    if (successfullDeleteLine) {
-      setLineRemoveId("");
-      setSelectedLine(null);
+    if (!successfullDeleteLine) return;
+
+    const toUpdate = affectedPresetsRef.current;
+    const deletedLineId = lineRemoveId;
+    if (toUpdate.length > 0) {
+      Promise.all(
+        toUpdate.map((preset) => {
+          const updatedCalls = preset.calls.filter(
+            (c) =>
+              !(
+                c.productionId === production.productionId &&
+                c.lineId === deletedLineId
+              )
+          );
+          // eslint-disable-next-line no-underscore-dangle
+          return updatePreset(preset._id, { calls: updatedCalls });
+        })
+      )
+        .then(() => dispatch({ type: "PRESET_UPDATED" }))
+        .catch(() => {});
+      affectedPresetsRef.current = [];
     }
-  }, [successfullDeleteLine]);
+
+    setLineRemoveId("");
+    setSelectedLine(null);
+  }, [
+    successfullDeleteLine,
+    lineRemoveId,
+    production.productionId,
+    dispatch,
+    updatePreset,
+  ]);
 
   const getLineByLineId = (lineId: string) => {
     return production.lines?.find((l) => l.id === lineId);
@@ -93,11 +125,26 @@ export const ProductionListExpandedContent = ({
 
       if (success) {
         navigate(
-          `/production-calls/production/${payload.productionId}/line/${lineId}`
+          buildCallsUrl([{ productionId: payload.productionId, lineId }])
         );
       }
     }
   };
+
+  const affectedPresets = selectedLine
+    ? presets.filter((g) =>
+        g.calls.some(
+          (c) =>
+            c.productionId === production.productionId &&
+            c.lineId === selectedLine.id
+        )
+      )
+    : [];
+
+  const confirmationText =
+    affectedPresets.length > 0
+      ? `This line is in ${affectedPresets.length} saved configuration${affectedPresets.length > 1 ? "s" : ""}: ${affectedPresets.map((g) => g.name).join(", ")}. It will be removed from ${affectedPresets.length > 1 ? "those saved configurations" : "that saved configuration"}.`
+      : undefined;
 
   return (
     <>
@@ -177,10 +224,13 @@ export const ProductionListExpandedContent = ({
         <ConfirmationModal
           title="Delete Line"
           description={`You are about to delete the line: ${selectedLine.name}. Are you sure?`}
+          confirmationText={confirmationText}
           onCancel={() => setSelectedLine(null)}
-          onConfirm={() =>
-            selectedLine?.id ? setLineRemoveId(selectedLine.id) : null
-          }
+          onConfirm={() => {
+            if (!selectedLine?.id) return;
+            affectedPresetsRef.current = affectedPresets;
+            setLineRemoveId(selectedLine.id);
+          }}
         />
       )}
     </>

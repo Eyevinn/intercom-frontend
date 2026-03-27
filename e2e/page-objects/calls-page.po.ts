@@ -13,8 +13,23 @@ export class CallsPagePO {
   }
 
   async gotoWithParams(productionId: string, lineId: string) {
-    await this.page.goto(
-      `/production-calls/production/${productionId}/line/${lineId}`
+    await this.page.goto(`/lines?lines=${productionId}:${lineId}`);
+  }
+
+  async gotoWithSettings(
+    productionId: string,
+    lineId: string,
+    username = "TestUser"
+  ) {
+    await this.page.addInitScript(
+      ({ username }: { username: string }) => {
+        // storage-ts uses prefix "id" with dot separator and JSON.stringify values
+        localStorage.setItem("id.username", JSON.stringify(username));
+        localStorage.setItem("id.audioinput", JSON.stringify("mock-input-1"));
+        localStorage.setItem("id.audiooutput", JSON.stringify("mock-output-1"));
+      },
+      { username }
     );
+    await this.page.goto(`/lines?lines=${productionId}:${lineId}`);
   }
 }

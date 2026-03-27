@@ -9,6 +9,8 @@ import { PageHeader } from "../page-layout/page-header.tsx";
 import { AddIcon, EditIcon, HeadsetIcon } from "../../assets/icons/icon.tsx";
 import { PrimaryButton } from "../form-elements/form-elements";
 import { HideOnSmallScreen } from "../generic-components";
+import { PresetList } from "./presets-list";
+import { InfoTooltip } from "../info-tooltip/info-tooltip";
 
 const HeaderButton = styled(PrimaryButton)`
   margin-left: 1rem;
@@ -74,15 +76,14 @@ const EmptyStateButton = styled(PrimaryButton)`
   padding: 1rem 2rem;
 `;
 
+const PRODUCTION_LIST_FILTER = { limit: "30", extended: "true" };
+
 export const ProductionsListContainer = () => {
-  const [{ reloadProductionList }] = useGlobalState();
+  const [{ reloadProductionList }, dispatch] = useGlobalState();
   const navigate = useNavigate();
 
   const { productions, doInitialLoad, error, setIntervalLoad } =
-    useFetchProductionList({
-      limit: "30",
-      extended: "true",
-    });
+    useFetchProductionList(PRODUCTION_LIST_FILTER);
 
   const showRefreshing = useRefreshAnimation({
     reloadProductionList,
@@ -99,17 +100,36 @@ export const ProductionsListContainer = () => {
     };
   }, [setIntervalLoad]);
 
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      dispatch({ type: "PRESET_UPDATED" });
+    }, 30000);
+
+    return () => {
+      window.clearInterval(interval);
+    };
+  }, [dispatch]);
+
   const goToCreate = () => {
-    navigate("/create-production");
+    navigate("/create");
   };
 
   const goToManage = () => {
-    navigate("/manage-productions");
+    navigate("/manage");
   };
 
   return (
     <>
-      <PageHeader title="Productions" loading={showRefreshing}>
+      <PageHeader
+        title="Productions"
+        loading={showRefreshing}
+        titleAdornment={
+          <InfoTooltip>
+            A <strong>production</strong> is a named group of communication
+            lines
+          </InfoTooltip>
+        }
+      >
         {!!productions?.productions.length && (
           <HideOnSmallScreen>
             <ManageButton onClick={goToManage}>
@@ -135,6 +155,7 @@ export const ProductionsListContainer = () => {
       {!!productions?.productions.length && (
         <ProductionsList productions={productions.productions} error={error} />
       )}
+      <PresetList productions={productions?.productions ?? []} />
     </>
   );
 };

@@ -3,6 +3,7 @@ import { CallState, DevicesState } from "./types.ts";
 
 export type TGlobalStateAction =
   | TPublishError
+  | TPublishWarning
   | TProductionCreated
   | TApiNotAvailable
   | TProductionListFetched
@@ -13,11 +14,18 @@ export type TGlobalStateAction =
   | TUpdateCallState
   | TRemoveCallState
   | TSetWebSocket
-  | THeartbeatError;
+  | THeartbeatError
+  | TPresetUpdated
+  | TPresetListFetched;
 
 export type TPublishError = {
   type: "ERROR";
   payload: { callId?: string; error: Error | null };
+};
+
+export type TPublishWarning = {
+  type: "WARNING";
+  payload: { message: string | null };
 };
 
 export type TProductionCreated = {
@@ -70,4 +78,12 @@ export type TSetWebSocket = {
 export type THeartbeatError = {
   type: "HEARTBEAT_ERROR";
   payload: { sessionId: string; error: Error };
+};
+
+export type TPresetUpdated = {
+  type: "PRESET_UPDATED";
+};
+
+export type TPresetListFetched = {
+  type: "PRESET_LIST_FETCHED";
 };

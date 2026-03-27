@@ -38,14 +38,14 @@ test.describe("Landing Page", () => {
     test.skip(isMobileProject(), "Create button hidden on mobile");
     await landingPage.gotoWithSettings("TestUser");
     await landingPage.createButton.click();
-    await expect(landingPage.page).toHaveURL(/create-production/);
+    await expect(landingPage.page).toHaveURL(/\/create/);
   });
 
   test("navigates to manage productions page", async ({ landingPage }) => {
     test.skip(isMobileProject(), "Manage button hidden on mobile");
     await landingPage.gotoWithSettings("TestUser");
     await landingPage.manageButton.click();
-    await expect(landingPage.page).toHaveURL(/manage-productions/);
+    await expect(landingPage.page).toHaveURL(/\/manage/);
   });
 
   test("shows User Settings heading on initial visit", async ({
@@ -55,5 +55,49 @@ test.describe("Landing Page", () => {
     await expect(
       landingPage.page.getByText("User Settings").first()
     ).toBeVisible();
+  });
+
+  test("does not show saved configurations section when no presets exist", async ({
+    landingPage,
+  }) => {
+    await landingPage.gotoWithSettings("TestUser");
+    await expect(
+      landingPage.page.getByText("Saved Configurations")
+    ).toBeHidden();
+  });
+
+  test("shows saved configurations section when presets exist", async ({
+    landingPage,
+    mockApi,
+  }) => {
+    mockApi.addPreset({
+      _id: "preset-1",
+      name: "My Test Preset",
+      calls: [{ productionId: "1", lineId: "10" }],
+      createdAt: new Date().toISOString(),
+    });
+    await landingPage.gotoWithSettings("TestUser");
+    await expect(
+      landingPage.page.getByText("Saved Configurations")
+    ).toBeVisible();
+    await expect(landingPage.page.getByText("My Test Preset")).toBeVisible();
+  });
+
+  test("Join button in preset navigates to calls page", async ({
+    landingPage,
+    mockApi,
+  }) => {
+    mockApi.addPreset({
+      _id: "preset-2",
+      name: "Quick Join Preset",
+      calls: [{ productionId: "1", lineId: "10" }],
+      createdAt: new Date().toISOString(),
+    });
+    await landingPage.gotoWithSettings("TestUser");
+    const presetCard = landingPage.page
+      .getByText("Quick Join Preset")
+      .locator("..");
+    await presetCard.getByRole("button", { name: /^join$/i }).click();
+    await expect(landingPage.page).toHaveURL(/\/lines\?lines=1:10/);
   });
 });

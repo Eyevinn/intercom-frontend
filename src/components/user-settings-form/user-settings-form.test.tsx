@@ -51,6 +51,7 @@ const mockState: TGlobalState = {
   calls: {},
   error: {},
   reloadProductionList: false,
+  reloadPresetList: false,
   production: null,
   selectedProductionId: null,
   devices: { input: [], output: [] },

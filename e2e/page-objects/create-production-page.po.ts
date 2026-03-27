@@ -17,7 +17,7 @@ export class CreateProductionPagePO {
 
     this.productionNameInput = page.getByPlaceholder("Production Name");
     this.defaultLineInput = page.getByPlaceholder("Line Name").first();
-    this.addLineButton = page.getByText("Add Line");
+    this.addLineButton = page.getByRole("button", { name: "Add Line" }).first();
     this.createButton = page.getByRole("button", {
       name: "Create Production",
     });
@@ -26,7 +26,7 @@ export class CreateProductionPagePO {
   }
 
   async goto() {
-    await this.page.goto("/create-production");
+    await this.page.goto("/create");
   }
 
   async fillAndSubmit(

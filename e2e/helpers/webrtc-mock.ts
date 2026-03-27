@@ -32,6 +32,9 @@ export const setupWebRTCMocks = async (page: Page) => {
           toJSON: () => ({}),
         },
       ] as MediaDeviceInfo[];
+    // Override enumerateDevices on the prototype (works for chromium/firefox).
+    // On webkit, permission-gated devices are returned with empty deviceIds —
+    // the app treats those as unidentifiable and skips validation.
     Object.defineProperty(MediaDevices.prototype, "enumerateDevices", {
       value: mockEnumerateDevices,
       writable: true,

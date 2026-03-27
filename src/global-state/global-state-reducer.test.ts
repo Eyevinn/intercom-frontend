@@ -54,10 +54,11 @@ describe("globalReducer", () => {
   it("should have the correct initial state shape", () => {
     expect(initialGlobalState).toEqual({
       production: null,
-      error: { callErrors: null, globalError: null },
+      error: { callErrors: null, globalError: null, globalWarning: null },
       reloadProductionList: false,
+      reloadPresetList: false,
       devices: { input: null, output: null },
-      userSettings: null,
+      userSettings: {},
       selectedProductionId: null,
       calls: {},
       apiError: false,
@@ -160,6 +161,38 @@ describe("globalReducer", () => {
       const next = globalReducer(state, { type: "PRODUCTION_LIST_FETCHED" });
 
       expect(next.reloadProductionList).toBe(false);
+    });
+  });
+
+  // ── PRESET_UPDATED ─────────────────────────────────────────────────────
+
+  describe("PRESET_UPDATED action", () => {
+    it("sets reloadPresetList to true", () => {
+      const state = { ...initialGlobalState, reloadPresetList: false };
+      const next = globalReducer(state, { type: "PRESET_UPDATED" });
+      expect(next.reloadPresetList).toBe(true);
+    });
+
+    it("does not affect other state fields", () => {
+      const state = { ...initialGlobalState, reloadProductionList: true };
+      const next = globalReducer(state, { type: "PRESET_UPDATED" });
+      expect(next.reloadProductionList).toBe(true);
+    });
+  });
+
+  // ── PRESET_LIST_FETCHED ────────────────────────────────────────────────
+
+  describe("PRESET_LIST_FETCHED action", () => {
+    it("sets reloadPresetList to false", () => {
+      const state = { ...initialGlobalState, reloadPresetList: true };
+      const next = globalReducer(state, { type: "PRESET_LIST_FETCHED" });
+      expect(next.reloadPresetList).toBe(false);
+    });
+
+    it("does not affect other state fields", () => {
+      const state = { ...initialGlobalState, reloadProductionList: true };
+      const next = globalReducer(state, { type: "PRESET_LIST_FETCHED" });
+      expect(next.reloadProductionList).toBe(true);
     });
   });
 

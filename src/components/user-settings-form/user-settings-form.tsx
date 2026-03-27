@@ -50,9 +50,9 @@ export const UserSettingsForm = ({
   closeAddCallView,
   updateUserSettings,
   onSave,
-  isFirstConnection,
   needsConfirmation,
   hideUsername,
+  hideDevices,
 }: {
   isJoinProduction?: boolean;
   preSelected?: {
@@ -71,9 +71,9 @@ export const UserSettingsForm = ({
   closeAddCallView?: () => void;
   updateUserSettings?: boolean;
   onSave?: () => void;
-  isFirstConnection?: string;
   needsConfirmation?: boolean;
   hideUsername?: boolean;
+  hideDevices?: boolean;
 }) => {
   const [production, setProduction] = useState<TProduction | null>(null);
   const [isProgramOutputLine, setIsProgramOutputLine] =
@@ -104,7 +104,17 @@ export const UserSettingsForm = ({
   // this will update whenever lineId changes
   const selectedLineId = useWatch({ name: "lineId", control });
 
-  const [{ devices, selectedProductionId }] = useGlobalState();
+  const [{ devices, selectedProductionId: globalSelectedProductionId, calls }] =
+    useGlobalState();
+
+  const isAlreadyJoined =
+    !!production &&
+    !!selectedLineId &&
+    Object.values(calls).some(
+      (c) =>
+        c.joinProductionOptions?.productionId === production.productionId &&
+        c.joinProductionOptions?.lineId === selectedLineId
+    );
 
   const { onSubmit } = useSubmitForm({
     isJoinProduction,
@@ -119,7 +129,6 @@ export const UserSettingsForm = ({
   });
 
   const isSettingsConfig = !isJoinProduction;
-  const isSupportedBrowser = isBrowserFirefox && isJoinProduction;
 
   useEffect(() => {
     if (production && isJoinProduction) {
@@ -172,12 +181,12 @@ export const UserSettingsForm = ({
 
   // If user selects a production from the productionlist
   useEffect(() => {
-    if (selectedProductionId && isJoinProduction) {
+    if (globalSelectedProductionId && isJoinProduction) {
       reset({
-        productionId: `${selectedProductionId}`,
+        productionId: `${globalSelectedProductionId}`,
       });
     }
-  }, [reset, selectedProductionId, isJoinProduction]);
+  }, [reset, globalSelectedProductionId, isJoinProduction]);
 
   useSubmitOnEnter<FormValues | TUserSettings>({
     handleSubmit,
@@ -234,6 +243,7 @@ export const UserSettingsForm = ({
             })}
             style={{
               display: production ? "block" : "none",
+              marginBottom: isAlreadyJoined ? 0 : undefined,
             }}
           >
             {production &&
@@ -246,6 +256,11 @@ export const UserSettingsForm = ({
           {!production && (
             <StyledWarningMessage>
               Please enter a production id
+            </StyledWarningMessage>
+          )}
+          {isAlreadyJoined && (
+            <StyledWarningMessage style={{ marginTop: "0.5rem" }}>
+              You have already joined this line
             </StyledWarningMessage>
           )}
         </FormItem>
@@ -262,7 +277,7 @@ export const UserSettingsForm = ({
           />
         </FormItem>
       )}
-      {(isFirstConnection || isSupportedBrowser || isSettingsConfig) && (
+      {!hideDevices && (isJoinProduction || isSettingsConfig) && (
         <>
           <DevicesSection>
             <SectionTitle>
@@ -334,7 +349,7 @@ export const UserSettingsForm = ({
       <ButtonWrapper>
         <SubmitButton
           type="button"
-          disabled={isJoinProduction ? !isValid : false}
+          disabled={isJoinProduction ? !isValid || isAlreadyJoined : false}
           onClick={
             !needsConfirmation || isBrowserFirefox
               ? handleSubmit(onSubmit)
@@ -350,7 +365,7 @@ export const UserSettingsForm = ({
         <ConfirmationModal
           title="Confirm"
           description="Are you sure you want to update your settings?"
-          confirmationText="This will update the devices for all current calls."
+          confirmationText="This will update the devices for all current lines."
           onConfirm={handleSubmit(onSubmit)}
           onCancel={() => setConfirmModalOpen(false)}
           shouldSubmitOnEnter

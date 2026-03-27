@@ -8,9 +8,7 @@ test.describe("Share Link Modal", () => {
     await landingPage.page.getByTitle("Get share link").first().click();
 
     // Share modal should appear
-    await expect(
-      landingPage.page.getByText("Share Production URLs")
-    ).toBeVisible();
+    await expect(landingPage.page.getByText("Share Lines")).toBeVisible();
   });
 
   test("share modal shows note about single use links", async ({
@@ -28,7 +26,9 @@ test.describe("Share Link Modal", () => {
     await landingPage.gotoWithSettings("TestUser");
     await landingPage.page.getByTitle("Get share link").first().click();
 
-    await expect(landingPage.page.getByText(/refresh url/i)).toBeVisible();
+    await expect(
+      landingPage.page.getByRole("button", { name: "Copy link" }).first()
+    ).toBeVisible();
   });
 });
 

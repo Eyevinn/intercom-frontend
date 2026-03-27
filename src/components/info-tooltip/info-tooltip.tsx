@@ -6,6 +6,11 @@ const Trigger = styled.span`
   display: inline-flex;
   align-items: center;
   cursor: help;
+  font-size: 2rem;
+  line-height: 1;
+  vertical-align: middle;
+  position: relative;
+  top: 0;
 `;
 
 const Popup = styled.span<{ x: number; y: number }>`
@@ -42,8 +47,15 @@ export const InfoTooltip = ({ children }: { children: React.ReactNode }) => {
     if (!ref.current) return;
     const rect = ref.current.getBoundingClientRect();
     const viewportHeight = window.innerHeight;
+    const popupHalfWidth = Math.min(300, window.innerWidth * 0.9) / 2;
+    const margin = 8;
+    const idealX = rect.left + rect.width / 2;
+    const clampedX = Math.max(
+      popupHalfWidth + margin,
+      Math.min(window.innerWidth - popupHalfWidth - margin, idealX)
+    );
     setPos({
-      x: rect.left + rect.width / 2,
+      x: clampedX,
       y: viewportHeight - rect.top + 4,
     });
     setVisible(true);

@@ -42,6 +42,10 @@ export const CheckboxWrapper = styled.div`
   gap: 0.5rem;
   white-space: nowrap;
   flex-shrink: 0;
+
+  span {
+    top: 0;
+  }
 `;
 
 export const ButtonContainer = styled(FlexContainer)`
@@ -167,5 +171,51 @@ export const AddLineCard = styled.button`
     width: 1.6rem;
     height: 1.6rem;
     fill: currentColor;
+  }
+`;
+
+export const SelectInput = styled.select`
+  width: 100%;
+  font-size: 1.6rem;
+  padding: 0.75rem;
+  margin: 0 0 1rem;
+  border: 0.1rem solid #6d6d6d;
+  border-radius: 0.5rem;
+  background: #32383b;
+  color: white;
+  cursor: pointer;
+  &:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+`;
+
+export const SectionHeader = styled.h2`
+  font-size: 2rem;
+  font-weight: bold;
+  margin: 0 0 1.5rem;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  span {
+    top: 1px;
+  }
+`;
+
+export const SectionDivider = styled.div`
+  margin-top: 3rem;
+`;
+
+export const TwoColumnLayout = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 20rem;
+  padding: 0 24rem;
+  & > * {
+    flex: 1;
+    min-width: 0;
   }
 `;

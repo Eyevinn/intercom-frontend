@@ -6,6 +6,22 @@ const API_URL =
   `${window.location.origin}/${API_VERSION}`;
 const API_KEY = import.meta.env.VITE_BACKEND_API_KEY;
 
+type TPresetCall = {
+  productionId: string;
+  lineId: string;
+  lineUsedForProgramOutput?: boolean;
+  lineName?: string;
+};
+
+export type TPreset = {
+  _id: string;
+  name: string;
+  calls: TPresetCall[];
+  createdAt: string;
+  isLocal?: boolean;
+  companionUrl?: string;
+};
+
 type TCreateProductionOptions = {
   name: string;
   lines: { name: string; programOutputLine?: boolean }[];
@@ -292,4 +308,57 @@ export const API = {
       })
     );
   },
+  createPreset: (options: {
+    name: string;
+    calls: TPresetCall[];
+    companionUrl?: string;
+  }): Promise<TPreset> =>
+    handleFetchRequest<TPreset>(
+      fetch(`${API_URL}preset`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
+        },
+        body: JSON.stringify(options),
+      })
+    ),
+  listPresets: (): Promise<{ presets: TPreset[] }> =>
+    handleFetchRequest<{ presets: TPreset[] }>(
+      fetch(`${API_URL}preset`, {
+        method: "GET",
+        headers: {
+          ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
+        },
+      })
+    ),
+  deletePreset: async (id: string): Promise<void> => {
+    const response = await fetch(`${API_URL}preset/${id}`, {
+      method: "DELETE",
+      headers: {
+        ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
+      },
+    });
+    if (!response.ok || response.status !== 204) {
+      await handleFetchRequest<void>(Promise.resolve(response));
+    }
+  },
+  updatePreset: (
+    id: string,
+    update: {
+      name?: string;
+      calls?: TPresetCall[];
+      companionUrl?: string | null;
+    }
+  ): Promise<TPreset> =>
+    handleFetchRequest<TPreset>(
+      fetch(`${API_URL}preset/${id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
+        },
+        body: JSON.stringify(update),
+      })
+    ),
 };

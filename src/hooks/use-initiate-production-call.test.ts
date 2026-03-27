@@ -167,7 +167,7 @@ describe("useInitiateProductionCall", () => {
   // ── Input device not found ────────────────────────────────────────────────
 
   describe("input device not found", () => {
-    it("returns false and dispatches ERROR, does not dispatch ADD_CALL", async () => {
+    it("falls back to first available input device and dispatches ADD_CALL", async () => {
       mockGetUpdatedDevices.mockResolvedValue({
         input: [makeDevice("other-mic")],
         output: [makeOutputDevice("spk1")],
@@ -184,21 +184,21 @@ describe("useInitiateProductionCall", () => {
         });
       });
 
-      expect(returnValue).toBe(false);
-      expect(mockDispatch).toHaveBeenCalledWith({
-        type: "ERROR",
-        payload: { error: expect.any(Error) },
-      });
-      const dispatchMock = mockDispatch as unknown as ReturnType<typeof vi.fn>;
-      const errorCall = dispatchMock.mock.calls.find(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (call: any[]) => call[0]?.type === "ERROR"
-      );
-      expect(errorCall?.[0].payload.error.message).toBe(
-        "Selected devices are not available"
-      );
+      expect(returnValue).toBe(true);
       expect(mockDispatch).not.toHaveBeenCalledWith(
-        expect.objectContaining({ type: "ADD_CALL" })
+        expect.objectContaining({ type: "ERROR" })
+      );
+      expect(mockDispatch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: "ADD_CALL",
+          payload: expect.objectContaining({
+            callState: expect.objectContaining({
+              joinProductionOptions: expect.objectContaining({
+                audioinput: "other-mic",
+              }),
+            }),
+          }),
+        })
       );
     });
   });

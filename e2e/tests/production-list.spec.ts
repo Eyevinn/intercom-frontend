@@ -69,7 +69,7 @@ test.describe("Production List", () => {
     await landingPage.gotoWithSettings("TestUser");
 
     await landingPage.page.getByText("Create your first production").click();
-    await expect(landingPage.page).toHaveURL(/create-production/);
+    await expect(landingPage.page).toHaveURL(/\/create/);
   });
 
   test("shows Productions heading", async ({ landingPage }) => {
