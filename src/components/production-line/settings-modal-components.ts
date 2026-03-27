@@ -1,66 +1,6 @@
 import styled from "@emotion/styled";
 import { ActionButton, FormInput } from "../form-elements/form-elements";
 
-export const ModalOverlay = styled.div`
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(0, 0, 0, 0.5);
-  z-index: 100;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-`;
-
-export const ModalContent = styled.div`
-  background: #383838;
-  border-radius: 0.5rem;
-  padding: 1.75rem;
-  width: 80%;
-  max-width: 40rem;
-  box-shadow: 0 0.4rem 0.8rem rgba(0, 0, 0, 0.2);
-  color: white;
-`;
-
-export const ModalHeaderRow = styled.div`
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  margin-bottom: 2rem;
-  gap: 1rem;
-`;
-
-export const ModalHeader = styled.h2`
-  font-size: 2rem;
-  margin: 0;
-  font-weight: 600;
-  overflow-wrap: break-word;
-  word-break: break-word;
-  min-width: 0;
-`;
-
-export const ModalCloseButton = styled.button`
-  background: transparent;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-
-  svg {
-    width: 2.5rem;
-    fill: #f96c6c;
-  }
-
-  &:hover svg {
-    fill: #c44c4c;
-  }
-`;
-
 export const CancelButton = styled(ActionButton)`
   background: #d6d3d1;
 

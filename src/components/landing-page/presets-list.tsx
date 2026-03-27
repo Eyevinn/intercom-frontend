@@ -7,11 +7,12 @@ import { TBasicProductionResponse, TPreset } from "../../api/api";
 import { CollapsibleItem } from "../shared/collapsible-item";
 import { InfoTooltip } from "../info-tooltip/info-tooltip";
 import { PageHeader } from "../page-layout/page-header";
-import { ShareIcon, UsersIcon } from "../../assets/icons/icon";
+import { ShareIcon, TVIcon, UsersIcon } from "../../assets/icons/icon";
 import { CopyIconWrapper } from "../copy-button/copy-components";
 import { SecondaryButton } from "../form-elements/form-elements";
 import { ShareUrlModal } from "../share-url-modal/share-url-modal";
 import {
+  IconWrapper,
   Lineblock,
   ParticipantCount,
   ParticipantCountWrapper,
@@ -211,7 +212,12 @@ const PresetCard = ({ preset, productions }: PresetCardProps) => {
         return (
           // eslint-disable-next-line react/no-array-index-key
           <li key={`${call.productionId}-${call.lineId}-${idx}`}>
-            <Lineblock>
+            <Lineblock isProgramOutput={!!line?.programOutputLine}>
+              {line?.programOutputLine && (
+                <IconWrapper>
+                  <TVIcon />
+                </IconWrapper>
+              )}
               <LineNameWrapper>
                 <LineName>{lineName}</LineName>
                 {productionName && (

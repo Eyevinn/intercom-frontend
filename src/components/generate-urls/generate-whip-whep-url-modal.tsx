@@ -1,20 +1,54 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
+import styled from "@emotion/styled";
 import { generateWhipUrl } from "../../utils/generateWhipUrl";
 import { generateWhepUrl } from "../../utils/generateWhepUrl";
-import { CopyButton } from "../copy-button/copy-button";
-import { DecorativeLabel } from "../form-elements/form-elements";
+import { DecorativeLabel, FormInput } from "../form-elements/form-elements";
 import { Modal } from "../modal/modal";
-import { RefreshButton } from "../refresh-button/refresh-button";
-import {
-  CombinedInputWrapper,
-  InputWrapper,
-  LinkLabel,
-  ModalNoteWrapper,
-  ModalText,
-  ModalTextBold,
-  ModalTextItalic,
-  Wrapper,
-} from "./generate-urls-components";
+
+const Description = styled.p`
+  font-size: 1.4rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0 0 1.5rem 0;
+  line-height: 1.5;
+`;
+
+const UsernameField = styled.div`
+  margin-bottom: 1.5rem;
+`;
+
+const ButtonGroup = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+`;
+
+const CopyButton = styled.button<{ copied: boolean }>`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 1rem 1.5rem;
+  font-size: 1.6rem;
+  font-weight: 600;
+  background: #383838;
+  color: ${({ copied }) => (copied ? "#91fa8c" : "white")};
+  border: 0.1rem solid ${({ copied }) => (copied ? "#91fa8c" : "#6d6d6d")};
+  border-radius: 0.6rem;
+  cursor: pointer;
+  transition:
+    color 0.15s,
+    border-color 0.15s;
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  &:hover:not(:disabled) {
+    border-color: ${({ copied }) => (copied ? "#91fa8c" : "#59cbe8")};
+    color: ${({ copied }) => (copied ? "#91fa8c" : "#59cbe8")};
+  }
+`;
 
 type TGenerateWhipWhepUrlModalProps = {
   productionId: string;
@@ -27,131 +61,52 @@ export const GenerateWhipWhepUrlModal = ({
   lineId,
   onClose,
 }: TGenerateWhipWhepUrlModalProps) => {
-  const modalRef = useRef<HTMLDivElement>(null);
-  const [whipUsername, setWhipUsername] = useState("");
-  const [whepUsername, setWhepUsername] = useState("");
-  const [whipUrl, setWhipUrl] = useState("");
-  const [whepUrl, setWhepUrl] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [username, setUsername] = useState("");
+  const [whipCopied, setWhipCopied] = useState(false);
+  const [whepCopied, setWhepCopied] = useState(false);
 
-  const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const trimmed = username.trim();
+  const whipUrl = trimmed ? generateWhipUrl(productionId, lineId, trimmed) : "";
+  const whepUrl = trimmed ? generateWhepUrl(productionId, lineId, trimmed) : "";
 
-  useEffect(() => {
-    setWhipUrl(
-      whipUsername.trim()
-        ? generateWhipUrl(productionId, lineId, whipUsername.trim())
-        : ""
-    );
-  }, [whipUsername, productionId, lineId]);
-
-  useEffect(() => {
-    setWhepUrl(
-      whepUsername.trim()
-        ? generateWhepUrl(productionId, lineId, whepUsername.trim())
-        : ""
-    );
-  }, [whepUsername, productionId, lineId]);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        modalRef.current &&
-        !modalRef.current.contains(event.target as Node)
-      ) {
-        onClose();
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [onClose]);
-
-  useEffect(() => {
-    return () => {
-      if (refreshTimerRef.current !== null)
-        clearTimeout(refreshTimerRef.current);
-    };
-  }, []);
-
-  const handleRefresh = () => {
-    setIsLoading(true);
-    setWhipUrl(
-      whipUsername.trim()
-        ? generateWhipUrl(productionId, lineId, whipUsername.trim())
-        : ""
-    );
-    setWhepUrl(
-      whepUsername.trim()
-        ? generateWhepUrl(productionId, lineId, whepUsername.trim())
-        : ""
-    );
-    refreshTimerRef.current = setTimeout(() => {
-      setIsLoading(false);
-    }, 500);
+  const handleCopy = (url: string, setCopied: (v: boolean) => void) => {
+    navigator.clipboard.writeText(url).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
   };
 
   return (
-    <Modal onClose={onClose} title="Generate WHIP/WHEP URLs">
-      <div ref={modalRef}>
-        <ModalText>
-          Enter a username to generate WHIP and WHEP URLs for connecting to the
-          server.
-        </ModalText>
-        <ModalNoteWrapper>
-          <ModalTextBold>Note:</ModalTextBold>
-          <ModalTextItalic>
-            These URLs are tied to the username and will update if you refresh.
-          </ModalTextItalic>
-        </ModalNoteWrapper>
-
-        <Wrapper>
-          <InputWrapper>
-            <LinkLabel>
-              <DecorativeLabel>WHIP URL</DecorativeLabel>
-              <CombinedInputWrapper>
-                <span>{generateWhipUrl(productionId, lineId, "")}</span>
-                <input
-                  aria-label="WHIP username"
-                  value={whipUsername}
-                  onChange={(e) => setWhipUsername(e.target.value)}
-                  placeholder="username"
-                />
-              </CombinedInputWrapper>
-            </LinkLabel>
-            <CopyButton
-              urls={[whipUrl]}
-              className="share-line-link-modal"
-              disabled={!whipUrl}
-            />
-          </InputWrapper>
-
-          <InputWrapper>
-            <LinkLabel>
-              <DecorativeLabel>WHEP URL</DecorativeLabel>
-              <CombinedInputWrapper>
-                <span>{generateWhepUrl(productionId, lineId, "")}</span>
-                <input
-                  aria-label="WHEP username"
-                  value={whepUsername}
-                  onChange={(e) => setWhepUsername(e.target.value)}
-                  placeholder="username"
-                />
-              </CombinedInputWrapper>
-            </LinkLabel>
-            <CopyButton
-              urls={[whepUrl]}
-              className="share-line-link-modal"
-              disabled={!whepUrl}
-            />
-          </InputWrapper>
-        </Wrapper>
-
-        <RefreshButton
-          label="Refresh URLs"
-          isLoading={isLoading}
-          onRefresh={handleRefresh}
+    <Modal onClose={onClose} title="WebRTC">
+      <Description>
+        Enter a username to generate copy links for WHIP and WHEP connections.
+      </Description>
+      <UsernameField>
+        <DecorativeLabel>Username</DecorativeLabel>
+        <FormInput
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          placeholder="username"
         />
-      </div>
+      </UsernameField>
+      <ButtonGroup>
+        <CopyButton
+          type="button"
+          copied={whipCopied}
+          disabled={!whipUrl}
+          onClick={() => handleCopy(whipUrl, setWhipCopied)}
+        >
+          {whipCopied ? "✓ WHIP link copied!" : "Copy WHIP link"}
+        </CopyButton>
+        <CopyButton
+          type="button"
+          copied={whepCopied}
+          disabled={!whepUrl}
+          onClick={() => handleCopy(whepUrl, setWhepCopied)}
+        >
+          {whepCopied ? "✓ WHEP link copied!" : "Copy WHEP link"}
+        </CopyButton>
+      </ButtonGroup>
     </Modal>
   );
 };

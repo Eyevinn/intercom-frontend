@@ -9,8 +9,10 @@ import {
   EditIcon,
   SaveIcon,
   RemoveIcon,
+  TVIcon,
 } from "../../assets/icons/icon";
 import {
+  IconWrapper,
   Lineblock,
   ParticipantCount,
   ParticipantCountWrapper,
@@ -562,7 +564,12 @@ const ManagePresetCard = ({
           return (
             // eslint-disable-next-line react/no-array-index-key
             <li key={`${call.productionId}-${call.lineId}-${idx}`}>
-              <Lineblock>
+              <Lineblock isProgramOutput={!!line?.programOutputLine}>
+                {line?.programOutputLine && (
+                  <IconWrapper>
+                    <TVIcon />
+                  </IconWrapper>
+                )}
                 <LineNameWrapper>
                   <LineName>{lineName}</LineName>
                   <ProductionSubtext>{productionName}</ProductionSubtext>
