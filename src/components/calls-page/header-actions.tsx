@@ -74,6 +74,7 @@ type HeaderActionsProps = {
   sendCallsStateUpdate: () => void;
   resetLastSentCallsState: () => void;
   autoCompanionUrl?: string;
+  onCompanionUrlChange?: (url: string | undefined) => void;
   orderedPresetCalls?: {
     productionId: string;
     lineId: string;
@@ -94,6 +95,7 @@ export const HeaderActions = ({
   sendCallsStateUpdate,
   resetLastSentCallsState,
   autoCompanionUrl,
+  onCompanionUrlChange,
   orderedPresetCalls,
 }: HeaderActionsProps) => {
   const [{ websocket }] = useGlobalState();
@@ -129,6 +131,7 @@ export const HeaderActions = ({
             resetLastSentCallsState={resetLastSentCallsState}
             handleToggleGlobalMute={handleToggleGlobalMute}
             autoCompanionUrl={autoCompanionUrl}
+            onCompanionUrlChange={onCompanionUrlChange}
           />
         )}
         {!isEmpty && (

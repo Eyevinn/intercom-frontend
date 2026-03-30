@@ -73,6 +73,7 @@ interface ConnectToWSButtonProps {
   sendCallsStateUpdate: () => void;
   resetLastSentCallsState: () => void;
   autoCompanionUrl?: string;
+  onCompanionUrlChange?: (url: string | undefined) => void;
 }
 
 export const ConnectToWSButton = ({
@@ -83,6 +84,7 @@ export const ConnectToWSButton = ({
   sendCallsStateUpdate,
   resetLastSentCallsState,
   autoCompanionUrl,
+  onCompanionUrlChange,
 }: ConnectToWSButtonProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
@@ -91,6 +93,7 @@ export const ConnectToWSButton = ({
   const autoConnectedRef = useRef(false);
   const everConnectedRef = useRef(false);
   const isManualConnectRef = useRef(false);
+  const connectingUrlRef = useRef<string | undefined>(undefined);
   const [{ calls }, dispatch] = useGlobalState();
 
   const handleAction = useWebsocketActions({
@@ -124,6 +127,7 @@ export const ConnectToWSButton = ({
       setIsConnecting(false);
       setConnectionConflict(false);
       sendCallsStateUpdate();
+      onCompanionUrlChange?.(connectingUrlRef.current);
     },
     resetLastSentCallsState: () => {
       resetLastSentCallsState();
@@ -182,6 +186,7 @@ export const ConnectToWSButton = ({
   const handleConnect = (url: string) => {
     setConnectionConflict(false);
     isManualConnectRef.current = true;
+    connectingUrlRef.current = url;
     setIsConnecting(true);
     wsConnect(url);
     setIsOpen(false);
@@ -193,6 +198,7 @@ export const ConnectToWSButton = ({
       setIsWSReconnecting(false);
       everConnectedRef.current = false;
       wsDisconnect();
+      onCompanionUrlChange?.(undefined);
       setIsOpen(true);
       return;
     }
@@ -200,6 +206,7 @@ export const ConnectToWSButton = ({
       everConnectedRef.current = false;
       setIsConnecting(false);
       wsDisconnect();
+      onCompanionUrlChange?.(undefined);
       return;
     }
     setIsOpen(true);

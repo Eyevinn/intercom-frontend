@@ -109,6 +109,10 @@ export const CallsPage = () => {
   const autoCompanionUrl = parseCompanionParam(
     new URLSearchParams(search).get("companion")
   );
+  const [manualCompanionUrl, setManualCompanionUrl] = useState<
+    string | undefined
+  >(undefined);
+  const activeCompanionUrl = manualCompanionUrl ?? autoCompanionUrl;
 
   const { navigate, pendingCallRefs } = useCallsNavigation({
     isEmpty: Object.values(calls).length === 0,
@@ -317,6 +321,11 @@ export const CallsPage = () => {
     customKey: customGlobalMute,
   });
 
+  const handleCompanionUrlChange = (url: string | undefined) => {
+    setManualCompanionUrl(url);
+    navigate(buildCallsUrl(pendingCallRefs, url), { replace: true });
+  };
+
   const handleShare = () => {
     setShareModalOpen(true);
   };
@@ -424,7 +433,7 @@ export const CallsPage = () => {
         {shareModalOpen && (
           <ShareUrlModal
             path={buildCallsUrl(shareCallRefs)}
-            companionUrl={autoCompanionUrl}
+            companionUrl={activeCompanionUrl}
             title="Share Current Configuration"
             onClose={() => setShareModalOpen(false)}
           />
@@ -443,6 +452,7 @@ export const CallsPage = () => {
           sendCallsStateUpdate={sendCallsStateUpdate}
           resetLastSentCallsState={resetLastSentCallsState}
           autoCompanionUrl={autoCompanionUrl}
+          onCompanionUrlChange={handleCompanionUrlChange}
           orderedPresetCalls={orderedPresetCalls}
         />
       </PageHeader>
@@ -486,28 +496,38 @@ export const CallsPage = () => {
             userSettings.username &&
             (userSettings.audioinput || userSettings.audiooutput)
           ) &&
-            pendingProgramLines.map((ref) => (
-              <ProgramLineJoinCard
-                key={`${ref.productionId}:${ref.lineId}`}
-                productionId={ref.productionId}
-                lineId={ref.lineId}
-                lineName={ref.lineName}
-                productionName={ref.productionName}
-                presetOrder={ref.presetOrder}
-                customGlobalMute={customGlobalMute}
-                onJoined={() =>
-                  setPendingProgramLines((prev) =>
-                    prev.filter(
-                      (r) =>
-                        !(
-                          r.productionId === ref.productionId &&
-                          r.lineId === ref.lineId
-                        )
-                    )
+            pendingProgramLines
+              .filter(
+                (ref) =>
+                  !Object.values(calls).some(
+                    (c) =>
+                      c.joinProductionOptions?.productionId ===
+                        ref.productionId &&
+                      c.joinProductionOptions?.lineId === ref.lineId
                   )
-                }
-              />
-            ))}
+              )
+              .map((ref) => (
+                <ProgramLineJoinCard
+                  key={`${ref.productionId}:${ref.lineId}`}
+                  productionId={ref.productionId}
+                  lineId={ref.lineId}
+                  lineName={ref.lineName}
+                  productionName={ref.productionName}
+                  presetOrder={ref.presetOrder}
+                  customGlobalMute={customGlobalMute}
+                  onJoined={() =>
+                    setPendingProgramLines((prev) =>
+                      prev.filter(
+                        (r) =>
+                          !(
+                            r.productionId === ref.productionId &&
+                            r.lineId === ref.lineId
+                          )
+                      )
+                    )
+                  }
+                />
+              ))}
           <ProductionLines
             isSettingGlobalMute={isSettingGlobalMute}
             setAddCallActive={setAddCallActive}

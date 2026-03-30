@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import {
   buildCallsUrl,
@@ -32,11 +32,9 @@ export const useCallsNavigation = ({
     []
   );
 
-  const companionUrl = useMemo(
-    () => parseCompanionParam(searchParams.get("companion")),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  );
+  const companionUrl = parseCompanionParam(searchParams.get("companion"));
+  const companionUrlRef = useRef(companionUrl);
+  companionUrlRef.current = companionUrl;
 
   useEffect(() => {
     if (
@@ -88,7 +86,7 @@ export const useCallsNavigation = ({
     const allRefs = [...orderedRefs, ...extraRefs];
 
     if (allRefs.length > 0) {
-      const newUrl = buildCallsUrl(allRefs, companionUrl);
+      const newUrl = buildCallsUrl(allRefs, companionUrlRef.current);
       if (newUrl !== `${window.location.pathname}${window.location.search}`) {
         navigate(newUrl, { replace: true });
       }
