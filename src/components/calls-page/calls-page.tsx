@@ -222,7 +222,7 @@ export const CallsPage = () => {
           );
           if (!prod || !line) return;
           validRefs.push(ref);
-          if (line.programOutputLine === true) {
+          if (line.programOutputLine === true && !ref.role) {
             program.push({
               productionId: ref.productionId,
               lineId: ref.lineId,
@@ -287,8 +287,8 @@ export const CallsPage = () => {
               lineId: ref.lineId,
               username: userSettings.username!,
               audioinput: userSettings.audioinput,
-              lineUsedForProgramOutput: false,
-              isProgramUser: false,
+              lineUsedForProgramOutput: ref.role === "l" || ref.role === "p",
+              isProgramUser: ref.role === "p",
             },
             audiooutput: userSettings.audiooutput,
           },
@@ -344,7 +344,10 @@ export const CallsPage = () => {
         productionId: ref.productionId,
         lineId: ref.lineId,
         ...(o.lineUsedForProgramOutput
-          ? { lineUsedForProgramOutput: true as const }
+          ? {
+              lineUsedForProgramOutput: true as const,
+              isProgramUser: !!o.isProgramUser,
+            }
           : {}),
         ...(o.lineName ? { lineName: o.lineName } : {}),
       };
@@ -356,6 +359,7 @@ export const CallsPage = () => {
       productionId: ref.productionId,
       lineId: ref.lineId,
       lineUsedForProgramOutput: true as const,
+      isProgramUser: ref.role === "p",
       ...(pending?.lineName ? { lineName: pending.lineName } : {}),
     };
   });

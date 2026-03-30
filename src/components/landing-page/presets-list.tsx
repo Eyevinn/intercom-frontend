@@ -152,7 +152,18 @@ const PresetCard = ({ preset, productions }: PresetCardProps) => {
 
   const handleJoin = (e: React.MouseEvent) => {
     e.stopPropagation();
-    navigate(buildCallsUrl(preset.calls, preset.companionUrl));
+    navigate(
+      buildCallsUrl(
+        preset.calls.map((call) => ({
+          productionId: call.productionId,
+          lineId: call.lineId,
+          ...(call.lineUsedForProgramOutput
+            ? { role: (call.isProgramUser ? "p" : "l") as "l" | "p" }
+            : {}),
+        })),
+        preset.companionUrl
+      )
+    );
   };
 
   const headerContent = (
@@ -253,7 +264,15 @@ const PresetCard = ({ preset, productions }: PresetCardProps) => {
       />
       {shareModalOpen && (
         <ShareUrlModal
-          path={buildCallsUrl(preset.calls)}
+          path={buildCallsUrl(
+            preset.calls.map((call) => ({
+              productionId: call.productionId,
+              lineId: call.lineId,
+              ...(call.lineUsedForProgramOutput
+                ? { role: (call.isProgramUser ? "p" : "l") as "l" | "p" }
+                : {}),
+            }))
+          )}
           companionUrl={preset.companionUrl}
           title="Share Saved Configuration"
           onClose={() => setShareModalOpen(false)}

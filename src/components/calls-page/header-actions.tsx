@@ -79,6 +79,7 @@ type HeaderActionsProps = {
     productionId: string;
     lineId: string;
     lineUsedForProgramOutput?: boolean;
+    isProgramUser?: boolean;
     lineName?: string;
   }[];
 };
