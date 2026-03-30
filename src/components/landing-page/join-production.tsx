@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
-import { TJoinProductionOptions } from "../production-line/types.ts";
+import {
+  TJoinProductionOptions,
+  TProduction,
+} from "../production-line/types.ts";
 import { useNavigateToProduction } from "./use-navigate-to-production.ts";
 import { isMobile } from "../../bowser.ts";
 import { RemoveIcon } from "../../assets/icons/icon.tsx";
@@ -11,6 +14,7 @@ import {
 } from "./join-production-components.ts";
 import { UserSettingsForm } from "../user-settings-form/user-settings-form.tsx";
 import { ResponsiveFormContainer } from "../generic-components.ts";
+import { TListProductionsResponse } from "../../api/api.ts";
 
 type TProps = {
   preSelected?: {
@@ -19,6 +23,8 @@ type TProps = {
   };
   customGlobalMute: string;
   addAdditionalCallId?: string;
+  prefetchedProduction?: TProduction | null;
+  prefetchedProductionList?: TListProductionsResponse;
   closeAddCallView?: () => void;
   className?: string;
   updateUserSettings?: boolean;
@@ -30,6 +36,8 @@ export const JoinProduction = ({
   preSelected,
   customGlobalMute,
   addAdditionalCallId,
+  prefetchedProduction,
+  prefetchedProductionList,
   closeAddCallView,
   className,
   updateUserSettings = false,
@@ -72,6 +80,9 @@ export const JoinProduction = ({
         <UserSettingsForm
           isJoinProduction
           preSelected={preSelected}
+          addAdditionalCallId={addAdditionalCallId}
+          prefetchedProduction={prefetchedProduction}
+          prefetchedProductionList={prefetchedProductionList}
           buttonText="Join"
           defaultValues={defaultValues}
           setJoinProductionOptions={setJoinProductionOptions}

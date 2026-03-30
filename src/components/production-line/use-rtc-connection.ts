@@ -46,10 +46,12 @@ type TAttachAudioStream = {
 const attachInputAudioToPeerConnection = ({
   inputAudioStream,
   rtcPeerConnection,
-}: TAttachAudioStream) =>
+}: TAttachAudioStream) => {
+  if (rtcPeerConnection.signalingState === "closed") return;
   inputAudioStream
     .getTracks()
     .forEach((track) => rtcPeerConnection.addTrack(track));
+};
 
 const establishConnection = ({
   rtcPeerConnection,
@@ -229,6 +231,10 @@ export const useRtcConnection = ({
       return noop;
     }
 
+    if (rtcPeerConnection.signalingState === "closed") {
+      return noop;
+    }
+
     logger.cyan("Setting up RTC Peer Connection");
 
     const onConnectionStateChange = () => {
@@ -285,7 +291,6 @@ export const useRtcConnection = ({
     joinProductionOptions,
     rtcPeerConnection,
     dispatch,
-    noStreamError,
     callId,
   ]);
 

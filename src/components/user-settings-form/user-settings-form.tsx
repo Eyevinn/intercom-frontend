@@ -24,7 +24,11 @@ import { TUserSettings } from "../user-settings/types";
 import { ConfirmationModal } from "../verify-decision/confirmation-modal";
 import { FormItem } from "./form-item";
 import { useSubmitForm } from "./use-submit-form";
-import { useFetchProductionList } from "../landing-page/use-fetch-production-list";
+import {
+  useFetchProductionList,
+  type GetProductionListFilter,
+} from "../landing-page/use-fetch-production-list";
+import { TListProductionsResponse } from "../../api/api";
 import { FirefoxWarning } from "../production-line/firefox-warning";
 
 type FormValues = TJoinProductionOptions & {
@@ -41,6 +45,9 @@ const SubmitButton = styled(PrimaryButton)<{ shouldSubmitOnEnter?: boolean }>`
 export const UserSettingsForm = ({
   isJoinProduction,
   preSelected,
+  addAdditionalCallId,
+  prefetchedProduction,
+  prefetchedProductionList,
   buttonText,
   defaultValues,
   setJoinProductionOptions,
@@ -60,6 +67,8 @@ export const UserSettingsForm = ({
     preSelectedLineId: string;
   };
   addAdditionalCallId?: string;
+  prefetchedProduction?: TProduction | null;
+  prefetchedProductionList?: TListProductionsResponse;
   buttonText: string;
   defaultValues: TUserSettings | FormValues;
   setJoinProductionOptions?: React.Dispatch<
@@ -75,7 +84,9 @@ export const UserSettingsForm = ({
   isProgramUser?: boolean;
   setIsProgramUser?: Dispatch<SetStateAction<boolean>>;
 }) => {
-  const [production, setProduction] = useState<TProduction | null>(null);
+  const [production, setProduction] = useState<TProduction | null>(
+    prefetchedProduction ?? null
+  );
   const [confirmModalOpen, setConfirmModalOpen] = useState<boolean>(false);
   const [selectedLineName, setSelectedLineName] = useState<string>("");
   const [isProgramOutputLine, setIsProgramOutputLine] =
@@ -96,11 +107,24 @@ export const UserSettingsForm = ({
     },
   });
 
-  const { productions, error: productionListFetchError } =
-    useFetchProductionList({
-      limit: "100",
-      extended: "true",
-    });
+  const productionListFilter: GetProductionListFilter = {
+    limit: "100",
+    extended: "true",
+  };
+  const { productions: fetchedProductions, error: productionListFetchError } =
+    useFetchProductionList(productionListFilter);
+
+  // Use prefetched list immediately (no loading flicker), then switch to the
+  // live-fetched list once it arrives.
+  const productions = fetchedProductions ?? prefetchedProductionList;
+
+  // When a pre-fetched production arrives (via prop), adopt it immediately so
+  // the line dropdown renders without waiting for the full production list.
+  useEffect(() => {
+    if (prefetchedProduction) {
+      setProduction(prefetchedProduction);
+    }
+  }, [prefetchedProduction]);
 
   // this will update whenever lineId changes
   const selectedLineId = useWatch({ name: "lineId", control });
@@ -155,10 +179,24 @@ export const UserSettingsForm = ({
       return;
     }
 
-    const lineId = production.lines[0]?.id?.toString() ?? "";
+    // Prefer the first line that the user is not already connected to.
+    const joinedLineIds = new Set(
+      Object.values(calls)
+        .map((c) => c.joinProductionOptions)
+        .filter(
+          (o): o is NonNullable<typeof o> =>
+            !!o && o.productionId === production.productionId
+        )
+        .map((o) => o.lineId)
+    );
+
+    const unjoinedLine = production.lines.find(
+      (l) => !joinedLineIds.has(String(l.id))
+    );
+    const lineId = (unjoinedLine ?? production.lines[0])?.id?.toString() ?? "";
 
     setValue("lineId", lineId, { shouldValidate: true });
-  }, [preSelected, production, setValue, isJoinProduction]);
+  }, [preSelected, production, calls, setValue, isJoinProduction]);
 
   useEffect(() => {
     if (defaultValues && "productionId" in defaultValues) {
@@ -250,38 +288,40 @@ export const UserSettingsForm = ({
           )}
         </FormItem>
       )}
-      {!preSelected && isJoinProduction && productions && (
-        <FormItem label="Line">
-          <FormSelect
-            // eslint-disable-next-line
-            {...register(`lineId`, {
-              required: "Line id is required",
-              minLength: 1,
-            })}
-            style={{
-              display: production ? "block" : "none",
-              marginBottom: isAlreadyJoined ? 0 : undefined,
-            }}
-          >
-            {production &&
-              production.lines.map((line) => (
-                <option key={line.id} value={line.id}>
-                  {line.name || line.id}
-                </option>
-              ))}
-          </FormSelect>
-          {!production && (
-            <StyledWarningMessage>
-              Please enter a production id
-            </StyledWarningMessage>
-          )}
-          {isAlreadyJoined && (
-            <StyledWarningMessage style={{ marginTop: "0.5rem" }}>
-              You have already joined this line
-            </StyledWarningMessage>
-          )}
-        </FormItem>
-      )}
+      {!preSelected &&
+        isJoinProduction &&
+        (addAdditionalCallId ? !!production : !!productions) && (
+          <FormItem label="Line">
+            <FormSelect
+              // eslint-disable-next-line
+              {...register(`lineId`, {
+                required: "Line id is required",
+                minLength: 1,
+              })}
+              style={{
+                display: production ? "block" : "none",
+                marginBottom: isAlreadyJoined ? 0 : undefined,
+              }}
+            >
+              {production &&
+                production.lines.map((line) => (
+                  <option key={line.id} value={line.id}>
+                    {line.name || line.id}
+                  </option>
+                ))}
+            </FormSelect>
+            {!production && (
+              <StyledWarningMessage>
+                Please enter a production id
+              </StyledWarningMessage>
+            )}
+            {isAlreadyJoined && (
+              <StyledWarningMessage style={{ marginTop: "0.5rem" }}>
+                You have already joined this line
+              </StyledWarningMessage>
+            )}
+          </FormItem>
+        )}
       {!hideUsername && (
         <FormItem label="Username" fieldName="username" errors={errors}>
           <FormInput

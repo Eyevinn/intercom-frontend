@@ -109,18 +109,41 @@ const LineName = styled.div`
 `;
 
 const ProductionSubtext = styled.div`
-  font-size: 1.2rem;
-  color: rgba(255, 255, 255, 0.55);
-  margin-top: 0.2rem;
-  overflow: hidden;
+  position: absolute;
+  top: calc(100% - 0.4rem);
+  left: 0;
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.4);
   white-space: nowrap;
+  overflow: hidden;
   text-overflow: ellipsis;
+  max-width: 100%;
+`;
+
+const LineNameRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 0;
 `;
 
 const LineNameWrapper = styled.div`
+  position: relative;
   flex: 1;
   min-width: 0;
-  overflow: hidden;
+`;
+
+const RoleBadge = styled.span`
+  display: inline-block;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0.3rem;
+  padding: 0.1rem 0.4rem;
 `;
 
 type PresetCardProps = {
@@ -230,7 +253,14 @@ const PresetCard = ({ preset, productions }: PresetCardProps) => {
                 </IconWrapper>
               )}
               <LineNameWrapper>
-                <LineName>{lineName}</LineName>
+                <LineNameRow>
+                  <LineName>{lineName}</LineName>
+                  {call.lineUsedForProgramOutput && (
+                    <RoleBadge>
+                      {call.isProgramUser ? "Audio feed" : "Listener"}
+                    </RoleBadge>
+                  )}
+                </LineNameRow>
                 {productionName && (
                   <ProductionSubtext>{productionName}</ProductionSubtext>
                 )}

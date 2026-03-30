@@ -19,10 +19,12 @@ export function decodeCallsParam(param: string | null): CallRef[] {
   return param.split(",").reduce<CallRef[]>((acc, s) => {
     const parts = s.split(":");
     if (parts.length < 2 || !parts[0] || !parts[1]) return acc;
-    const ref: CallRef = { productionId: parts[0], lineId: parts[1] };
-    if (parts[2] === "l" || parts[2] === "p") {
-      ref.role = parts[2];
-    }
+    const role = parts[2] === "l" || parts[2] === "p" ? parts[2] : undefined;
+    const ref: CallRef = {
+      productionId: parts[0],
+      lineId: parts[1],
+      ...(role ? { role } : {}),
+    };
     acc.push(ref);
     return acc;
   }, []);

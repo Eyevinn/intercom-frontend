@@ -6,7 +6,7 @@ const API_URL =
   `${window.location.origin}/${API_VERSION}`;
 const API_KEY = import.meta.env.VITE_BACKEND_API_KEY;
 
-type TPresetCall = {
+export type TPresetCall = {
   productionId: string;
   lineId: string;
   lineUsedForProgramOutput?: boolean;

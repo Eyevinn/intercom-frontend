@@ -1,5 +1,5 @@
 import { useSyncExternalStore, useCallback } from "react";
-import { TPreset } from "../api/api";
+import { TPreset, TPresetCall } from "../api/api";
 
 const STORAGE_KEY = "openintercom:local-presets";
 
@@ -42,11 +42,7 @@ export const useLocalPresets = () => {
   const presets = loadPresets();
 
   const createPreset = useCallback(
-    (
-      name: string,
-      calls: { productionId: string; lineId: string }[],
-      companionUrl?: string
-    ) => {
+    (name: string, calls: TPresetCall[], companionUrl?: string) => {
       const newPreset: TPreset = {
         _id: `local_${crypto.randomUUID()}`,
         name,
@@ -65,7 +61,7 @@ export const useLocalPresets = () => {
       id: string,
       update: {
         name?: string;
-        calls?: { productionId: string; lineId: string }[];
+        calls?: TPresetCall[];
         companionUrl?: string | null;
       }
     ) => {

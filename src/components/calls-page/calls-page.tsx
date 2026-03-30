@@ -6,12 +6,15 @@ import { useGlobalState } from "../../global-state/context-provider";
 import { useCallList } from "../../hooks/use-call-list";
 import {
   buildCallsUrl,
+  decodeCallsParam,
   parseCompanionParam,
   type CallRef,
 } from "../../utils/call-url";
 import { API } from "../../api/api";
 import { CopyIconWrapper } from "../copy-button/copy-components";
 import { JoinProduction } from "../landing-page/join-production";
+import { useFetchProduction } from "../landing-page/use-fetch-production";
+import { useFetchProductionList } from "../landing-page/use-fetch-production-list";
 import { UserSettingsButton } from "../landing-page/user-settings-button";
 import { isMobile } from "../../bowser";
 import { Modal } from "../modal/modal";
@@ -66,11 +69,57 @@ const CallsContainer = styled.div`
 export const CallsPage = () => {
   const [productionId, setProductionId] = useState<string | null>(null);
   const [addCallActive, setAddCallActive] = useState<boolean>(false);
+
+  // Pre-fetch the selected production eagerly so the line dropdown in the
+  // "Add Line" form renders immediately when the user opens it, rather than
+  // waiting for the full production list to load.
+  const { production: prefetchedProduction } = useFetchProduction(
+    productionId ? Number(productionId) : null
+  );
+
+  // Pre-fetch the full production list unconditionally so both the production
+  // dropdown and the line dropdown are populated immediately when "Add Line" is
+  // clicked, with no loading flicker.
+  const { productions: prefetchedProductionList } = useFetchProductionList({
+    limit: "100",
+    extended: "true",
+  });
+
   const [confirmExitModalOpen, setConfirmExitModalOpen] =
     useState<boolean>(false);
   const [isMasterInputMuted, setIsMasterInputMuted] = useState<boolean>(true);
   const [{ calls, selectedProductionId, websocket, userSettings }, dispatch] =
     useGlobalState();
+
+  // Compute the first production+line not already joined, so the "Add Line"
+  // form defaults to an unjoined line rather than whatever is first in the list.
+  const addCallPreSelected = useMemo(() => {
+    if (!prefetchedProductionList) return undefined;
+
+    const joinedKeys = new Set(
+      Object.values(calls)
+        .map((c) => c.joinProductionOptions)
+        .filter(Boolean)
+        .map((o) => `${o!.productionId}:${o!.lineId}`)
+    );
+
+    const firstUnjoined = prefetchedProductionList.productions
+      .flatMap((prod) =>
+        prod.lines.map((line) => ({
+          preSelectedProductionId: prod.productionId,
+          preSelectedLineId: String(line.id),
+          key: `${prod.productionId}:${line.id}`,
+        }))
+      )
+      .find(({ key }) => !joinedKeys.has(key));
+
+    return firstUnjoined
+      ? {
+          preSelectedProductionId: firstUnjoined.preSelectedProductionId,
+          preSelectedLineId: firstUnjoined.preSelectedLineId,
+        }
+      : undefined;
+  }, [prefetchedProductionList, calls]);
   type PendingProgramLine = {
     productionId: string;
     lineId: string;
@@ -141,16 +190,28 @@ export const CallsPage = () => {
   );
   const callIndexMap = useRef<Record<number, string>>({});
 
-  const presetOrderMap = useMemo(
-    () =>
-      new Map(
-        pendingCallRefs.map((ref, i) => [
-          `${ref.productionId}:${ref.lineId}`,
-          i,
-        ])
-      ),
-    [pendingCallRefs]
+  const currentCallRefs = useMemo(
+    () => decodeCallsParam(new URLSearchParams(search).get("lines")),
+    [search]
   );
+
+  const presetOrderMap = useMemo(() => {
+    const map = new Map(
+      currentCallRefs.map((ref, i) => [`${ref.productionId}:${ref.lineId}`, i])
+    );
+    // Assign stable orders to calls not yet in the URL (e.g. just added via "Add Line")
+    // so they never flash with order=Infinity before the URL catches up.
+    let extra = currentCallRefs.length;
+    Object.values(calls).forEach((c) => {
+      if (!c.joinProductionOptions) return;
+      const key = `${c.joinProductionOptions.productionId}:${c.joinProductionOptions.lineId}`;
+      if (!map.has(key)) {
+        map.set(key, extra);
+        extra += 1;
+      }
+    });
+    return map;
+  }, [currentCallRefs, calls]);
 
   const { shouldReduceVolume } = useSpeakerDetection({
     isProgramOutputAdded,
@@ -332,7 +393,7 @@ export const CallsPage = () => {
 
   const shareCallRefs = pendingCallRefs;
 
-  const orderedPresetCalls = pendingCallRefs.map((ref) => {
+  const orderedPresetCalls = currentCallRefs.map((ref) => {
     const joined = Object.values(calls).find(
       (c) =>
         c.joinProductionOptions?.productionId === ref.productionId &&
@@ -485,10 +546,16 @@ export const CallsPage = () => {
             />
           )}
         <CallsContainer>
-          {addCallActive && productionId && (
+          {addCallActive && (productionId || addCallPreSelected) && (
             <JoinProduction
               customGlobalMute={customGlobalMute}
-              addAdditionalCallId={productionId}
+              addAdditionalCallId={
+                productionId ??
+                addCallPreSelected?.preSelectedProductionId ??
+                ""
+              }
+              prefetchedProduction={prefetchedProduction}
+              prefetchedProductionList={prefetchedProductionList}
               closeAddCallView={() => setAddCallActive(false)}
               className="calls-page"
               hideUsername

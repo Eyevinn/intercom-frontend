@@ -37,10 +37,20 @@ export const ProductionLines = ({
 }: ProductionLinesProps) => {
   return (
     <>
-      {Object.entries(calls).map(
-        ([callId, callState]) =>
-          callId &&
-          callState.joinProductionOptions && (
+      {Object.entries(calls)
+        .sort(([, a], [, b]) => {
+          const keyA = a.joinProductionOptions
+            ? `${a.joinProductionOptions.productionId}:${a.joinProductionOptions.lineId}`
+            : "";
+          const keyB = b.joinProductionOptions
+            ? `${b.joinProductionOptions.productionId}:${b.joinProductionOptions.lineId}`
+            : "";
+          const orderA = callOrderMap?.get(keyA) ?? Infinity;
+          const orderB = callOrderMap?.get(keyB) ?? Infinity;
+          return orderA - orderB;
+        })
+        .map(([callId, callState]) =>
+          callId && callState.joinProductionOptions ? (
             <ProductionLine
               key={callId}
               id={callId}
@@ -60,8 +70,8 @@ export const ProductionLines = ({
                 ) ?? Infinity
               }
             />
-          )
-      )}
+          ) : null
+        )}
     </>
   );
 };
