@@ -522,16 +522,19 @@ export const CallsPage = () => {
         />
       </PageHeader>
       <Container>
-        {isEmpty && pendingCallRefs.length > 0 && userSettings?.username !== undefined && !userSettings.username && (
-          <JoinProduction
-            preSelected={{
-              preSelectedProductionId: pendingCallRefs[0].productionId,
-              preSelectedLineId: pendingCallRefs[0].lineId,
-            }}
-            customGlobalMute={customGlobalMute}
-            updateUserSettings
-          />
-        )}
+        {isEmpty &&
+          pendingCallRefs.length > 0 &&
+          userSettings?.username !== undefined &&
+          !userSettings.username && (
+            <JoinProduction
+              preSelected={{
+                preSelectedProductionId: pendingCallRefs[0].productionId,
+                preSelectedLineId: pendingCallRefs[0].lineId,
+              }}
+              customGlobalMute={customGlobalMute}
+              updateUserSettings
+            />
+          )}
         {isEmpty &&
           !pendingCallRefs.length &&
           paramProductionId &&

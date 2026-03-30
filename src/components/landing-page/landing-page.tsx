@@ -39,7 +39,9 @@ export const LandingPage = ({ setApiError }: { setApiError: () => void }) => {
           />
         )) || (
           <>
-            <UserSettingsButton onClick={() => setShowSettings(!showSettings)} />
+            <UserSettingsButton
+              onClick={() => setShowSettings(!showSettings)}
+            />
             <ProductionsListContainer />
           </>
         ))}
