@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import styled from "@emotion/styled";
-import { TBasicProductionResponse, TPreset } from "../../api/api";
+import { TBasicProductionResponse, TPreset, TPresetCall } from "../../api/api";
 import { usePresetContext } from "../../contexts/preset-context";
 import { CollapsibleItem } from "../shared/collapsible-item";
 import { InfoTooltip } from "../info-tooltip/info-tooltip";
@@ -9,8 +9,10 @@ import {
   EditIcon,
   SaveIcon,
   RemoveIcon,
+  TVIcon,
 } from "../../assets/icons/icon";
 import {
+  IconWrapper,
   Lineblock,
   ParticipantCount,
   ParticipantCountWrapper,
@@ -230,18 +232,19 @@ const LineName = styled.div`
 `;
 
 const ProductionSubtext = styled.div`
-  font-size: 1.2rem;
-  color: rgba(255, 255, 255, 0.55);
-  margin-top: 0.2rem;
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.4);
+  margin-top: -0.3rem;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
 `;
 
 const LineNameWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
   flex: 1;
   min-width: 0;
-  overflow: hidden;
 `;
 
 const ActionBar = styled.div`
@@ -274,6 +277,65 @@ const SpacedAddCallForm = styled(AddLineSectionForm)`
   margin-bottom: 1rem;
 `;
 
+const RoleSelector = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  margin-top: 0.3rem;
+  margin-bottom: 0.3rem;
+`;
+
+const RoleOption = styled.button<{ active: boolean }>`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-size: 1.3rem;
+  font-weight: ${({ active }) => (active ? "600" : "400")};
+  color: ${({ active }) =>
+    active ? "rgba(255,255,255,0.95)" : "rgba(255,255,255,0.45)"};
+  transition: color 0.15s;
+
+  &:hover:not(:disabled) {
+    color: rgba(255, 255, 255, 0.8);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+`;
+
+const RoleDot = styled.span<{ active: boolean }>`
+  position: relative;
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 50%;
+  border: 0.2rem solid
+    ${({ active }) =>
+      active ? "rgba(89, 203, 232, 1)" : "rgba(255,255,255,0.3)"};
+  background: transparent;
+  flex-shrink: 0;
+  transition: border-color 0.15s;
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 0.6rem;
+    height: 0.6rem;
+    border-radius: 50%;
+    background: rgba(89, 203, 232, 1);
+    opacity: ${({ active }) => (active ? 1 : 0)};
+    transition: opacity 0.15s;
+  }
+`;
+
 const isValidHostPort = (input: string): boolean => {
   const pattern = /^([a-zA-Z0-9.-]+|\[[\da-fA-F:]+\])(:\d{1,5})?$/;
   return pattern.test(input);
@@ -286,7 +348,7 @@ type ManagePresetCardProps = {
     id: string,
     update: {
       name?: string;
-      calls?: { productionId: string; lineId: string }[];
+      calls?: TPresetCall[];
       companionUrl?: string | null;
     }
   ) => Promise<void>;
@@ -305,6 +367,7 @@ const ManagePresetCard = ({
   const [updating, setUpdating] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showAddCall, setShowAddCall] = useState(false);
+  const [selectedIsProgramUser, setSelectedIsProgramUser] = useState(false);
 
   // Inline name editing state
   const [isEditingName, setIsEditingName] = useState(false);
@@ -431,6 +494,11 @@ const ManagePresetCard = ({
     (p) => p.productionId === selectedProductionId
   );
 
+  const selectedLine = selectedProduction?.lines.find(
+    (l) => l.id === selectedLineId
+  );
+  const selectedLineIsProgramOutput = !!selectedLine?.programOutputLine;
+
   const handleRemoveCall = async (
     callProductionId: string,
     callLineId: string
@@ -461,9 +529,15 @@ const ManagePresetCard = ({
       return;
     }
 
-    const newCall = {
+    const newCall: TPresetCall = {
       productionId: selectedProductionId,
       lineId: selectedLineId,
+      ...(selectedLineIsProgramOutput
+        ? {
+            lineUsedForProgramOutput: true,
+            isProgramUser: selectedIsProgramUser,
+          }
+        : {}),
     };
     setUpdating(true);
     try {
@@ -481,6 +555,25 @@ const ManagePresetCard = ({
     setSelectedProductionId(e.target.value);
     setSelectedLineId("");
     setAddCallError(null);
+  };
+
+  const handleChangeCallRole = async (
+    callProductionId: string,
+    callLineId: string,
+    isProgramUser: boolean
+  ) => {
+    const updated = preset.calls.map((c) =>
+      c.productionId === callProductionId && c.lineId === callLineId
+        ? { ...c, isProgramUser }
+        : c
+    );
+    setUpdating(true);
+    try {
+      // eslint-disable-next-line no-underscore-dangle
+      await onUpdate(preset._id, { calls: updated });
+    } finally {
+      setUpdating(false);
+    }
   };
 
   const headerContent = (
@@ -562,10 +655,56 @@ const ManagePresetCard = ({
           return (
             // eslint-disable-next-line react/no-array-index-key
             <li key={`${call.productionId}-${call.lineId}-${idx}`}>
-              <Lineblock>
+              <Lineblock isProgramOutput={!!line?.programOutputLine}>
+                {line?.programOutputLine && (
+                  <IconWrapper>
+                    <TVIcon />
+                  </IconWrapper>
+                )}
                 <LineNameWrapper>
                   <LineName>{lineName}</LineName>
                   <ProductionSubtext>{productionName}</ProductionSubtext>
+                  {line?.programOutputLine && (
+                    <RoleSelector>
+                      <RoleOption
+                        type="button"
+                        active={!call.isProgramUser}
+                        disabled={updating}
+                        onClick={() =>
+                          handleChangeCallRole(
+                            call.productionId,
+                            call.lineId,
+                            false
+                          )
+                        }
+                      >
+                        <RoleDot active={!call.isProgramUser} />
+                        Listener
+                      </RoleOption>
+                      <RoleOption
+                        type="button"
+                        active={!!call.isProgramUser}
+                        disabled={updating}
+                        onClick={() =>
+                          handleChangeCallRole(
+                            call.productionId,
+                            call.lineId,
+                            true
+                          )
+                        }
+                      >
+                        <RoleDot active={!!call.isProgramUser} />
+                        Audio feed
+                      </RoleOption>
+                      <InfoTooltip>
+                        <strong>Listener</strong> can hear the audio feed but
+                        cannot talk back.
+                        <br />
+                        <strong>Audio feed</strong> is the source — their audio
+                        is broadcast to all listeners on this line.
+                      </InfoTooltip>
+                    </RoleSelector>
+                  )}
                 </LineNameWrapper>
                 <DeleteButton
                   type="button"
@@ -616,6 +755,7 @@ const ManagePresetCard = ({
               onChange={(e) => {
                 setSelectedLineId(e.target.value);
                 setAddCallError(null);
+                setSelectedIsProgramUser(false);
               }}
               disabled={!selectedProduction}
             >
@@ -627,6 +767,33 @@ const ManagePresetCard = ({
               ))}
             </FullWidthSelect>
           </SpacedRow>
+          {selectedLineIsProgramOutput && (
+            <RoleSelector>
+              <RoleOption
+                type="button"
+                active={!selectedIsProgramUser}
+                onClick={() => setSelectedIsProgramUser(false)}
+              >
+                <RoleDot active={!selectedIsProgramUser} />
+                Listener
+              </RoleOption>
+              <RoleOption
+                type="button"
+                active={selectedIsProgramUser}
+                onClick={() => setSelectedIsProgramUser(true)}
+              >
+                <RoleDot active={selectedIsProgramUser} />
+                Audio feed
+              </RoleOption>
+              <InfoTooltip>
+                <strong>Listener</strong> can hear the audio feed but cannot
+                talk back.
+                <br />
+                <strong>Audio feed</strong> is the source — their audio is
+                broadcast to all listeners on this line.
+              </InfoTooltip>
+            </RoleSelector>
+          )}
           {addCallError && (
             <StyledWarningMessage style={{ marginTop: "0.5rem" }}>
               {addCallError}
@@ -762,7 +929,7 @@ export const ManagePresetsList = ({ productions }: ManagePresetsListProps) => {
       id: string,
       update: {
         name?: string;
-        calls?: { productionId: string; lineId: string }[];
+        calls?: TPresetCall[];
         companionUrl?: string | null;
       }
     ) => {

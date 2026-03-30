@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
-import { TJoinProductionOptions } from "../production-line/types.ts";
+import {
+  TJoinProductionOptions,
+  TProduction,
+} from "../production-line/types.ts";
 import { useNavigateToProduction } from "./use-navigate-to-production.ts";
 import { isMobile } from "../../bowser.ts";
 import { RemoveIcon } from "../../assets/icons/icon.tsx";
@@ -11,6 +14,7 @@ import {
 } from "./join-production-components.ts";
 import { UserSettingsForm } from "../user-settings-form/user-settings-form.tsx";
 import { ResponsiveFormContainer } from "../generic-components.ts";
+import { TListProductionsResponse } from "../../api/api.ts";
 
 type TProps = {
   preSelected?: {
@@ -19,6 +23,8 @@ type TProps = {
   };
   customGlobalMute: string;
   addAdditionalCallId?: string;
+  prefetchedProduction?: TProduction | null;
+  prefetchedProductionList?: TListProductionsResponse;
   closeAddCallView?: () => void;
   className?: string;
   updateUserSettings?: boolean;
@@ -30,6 +36,8 @@ export const JoinProduction = ({
   preSelected,
   customGlobalMute,
   addAdditionalCallId,
+  prefetchedProduction,
+  prefetchedProductionList,
   closeAddCallView,
   className,
   updateUserSettings = false,
@@ -46,7 +54,10 @@ export const JoinProduction = ({
       preSelected?.preSelectedProductionId || addAdditionalCallId || "",
     lineId: preSelected?.preSelectedLineId || undefined,
     username: userSettings?.username,
-    audioinput: userSettings?.audioinput,
+    audioinput:
+      userSettings?.audioinput ??
+      devices.input?.find((d) => d.deviceId === "default")?.deviceId ??
+      devices.input?.[0]?.deviceId,
     audiooutput: userSettings?.audiooutput,
     lineUsedForProgramOutput: false,
   };
@@ -69,16 +80,19 @@ export const JoinProduction = ({
         <UserSettingsForm
           isJoinProduction
           preSelected={preSelected}
+          addAdditionalCallId={addAdditionalCallId}
+          prefetchedProduction={prefetchedProduction}
+          prefetchedProductionList={prefetchedProductionList}
           buttonText="Join"
           defaultValues={defaultValues}
-          isProgramUser={isProgramUser}
-          setIsProgramUser={setIsProgramUser}
           setJoinProductionOptions={setJoinProductionOptions}
           customGlobalMute={customGlobalMute}
           closeAddCallView={closeAddCallView}
           updateUserSettings={updateUserSettings}
           hideUsername={hideUsername}
           hideDevices={hideDevices}
+          isProgramUser={isProgramUser}
+          setIsProgramUser={setIsProgramUser}
         />
       )}
     </ResponsiveFormContainer>

@@ -48,7 +48,7 @@ import { PageHeader } from "../page-layout/page-header.tsx";
 
 type PresetFormValues = {
   presetName: string;
-  calls: { productionId: string; lineId: string }[];
+  calls: { productionId: string; lineId: string; isProgramUser?: boolean }[];
 };
 
 const VisibilityRow = styled.div`
@@ -123,6 +123,13 @@ const RadioDot = styled.span<{ active: boolean }>`
     opacity: ${({ active }) => (active ? 1 : 0)};
     transition: opacity 0.15s;
   }
+`;
+
+const RoleSelector = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-top: 0.8rem;
 `;
 
 const isValidHostPort = (input: string): boolean => {
@@ -294,7 +301,7 @@ export const CreateProductionPage = () => {
     mode: "onChange",
     defaultValues: {
       presetName: "",
-      calls: [{ productionId: "", lineId: "" }],
+      calls: [{ productionId: "", lineId: "", isProgramUser: undefined }],
     },
   });
 
@@ -365,23 +372,35 @@ export const CreateProductionPage = () => {
     presetData
   ) => {
     setPresetLoading(true);
+    const callsToSave = presetData.calls.map((call) => {
+      const prod = productionList?.productions.find(
+        (p) => p.productionId === call.productionId
+      );
+      const line = prod?.lines.find((l) => l.id === call.lineId);
+      return {
+        productionId: call.productionId,
+        lineId: call.lineId,
+        ...(line?.programOutputLine
+          ? {
+              lineUsedForProgramOutput: true,
+              isProgramUser: !!call.isProgramUser,
+            }
+          : {}),
+      };
+    });
     try {
       if (isLocalPreset) {
-        createLocalPreset(
-          presetData.presetName,
-          presetData.calls,
-          companionUrl
-        );
+        createLocalPreset(presetData.presetName, callsToSave, companionUrl);
       } else {
         await createPublicPreset({
           name: presetData.presetName,
-          calls: presetData.calls,
+          calls: callsToSave,
           companionUrl,
         });
       }
       resetPreset({
         presetName: "",
-        calls: [{ productionId: "", lineId: "" }],
+        calls: [{ productionId: "", lineId: "", isProgramUser: undefined }],
       });
       setShowPresetConfirmation(true);
       setTimeout(() => setShowPresetConfirmation(false), 4000);
@@ -678,11 +697,67 @@ export const CreateProductionPage = () => {
             name={`calls.${index}.lineId`}
             as={<StyledWarningMessage style={{ marginTop: "0.5rem" }} />}
           />
+          {(() => {
+            const selectedProd = productionList?.productions.find(
+              (p) => p.productionId === presetCalls?.[index]?.productionId
+            );
+            const selectedLine = selectedProd?.lines.find(
+              (l) => l.id === presetCalls?.[index]?.lineId
+            );
+            if (!selectedLine?.programOutputLine) return null;
+            return (
+              <Controller
+                name={`calls.${index}.isProgramUser`}
+                control={presetControl}
+                rules={{
+                  validate: (v) =>
+                    v !== undefined ||
+                    "Please select a role for this program output line",
+                }}
+                render={({ field: roleField }) => (
+                  <>
+                    <RoleSelector>
+                      <RadioOption
+                        type="button"
+                        active={roleField.value === false}
+                        onClick={() => roleField.onChange(false)}
+                      >
+                        <RadioDot active={roleField.value === false} />
+                        Listener
+                      </RadioOption>
+                      <RadioOption
+                        type="button"
+                        active={roleField.value === true}
+                        onClick={() => roleField.onChange(true)}
+                      >
+                        <RadioDot active={roleField.value === true} />
+                        Audio feed
+                      </RadioOption>
+                      <InfoTooltip>
+                        <strong>Listener</strong> can hear the audio feed but
+                        cannot talk back.
+                        <br />
+                        <strong>Audio feed</strong> is the source — their audio
+                        is broadcast to all listeners on this line.
+                      </InfoTooltip>
+                    </RoleSelector>
+                    {presetErrors.calls?.[index]?.isProgramUser && (
+                      <StyledWarningMessage style={{ marginTop: "0.5rem" }}>
+                        {presetErrors.calls[index].isProgramUser?.message}
+                      </StyledWarningMessage>
+                    )}
+                  </>
+                )}
+              />
+            );
+          })()}
         </LineCard>
       ))}
       <AddLineCard
         type="button"
-        onClick={() => appendCall({ productionId: "", lineId: "" })}
+        onClick={() =>
+          appendCall({ productionId: "", lineId: "", isProgramUser: undefined })
+        }
         disabled={hasDuplicateCall}
       >
         <AddIcon />

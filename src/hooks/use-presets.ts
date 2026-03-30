@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { API, TPreset } from "../api/api";
+import { API, TPreset, TPresetCall } from "../api/api";
 import { useGlobalState } from "../global-state/context-provider";
 import { useLocalPresets } from "./use-local-presets";
 
@@ -51,7 +51,7 @@ export const usePresets = () => {
       id: string,
       update: {
         name?: string;
-        calls?: { productionId: string; lineId: string }[];
+        calls?: TPresetCall[];
         companionUrl?: string | null;
       }
     ) => {
@@ -69,11 +69,7 @@ export const usePresets = () => {
   );
 
   const createLocalPreset = useCallback(
-    (
-      name: string,
-      calls: { productionId: string; lineId: string }[],
-      companionUrl?: string
-    ) => {
+    (name: string, calls: TPresetCall[], companionUrl?: string) => {
       localCreatePreset(name, calls, companionUrl);
     },
     [localCreatePreset]
@@ -82,12 +78,7 @@ export const usePresets = () => {
   const createPublicPreset = useCallback(
     async (options: {
       name: string;
-      calls: {
-        productionId: string;
-        lineId: string;
-        lineUsedForProgramOutput?: boolean;
-        lineName?: string;
-      }[];
+      calls: TPresetCall[];
       companionUrl?: string;
     }): Promise<void> => {
       await API.createPreset(options);

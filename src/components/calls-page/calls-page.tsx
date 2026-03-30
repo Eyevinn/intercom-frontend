@@ -6,12 +6,15 @@ import { useGlobalState } from "../../global-state/context-provider";
 import { useCallList } from "../../hooks/use-call-list";
 import {
   buildCallsUrl,
+  decodeCallsParam,
   parseCompanionParam,
   type CallRef,
 } from "../../utils/call-url";
 import { API } from "../../api/api";
 import { CopyIconWrapper } from "../copy-button/copy-components";
 import { JoinProduction } from "../landing-page/join-production";
+import { useFetchProduction } from "../landing-page/use-fetch-production";
+import { useFetchProductionList } from "../landing-page/use-fetch-production-list";
 import { UserSettingsButton } from "../landing-page/user-settings-button";
 import { isMobile } from "../../bowser";
 import { Modal } from "../modal/modal";
@@ -66,11 +69,57 @@ const CallsContainer = styled.div`
 export const CallsPage = () => {
   const [productionId, setProductionId] = useState<string | null>(null);
   const [addCallActive, setAddCallActive] = useState<boolean>(false);
+
+  // Pre-fetch the selected production eagerly so the line dropdown in the
+  // "Add Line" form renders immediately when the user opens it, rather than
+  // waiting for the full production list to load.
+  const { production: prefetchedProduction } = useFetchProduction(
+    productionId ? Number(productionId) : null
+  );
+
+  // Pre-fetch the full production list unconditionally so both the production
+  // dropdown and the line dropdown are populated immediately when "Add Line" is
+  // clicked, with no loading flicker.
+  const { productions: prefetchedProductionList } = useFetchProductionList({
+    limit: "100",
+    extended: "true",
+  });
+
   const [confirmExitModalOpen, setConfirmExitModalOpen] =
     useState<boolean>(false);
   const [isMasterInputMuted, setIsMasterInputMuted] = useState<boolean>(true);
   const [{ calls, selectedProductionId, websocket, userSettings }, dispatch] =
     useGlobalState();
+
+  // Compute the first production+line not already joined, so the "Add Line"
+  // form defaults to an unjoined line rather than whatever is first in the list.
+  const addCallPreSelected = useMemo(() => {
+    if (!prefetchedProductionList) return undefined;
+
+    const joinedKeys = new Set(
+      Object.values(calls)
+        .map((c) => c.joinProductionOptions)
+        .filter(Boolean)
+        .map((o) => `${o!.productionId}:${o!.lineId}`)
+    );
+
+    const firstUnjoined = prefetchedProductionList.productions
+      .flatMap((prod) =>
+        prod.lines.map((line) => ({
+          preSelectedProductionId: prod.productionId,
+          preSelectedLineId: String(line.id),
+          key: `${prod.productionId}:${line.id}`,
+        }))
+      )
+      .find(({ key }) => !joinedKeys.has(key));
+
+    return firstUnjoined
+      ? {
+          preSelectedProductionId: firstUnjoined.preSelectedProductionId,
+          preSelectedLineId: firstUnjoined.preSelectedLineId,
+        }
+      : undefined;
+  }, [prefetchedProductionList, calls]);
   type PendingProgramLine = {
     productionId: string;
     lineId: string;
@@ -102,12 +151,17 @@ export const CallsPage = () => {
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const { initiateProductionCall } = useInitiateProductionCall({ dispatch });
   const autoJoinTriggeredRef = useRef(false);
+  const pendingProgramKeysRef = useRef<Set<string>>(new Set());
 
   const { productionId: paramProductionId, lineId: paramLineId } = useParams();
   const { search } = useLocation();
   const autoCompanionUrl = parseCompanionParam(
     new URLSearchParams(search).get("companion")
   );
+  const [manualCompanionUrl, setManualCompanionUrl] = useState<
+    string | undefined
+  >(undefined);
+  const activeCompanionUrl = manualCompanionUrl ?? autoCompanionUrl;
 
   const { navigate, pendingCallRefs } = useCallsNavigation({
     isEmpty: Object.values(calls).length === 0,
@@ -136,16 +190,28 @@ export const CallsPage = () => {
   );
   const callIndexMap = useRef<Record<number, string>>({});
 
-  const presetOrderMap = useMemo(
-    () =>
-      new Map(
-        pendingCallRefs.map((ref, i) => [
-          `${ref.productionId}:${ref.lineId}`,
-          i,
-        ])
-      ),
-    [pendingCallRefs]
+  const currentCallRefs = useMemo(
+    () => decodeCallsParam(new URLSearchParams(search).get("lines")),
+    [search]
   );
+
+  const presetOrderMap = useMemo(() => {
+    const map = new Map(
+      currentCallRefs.map((ref, i) => [`${ref.productionId}:${ref.lineId}`, i])
+    );
+    // Assign stable orders to calls not yet in the URL (e.g. just added via "Add Line")
+    // so they never flash with order=Infinity before the URL catches up.
+    let extra = currentCallRefs.length;
+    Object.values(calls).forEach((c) => {
+      if (!c.joinProductionOptions) return;
+      const key = `${c.joinProductionOptions.productionId}:${c.joinProductionOptions.lineId}`;
+      if (!map.has(key)) {
+        map.set(key, extra);
+        extra += 1;
+      }
+    });
+    return map;
+  }, [currentCallRefs, calls]);
 
   const { shouldReduceVolume } = useSpeakerDetection({
     isProgramOutputAdded,
@@ -159,10 +225,21 @@ export const CallsPage = () => {
 
   useEffect(() => {
     callIndexMap.current = {};
-    Object.keys(calls).forEach((callId, i) => {
+    const sorted = Object.entries(calls).sort(([, a], [, b]) => {
+      const keyA = a.joinProductionOptions
+        ? `${a.joinProductionOptions.productionId}:${a.joinProductionOptions.lineId}`
+        : "";
+      const keyB = b.joinProductionOptions
+        ? `${b.joinProductionOptions.productionId}:${b.joinProductionOptions.lineId}`
+        : "";
+      const orderA = presetOrderMap.get(keyA) ?? Infinity;
+      const orderB = presetOrderMap.get(keyB) ?? Infinity;
+      return orderA - orderB;
+    });
+    sorted.forEach(([callId], i) => {
       callIndexMap.current[i + 1] = callId;
     });
-  }, [calls]);
+  }, [calls, presetOrderMap]);
 
   useEffect(() => {
     if (splitStartedRef.current) return;
@@ -206,7 +283,7 @@ export const CallsPage = () => {
           );
           if (!prod || !line) return;
           validRefs.push(ref);
-          if (line.programOutputLine === true) {
+          if (line.programOutputLine === true && !ref.role) {
             program.push({
               productionId: ref.productionId,
               lineId: ref.lineId,
@@ -218,6 +295,9 @@ export const CallsPage = () => {
         });
 
         if (program.length > 0) {
+          pendingProgramKeysRef.current = new Set(
+            program.map((p) => `${p.productionId}:${p.lineId}`)
+          );
           setPendingProgramLines(program);
         }
 
@@ -245,9 +325,7 @@ export const CallsPage = () => {
 
     autoJoinTriggeredRef.current = true;
 
-    const programKeys = new Set(
-      pendingProgramLines.map((p) => `${p.productionId}:${p.lineId}`)
-    );
+    const programKeys = pendingProgramKeysRef.current;
 
     const existingKeys = new Set(
       Object.values(calls)
@@ -270,8 +348,8 @@ export const CallsPage = () => {
               lineId: ref.lineId,
               username: userSettings.username!,
               audioinput: userSettings.audioinput,
-              lineUsedForProgramOutput: false,
-              isProgramUser: false,
+              lineUsedForProgramOutput: ref.role === "l" || ref.role === "p",
+              isProgramUser: ref.role === "p",
             },
             audiooutput: userSettings.audiooutput,
           },
@@ -280,7 +358,6 @@ export const CallsPage = () => {
       });
   }, [
     validatedCallRefs,
-    pendingProgramLines,
     userSettings,
     calls,
     initiateProductionCall,
@@ -305,13 +382,18 @@ export const CallsPage = () => {
     customKey: customGlobalMute,
   });
 
+  const handleCompanionUrlChange = (url: string | undefined) => {
+    setManualCompanionUrl(url);
+    navigate(buildCallsUrl(currentCallRefs, url), { replace: true });
+  };
+
   const handleShare = () => {
     setShareModalOpen(true);
   };
 
   const shareCallRefs = pendingCallRefs;
 
-  const orderedPresetCalls = pendingCallRefs.map((ref) => {
+  const orderedPresetCalls = currentCallRefs.map((ref) => {
     const joined = Object.values(calls).find(
       (c) =>
         c.joinProductionOptions?.productionId === ref.productionId &&
@@ -323,7 +405,10 @@ export const CallsPage = () => {
         productionId: ref.productionId,
         lineId: ref.lineId,
         ...(o.lineUsedForProgramOutput
-          ? { lineUsedForProgramOutput: true as const }
+          ? {
+              lineUsedForProgramOutput: true as const,
+              isProgramUser: !!o.isProgramUser,
+            }
           : {}),
         ...(o.lineName ? { lineName: o.lineName } : {}),
       };
@@ -335,6 +420,7 @@ export const CallsPage = () => {
       productionId: ref.productionId,
       lineId: ref.lineId,
       lineUsedForProgramOutput: true as const,
+      isProgramUser: ref.role === "p",
       ...(pending?.lineName ? { lineName: pending.lineName } : {}),
     };
   });
@@ -412,7 +498,7 @@ export const CallsPage = () => {
         {shareModalOpen && (
           <ShareUrlModal
             path={buildCallsUrl(shareCallRefs)}
-            companionUrl={autoCompanionUrl}
+            companionUrl={activeCompanionUrl}
             title="Share Current Configuration"
             onClose={() => setShareModalOpen(false)}
           />
@@ -431,6 +517,7 @@ export const CallsPage = () => {
           sendCallsStateUpdate={sendCallsStateUpdate}
           resetLastSentCallsState={resetLastSentCallsState}
           autoCompanionUrl={autoCompanionUrl}
+          onCompanionUrlChange={handleCompanionUrlChange}
           orderedPresetCalls={orderedPresetCalls}
         />
       </PageHeader>
@@ -459,38 +546,59 @@ export const CallsPage = () => {
             />
           )}
         <CallsContainer>
-          {addCallActive && productionId && (
+          {addCallActive && (productionId || addCallPreSelected) && (
             <JoinProduction
               customGlobalMute={customGlobalMute}
-              addAdditionalCallId={productionId}
+              addAdditionalCallId={
+                productionId ??
+                addCallPreSelected?.preSelectedProductionId ??
+                ""
+              }
+              prefetchedProduction={prefetchedProduction}
+              prefetchedProductionList={prefetchedProductionList}
               closeAddCallView={() => setAddCallActive(false)}
               className="calls-page"
               hideUsername
               hideDevices
             />
           )}
-          {pendingProgramLines.map((ref) => (
-            <ProgramLineJoinCard
-              key={`${ref.productionId}:${ref.lineId}`}
-              productionId={ref.productionId}
-              lineId={ref.lineId}
-              lineName={ref.lineName}
-              productionName={ref.productionName}
-              presetOrder={ref.presetOrder}
-              customGlobalMute={customGlobalMute}
-              onJoined={() =>
-                setPendingProgramLines((prev) =>
-                  prev.filter(
-                    (r) =>
-                      !(
-                        r.productionId === ref.productionId &&
-                        r.lineId === ref.lineId
-                      )
+          {!!(
+            userSettings &&
+            userSettings.username &&
+            (userSettings.audioinput || userSettings.audiooutput)
+          ) &&
+            pendingProgramLines
+              .filter(
+                (ref) =>
+                  !Object.values(calls).some(
+                    (c) =>
+                      c.joinProductionOptions?.productionId ===
+                        ref.productionId &&
+                      c.joinProductionOptions?.lineId === ref.lineId
                   )
-                )
-              }
-            />
-          ))}
+              )
+              .map((ref) => (
+                <ProgramLineJoinCard
+                  key={`${ref.productionId}:${ref.lineId}`}
+                  productionId={ref.productionId}
+                  lineId={ref.lineId}
+                  lineName={ref.lineName}
+                  productionName={ref.productionName}
+                  presetOrder={ref.presetOrder}
+                  customGlobalMute={customGlobalMute}
+                  onJoined={() =>
+                    setPendingProgramLines((prev) =>
+                      prev.filter(
+                        (r) =>
+                          !(
+                            r.productionId === ref.productionId &&
+                            r.lineId === ref.lineId
+                          )
+                      )
+                    )
+                  }
+                />
+              ))}
           <ProductionLines
             isSettingGlobalMute={isSettingGlobalMute}
             setAddCallActive={setAddCallActive}

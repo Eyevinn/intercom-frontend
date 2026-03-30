@@ -132,6 +132,7 @@ type SavePresetModalProps = {
     productionId: string;
     lineId: string;
     lineUsedForProgramOutput?: boolean;
+    isProgramUser?: boolean;
     lineName?: string;
   }[];
 };
@@ -193,7 +194,9 @@ export const SavePresetModal = ({
     const presetCalls = (orderedPresetCalls ?? []).map((r) => ({
       productionId: r.productionId,
       lineId: r.lineId,
-      ...(r.lineUsedForProgramOutput ? { lineUsedForProgramOutput: true } : {}),
+      ...(r.lineUsedForProgramOutput
+        ? { lineUsedForProgramOutput: true, isProgramUser: !!r.isProgramUser }
+        : {}),
       ...(r.lineName ? { lineName: r.lineName } : {}),
     }));
     try {

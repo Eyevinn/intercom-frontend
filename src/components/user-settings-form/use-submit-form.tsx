@@ -46,10 +46,15 @@ export const useSubmitForm = ({
         (line) => line.id === payload.lineId
       );
 
+      const resolvedAudioInput =
+        payload?.audioinput && payload.audioinput !== "no-device"
+          ? payload.audioinput
+          : (userSettings?.audioinput ?? "default");
+
       const options: TJoinProductionOptions = {
         ...payload,
         username: payload.username || userSettings?.username || "",
-        audioinput: payload?.audioinput || userSettings?.audioinput,
+        audioinput: resolvedAudioInput,
         lineUsedForProgramOutput: selectedLine?.programOutputLine || false,
         isProgramUser: isProgramUser || false,
         lineName: selectedLineName || selectedLine?.name,

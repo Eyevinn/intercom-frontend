@@ -11,6 +11,7 @@ export type CallData = {
   isProgramOutputLine: boolean;
   isProgramUser: boolean;
   isSomeoneSpeaking: boolean;
+  presetOrder?: number;
 };
 
 type UseCallListProps = {
@@ -31,9 +32,19 @@ export function useCallList({
   const numberOfCallsRef = useRef(numberOfCalls);
   const hasRegisteredCallRef = useRef(false);
 
+  const sortedEntries = useCallback(() => {
+    const entries = Object.entries(callLineStates.current);
+    return [...entries].sort(([, a], [, b]) => {
+      if (a.presetOrder !== undefined && b.presetOrder !== undefined) {
+        return a.presetOrder - b.presetOrder;
+      }
+      return 0;
+    });
+  }, []);
+
   const sendCallsStateUpdate = useCallback(
     (force = false) => {
-      const entries = Object.entries(callLineStates.current);
+      const entries = sortedEntries();
       if (entries.length === 0) return;
 
       const callsPayload = entries.map(([callId, state], index) => ({
@@ -60,7 +71,7 @@ export function useCallList({
         lastSentCallsState.current = serializedCalls;
       }
     },
-    [websocket]
+    [websocket, sortedEntries]
   );
 
   useEffect(() => {
@@ -104,7 +115,7 @@ export function useCallList({
 
       if (!hasChanged) return;
 
-      const entries = Object.entries(callLineStates.current);
+      const entries = sortedEntries();
       const index = entries.findIndex(([id]) => id === callId) + 1;
 
       if (
@@ -122,7 +133,7 @@ export function useCallList({
         );
       }
     },
-    [websocket]
+    [websocket, sortedEntries]
   );
 
   const deregisterCall = useCallback((callId: string) => {
