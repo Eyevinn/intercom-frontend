@@ -66,12 +66,10 @@ export const useSubmitForm = ({
         audiooutput: payload.audiooutput || userSettings?.audiooutput,
       };
 
-      if (!selectedLine?.programOutputLine) {
-        initiateProductionCall({
-          payload: callPayload,
-          customGlobalMute,
-        });
-      }
+      initiateProductionCall({
+        payload: callPayload,
+        customGlobalMute,
+      });
 
       if (closeAddCallView) {
         closeAddCallView();

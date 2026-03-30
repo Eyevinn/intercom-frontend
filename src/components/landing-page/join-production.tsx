@@ -38,6 +38,7 @@ export const JoinProduction = ({
 }: TProps) => {
   const [joinProductionOptions, setJoinProductionOptions] =
     useState<TJoinProductionOptions | null>(null);
+  const [isProgramUser, setIsProgramUser] = useState(false);
   const [{ devices, userSettings }] = useGlobalState();
 
   const defaultValues = {
@@ -79,6 +80,8 @@ export const JoinProduction = ({
           updateUserSettings={updateUserSettings}
           hideUsername={hideUsername}
           hideDevices={hideDevices}
+          isProgramUser={isProgramUser}
+          setIsProgramUser={setIsProgramUser}
         />
       )}
     </ResponsiveFormContainer>

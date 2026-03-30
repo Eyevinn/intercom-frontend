@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Dispatch, SetStateAction } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { isBrowserFirefox, isBrowserSafari } from "../../bowser";
 import { useGlobalState } from "../../global-state/context-provider";
@@ -13,7 +13,11 @@ import {
   SectionTitle,
   StyledWarningMessage,
 } from "../form-elements/form-elements";
-import { FetchErrorMessage } from "../landing-page/join-production-components";
+import {
+  CheckboxWrapper,
+  FetchErrorMessage,
+} from "../landing-page/join-production-components";
+import { Checkbox } from "../checkbox/checkbox";
 import { TJoinProductionOptions, TProduction } from "../production-line/types";
 import { ReloadDevicesButton } from "../reload-devices-button.tsx/reload-devices-button";
 import { TUserSettings } from "../user-settings/types";
@@ -47,6 +51,8 @@ export const UserSettingsForm = ({
   needsConfirmation,
   hideUsername,
   hideDevices,
+  isProgramUser,
+  setIsProgramUser,
 }: {
   isJoinProduction?: boolean;
   preSelected?: {
@@ -66,10 +72,14 @@ export const UserSettingsForm = ({
   needsConfirmation?: boolean;
   hideUsername?: boolean;
   hideDevices?: boolean;
+  isProgramUser?: boolean;
+  setIsProgramUser?: Dispatch<SetStateAction<boolean>>;
 }) => {
   const [production, setProduction] = useState<TProduction | null>(null);
   const [confirmModalOpen, setConfirmModalOpen] = useState<boolean>(false);
   const [selectedLineName, setSelectedLineName] = useState<string>("");
+  const [isProgramOutputLine, setIsProgramOutputLine] =
+    useState<boolean>(false);
   const {
     formState: { errors, isValid },
     register,
@@ -110,7 +120,7 @@ export const UserSettingsForm = ({
   const { onSubmit } = useSubmitForm({
     isJoinProduction,
     production,
-    isProgramUser: false,
+    isProgramUser: isProgramUser || false,
     setJoinProductionOptions,
     customGlobalMute,
     closeAddCallView,
@@ -127,8 +137,12 @@ export const UserSettingsForm = ({
         (line) => line.id.toString() === selectedLineId
       );
       setSelectedLineName(selectedLine?.name ?? "");
+      setIsProgramOutputLine(!!selectedLine?.programOutputLine);
+      if (!selectedLine?.programOutputLine) {
+        setIsProgramUser?.(false);
+      }
     }
-  }, [production, selectedLineId, isJoinProduction]);
+  }, [production, selectedLineId, isJoinProduction, setIsProgramUser]);
 
   // Update selected line id when a new production is fetched
   useEffect(() => {
@@ -326,6 +340,20 @@ export const UserSettingsForm = ({
             </FormItem>
           )}
         </>
+      )}
+      {isProgramOutputLine && isJoinProduction && (
+        <CheckboxWrapper>
+          <Checkbox
+            label="Listener"
+            checked={!isProgramUser}
+            onChange={() => setIsProgramUser?.(false)}
+          />
+          <Checkbox
+            label="Audio feed"
+            checked={!!isProgramUser}
+            onChange={() => setIsProgramUser?.(true)}
+          />
+        </CheckboxWrapper>
       )}
       <ButtonWrapper>
         <SubmitButton
