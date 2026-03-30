@@ -13,12 +13,6 @@ export const useLocalUserSettings = ({
   dispatch,
 }: TUseLocalUserSettings) => {
   const { readFromStorage, removeFromStorage } = useStorage();
-  useEffect(() => {
-    dispatch({
-      type: "UPDATE_USER_SETTINGS",
-      payload: { username: readFromStorage("username") || "" },
-    });
-  }, [dispatch, readFromStorage]);
 
   useEffect(() => {
     if (devices.input || devices.output) {
