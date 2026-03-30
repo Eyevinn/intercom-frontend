@@ -107,6 +107,13 @@ export const UserSettingsForm = ({
     },
   });
 
+  // Extract stable primitive to avoid re-running effects when the defaultValues
+  // object reference changes on every parent render.
+  const defaultProductionId =
+    defaultValues && "productionId" in defaultValues
+      ? (defaultValues as FormValues).productionId
+      : undefined;
+
   const productionListFilter: GetProductionListFilter = {
     limit: "100",
     extended: "true",
@@ -199,20 +206,20 @@ export const UserSettingsForm = ({
   }, [preSelected, production, calls, setValue, isJoinProduction]);
 
   useEffect(() => {
-    if (defaultValues && "productionId" in defaultValues) {
-      setValue("productionId", defaultValues.productionId);
+    if (defaultProductionId !== undefined) {
+      setValue("productionId", defaultProductionId);
     }
-  }, [defaultValues, setValue]);
+  }, [defaultProductionId, setValue]);
 
   useEffect(() => {
-    if (defaultValues && "productionId" in defaultValues && productions) {
+    if (defaultProductionId !== undefined && productions) {
       setProduction(
         productions?.productions.find(
-          (p) => p.productionId === defaultValues.productionId
+          (p) => p.productionId === defaultProductionId
         ) || null
       );
     }
-  }, [defaultValues, productions]);
+  }, [defaultProductionId, productions]);
 
   // If devices have been enumerated and none are available, set to "no-device".
   // Only do this when devices.input is a non-null empty array (i.e. enumeration

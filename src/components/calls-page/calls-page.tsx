@@ -522,7 +522,7 @@ export const CallsPage = () => {
         />
       </PageHeader>
       <Container>
-        {isEmpty && pendingCallRefs.length > 0 && !userSettings?.username && (
+        {isEmpty && pendingCallRefs.length > 0 && userSettings?.username !== undefined && !userSettings.username && (
           <JoinProduction
             preSelected={{
               preSelectedProductionId: pendingCallRefs[0].productionId,
