@@ -76,11 +76,32 @@ export const useCallsNavigation = ({
       new URLSearchParams(window.location.search).get("lines")
     );
 
-    // Keep calls that are currently in the URL in their current order
-    const orderedRefs = currentUrlRefs.filter((r) => {
-      const key = `${r.productionId}:${r.lineId}`;
-      return joinedKeys.has(key) || programKeys.has(key);
-    });
+    // Keep calls that are currently in the URL in their current order,
+    // and inject the role when the call is joined with a program output line.
+    const orderedRefs = currentUrlRefs
+      .filter((r) => {
+        const key = `${r.productionId}:${r.lineId}`;
+        return joinedKeys.has(key) || programKeys.has(key);
+      })
+      .map((r) => {
+        if (r.role) return r;
+        const key = `${r.productionId}:${r.lineId}`;
+        const joined = Object.values(calls ?? {}).find(
+          (c) =>
+            c.joinProductionOptions &&
+            `${c.joinProductionOptions.productionId}:${c.joinProductionOptions.lineId}` ===
+              key
+        );
+        if (joined?.joinProductionOptions?.lineUsedForProgramOutput) {
+          return {
+            ...r,
+            role: (joined.joinProductionOptions.isProgramUser ? "p" : "l") as
+              | "l"
+              | "p",
+          };
+        }
+        return r;
+      });
 
     // Append any joined calls not present in the current URL (e.g. added via "Add Call")
     const currentKeys = new Set(
