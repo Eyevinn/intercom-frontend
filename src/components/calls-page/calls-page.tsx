@@ -384,7 +384,7 @@ export const CallsPage = () => {
 
   const handleCompanionUrlChange = (url: string | undefined) => {
     setManualCompanionUrl(url);
-    navigate(buildCallsUrl(pendingCallRefs, url), { replace: true });
+    navigate(buildCallsUrl(currentCallRefs, url), { replace: true });
   };
 
   const handleShare = () => {

@@ -168,6 +168,7 @@ export const ConnectToWSButton = ({
     isManualConnectRef.current = false;
     setIsConnecting(true);
     const url = autoCompanionUrl;
+    connectingUrlRef.current = url;
     const id = window.setTimeout(() => {
       autoConnectTimerFiredRef.current = true;
       wsConnectRef.current(url);

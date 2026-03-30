@@ -132,20 +132,26 @@ describe("useCallsNavigation", () => {
 
   describe("companion URL preservation", () => {
     it("preserves the companion query param when rebuilding the URL", async () => {
-      // URL has line 10 + companion, but no companion in window.location yet —
-      // simulates the moment a second call joins and the hook rebuilds the URL.
-      mockSearchParams = new URLSearchParams(
-        "lines=1:10&companion=localhost:9000"
-      );
-      // window.location only has the old URL without the new call — triggers a navigate
+      // Simulate the state after handleCompanionUrlChange has already written
+      // ?companion= into window.location (the live URL) but a calls-state change
+      // also fires the URL-sync effect.  The effect must read from window.location
+      // (not from the React searchParams snapshot) so it does not strip the param.
+      mockSearchParams = new URLSearchParams("lines=1:10");
+      // window.location already contains the companion param — the source of truth
       Object.defineProperty(window, "location", {
-        value: { pathname: "/lines", search: "?lines=1:10" },
+        value: {
+          pathname: "/lines",
+          search: "?lines=1:10&companion=localhost:9000",
+        },
         writable: true,
       });
 
       const calls = {
         "call-a": {
           joinProductionOptions: { productionId: "1", lineId: "10" },
+        },
+        "call-b": {
+          joinProductionOptions: { productionId: "1", lineId: "20" },
         },
       };
 
@@ -163,6 +169,53 @@ describe("useCallsNavigation", () => {
       expect(navigatedUrl).toContain("companion=localhost:9000");
 
       rerender();
+    });
+
+    it("does not strip the companion param added by handleCompanionUrlChange when calls state changes shortly after", async () => {
+      // This is the exact bug scenario: the user connects WebSocket, which calls
+      // navigate("?lines=1:10&companion=host:9000") via handleCompanionUrlChange.
+      // Before the next render cycle the calls-state effect fires.  It must read
+      // the companion from window.location (already updated) rather than from the
+      // stale React searchParams (which still lacks the companion param).
+      mockSearchParams = new URLSearchParams("lines=1:10"); // stale — no companion yet
+      Object.defineProperty(window, "location", {
+        value: {
+          pathname: "/lines",
+          search: "?lines=1:10&companion=host:9000",
+        },
+        writable: true,
+      });
+
+      const calls = {
+        "call-a": {
+          joinProductionOptions: { productionId: "1", lineId: "10" },
+        },
+      };
+
+      renderHook(() =>
+        useCallsNavigation({
+          isEmpty: false,
+          calls,
+          pendingProgramLineRefs: [],
+        })
+      );
+
+      await act(async () => {});
+
+      // The URL already matches window.location so no navigate should be called,
+      // but if it is (e.g. due to an extra call), it must still carry the companion.
+      const navigatedUrl: string = mockNavigate.mock.calls[0]?.[0] ?? "";
+      if (navigatedUrl) {
+        expect(navigatedUrl).toContain("companion=host:9000");
+      }
+      // The companion param must not have been stripped by a navigate call
+      const strippedCalls = mockNavigate.mock.calls.filter(
+        (args: unknown[]) => {
+          const url = args[0] as string | undefined;
+          return url && !url.includes("companion");
+        }
+      );
+      expect(strippedCalls).toHaveLength(0);
     });
   });
 
