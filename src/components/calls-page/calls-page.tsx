@@ -391,7 +391,7 @@ export const CallsPage = () => {
     setShareModalOpen(true);
   };
 
-  const shareCallRefs = pendingCallRefs;
+  const shareCallRefs = currentCallRefs;
 
   const orderedPresetCalls = currentCallRefs.map((ref) => {
     const joined = Object.values(calls).find(
