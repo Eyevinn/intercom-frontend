@@ -64,7 +64,6 @@ export const ExpandableSection = styled.div`
   display: grid;
   padding: 0 2rem;
   grid-template-rows: 0fr;
-  transition: grid-template-rows 0.3s ease-out;
 
   &.expanded {
     grid-template-rows: 1fr;

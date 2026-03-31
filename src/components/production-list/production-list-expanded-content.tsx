@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { TBasicProductionResponse, TPreset } from "../../api/api";
-import { AudioFeedModal } from "../audio-feed-modal/audio-feed-modal";
 import {
   DeleteButton,
   SpinnerWrapper,
@@ -36,9 +35,6 @@ export const ProductionListExpandedContent = ({
 }: ExpandedContentProps) => {
   const [editNameOpen, setEditNameOpen] = useState<boolean>(false);
   const [{ userSettings }, dispatch] = useGlobalState();
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [modalLineId, setModalLineId] = useState<string | null>(null);
-  const [isProgramUser, setIsProgramUser] = useState<boolean>(false);
 
   const navigate = useNavigate();
 
@@ -113,7 +109,7 @@ export const ProductionListExpandedContent = ({
         audioinput: userSettings?.audioinput,
         lineUsedForProgramOutput:
           getLineByLineId(lineId)?.programOutputLine || false,
-        isProgramUser,
+        isProgramUser: false,
       };
 
       const callPayload = {
@@ -186,8 +182,14 @@ export const ProductionListExpandedContent = ({
               type="button"
               onClick={() => {
                 if (l.programOutputLine) {
-                  setModalLineId(l.id);
-                  setIsModalOpen(true);
+                  navigate(
+                    buildCallsUrl([
+                      {
+                        productionId: production.productionId,
+                        lineId: l.id,
+                      },
+                    ])
+                  );
                 } else {
                   goToProduction(l.id);
                 }
@@ -195,17 +197,6 @@ export const ProductionListExpandedContent = ({
             >
               Join
             </SecondaryButton>
-          )}
-          {isModalOpen && modalLineId && (
-            <AudioFeedModal
-              onClose={() => setIsModalOpen(false)}
-              onJoin={() => {
-                setIsModalOpen(false);
-                goToProduction(modalLineId);
-              }}
-              setIsProgramUser={setIsProgramUser}
-              isProgramUser={isProgramUser}
-            />
           )}
         </Lineblock>
       ))}

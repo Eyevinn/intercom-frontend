@@ -24,22 +24,27 @@ export const LandingPage = ({ setApiError }: { setApiError: () => void }) => {
     );
   };
 
+  const settingsLoaded = userSettings?.username !== undefined;
+
   return (
     <div>
-      {((showSettings || !isUserSettingsComplete(userSettings)) && (
-        <UserSettings
-          buttonText={showSettings ? "Save" : "Next"}
-          className={isMobile ? "" : "desktop"}
-          onSave={() => setShowSettings(false)}
-          showBackButton={showSettings}
-          onBack={() => setShowSettings(false)}
-        />
-      )) || (
-        <>
-          <UserSettingsButton onClick={() => setShowSettings(!showSettings)} />
-          <ProductionsListContainer />
-        </>
-      )}
+      {settingsLoaded &&
+        (((showSettings || !isUserSettingsComplete(userSettings)) && (
+          <UserSettings
+            buttonText={showSettings ? "Save" : "Next"}
+            className={isMobile ? "" : "desktop"}
+            onSave={() => setShowSettings(false)}
+            showBackButton={showSettings}
+            onBack={() => setShowSettings(false)}
+          />
+        )) || (
+          <>
+            <UserSettingsButton
+              onClick={() => setShowSettings(!showSettings)}
+            />
+            <ProductionsListContainer />
+          </>
+        ))}
     </div>
   );
 };
