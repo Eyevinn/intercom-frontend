@@ -98,6 +98,6 @@ test.describe("Landing Page", () => {
       .getByText("Quick Join Preset")
       .locator("..");
     await presetCard.getByRole("button", { name: /^join$/i }).click();
-    await expect(landingPage.page).toHaveURL(/\/lines\?lines=1:10/);
+    await expect(landingPage.page).toHaveURL(/\/calls\?lines=1:10/);
   });
 });
