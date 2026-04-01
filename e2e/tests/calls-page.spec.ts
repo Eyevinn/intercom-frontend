@@ -57,7 +57,7 @@ test.describe("Calls Page", () => {
 
   test("invalid line in URL is removed silently", async ({ callsPage }) => {
     // Line 99 does not exist; only line 10 should remain
-    await callsPage.page.goto("/lines?lines=1:10,1:99");
+    await callsPage.page.goto("/calls?lines=1:10,1:99");
     await expect(callsPage.page).toHaveURL(/lines=1:10/);
     await expect(callsPage.page).not.toHaveURL(/1:99/);
   });
