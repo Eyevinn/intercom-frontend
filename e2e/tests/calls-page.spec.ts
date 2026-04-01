@@ -17,7 +17,7 @@ test.describe("Calls Page", () => {
     ).toBeVisible();
   });
 
-  test("shows Lines header after joining with username", async ({
+  test("shows Calls header after joining with username", async ({
     callsPage,
   }) => {
     await callsPage.gotoWithSettings("1", "10");
