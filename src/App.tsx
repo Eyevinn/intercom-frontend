@@ -1,6 +1,12 @@
 import styled from "@emotion/styled";
 import { useEffect, useState } from "react";
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+  useLocation,
+} from "react-router";
 import { ErrorPage } from "./components/router-error.tsx";
 import { useDevicePermissions } from "./hooks/use-device-permission.ts";
 import { LandingPage } from "./components/landing-page/landing-page.tsx";
@@ -175,10 +181,7 @@ const AppContent = ({
                     element={<CallsPage />}
                     errorElement={<ErrorPage />}
                   />
-                  <Route
-                    path="/lines"
-                    element={<LinesToCallsRedirect />}
-                  />
+                  <Route path="/lines" element={<LinesToCallsRedirect />} />
                   <Route path="*" element={<NotFound />} />
                 </>
               </Routes>
