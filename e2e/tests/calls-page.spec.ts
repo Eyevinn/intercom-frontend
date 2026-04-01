@@ -7,7 +7,7 @@ test.describe("Calls Page", () => {
     callsPage,
   }) => {
     await callsPage.gotoWithParams("1", "10");
-    await expect(callsPage.page).toHaveURL(/\/lines\?lines=1:10/);
+    await expect(callsPage.page).toHaveURL(/\/calls\?lines=1:10/);
   });
 
   test("shows join form when no username is set", async ({ callsPage }) => {
@@ -21,7 +21,7 @@ test.describe("Calls Page", () => {
     callsPage,
   }) => {
     await callsPage.gotoWithSettings("1", "10");
-    await expect(callsPage.page.getByText("Lines").first()).toBeVisible();
+    await expect(callsPage.page.getByText("Calls").first()).toBeVisible();
   });
 
   test("shows Save as Configuration button when not on mobile", async ({
