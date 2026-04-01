@@ -204,12 +204,12 @@ export const ShareLineLinkModal = ({
   return (
     <Modal
       onClose={onClose}
-      title={`Share ${isCopyProduction ? "Lines" : "Line URL"}`}
+      title={`Share ${isCopyProduction ? "Calls" : "Call URL"}`}
     >
       <Description>
         {isCopyProduction
-          ? "Share these links to invite others to each line."
-          : "Anyone with this link can join the line."}
+          ? "Share these links to invite others to each call."
+          : "Anyone with this link can join the call."}
       </Description>
       <Note>
         Each link can only be used once. A fresh link is generated automatically

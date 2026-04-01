@@ -7,17 +7,17 @@ import {
 } from "./call-url";
 
 describe("buildCallsUrl", () => {
-  it("returns /lines when given an empty list", () => {
-    expect(buildCallsUrl([])).toBe("/lines");
+  it("returns /calls when given an empty list", () => {
+    expect(buildCallsUrl([])).toBe("/calls");
   });
 
-  it("produces the /lines?lines=prodId:lineId format for a single call", () => {
+  it("produces the /calls?lines=prodId:lineId format for a single call", () => {
     // Regression: use-navigate-to-production previously navigated to the old
     // /production-calls/production/:id/line/:id URL. This assertion locks in
     // the correct target URL that buildCallsUrl must produce so that the landing
     // page join lands directly on the right route without a flash redirect.
     expect(buildCallsUrl([{ productionId: "prod-1", lineId: "line-2" }])).toBe(
-      "/lines?lines=prod-1:line-2"
+      "/calls?lines=prod-1:line-2"
     );
   });
 
@@ -27,7 +27,7 @@ describe("buildCallsUrl", () => {
         { productionId: "p1", lineId: "l1" },
         { productionId: "p2", lineId: "l2" },
       ])
-    ).toBe("/lines?lines=p1:l1,p2:l2");
+    ).toBe("/calls?lines=p1:l1,p2:l2");
   });
 });
 
@@ -94,7 +94,7 @@ describe("buildCallsUrl — companion URL", () => {
       [{ productionId: "p1", lineId: "l1" }],
       "ws://localhost:12345"
     );
-    expect(url).toBe("/lines?lines=p1:l1&companion=localhost:12345");
+    expect(url).toBe("/calls?lines=p1:l1&companion=localhost:12345");
   });
 
   it("strips wss:// prefix from companion URL", () => {
@@ -102,17 +102,17 @@ describe("buildCallsUrl — companion URL", () => {
       [{ productionId: "p1", lineId: "l1" }],
       "wss://example.com:9000"
     );
-    expect(url).toBe("/lines?lines=p1:l1&companion=example.com:9000");
+    expect(url).toBe("/calls?lines=p1:l1&companion=example.com:9000");
   });
 
   it("works with empty calls list and a companion URL", () => {
     const url = buildCallsUrl([], "ws://localhost:12345");
-    expect(url).toBe("/lines?companion=localhost:12345");
+    expect(url).toBe("/calls?companion=localhost:12345");
   });
 
   it("returns the base URL unchanged when companionUrl is undefined", () => {
     expect(buildCallsUrl([{ productionId: "p1", lineId: "l1" }])).toBe(
-      "/lines?lines=p1:l1"
+      "/calls?lines=p1:l1"
     );
   });
 });

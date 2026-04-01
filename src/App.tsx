@@ -166,7 +166,7 @@ const AppContent = ({
                     errorElement={<ErrorPage />}
                   />
                   <Route
-                    path="/lines"
+                    path="/calls"
                     element={<CallsPage />}
                     errorElement={<ErrorPage />}
                   />

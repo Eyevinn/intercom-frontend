@@ -450,7 +450,7 @@ export const CallsPage = () => {
         <UserSettingsButton onClick={() => setShowSettings(!showSettings)} />
       )}
       <PageHeader
-        title={!isEmpty ? "Lines" : ""}
+        title={!isEmpty ? "Calls" : ""}
         titleAdornment={
           !isEmpty ? (
             <ShareAdornment>
@@ -477,8 +477,8 @@ export const CallsPage = () => {
         {confirmExitModalOpen && (
           <ConfirmationModal
             title="Confirm"
-            description="Are you sure you want to leave all lines?"
-            confirmationText="This will leave all lines and return to the home page."
+            description="Are you sure you want to leave all calls?"
+            confirmationText="This will leave all calls and return to the home page."
             onCancel={() => setConfirmExitModalOpen(false)}
             onConfirm={runExitAllCalls}
           />
