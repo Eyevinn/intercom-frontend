@@ -1,6 +1,12 @@
 import styled from "@emotion/styled";
 import { useEffect, useState } from "react";
-import { BrowserRouter, Routes, Route } from "react-router";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+  useLocation,
+} from "react-router";
 import { ErrorPage } from "./components/router-error.tsx";
 import { useDevicePermissions } from "./hooks/use-device-permission.ts";
 import { LandingPage } from "./components/landing-page/landing-page.tsx";
@@ -35,6 +41,11 @@ const ButtonWrapper = styled.div`
   margin: 0 2rem 2rem;
   display: inline-block;
 `;
+
+const LinesToCallsRedirect = () => {
+  const { search } = useLocation();
+  return <Navigate to={`/calls${search}`} replace />;
+};
 
 const NotFound = () => {
   return (
@@ -166,10 +177,11 @@ const AppContent = ({
                     errorElement={<ErrorPage />}
                   />
                   <Route
-                    path="/lines"
+                    path="/calls"
                     element={<CallsPage />}
                     errorElement={<ErrorPage />}
                   />
+                  <Route path="/lines" element={<LinesToCallsRedirect />} />
                   <Route path="*" element={<NotFound />} />
                 </>
               </Routes>

@@ -13,7 +13,7 @@ export class CallsPagePO {
   }
 
   async gotoWithParams(productionId: string, lineId: string) {
-    await this.page.goto(`/lines?lines=${productionId}:${lineId}`);
+    await this.page.goto(`/calls?lines=${productionId}:${lineId}`);
   }
 
   async gotoWithSettings(
@@ -30,6 +30,6 @@ export class CallsPagePO {
       },
       { username }
     );
-    await this.page.goto(`/lines?lines=${productionId}:${lineId}`);
+    await this.page.goto(`/calls?lines=${productionId}:${lineId}`);
   }
 }
