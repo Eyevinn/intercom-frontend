@@ -8,7 +8,7 @@ test.describe("Share Link Modal", () => {
     await landingPage.page.getByTitle("Get share link").first().click();
 
     // Share modal should appear
-    await expect(landingPage.page.getByText("Share Lines")).toBeVisible();
+    await expect(landingPage.page.getByText("Share Calls")).toBeVisible();
   });
 
   test("share modal shows note about single use links", async ({

@@ -40,7 +40,7 @@ export const ExitCallButton = ({
       title="Exit line"
       onClick={() => resetOnExit()}
     >
-      <ButtonText>Leave Line</ButtonText>
+      <ButtonText>Leave Call</ButtonText>
       <LogoutIcon />
     </StyledBackBtn>
   );

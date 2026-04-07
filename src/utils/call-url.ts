@@ -32,7 +32,7 @@ export function decodeCallsParam(param: string | null): CallRef[] {
 
 export function buildCallsUrl(calls: CallRef[], companionUrl?: string): string {
   const base =
-    calls.length === 0 ? "/lines" : `/lines?lines=${encodeCallsParam(calls)}`;
+    calls.length === 0 ? "/calls" : `/calls?lines=${encodeCallsParam(calls)}`;
   let url = base;
   if (companionUrl) {
     const hostPort = companionUrl.replace(/^wss?:\/\//, "");

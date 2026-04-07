@@ -18,7 +18,7 @@ describe("useCallsNavigation", () => {
     mockNavigate.mockReset();
     mockSearchParams = new URLSearchParams();
     Object.defineProperty(window, "location", {
-      value: { pathname: "/lines", search: "" },
+      value: { pathname: "/calls", search: "" },
       writable: true,
     });
   });
@@ -29,7 +29,7 @@ describe("useCallsNavigation", () => {
       // a pending program card that has not yet appeared in the URL).
       mockSearchParams = new URLSearchParams("lines=1:10");
       Object.defineProperty(window, "location", {
-        value: { pathname: "/lines", search: "?lines=1:10" },
+        value: { pathname: "/calls", search: "?lines=1:10" },
         writable: true,
       });
 
@@ -64,7 +64,7 @@ describe("useCallsNavigation", () => {
     it("does not change the URL when a program line ref has joined and is no longer pending", async () => {
       mockSearchParams = new URLSearchParams("lines=1:10,1:20");
       Object.defineProperty(window, "location", {
-        value: { pathname: "/lines", search: "?lines=1:10,1:20" },
+        value: { pathname: "/calls", search: "?lines=1:10,1:20" },
         writable: true,
       });
 
@@ -98,7 +98,7 @@ describe("useCallsNavigation", () => {
       // Original URL only had line 10
       mockSearchParams = new URLSearchParams("lines=1:10");
       Object.defineProperty(window, "location", {
-        value: { pathname: "/lines", search: "?lines=1:10" },
+        value: { pathname: "/calls", search: "?lines=1:10" },
         writable: true,
       });
 
@@ -140,7 +140,7 @@ describe("useCallsNavigation", () => {
       // window.location already contains the companion param — the source of truth
       Object.defineProperty(window, "location", {
         value: {
-          pathname: "/lines",
+          pathname: "/calls",
           search: "?lines=1:10&companion=localhost:9000",
         },
         writable: true,
@@ -180,7 +180,7 @@ describe("useCallsNavigation", () => {
       mockSearchParams = new URLSearchParams("lines=1:10"); // stale — no companion yet
       Object.defineProperty(window, "location", {
         value: {
-          pathname: "/lines",
+          pathname: "/calls",
           search: "?lines=1:10&companion=host:9000",
         },
         writable: true,
@@ -232,7 +232,7 @@ describe("useCallsNavigation", () => {
 
       // Mock window.location so the hook's guard detects no change
       Object.defineProperty(window, "location", {
-        value: { pathname: "/lines", search: "?lines=1:10" },
+        value: { pathname: "/calls", search: "?lines=1:10" },
         writable: true,
       });
 

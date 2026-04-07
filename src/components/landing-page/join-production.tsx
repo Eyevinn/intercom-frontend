@@ -69,7 +69,7 @@ export const JoinProduction = ({
       className={`${isMobile ? "" : "desktop"} ${className}`}
     >
       <HeaderWrapper>
-        <HeaderText>Join Production</HeaderText>
+        <HeaderText>Join Call</HeaderText>
         {closeAddCallView && (
           <HeaderExitButton onClick={() => closeAddCallView()}>
             <RemoveIcon />

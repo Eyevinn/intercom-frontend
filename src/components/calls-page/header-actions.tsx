@@ -146,7 +146,7 @@ export const HeaderActions = ({
               type="button"
               onClick={() => setAddCallActive(!addCallActive)}
             >
-              Add Line
+              Add Call
             </SecondaryButton>
           </AddCallContainer>
         )}

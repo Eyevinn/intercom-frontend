@@ -106,7 +106,7 @@ export const SettingsModal = ({
             : false;
 
           if (isGlobalStateDuplicate) {
-            acc[field] = "This key is used in another connected line.";
+            acc[field] = "This key is used in another connected call.";
           } else {
             acc[field] = "";
           }
@@ -224,7 +224,7 @@ export const SettingsModal = ({
 
   return (
     <Modal
-      title={`Hotkey settings${lineName ? ` for line: ${lineName}` : ""}`}
+      title={`Hotkey settings${lineName ? ` for call: ${lineName}` : ""}`}
       onClose={onClose}
     >
       <FormContainer>
