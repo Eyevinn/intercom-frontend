@@ -189,6 +189,7 @@ export const CallWrapper = styled.div<{
 
 export const CallContainer = styled(CollapsibleItemWrapper)<{
   isProgramLine?: boolean;
+  isVideoEnabled?: boolean;
 }>`
   margin: 0;
   width: 100%;
@@ -200,8 +201,11 @@ export const CallContainer = styled(CollapsibleItemWrapper)<{
   border: 0.1rem solid rgba(109, 109, 109, 0.3);
   overflow: hidden;
 
-  background: ${({ isProgramLine }) =>
-    isProgramLine ? "rgba(73, 67, 124, 0.2)" : "rgba(50, 56, 59, 0.4)"};
+  background: ${({ isProgramLine, isVideoEnabled }) => {
+    if (isVideoEnabled) return "rgba(45, 62, 124, 0.2)";
+    if (isProgramLine) return "rgba(73, 67, 124, 0.2)";
+    return "rgba(50, 56, 59, 0.4)";
+  }};
 `;
 
 export const CallHeader = styled(HeaderWrapper)`
@@ -246,4 +250,90 @@ export const MinifiedControlsButton = styled(UserControlBtn)`
       fill: #6fd84f;
     }
   }
+`;
+
+type PinnedProps = { isPinned: boolean };
+
+export const VideoContainer = styled.div<PinnedProps>`
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background-color: #000;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  order: ${({ isPinned }) => (isPinned ? -1 : 0)};
+`;
+
+export const Video = styled.video<{ isVideoMuted: boolean }>`
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background-color: #000;
+  display: ${({ isVideoMuted }) => (isVideoMuted ? "none" : "block")};
+`;
+
+export const VideoOptionsButton = styled.button<PinnedProps>`
+  position: absolute;
+  top: 0.25rem;
+  left: 0.25rem;
+  width: 2.2rem;
+  height: 2.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: ${({ isPinned }) =>
+    isPinned ? "rgba(89, 203, 232, 0.80)" : "rgba(0, 0, 0, 0.45)"};
+  border: none;
+  border-radius: 0.25rem 0.25rem 0.5rem 0.25rem;
+  cursor: pointer;
+  padding: 0;
+  color: #d9d9d9;
+
+  & svg {
+    fill: currentColor;
+  }
+`;
+
+export const NameTag = styled.span`
+  position: absolute;
+  bottom: 0.25rem;
+  right: 0.25rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.5rem 0.25rem 0.25rem 0.25rem;
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  background-color: rgba(123, 226, 123, 0.82);
+  max-width: calc(100% - 0.5rem);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  pointer-events: none;
+`;
+
+export const PinDialogBackdrop = styled.div`
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+`;
+
+export const PinDialogPopover = styled.div<{ top: number; left: number }>`
+  position: fixed;
+  top: ${({ top }) => `${top}px`};
+  left: ${({ left }) => `${left}px`};
+  z-index: 201;
+`;
+
+export const ListInnerWrapper = styled.div`
+  width: 100%;
+`;
+
+export const VideoSection = styled.div`
+  width: 100%;
+`;
+
+export const VideoGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 0.5rem;
 `;

@@ -29,7 +29,7 @@ const mockState: TGlobalState = {
   reloadPresetList: false,
   production: null,
   selectedProductionId: null,
-  devices: { input: null, output: null },
+  devices: { input: null, output: null, videoInput: null },
   userSettings: null,
   apiError: false,
   websocket: null,

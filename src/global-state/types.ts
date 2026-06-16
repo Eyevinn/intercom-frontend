@@ -14,6 +14,7 @@ export interface ErrorState {
 export interface DevicesState {
   input: MediaDeviceInfo[] | null;
   output: MediaDeviceInfo[] | null;
+  videoInput: MediaDeviceInfo[] | null;
 }
 
 export interface CallState {
@@ -21,10 +22,12 @@ export interface CallState {
   // Not all devices allow choosing output
   audiooutput?: string;
   mediaStreamInput: MediaStream | null;
+  mediaStreamVideoInput: MediaStream | null;
   dominantSpeaker: string | null;
   audioLevelAboveThreshold: boolean;
   connectionState: RTCPeerConnectionState | null;
   audioElements: HTMLAudioElement[] | null;
+  videoElements: HTMLVideoElement[] | null;
   sessionId: string | null;
   hotkeys: Hotkeys;
   dataChannel: RTCDataChannel | null;

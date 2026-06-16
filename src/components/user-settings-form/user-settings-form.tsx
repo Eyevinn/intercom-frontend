@@ -120,21 +120,20 @@ export const UserSettingsForm = ({
   };
   const { productions: fetchedProductions, error: productionListFetchError } =
     useFetchProductionList(productionListFilter);
-
-  // Use prefetched list immediately (no loading flicker), then switch to the
-  // live-fetched list once it arrives.
   const productions = fetchedProductions ?? prefetchedProductionList;
 
-  // When a pre-fetched production arrives (via prop), adopt it immediately so
-  // the line dropdown renders without waiting for the full production list.
   useEffect(() => {
     if (prefetchedProduction) {
       setProduction(prefetchedProduction);
     }
   }, [prefetchedProduction]);
 
-  // this will update whenever lineId changes
   const selectedLineId = useWatch({ name: "lineId", control });
+
+  const selectedLine = production?.lines.find(
+    (l) => l.id.toString() === selectedLineId
+  );
+  const selectedLineVideoEnabled = selectedLine?.videoEnabled ?? false;
 
   const [{ devices, selectedProductionId: globalSelectedProductionId, calls }] =
     useGlobalState();
@@ -164,12 +163,12 @@ export const UserSettingsForm = ({
 
   useEffect(() => {
     if (production && isJoinProduction) {
-      const selectedLine = production.lines.find(
+      const matchedLine = production.lines.find(
         (line) => line.id.toString() === selectedLineId
       );
-      setSelectedLineName(selectedLine?.name ?? "");
-      setIsProgramOutputLine(!!selectedLine?.programOutputLine);
-      if (!selectedLine?.programOutputLine) {
+      setSelectedLineName(matchedLine?.name ?? "");
+      setIsProgramOutputLine(!!matchedLine?.programOutputLine);
+      if (!matchedLine?.programOutputLine) {
         setIsProgramUser?.(false);
       }
     }
@@ -387,6 +386,24 @@ export const UserSettingsForm = ({
             </FormItem>
           )}
         </>
+      )}
+      {isJoinProduction && selectedLineVideoEnabled && (
+        <FormItem label="Camera">
+          <FormSelect
+            // eslint-disable-next-line
+            {...register(`videoinput`)}
+            defaultValue="no-device"
+          >
+            <option value="no-device">No camera</option>
+            {devices.videoInput && devices.videoInput.length > 0
+              ? devices.videoInput.map((device) => (
+                  <option key={device.deviceId} value={device.deviceId}>
+                    {device.label}
+                  </option>
+                ))
+              : null}
+          </FormSelect>
+        </FormItem>
       )}
       {isProgramOutputLine && isJoinProduction && (
         <CheckboxWrapper>

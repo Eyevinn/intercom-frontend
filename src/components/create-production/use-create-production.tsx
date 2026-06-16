@@ -5,12 +5,21 @@ export type FormValues = {
   productionName: string;
   defaultLine: string;
   defaultLineProgramOutput: boolean;
-  lines: { name: string; programOutputLine?: boolean }[];
+  defaultLineVideoEnabled: boolean;
+  lines: {
+    name: string;
+    programOutputLine?: boolean;
+    videoEnabled?: boolean;
+  }[];
 };
 
 type CreateProductionParams = {
   name: string;
-  lines: { name: string; programOutputLine?: boolean }[];
+  lines: {
+    name: string;
+    programOutputLine?: boolean;
+    videoEnabled?: boolean;
+  }[];
 };
 
 export const useCreateProduction = ({
@@ -26,6 +35,7 @@ export const useCreateProduction = ({
             {
               name: createNewProduction.defaultLine,
               programOutputLine: createNewProduction.defaultLineProgramOutput,
+              videoEnabled: createNewProduction.defaultLineVideoEnabled,
             },
             ...createNewProduction.lines,
           ],

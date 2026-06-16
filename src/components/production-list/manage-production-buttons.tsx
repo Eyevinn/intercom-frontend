@@ -53,6 +53,7 @@ interface ManageProductionButtonsProps {
 type Line = {
   name: string;
   programOutputLine: boolean;
+  videoEnabled: boolean;
 };
 
 export const ManageProductionButtons: FC<ManageProductionButtonsProps> = (
@@ -85,6 +86,7 @@ export const ManageProductionButtons: FC<ManageProductionButtonsProps> = (
     defaultValues: {
       name: "",
       programOutputLine: false,
+      videoEnabled: false,
     },
     resetOptions: {
       keepDirtyValues: true,
@@ -170,6 +172,7 @@ export const ManageProductionButtons: FC<ManageProductionButtonsProps> = (
     setAddLineOpen(!addLineOpen);
     setValue("name", "");
     setValue("programOutputLine", false);
+    setValue("videoEnabled", false);
   };
 
   const validateUniqueLineName = (value: string) => {
@@ -219,6 +222,25 @@ export const ManageProductionButtons: FC<ManageProductionButtonsProps> = (
               <InfoTooltip>
                 In an <strong>Audio Feed</strong> line, listeners are not able
                 to talk. Only the <strong>Audio Feed</strong> will be heard.
+              </InfoTooltip>
+            </CheckboxWrapper>
+            <CheckboxWrapper>
+              <Controller
+                name="videoEnabled"
+                control={control}
+                render={({ field: controllerField }) => (
+                  <Checkbox
+                    label="Video Enabled"
+                    checked={controllerField.value || false}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      controllerField.onChange(e.target.checked)
+                    }
+                  />
+                )}
+              />
+              <InfoTooltip>
+                When enabled, participants can optionally share their camera in
+                this line.
               </InfoTooltip>
             </CheckboxWrapper>
           </ManageLineInputRow>

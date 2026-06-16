@@ -54,7 +54,7 @@ const mockState: TGlobalState = {
   reloadPresetList: false,
   production: null,
   selectedProductionId: null,
-  devices: { input: [], output: [] },
+  devices: { input: [], output: [], videoInput: [] },
   userSettings: null,
   apiError: false,
   websocket: null,
@@ -175,5 +175,104 @@ describe("UserSettingsForm — lineId auto-selection fix", () => {
     // so the select's value should equal the first line's id.
     const lineSelect = screen.getAllByRole("combobox")[1] as HTMLSelectElement;
     expect(lineSelect.value).toBe("line-1");
+  });
+});
+
+// ── Camera select for video-enabled lines ────────────────────────────────────
+
+const productionWithVideoLine = {
+  name: "Video Show",
+  productionId: "prod-2",
+  lines: [
+    {
+      id: "line-1",
+      name: "Video Line",
+      participants: [],
+      smbConferenceId: "",
+      videoEnabled: true,
+    },
+  ],
+};
+
+describe("UserSettingsForm — camera select on video-enabled lines", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+
+    mockUseGlobalState.mockReturnValue([
+      {
+        ...mockState,
+        devices: {
+          input: [],
+          output: [],
+          videoInput: [
+            {
+              deviceId: "cam-1",
+              label: "Built-in Camera",
+              groupId: "group-1",
+              kind: "videoinput",
+              toJSON: () => ({}),
+            } as MediaDeviceInfo,
+          ],
+        },
+      },
+      mockDispatch,
+    ]);
+    mockUseSubmitForm.mockReturnValue({ onSubmit: vi.fn() });
+  });
+
+  const selectProduction = async (productionId: string) => {
+    await act(async () => {
+      render(
+        <UserSettingsForm
+          isJoinProduction
+          buttonText="Join"
+          defaultValues={defaultValues}
+        />
+      );
+    });
+
+    await act(async () => {
+      fireEvent.change(screen.getAllByRole("combobox")[0], {
+        target: { value: productionId },
+      });
+    });
+  };
+
+  it("offers camera selection when the selected line is video enabled", async () => {
+    mockUseFetchProductionList.mockReturnValue({
+      productions: {
+        ...productionList,
+        productions: [productionWithVideoLine],
+      },
+      doInitialLoad: false,
+      error: null,
+      setIntervalLoad: vi.fn(),
+    });
+
+    await selectProduction(productionWithVideoLine.productionId);
+
+    const cameraSelect = screen.getByRole("combobox", { name: "Camera" });
+    expect(cameraSelect).toBeInTheDocument();
+    expect(
+      screen.getByRole("option", { name: "Built-in Camera" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("option", { name: "No camera" })
+    ).toBeInTheDocument();
+  });
+
+  it("does not offer camera selection when the selected line is audio only", async () => {
+    mockUseFetchProductionList.mockReturnValue({
+      productions: productionList,
+      doInitialLoad: false,
+      error: null,
+      setIntervalLoad: vi.fn(),
+    });
+
+    await selectProduction(productionWithLines.productionId);
+
+    expect(
+      screen.queryByRole("combobox", { name: "Camera" })
+    ).not.toBeInTheDocument();
   });
 });

@@ -7,6 +7,11 @@ import { noop } from "../../helpers";
 import logger from "../../utils/logger.ts";
 import { createAudioElement } from "./audio-element-factory.ts";
 import {
+  attachShowWhenReady,
+  createVideoElement,
+  stopFrameMonitor,
+} from "./video-element-factory.ts";
+import {
   parseDataChannelMessage,
   isRemoteMute,
 } from "./data-channel-parser.ts";
@@ -14,11 +19,15 @@ import { waitForIceGathering } from "./ice-gathering.ts";
 import { startRtcStatInterval } from "./rtc-stat-interval.ts";
 import { TJoinProductionOptions } from "./types.ts";
 import { useAudioElements } from "./use-audio-elements.ts";
+import { useVideoElements } from "./use-video-elements.ts";
 import { TUseAudioInputValues } from "./use-audio-input.ts";
+import { TUseVideoInputValues } from "./use-video-input.ts";
 import { useRtcDebugLogger } from "./use-rtc-debug-logger.ts";
 
 type TRtcConnectionOptions = {
   inputAudioStream: TUseAudioInputValues;
+  inputVideoStream: TUseVideoInputValues;
+  videoEnabled: boolean;
   sdpOffer: string | null;
   joinProductionOptions: TJoinProductionOptions | null;
   audiooutput: string | undefined;
@@ -35,11 +44,17 @@ type TEstablishConnection = {
   callId: string;
   dispatch: Dispatch<TGlobalStateAction>;
   setAudioElements: Dispatch<SetStateAction<HTMLAudioElement[]>>;
+  setVideoElements: Dispatch<SetStateAction<HTMLVideoElement[]>>;
   setNoStreamError: (input: boolean) => void;
 };
 
 type TAttachAudioStream = {
   inputAudioStream: MediaStream;
+  rtcPeerConnection: RTCPeerConnection;
+};
+
+type TAttachVideoStream = {
+  inputVideoStream: MediaStream;
   rtcPeerConnection: RTCPeerConnection;
 };
 
@@ -53,6 +68,34 @@ const attachInputAudioToPeerConnection = ({
     .forEach((track) => rtcPeerConnection.addTrack(track));
 };
 
+const VIDEO_MAX_BITRATE = 2_000_000;
+const VIDEO_MAX_FRAMERATE = 25;
+
+const applyVideoSenderParameters = async (sender: RTCRtpSender) => {
+  const params = sender.getParameters();
+  if (!params.encodings || params.encodings.length === 0) {
+    params.encodings = [{}];
+  }
+  params.encodings[0].maxBitrate = VIDEO_MAX_BITRATE;
+  params.encodings[0].maxFramerate = VIDEO_MAX_FRAMERATE;
+  try {
+    await sender.setParameters(params);
+  } catch (err) {
+    console.warn("[useRtcConnection] setParameters failed", err);
+  }
+};
+
+const attachInputVideoToPeerConnection = ({
+  inputVideoStream,
+  rtcPeerConnection,
+}: TAttachVideoStream) => {
+  if (rtcPeerConnection.signalingState === "closed") return;
+  inputVideoStream.getTracks().forEach((track) => {
+    const sender = rtcPeerConnection.addTrack(track);
+    if (track.kind === "video") applyVideoSenderParameters(sender);
+  });
+};
+
 const establishConnection = ({
   rtcPeerConnection,
   sdpOffer,
@@ -62,14 +105,25 @@ const establishConnection = ({
   callId,
   dispatch,
   setAudioElements,
+  setVideoElements,
   setNoStreamError,
 }: TEstablishConnection): { teardown: () => void } => {
   const lineId = joinProductionOptions.lineId || "unknown";
 
-  const onRtcTrack = ({ streams }: RTCTrackEvent) => {
-    const selectedStream = streams[0];
-
-    if (selectedStream && selectedStream.getAudioTracks().length !== 0) {
+  const onRtcTrack = ({ streams, track }: RTCTrackEvent) => {
+    if (track.kind === "audio") {
+      const selectedStream = streams[0];
+      if (!selectedStream) {
+        setNoStreamError(true);
+        dispatch({
+          type: "ERROR",
+          payload: {
+            callId,
+            error: new Error("Stream-error: No MediaStream available"),
+          },
+        });
+        return;
+      }
       const audioElement = createAudioElement({
         stream: selectedStream,
         lineId,
@@ -81,25 +135,79 @@ const establishConnection = ({
           dispatch({ type: "ERROR", payload: { callId, error } });
         },
       });
-
       setAudioElements((prevArray) => [audioElement, ...prevArray]);
-    } else if (selectedStream && selectedStream.getAudioTracks().length === 0) {
-      setNoStreamError(true);
-      dispatch({
-        type: "ERROR",
-        payload: {
-          callId,
-          error: new Error("Stream-error: No MediaStreamTracks avaliable"),
-        },
-      });
-    } else {
-      setNoStreamError(true);
-      dispatch({
-        type: "ERROR",
-        payload: {
-          callId,
-          error: new Error("Stream-error: No MediaStream avaliable"),
-        },
+    } else if (track.kind === "video") {
+      const selectedStream = streams[0] ?? new MediaStream([track]);
+      setVideoElements((prev) => {
+        if (
+          prev.some(
+            (el) =>
+              el.srcObject === selectedStream ||
+              (el.srcObject instanceof MediaStream &&
+                el.srcObject.getTracks().some((t) => t.id === track.id))
+          )
+        ) {
+          return prev;
+        }
+        const endpointId = streams[0]?.id ?? null;
+        const videoElement = createVideoElement({
+          stream: selectedStream,
+          lineId,
+          endpointId,
+        });
+        const removeThisElement = () => {
+          stopFrameMonitor(videoElement);
+          setVideoElements((current) =>
+            current.filter((el) => el !== videoElement)
+          );
+          videoElement.pause();
+          videoElement.srcObject = null;
+        };
+
+        track.addEventListener("ended", removeThisElement);
+        // Deliberately do NOT add a `mute` handler that hides the tile. `mute`
+        // fires on any brief interruption in the egress RTP — a simulcast layer
+        // switch at the SFU, a packet-loss burst, a jitterbuffer skew reset —
+        // and hiding instantly produced a visible disappear/reappear flicker
+        // when the media resumed a moment later via `unmute`. Tile visibility is
+        // owned by the frame-liveness monitor (attachShowWhenReady), which hides
+        // only after frames have genuinely stopped for ~1.5s. So a transient gap
+        // now shows a brief freeze (far less jarring than a flicker) and a truly
+        // departed source still gets hidden after the grace period.
+        track.addEventListener("unmute", () => {
+          // The backend reuses a single egress slot and never renegotiates:
+          // when the pinned source changes, this same track's media is swapped
+          // to the new publisher, which fires `unmute`. The tile's
+          // `lastSessionId` still points at the departed source, which would
+          // keep the matcher from rebinding it. Fresh media voids the old
+          // binding — clear it so the label re-resolves to the active source.
+          videoElement.dataset.lastSessionId = "";
+          // Safari may fire `unmute` before videoWidth/videoHeight are
+          // populated for remote MediaStream tracks. Trust the unmute
+          // signal and re-attach the show-when-ready logic so the tile
+          // becomes visible as soon as the first frame is presented.
+          const parent = videoElement.parentElement;
+          if (parent) attachShowWhenReady(videoElement, parent);
+          // The element may have been paused/idled while the egress slot was
+          // silent. After a mute->unmute on the SAME ssrc-rewrite track,
+          // WebKit/Safari will not resume painting on its own — re-issue
+          // play() so the swapped-in source's first frame is rendered. Harmless
+          // on Chrome/Firefox (which resume automatically).
+          videoElement.play().catch(() => {});
+          // Force a re-render so the grid effect re-mounts this recycled slot
+          // (it may have been removed from the DOM while the source was gone).
+          setVideoElements((current) => [...current]);
+        });
+
+        if (selectedStream instanceof MediaStream) {
+          selectedStream.addEventListener("removetrack", (event) => {
+            if (event.track.id === track.id) {
+              removeThisElement();
+            }
+          });
+        }
+
+        return [videoElement, ...prev];
       });
     }
   };
@@ -193,6 +301,8 @@ const establishConnection = ({
 
 export const useRtcConnection = ({
   inputAudioStream,
+  inputVideoStream,
+  videoEnabled,
   sdpOffer,
   joinProductionOptions,
   audiooutput,
@@ -212,6 +322,7 @@ export const useRtcConnection = ({
   const [connectionState, setConnectionState] =
     useState<RTCPeerConnectionState | null>(null);
   const { audioElements, setAudioElements } = useAudioElements();
+  const { videoElements, setVideoElements } = useVideoElements();
   const [noStreamError, setNoStreamError] = useState(false);
   const navigate = useNavigate();
 
@@ -219,14 +330,15 @@ export const useRtcConnection = ({
     if (noStreamError) {
       navigate("/");
     }
-  }, [navigate, noStreamError]);
+  }, [navigate, noStreamError, callId]);
 
   useEffect(() => {
     if (
       !sdpOffer ||
       !sessionId ||
       !joinProductionOptions ||
-      !inputAudioStream
+      !inputAudioStream ||
+      (videoEnabled && inputVideoStream === null)
     ) {
       return noop;
     }
@@ -261,6 +373,21 @@ export const useRtcConnection = ({
       });
     }
 
+    if (videoEnabled && inputVideoStream && inputVideoStream !== "no-device") {
+      attachInputVideoToPeerConnection({
+        rtcPeerConnection,
+        inputVideoStream,
+      });
+
+      dispatch({
+        type: "UPDATE_CALL",
+        payload: {
+          id: callId,
+          updates: { mediaStreamVideoInput: inputVideoStream },
+        },
+      });
+    }
+
     const { teardown } = establishConnection({
       rtcPeerConnection,
       sdpOffer,
@@ -270,6 +397,7 @@ export const useRtcConnection = ({
       callId,
       dispatch,
       setAudioElements,
+      setVideoElements,
       setNoStreamError,
     });
 
@@ -287,6 +415,8 @@ export const useRtcConnection = ({
   }, [
     sdpOffer,
     inputAudioStream,
+    inputVideoStream,
+    videoEnabled,
     sessionId,
     joinProductionOptions,
     rtcPeerConnection,
@@ -296,5 +426,5 @@ export const useRtcConnection = ({
 
   useRtcDebugLogger(rtcPeerConnection);
 
-  return { connectionState, audioElements };
+  return { connectionState, audioElements, videoElements };
 };

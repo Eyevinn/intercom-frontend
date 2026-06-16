@@ -12,7 +12,7 @@ export const useFetchDevices = ({ permission, dispatch }: TUseFetchDevices) => {
   // Create a function that returns a promise
   const getUpdatedDevices = useCallback(async () => {
     if (!permission) {
-      return { input: [], output: [] };
+      return { input: [], output: [], videoInput: [] };
     }
 
     try {
@@ -32,9 +32,17 @@ export const useFetchDevices = ({ permission, dispatch }: TUseFetchDevices) => {
           )
         : [];
 
+      const videoInputDevices = devices
+        ? uniqBy(
+            devices.filter((d) => d.kind === "videoinput"),
+            (item) => item.deviceId
+          )
+        : [];
+
       const result = {
         input: inputDevices,
         output: outputDevices,
+        videoInput: videoInputDevices,
       };
 
       dispatch({

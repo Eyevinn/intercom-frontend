@@ -16,6 +16,7 @@ import {
   TVIcon,
   UserIcon,
   UsersIcon,
+  VideoOnIcon,
   WhipIcon,
 } from "../../assets/icons/icon";
 
@@ -37,6 +38,11 @@ export const LineBlock = ({
         {line.programOutputLine && (
           <IconWrapper>
             <TVIcon />
+          </IconWrapper>
+        )}
+        {line.videoEnabled && (
+          <IconWrapper>
+            <VideoOnIcon />
           </IconWrapper>
         )}
         <LineBlockTitle title={line.name}>

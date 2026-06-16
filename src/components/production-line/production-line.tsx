@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useNavigate, useParams } from "react-router";
+import { API } from "../../api/api.ts";
 import { isBrowserFirefox, isMobile, isTablet } from "../../bowser.ts";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { CallState } from "../../global-state/types.ts";
@@ -25,15 +26,23 @@ import {
   CallContainer,
   CallWrapper,
   ConnectionErrorWrapper,
+  ListInnerWrapper,
   ListWrapper,
   LoaderWrapper,
   LongPressWrapper,
+  PinDialogBackdrop,
+  PinDialogPopover,
+  VideoGrid,
+  VideoSection,
 } from "./production-line-components.ts";
 import { SelectDevices } from "./select-devices.tsx";
 import { SymphonyRtcConnectionComponent } from "./symphony-rtc-connection-component.tsx";
 import { useActiveParticipant } from "./use-active-participant.tsx";
 import { useAudioCue } from "./use-audio-cue.ts";
 import { useAudioInput } from "./use-audio-input.ts";
+import { useVideoInput } from "./use-video-input.ts";
+import { TJoinProductionOptions } from "./types.ts";
+import { useShadowRtcConnection } from "./use-shadow-rtc-connection.ts";
 import { useCheckBadLineData } from "./use-check-bad-line-data.ts";
 import { useIsLoading } from "./use-is-loading.ts";
 import { useLineHotkeys, useSpeakerHotkeys } from "./use-line-hotkeys.ts";
@@ -44,6 +53,14 @@ import { useUpdateCallDevice } from "./use-update-call-device.tsx";
 import { useVolumeReducer } from "./use-volume-reducer.tsx";
 import { UserControls } from "./user-controls.tsx";
 import { UserList } from "./user-list.tsx";
+import { computeVideoTileLabels } from "./match-video-tile-labels.ts";
+import { useVideoTileGrid } from "./use-video-tile-grid.ts";
+import { useVideoSourcePin } from "./use-video-source-pin.ts";
+import { sendPinnedEndpoint } from "./pin-data-channel.ts";
+import { SelfPreviewTile } from "./self-preview-tile.tsx";
+import { ReturnFeedTile } from "./return-feed-tile.tsx";
+import { RemoteFullscreenControls } from "./remote-fullscreen-controls.tsx";
+import { VideoOptionsDialogue } from "./video-options-modal.tsx";
 
 type TProductionLine = {
   id: string;
@@ -90,7 +107,20 @@ export const ProductionLine = ({
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [muteError, setMuteError] = useState(false);
   const [userId, setUserId] = useState("");
+  const [isVideoMuted, setIsVideoMuted] = useState(false);
+  const [pinnedSessionId, setPinnedSessionId] = useState<string | null>(null);
+  const desiredPinEndpointIdRef = useRef<string | null>(null);
+  const [pinnedContainer, setPinnedContainer] = useState<HTMLElement | null>(
+    null
+  );
+  const [userOptionsTarget, setUserOptionsTarget] = useState<{
+    sessionId: string;
+    rect: DOMRect;
+  } | null>(null);
   const [userName, setUserName] = useState("");
+  const [pendingWhepTargetSessionId, setPendingWhepTargetSessionId] = useState<
+    string | null
+  >(null);
   const [open, setOpen] = useState<boolean>(!isMobile);
   const [hotkeysModalOpen, setHotkeysModalOpen] = useState(false);
   const {
@@ -100,6 +130,7 @@ export const ProductionLine = ({
     audioLevelAboveThreshold,
     connectionState,
     audioElements,
+    videoElements,
     sessionId,
     hotkeys: savedHotkeys,
     dataChannel,
@@ -113,6 +144,22 @@ export const ProductionLine = ({
     audioInputId: joinProductionOptions?.audioinput ?? null,
     dispatch,
   });
+
+  const videoEnabled = joinProductionOptions?.videoEnabled ?? false;
+  const [inputVideoStream] = useVideoInput({
+    videoInputId: videoEnabled
+      ? (joinProductionOptions?.videoinput ?? "no-device")
+      : null,
+    dispatch,
+  });
+
+  useEffect(() => {
+    if (!inputVideoStream || inputVideoStream === "no-device") return;
+    inputVideoStream.getVideoTracks().forEach((track) => {
+      // eslint-disable-next-line no-param-reassign
+      track.enabled = !isVideoMuted;
+    });
+  }, [inputVideoStream, isVideoMuted]);
 
   useEffect(() => {
     if (audioInputError) {
@@ -149,6 +196,69 @@ export const ProductionLine = ({
   );
 
   const isSelfDominantSpeaker = lineParticipant === dominantSpeaker;
+
+  const tileMatches = useMemo(
+    () =>
+      computeVideoTileLabels(
+        (videoElements ?? []).map((el) => ({
+          endpointId: el.dataset.endpointId || "",
+          previousSessionId: el.dataset.lastSessionId || null,
+        })),
+        line?.participants ?? [],
+        callState.sessionId ?? null
+      ),
+    [videoElements, line?.participants, callState.sessionId]
+  );
+
+  const pinnedVideoSessionId = pinnedSessionId;
+
+  const { pushWhepSourceToBackend, pushVideoSourceToBackend } =
+    useVideoSourcePin({
+      joinProductionOptions: joinProductionOptions ?? null,
+      callSessionId: callState.sessionId ?? null,
+    });
+
+  useEffect(() => {
+    const selfSid = callState.sessionId;
+    if (!selfSid) return;
+
+    const eligible = (line?.participants ?? []).filter(
+      (p) =>
+        p.sessionId !== selfSid && p.isActive && p.hasVideo && !p.isWhepReceiver
+    );
+    const pinnedStillEligible =
+      pinnedSessionId !== null &&
+      eligible.some((p) => p.sessionId === pinnedSessionId);
+    if (pinnedStillEligible) return;
+    const next = eligible[0]?.sessionId ?? null;
+    if (next === pinnedSessionId) return;
+    setPinnedSessionId(next);
+    pushVideoSourceToBackend(next);
+
+    const nextEndpointId =
+      eligible.find((p) => p.sessionId === next)?.endpointId ?? null;
+    desiredPinEndpointIdRef.current = nextEndpointId;
+    sendPinnedEndpoint(dataChannel, nextEndpointId);
+  }, [
+    line?.participants,
+    callState.sessionId,
+    pinnedSessionId,
+    pushVideoSourceToBackend,
+    dataChannel,
+  ]);
+
+  useEffect(() => {
+    if (!dataChannel) return undefined;
+    const flush = () =>
+      sendPinnedEndpoint(dataChannel, desiredPinEndpointIdRef.current);
+    if (dataChannel.readyState === "open") {
+      flush();
+      return undefined;
+    }
+    dataChannel.addEventListener("open", flush);
+    return () => dataChannel.removeEventListener("open", flush);
+  }, [dataChannel]);
+
   const isWhipOnLine = line?.participants.some((p) => p.isWhip);
   const isSomeoneSpeaking =
     !isProgramOutputLine &&
@@ -161,6 +271,38 @@ export const ProductionLine = ({
       ? parseInt(joinProductionOptions.productionId, 10)
       : null
   );
+
+  const siblingProgramLine = useMemo(
+    () =>
+      production?.lines.find(
+        (l: {
+          programOutputLine?: boolean;
+          id: string;
+          name: string;
+          videoEnabled?: boolean;
+        }) => l.programOutputLine && l.id !== joinProductionOptions?.lineId
+      ) ?? null,
+    [production, joinProductionOptions?.lineId]
+  );
+
+  const shadowJoinOptions: TJoinProductionOptions | null = useMemo(() => {
+    if (!videoEnabled || !siblingProgramLine || !joinProductionOptions)
+      return null;
+    return {
+      ...joinProductionOptions,
+      lineId: siblingProgramLine.id,
+      lineName: siblingProgramLine.name,
+      videoinput: undefined,
+      videoEnabled: !!siblingProgramLine.videoEnabled,
+      isProgramUser: true,
+      lineUsedForProgramOutput: true,
+    };
+  }, [videoEnabled, siblingProgramLine, joinProductionOptions]);
+
+  const {
+    audioElements: shadowAudioElements,
+    videoElements: shadowVideoElements,
+  } = useShadowRtcConnection(shadowJoinOptions);
 
   const { muteInput, isInputMuted } = useMuteInput({
     inputAudioStream,
@@ -225,6 +367,13 @@ export const ProductionLine = ({
       });
     }
   }, [audioElements]);
+
+  useEffect(() => {
+    shadowAudioElements.forEach((el) => {
+      // eslint-disable-next-line no-param-reassign
+      el.volume = value;
+    });
+  }, [shadowAudioElements, value]);
 
   const {
     startTalking,
@@ -345,6 +494,16 @@ export const ProductionLine = ({
     setIsOutputMuted(!isOutputMuted);
   }, [audioElements, isOutputMuted]);
 
+  const toggleVideo = useCallback(() => {
+    if (!inputVideoStream || inputVideoStream === "no-device") return;
+    const nextMuted = !isVideoMuted;
+    inputVideoStream.getVideoTracks().forEach((track) => {
+      // eslint-disable-next-line no-param-reassign
+      track.enabled = !nextMuted;
+    });
+    setIsVideoMuted(nextMuted);
+  }, [inputVideoStream, isVideoMuted]);
+
   const setActionHandler = useCallback(
     (action: string, handler: () => void) => {
       const handlers = callActionHandlers.current;
@@ -426,6 +585,206 @@ export const ProductionLine = ({
     }
   };
 
+  const handleAutoUnpin = useCallback(() => setPinnedContainer(null), []);
+
+  const pendingPinPromiseRef = useRef<Promise<void> | null>(null);
+
+  const [videoGridNode, setVideoGridNode] = useState<HTMLDivElement | null>(
+    null
+  );
+
+  const { setVideoGridEl } = useVideoTileGrid({
+    videoElements: videoElements ?? null,
+    participants: line?.participants ?? [],
+    tileMatches,
+    pinnedContainer,
+    pinnedSessionId,
+    cameraStream:
+      inputVideoStream && inputVideoStream !== "no-device"
+        ? inputVideoStream
+        : null,
+    cameraLabel: joinProductionOptions?.username ?? null,
+    pendingPinPromiseRef,
+    onAutoUnpin: handleAutoUnpin,
+  });
+
+  const [siblingLineParticipants, setSiblingLineParticipants] = useState<
+    import("./types.ts").TParticipant[]
+  >([]);
+  useEffect(() => {
+    if (!shadowJoinOptions) {
+      setSiblingLineParticipants([]);
+      return undefined;
+    }
+    const productionId = parseInt(shadowJoinOptions.productionId, 10);
+    const lineId = parseInt(shadowJoinOptions.lineId, 10);
+    const interval = window.setInterval(() => {
+      API.fetchProductionLine(productionId, lineId)
+        .then((l: import("./types.ts").TLine) =>
+          setSiblingLineParticipants(l.participants)
+        )
+        .catch(() => {});
+    }, 2000);
+    return () => window.clearInterval(interval);
+  }, [shadowJoinOptions]);
+
+  const whipParticipantName = useMemo(
+    () => siblingLineParticipants.find((p) => p.isWhip)?.name ?? null,
+    [siblingLineParticipants]
+  );
+
+  const pgmStream = useMemo(() => {
+    if (!videoEnabled || shadowVideoElements.length === 0) return null;
+    const el = shadowVideoElements[0];
+    return el.srcObject instanceof MediaStream ? el.srcObject : null;
+  }, [videoEnabled, shadowVideoElements]);
+
+  const pinnedRemoteStream = useMemo(() => {
+    const elements = videoElements ?? [];
+    if (elements.length === 0) return null;
+    const matchByPin = pinnedSessionId
+      ? elements.find((el) => el.dataset.lastSessionId === pinnedSessionId)
+      : null;
+    const candidate =
+      matchByPin ?? (elements.length === 1 ? elements[0] : null);
+    return candidate?.srcObject instanceof MediaStream
+      ? candidate.srcObject
+      : null;
+  }, [videoElements, pinnedSessionId]);
+
+  const pinnedRemoteName = useMemo(() => {
+    if (pinnedSessionId) {
+      return (
+        line?.participants.find((p) => p.sessionId === pinnedSessionId)?.name ??
+        null
+      );
+    }
+    const elements = videoElements ?? [];
+    const candidate = elements.length === 1 ? elements[0] : null;
+    const sid = candidate?.dataset.lastSessionId ?? null;
+    if (!sid) return null;
+    return line?.participants.find((p) => p.sessionId === sid)?.name ?? null;
+  }, [videoElements, pinnedSessionId, line?.participants]);
+
+  const pinnedRemoteIsWhip = useMemo(() => {
+    if (pinnedSessionId) {
+      return (
+        line?.participants.find((p) => p.sessionId === pinnedSessionId)
+          ?.isWhip ?? null
+      );
+    }
+    const elements = videoElements ?? [];
+    const candidate = elements.length === 1 ? elements[0] : null;
+    const sid = candidate?.dataset.lastSessionId ?? null;
+    if (!sid) return null;
+    return line?.participants.find((p) => p.sessionId === sid)?.isWhip ?? null;
+  }, [videoElements, pinnedSessionId, line?.participants]);
+
+  const handleSetWhep = (targetSessionId: string) => {
+    setPendingWhepTargetSessionId(targetSessionId);
+    setUserOptionsTarget(null);
+  };
+
+  const confirmSetWhep = () => {
+    if (!pendingWhepTargetSessionId) return;
+    const isAlreadyWhep =
+      (line?.whepSourceSessionId ?? null) === pendingWhepTargetSessionId;
+    const next = isAlreadyWhep ? null : pendingWhepTargetSessionId;
+    pushWhepSourceToBackend(next);
+    setPendingWhepTargetSessionId(null);
+  };
+
+  const whepConfirmTexts = useMemo(() => {
+    if (!pendingWhepTargetSessionId) return null;
+    const targetParticipant = line?.participants.find(
+      (p) => p.sessionId === pendingWhepTargetSessionId
+    );
+    const targetName = targetParticipant?.name ?? "this participant";
+    const currentSid = line?.whepSourceSessionId ?? null;
+    const isToggleOff = currentSid === pendingWhepTargetSessionId;
+    const note = (
+      <>
+        Note: if you already have a WHEP receiver running, you might need to
+        restart it to see the updated source.
+      </>
+    );
+    if (isToggleOff) {
+      return {
+        title: "Clear WHEP source?",
+        description: (
+          <>
+            Are you sure you want to clear <em>{targetName}</em> as the WHEP
+            source for everyone on this call?
+          </>
+        ),
+        confirmationText: note,
+      };
+    }
+    const currentParticipant = currentSid
+      ? line?.participants.find((p) => p.sessionId === currentSid)
+      : null;
+    if (currentParticipant) {
+      return {
+        title: "Replace WHEP source?",
+        description: (
+          <>
+            Are you sure you want to replace the current WHEP source{" "}
+            <em>{currentParticipant.name}</em> with <em>{targetName}</em> for
+            everyone on this call?
+          </>
+        ),
+        confirmationText: note,
+      };
+    }
+    return {
+      title: "Set WHEP source?",
+      description: (
+        <>
+          Are you sure you want to set <em>{targetName}</em> as the WHEP source
+          for everyone on this call?
+        </>
+      ),
+      confirmationText: note,
+    };
+  }, [
+    pendingWhepTargetSessionId,
+    line?.participants,
+    line?.whepSourceSessionId,
+  ]);
+
+  const handlePin = (targetSessionId: string) => {
+    const isAlreadyPinned = pinnedSessionId === targetSessionId;
+    const next = isAlreadyPinned ? null : targetSessionId;
+    setPinnedSessionId(next);
+    let nextEndpointId: string | null = null;
+    if (next === null) {
+      setPinnedContainer(null);
+    } else {
+      const participant = line?.participants.find((p) => p.sessionId === next);
+      const epid = participant?.endpointId;
+      nextEndpointId = epid ?? null;
+      const matchingEl = epid
+        ? (videoElements ?? []).find((el) => el.dataset.endpointId === epid)
+        : undefined;
+      const container =
+        (matchingEl?.parentElement as HTMLElement | null) ??
+        (matchingEl as HTMLElement | null) ??
+        null;
+      setPinnedContainer(container);
+    }
+    // Keep SMB's native pin (PinnedEndpointsChanged over the data channel) in
+    // sync with the whitelist pin. A manual re-pin previously updated only the
+    // manager-side ssrc-whitelist while _pinMap stayed on the PREVIOUSLY pinned
+    // source; when that earlier source later left the call, SMB tore down the
+    // now-dangling pin and the receiver's video collapsed (audio, which is not
+    // pinned, was unaffected). The auto-pin effect already syncs both — manual
+    // pins must too.
+    desiredPinEndpointIdRef.current = nextEndpointId;
+    sendPinnedEndpoint(dataChannel, nextEndpointId);
+    pendingPinPromiseRef.current = pushVideoSourceToBackend(next);
+    setUserOptionsTarget(null);
+  };
+
   // TODO detect if browser back button is pressed and run exit();
 
   return (
@@ -457,12 +816,17 @@ export const ProductionLine = ({
           joinProductionOptions={joinProductionOptions}
           audiooutput={audiooutput || undefined}
           inputAudioStream={inputAudioStream}
+          inputVideoStream={inputVideoStream}
+          videoEnabled={videoEnabled}
           callId={id}
           dispatch={dispatch}
         />
       )}
       {!connectionError && !loading && (
-        <CallContainer isProgramLine={line?.programOutputLine}>
+        <CallContainer
+          isProgramLine={line?.programOutputLine}
+          isVideoEnabled={line?.videoEnabled}
+        >
           {line && (
             <CallHeaderComponent
               open={open}
@@ -503,11 +867,60 @@ export const ProductionLine = ({
                     isProgramUser={isProgramUser || undefined}
                     isProgramLine={isProgramOutputLine || undefined}
                   >
-                    <div
-                      style={{
-                        width: "100%",
-                      }}
-                    >
+                    <ListInnerWrapper>
+                      {videoEnabled && (
+                        <VideoSection>
+                          {/* Local camera self-preview with fullscreen */}
+                          <SelfPreviewTile
+                            stream={inputVideoStream}
+                            username={joinProductionOptions?.username}
+                            isInputMuted={isInputMuted}
+                            muteInput={() => muteInput(!isInputMuted)}
+                            inputAudioStream={inputAudioStream}
+                            pgmStream={pgmStream}
+                            pinnedRemoteStream={pinnedRemoteStream}
+                            pinnedRemoteName={pinnedRemoteName}
+                            isPinnedRemoteWhip={pinnedRemoteIsWhip}
+                            isVideoMuted={isVideoMuted}
+                            hasCamera={
+                              !!inputVideoStream &&
+                              inputVideoStream !== "no-device"
+                            }
+                            toggleVideo={toggleVideo}
+                          />
+                          {/* Return Feed — renders itself when shadow stream is active */}
+                          <ReturnFeedTile
+                            stream={pgmStream}
+                            cameraStream={inputVideoStream}
+                            label={whipParticipantName}
+                            cameraLabel={
+                              joinProductionOptions?.username ?? null
+                            }
+                          />
+                          {/* Remote participant video tiles */}
+                          <VideoGrid
+                            ref={(node) => {
+                              setVideoGridEl(node);
+                              setVideoGridNode(node);
+                            }}
+                          />
+                          <RemoteFullscreenControls
+                            gridEl={videoGridNode}
+                            hasMic={
+                              !!inputAudioStream &&
+                              inputAudioStream !== "no-device"
+                            }
+                            isInputMuted={isInputMuted}
+                            onToggleMute={() => muteInput(!isInputMuted)}
+                            hasCamera={
+                              !!inputVideoStream &&
+                              inputVideoStream !== "no-device"
+                            }
+                            isVideoMuted={isVideoMuted}
+                            onToggleVideo={toggleVideo}
+                          />
+                        </VideoSection>
+                      )}
                       <UserControls
                         line={line}
                         joinProductionOptions={joinProductionOptions}
@@ -518,7 +931,14 @@ export const ProductionLine = ({
                         muteOutput={muteOutput}
                         muteInput={() => muteInput(!isInputMuted)}
                         handleInputChange={handleInputChange}
+                        videoEnabled={videoEnabled}
+                        isVideoMuted={isVideoMuted}
+                        toggleVideo={toggleVideo}
+                        hasCamera={
+                          !!inputVideoStream && inputVideoStream !== "no-device"
+                        }
                       />
+
                       {inputAudioStream &&
                         inputAudioStream !== "no-device" &&
                         !line?.programOutputLine && (
@@ -554,9 +974,16 @@ export const ProductionLine = ({
                             dominantSpeaker={dominantSpeaker}
                             audioLevelAboveThreshold={audioLevelAboveThreshold}
                             programOutputLine={line.programOutputLine}
+                            videoEnabled={line.videoEnabled}
                             setConfirmModalOpen={setConfirmModalOpen}
                             setUserId={setUserId}
                             setUserName={setUserName}
+                            pinnedVideoSessionId={pinnedVideoSessionId}
+                            whepSourceSessionId={
+                              line.whepSourceSessionId ?? null
+                            }
+                            onPin={handlePin}
+                            onSetWhep={handleSetWhep}
                           />
                         )}
                       </CollapsableSection>
@@ -575,7 +1002,7 @@ export const ProductionLine = ({
                           )}
                         </ButtonWrapper>
                       )}
-                    </div>
+                    </ListInnerWrapper>
                   </ListWrapper>
                   <ListWrapper>
                     {confirmModalOpen && (
@@ -595,6 +1022,15 @@ export const ProductionLine = ({
                         onCancel={() => setConfirmModalOpen(false)}
                       />
                     )}
+                    {pendingWhepTargetSessionId && whepConfirmTexts && (
+                      <ConfirmationModal
+                        title={whepConfirmTexts.title}
+                        description={whepConfirmTexts.description}
+                        confirmationText={whepConfirmTexts.confirmationText}
+                        onConfirm={confirmSetWhep}
+                        onCancel={() => setPendingWhepTargetSessionId(null)}
+                      />
+                    )}
                   </ListWrapper>
                 </FlexContainer>
               )}
@@ -612,6 +1048,29 @@ export const ProductionLine = ({
               onClose={() => setHotkeysModalOpen(false)}
               onSave={() => setHotkeysModalOpen(false)}
             />
+          )}
+          {userOptionsTarget && (
+            <>
+              <PinDialogBackdrop onClick={() => setUserOptionsTarget(null)} />
+              <PinDialogPopover
+                top={userOptionsTarget.rect.bottom + 4}
+                left={userOptionsTarget.rect.left}
+              >
+                <VideoOptionsDialogue
+                  isPinned={pinnedSessionId === userOptionsTarget.sessionId}
+                  isWhepSource={
+                    (line?.whepSourceSessionId ?? null) ===
+                    userOptionsTarget.sessionId
+                  }
+                  onPin={() => {
+                    handlePin(userOptionsTarget.sessionId);
+                  }}
+                  onSelectAsWhep={() =>
+                    handleSetWhep(userOptionsTarget.sessionId)
+                  }
+                />
+              </PinDialogPopover>
+            </>
           )}
         </CallContainer>
       )}

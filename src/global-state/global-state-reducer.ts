@@ -10,6 +10,7 @@ export const initialGlobalState: TGlobalState = {
   devices: {
     input: null,
     output: null,
+    videoInput: null,
   },
   userSettings: {},
   selectedProductionId: null,
@@ -30,20 +31,25 @@ export const globalReducer: Reducer<TGlobalState, TGlobalStateAction> = (
     case "ERROR": {
       const { callId, error } = action.payload;
 
-      if (callId && error) {
-        // Call-specific error
+      if (callId) {
+        // Call-specific error. A truthy error sets the banner; a null error
+        // clears it, so a call can recover its UI once a transient backend
+        // outage (e.g. a MongoDB primary failover) ends.
+        const callErrors = { ...state.error.callErrors };
+        if (error) {
+          callErrors[callId] = error;
+        } else {
+          delete callErrors[callId];
+        }
         return {
           ...state,
           error: {
             ...state.error,
-            callErrors: {
-              ...state.error.callErrors,
-              [callId]: error,
-            },
+            callErrors,
           },
         };
       }
-      // Global error
+      // Global error (set or clear)
       return {
         ...state,
         error: {

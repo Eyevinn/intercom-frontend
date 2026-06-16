@@ -73,8 +73,16 @@ test.describe("Create Production", () => {
     await createProductionPage.goto();
     await createProductionPage.addLineButton.click();
     // Both lines should have Audio Feed checkboxes
+    await expect(createProductionPage.page.getByText("Audio Feed")).toHaveCount(
+      2
+    );
+    // ...and both should also offer the per-line video toggle, so the total
+    // checkbox count is two per line.
+    await expect(
+      createProductionPage.page.getByText("Video Enabled")
+    ).toHaveCount(2);
     const checkboxes = createProductionPage.page.getByRole("checkbox");
-    await expect(checkboxes).toHaveCount(2);
+    await expect(checkboxes).toHaveCount(4);
   });
 
   test("shows line numbers on cards", async ({ createProductionPage }) => {
