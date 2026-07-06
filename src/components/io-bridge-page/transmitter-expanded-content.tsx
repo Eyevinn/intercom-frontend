@@ -36,15 +36,6 @@ export const ExpandedContent = ({
 
       <PropKey>Mode:</PropKey>
       <PropValue>{transmitter.mode}</PropValue>
-
-      <PropKey>No Video:</PropKey>
-      <PropValue>{transmitter.noVideo ? "true" : "false"}</PropValue>
-
-      <PropKey>Transcode Video to VP8:</PropKey>
-      <PropValue>{transmitter.vp8 ? "true" : "false"}</PropValue>
-
-      <PropKey>Bypass Video:</PropKey>
-      <PropValue>{transmitter.bypassVideo ? "true" : "false"}</PropValue>
     </>
   );
 

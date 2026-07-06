@@ -1,4 +1,4 @@
-import { Controller, SubmitHandler, useForm, useWatch } from "react-hook-form";
+import { SubmitHandler, useForm, useWatch } from "react-hook-form";
 import { useEffect, useMemo, useState } from "react";
 import {
   BoldHeader,
@@ -21,8 +21,6 @@ import { useCreateTransmitter } from "../../../hooks/use-create-transmitter";
 import { useSubmitOnEnter } from "../../../hooks/use-submit-form-enter-press";
 import { SpinnerWrapper } from "../../delete-button/delete-button-components";
 import { Spinner } from "../../loader/loader";
-import { Checkbox } from "../../checkbox/checkbox";
-
 type FormValues = {
   label?: string;
   port: number;
@@ -32,9 +30,6 @@ type FormValues = {
   lineId: number;
   passThroughUrl?: string;
   whipUsername: string;
-  noVideo?: boolean;
-  vp8?: boolean;
-  bypassVideo?: boolean;
   status: "idle" | "running" | "stopped" | "failed";
 };
 
@@ -276,58 +271,6 @@ export const AddTransmitterForm = ({ onSave }: AddTransmitterFormProps) => {
           <FormInput
             // eslint-disable-next-line
             {...register("passThroughUrl")}
-          />
-        </FormItem>
-
-        <FormItem fieldName="noVideo" errors={errors}>
-          <Controller
-            name="noVideo"
-            control={control}
-            render={({ field }) => (
-              <Checkbox
-                label="No Video (Audio Only)"
-                checked={field.value || false}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  field.onChange(e.target.checked)
-                }
-              />
-            )}
-          />
-        </FormItem>
-
-        <FormItem fieldName="vp8" errors={errors}>
-          <Controller
-            name="vp8"
-            control={control}
-            render={({ field }) => (
-              <Checkbox
-                label="Transcode Video to VP8"
-                checked={field.value || false}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  const checked = e.target.checked;
-                  field.onChange(checked);
-                  if (checked) setValue("bypassVideo", false);
-                }}
-              />
-            )}
-          />
-        </FormItem>
-
-        <FormItem fieldName="bypassVideo" errors={errors}>
-          <Controller
-            name="bypassVideo"
-            control={control}
-            render={({ field }) => (
-              <Checkbox
-                label="Bypass Video"
-                checked={field.value || false}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  const checked = e.target.checked;
-                  field.onChange(checked);
-                  if (checked) setValue("vp8", false);
-                }}
-              />
-            )}
           />
         </FormItem>
 
