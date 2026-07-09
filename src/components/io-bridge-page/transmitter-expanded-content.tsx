@@ -23,7 +23,9 @@ export const ExpandedContent = ({
   refresh,
 }: ExpandedContentProps) => {
   // eslint-disable-next-line no-underscore-dangle
-  const { toggle, loading: toggleLoading } = useToggleTransmitter(transmitter._id);
+  const { toggle, loading: toggleLoading } = useToggleTransmitter(
+    transmitter._id
+  );
   const { updateTransmitter } = useUpdateTransmitter();
 
   const extraRows = (

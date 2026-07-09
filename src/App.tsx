@@ -174,7 +174,9 @@ const AppContent = ({
                   />
                   <Route
                     path="/manage-io-bridge"
-                    element={<IOBridgePage setApiError={() => setApiError(true)} />}
+                    element={
+                      <IOBridgePage setApiError={() => setApiError(true)} />
+                    }
                     errorElement={<ErrorPage />}
                   />
                   <Route
