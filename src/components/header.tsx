@@ -2,6 +2,7 @@ import styled from "@emotion/styled";
 import { FC, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { HeadsetIcon } from "../assets/icons/icon.tsx";
+import { UserMenu } from "../auth/user-menu.tsx";
 import { backgroundColour } from "../css-helpers/defaults.ts";
 import { mediaQueries } from "./generic-components.ts";
 import { useGlobalState } from "../global-state/context-provider.tsx";
@@ -12,6 +13,9 @@ const HeaderWrapper = styled.div`
   width: 100%;
   background: ${backgroundColour};
   margin: 0 0 1rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 `;
 
 const HomeButton = styled.button`
@@ -85,6 +89,7 @@ export const Header: FC = () => {
           <HeadsetIcon />
           Open Intercom
         </HomeButton>
+        <UserMenu />
       </HeaderWrapper>
       {confirmExitModalOpen && (
         <ConfirmationModal

@@ -1,10 +1,10 @@
+import { authHeaders } from "../auth/access-token.ts";
 import { handleFetchRequest } from "./handle-fetch-request.ts";
 
 const API_VERSION = import.meta.env.VITE_BACKEND_API_VERSION ?? "api/v1/";
 const API_URL =
   `${import.meta.env.VITE_BACKEND_URL.replace(/\/+$/, "")}/${API_VERSION}` ||
   `${window.location.origin}/${API_VERSION}`;
-const API_KEY = import.meta.env.VITE_BACKEND_API_KEY;
 
 export type TPresetCall = {
   productionId: string;
@@ -109,7 +109,7 @@ export const API = {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
+          ...authHeaders(),
         },
         body: JSON.stringify({
           name,
@@ -126,7 +126,7 @@ export const API = {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
+          ...authHeaders(),
         },
         body: JSON.stringify({
           name,
@@ -143,7 +143,7 @@ export const API = {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
+          ...authHeaders(),
         },
         body: JSON.stringify({
           name,
@@ -159,7 +159,7 @@ export const API = {
       fetch(`${API_URL}productionlist?${searchParams}`, {
         method: "GET",
         headers: {
-          ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
+          ...authHeaders(),
         },
       })
     ),
@@ -168,7 +168,7 @@ export const API = {
       fetch(`${API_URL}production/${id}`, {
         method: "GET",
         headers: {
-          ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
+          ...authHeaders(),
         },
       })
     ),
@@ -177,7 +177,7 @@ export const API = {
       fetch(`${API_URL}production/${id}`, {
         method: "DELETE",
         headers: {
-          ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
+          ...authHeaders(),
         },
       })
     ),
@@ -186,7 +186,7 @@ export const API = {
       fetch(`${API_URL}production/${id}/line`, {
         method: "GET",
         headers: {
-          ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
+          ...authHeaders(),
         },
       })
     ),
@@ -195,7 +195,7 @@ export const API = {
       fetch(`${API_URL}production/${productionId}/line/${lineId}`, {
         method: "GET",
         headers: {
-          ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
+          ...authHeaders(),
         },
       })
     ),
@@ -209,7 +209,7 @@ export const API = {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
+          ...authHeaders(),
         },
         body: JSON.stringify({
           name,
@@ -225,7 +225,7 @@ export const API = {
       fetch(`${API_URL}production/${productionId}/line/${lineId}`, {
         method: "DELETE",
         headers: {
-          ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
+          ...authHeaders(),
         },
       })
     ),
@@ -240,7 +240,7 @@ export const API = {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
+          ...authHeaders(),
         },
         body: JSON.stringify({
           productionId,
@@ -258,7 +258,7 @@ export const API = {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
+          ...authHeaders(),
         },
         body: JSON.stringify({
           sdpAnswer,
@@ -272,7 +272,7 @@ export const API = {
       fetch(`${API_URL}session/${sessionId}`, {
         method: "DELETE",
         headers: {
-          ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
+          ...authHeaders(),
         },
       })
     ),
@@ -281,7 +281,7 @@ export const API = {
       fetch(`${API_URL}heartbeat/${sessionId}`, {
         method: "GET",
         headers: {
-          ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
+          ...authHeaders(),
         },
       })
     ),
@@ -291,7 +291,7 @@ export const API = {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
+          ...authHeaders(),
         },
         body: JSON.stringify({
           path,
@@ -304,7 +304,7 @@ export const API = {
       fetch(`${API_URL}reauth`, {
         method: "GET",
         headers: {
-          ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
+          ...authHeaders(),
         },
       })
     );
@@ -319,7 +319,7 @@ export const API = {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
+          ...authHeaders(),
         },
         body: JSON.stringify(options),
       })
@@ -329,7 +329,7 @@ export const API = {
       fetch(`${API_URL}preset`, {
         method: "GET",
         headers: {
-          ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
+          ...authHeaders(),
         },
       })
     ),
@@ -337,7 +337,7 @@ export const API = {
     const response = await fetch(`${API_URL}preset/${id}`, {
       method: "DELETE",
       headers: {
-        ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
+        ...authHeaders(),
       },
     });
     if (!response.ok || response.status !== 204) {
@@ -357,7 +357,7 @@ export const API = {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
+          ...authHeaders(),
         },
         body: JSON.stringify(update),
       })
