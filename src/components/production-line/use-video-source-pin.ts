@@ -2,11 +2,6 @@ import { useCallback, useRef } from "react";
 import { API } from "../../api/api.ts";
 import { TJoinProductionOptions } from "./types.ts";
 
-// The backend returns 425 when a pin is requested but the source publisher's
-// SDP (and therefore its video.ssrcs) hasn't landed in the DB yet — a race
-// right after the source joins, or across intercom-manager replicas. Retry a
-// few times with backoff so the pin eventually applies instead of being
-// silently stuck on the wrong (rotated) video.
 const PIN_RETRY_DELAYS_MS = [300, 600, 1000, 1500, 2000];
 
 const delay = (ms: number) =>

@@ -92,10 +92,6 @@ export const SelectDevices = ({
       resetAudioInput();
       muteInput();
 
-      // Spread the existing joinProductionOptions first so we keep
-      // fields the form doesn't surface (videoEnabled, lineName,
-      // productionName, ...); otherwise a mic change reconnects the
-      // call audio-only and drops the video track.
       const newJoinProductionOptions = {
         ...joinProductionOptions,
         audioinput: payload.audioinput,

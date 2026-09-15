@@ -1,5 +1,9 @@
 import styled from "@emotion/styled";
 import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  FullscreenExitIcon,
+  FullscreenIcon,
+} from "../../assets/icons/icon.tsx";
 import { TUseVideoInputValues } from "./use-video-input";
 import {
   exitTileFullscreen,
@@ -7,30 +11,6 @@ import {
   makePipDraggable,
   requestTileFullscreen,
 } from "./video-element-factory";
-
-const FullscreenIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    height="18px"
-    viewBox="0 -960 960 960"
-    width="18px"
-    fill="currentColor"
-  >
-    <path d="M120-120v-200h80v120h120v80H120Zm520 0v-80h120v-120h80v200H640ZM120-640v-200h200v80H200v120h-80Zm640 0v-120H640v-80h200v200h-80Z" />
-  </svg>
-);
-
-const FullscreenExitIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    height="18px"
-    viewBox="0 -960 960 960"
-    width="18px"
-    fill="currentColor"
-  >
-    <path d="M240-120v-120H120v-80h200v200h-80Zm400 0v-200h200v80H720v120h-80ZM120-640v-80h120v-120h80v200H120Zm520 0v-200h80v120h120v80H640Z" />
-  </svg>
-);
 
 type FullscreenState = {
   isFullscreen: boolean;
@@ -95,6 +75,13 @@ const FullscreenButton = styled.button<FullscreenState>`
     return showOverlay ? 1 : 0;
   }};
   transition: opacity 0.3s;
+
+  & svg {
+    width: 1.8rem;
+    height: 1.8rem;
+    fill: currentColor;
+    display: block;
+  }
 `;
 
 const PipContainer = styled.div<{ visible: boolean }>`
@@ -103,11 +90,6 @@ const PipContainer = styled.div<{ visible: boolean }>`
   bottom: 1rem;
   left: 1rem;
   width: 22rem;
-  /* Definite height rather than aspect-ratio: with a <video> child sized at
-     height: 100%, WebKit re-derives an aspect-ratio box's height from its
-     content on every layout pass, so dragging the PiP inflates it without
-     bound (measured 160px -> 26,843,546px in Safari, which then breaks the
-     drag clamp). 12.375rem is 22rem * 9/16. */
   height: 12.375rem;
   border-radius: 0.5rem;
   overflow: hidden;
@@ -164,14 +146,19 @@ const ExitFullscreenButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
+
+  & svg {
+    width: 1.8rem;
+    height: 1.8rem;
+    fill: currentColor;
+    display: block;
+  }
 `;
 
 type ReturnFeedTileProps = {
   stream: MediaStream | null;
   cameraStream?: TUseVideoInputValues;
-  /** Display name for the return-feed label. Falls back to "Return Feed" when null. */
   label?: string | null;
-  /** Display name for the camera PiP inset. Falls back to "CAM" when null. */
   cameraLabel?: string | null;
 };
 

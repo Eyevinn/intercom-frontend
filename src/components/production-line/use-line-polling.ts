@@ -20,19 +20,11 @@ export const useLinePolling = ({ callId, joinProductionOptions }: TProps) => {
     let consecutiveFailureCount = 0;
     const productionId = parseInt(joinProductionOptions.productionId, 10);
     const lineId = parseInt(joinProductionOptions.lineId, 10);
-
-    // Surface an error to the user after this many consecutive failures, but
-    // keep polling regardless — the backend may be briefly unavailable (e.g. a
-    // MongoDB primary failover, which re-elects within ~10s). Stopping the
-    // poll here used to leave the call permanently stuck until a manual reload;
-    // instead we retry for the lifetime of the call and recover on our own.
     const ERROR_AFTER_FAILURES = 5;
 
     const interval = window.setInterval(() => {
       API.fetchProductionLine(productionId, lineId)
         .then((l) => {
-          // Recovered after a sustained outage — clear the error banner so the
-          // call returns to normal without the user having to rejoin.
           if (consecutiveFailureCount >= ERROR_AFTER_FAILURES) {
             dispatch({ type: "ERROR", payload: { callId, error: null } });
           }
@@ -44,8 +36,6 @@ export const useLinePolling = ({ callId, joinProductionOptions }: TProps) => {
           logger.red(
             `Error fetching production line ${productionId}/${lineId}. For call-id: ${callId}`
           );
-          // Fire the error once, when we first cross the threshold — not every
-          // tick — and never stop polling, so recovery is automatic.
           if (consecutiveFailureCount === ERROR_AFTER_FAILURES) {
             dispatch({
               type: "ERROR",

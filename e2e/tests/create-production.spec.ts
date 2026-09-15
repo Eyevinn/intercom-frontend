@@ -76,8 +76,6 @@ test.describe("Create Production", () => {
     await expect(createProductionPage.page.getByText("Audio Feed")).toHaveCount(
       2
     );
-    // ...and both should also offer the per-line video toggle, so the total
-    // checkbox count is two per line.
     await expect(
       createProductionPage.page.getByText("Video Enabled")
     ).toHaveCount(2);

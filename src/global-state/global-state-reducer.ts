@@ -23,18 +23,12 @@ export const globalReducer: Reducer<TGlobalState, TGlobalStateAction> = (
   state,
   action
 ): TGlobalState => {
-  // Simple Debug
-  // logger.cyan(
-  //   `Global state action: ${action.type}, payload: ${action.payload}`
-  // );
   switch (action.type) {
     case "ERROR": {
       const { callId, error } = action.payload;
 
       if (callId) {
-        // Call-specific error. A truthy error sets the banner; a null error
-        // clears it, so a call can recover its UI once a transient backend
-        // outage (e.g. a MongoDB primary failover) ends.
+        // Call-specific error
         const callErrors = { ...state.error.callErrors };
         if (error) {
           callErrors[callId] = error;
@@ -49,7 +43,7 @@ export const globalReducer: Reducer<TGlobalState, TGlobalStateAction> = (
           },
         };
       }
-      // Global error (set or clear)
+      // Global error
       return {
         ...state,
         error: {

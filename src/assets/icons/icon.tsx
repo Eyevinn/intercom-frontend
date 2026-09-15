@@ -30,6 +30,8 @@ import VideoOn from "./video_on.svg?react";
 import VideoOff from "./video_off.svg?react";
 import Pin from "./pin.svg?react";
 import Unpin from "./unpin.svg?react";
+import Fullscreen from "./fullscreen.svg?react";
+import FullscreenExit from "./fullscreen_exit.svg?react";
 
 export const MicMuted = () => <MicMute />;
 
@@ -94,3 +96,7 @@ export const VideoOffIcon = () => <VideoOff />;
 export const PinIcon = () => <Pin />;
 
 export const UnpinIcon = () => <Unpin />;
+
+export const FullscreenIcon = () => <Fullscreen />;
+
+export const FullscreenExitIcon = () => <FullscreenExit />;

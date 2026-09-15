@@ -772,13 +772,6 @@ export const ProductionLine = ({
         null;
       setPinnedContainer(container);
     }
-    // Keep SMB's native pin (PinnedEndpointsChanged over the data channel) in
-    // sync with the whitelist pin. A manual re-pin previously updated only the
-    // manager-side ssrc-whitelist while _pinMap stayed on the PREVIOUSLY pinned
-    // source; when that earlier source later left the call, SMB tore down the
-    // now-dangling pin and the receiver's video collapsed (audio, which is not
-    // pinned, was unaffected). The auto-pin effect already syncs both — manual
-    // pins must too.
     desiredPinEndpointIdRef.current = nextEndpointId;
     sendPinnedEndpoint(dataChannel, nextEndpointId);
     pendingPinPromiseRef.current = pushVideoSourceToBackend(next);

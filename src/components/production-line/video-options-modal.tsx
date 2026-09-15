@@ -1,11 +1,8 @@
 import styled from "@emotion/styled";
 
 type VideoOptionsDialogueProps = {
-  /** Whether this target is currently this user's per-session pinned video. */
   isPinned?: boolean;
-  /** Whether this target is currently the line's WHEP egress source. */
   isWhepSource?: boolean;
-  /** Toggle the per-session video pin. */
   onPin: () => void;
   onSelectAsWhep?: () => void;
 };

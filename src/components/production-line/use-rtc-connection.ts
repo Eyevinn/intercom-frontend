@@ -165,37 +165,11 @@ const establishConnection = ({
         };
 
         track.addEventListener("ended", removeThisElement);
-        // Deliberately do NOT add a `mute` handler that hides the tile. `mute`
-        // fires on any brief interruption in the egress RTP — a simulcast layer
-        // switch at the SFU, a packet-loss burst, a jitterbuffer skew reset —
-        // and hiding instantly produced a visible disappear/reappear flicker
-        // when the media resumed a moment later via `unmute`. Tile visibility is
-        // owned by the frame-liveness monitor (attachShowWhenReady), which hides
-        // only after frames have genuinely stopped for ~1.5s. So a transient gap
-        // now shows a brief freeze (far less jarring than a flicker) and a truly
-        // departed source still gets hidden after the grace period.
         track.addEventListener("unmute", () => {
-          // The backend reuses a single egress slot and never renegotiates:
-          // when the pinned source changes, this same track's media is swapped
-          // to the new publisher, which fires `unmute`. The tile's
-          // `lastSessionId` still points at the departed source, which would
-          // keep the matcher from rebinding it. Fresh media voids the old
-          // binding — clear it so the label re-resolves to the active source.
           videoElement.dataset.lastSessionId = "";
-          // Safari may fire `unmute` before videoWidth/videoHeight are
-          // populated for remote MediaStream tracks. Trust the unmute
-          // signal and re-attach the show-when-ready logic so the tile
-          // becomes visible as soon as the first frame is presented.
           const parent = videoElement.parentElement;
           if (parent) attachShowWhenReady(videoElement, parent);
-          // The element may have been paused/idled while the egress slot was
-          // silent. After a mute->unmute on the SAME ssrc-rewrite track,
-          // WebKit/Safari will not resume painting on its own — re-issue
-          // play() so the swapped-in source's first frame is rendered. Harmless
-          // on Chrome/Firefox (which resume automatically).
           videoElement.play().catch(() => {});
-          // Force a re-render so the grid effect re-mounts this recycled slot
-          // (it may have been removed from the DOM while the source was gone).
           setVideoElements((current) => [...current]);
         });
 

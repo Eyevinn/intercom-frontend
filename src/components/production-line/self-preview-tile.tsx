@@ -145,11 +145,6 @@ const PipContainer = styled.div<{ visible: boolean; isWhip: boolean }>`
   bottom: 1rem;
   left: 1rem;
   width: 22rem;
-  /* Definite height rather than aspect-ratio: with a <video> child sized at
-     height: 100%, WebKit re-derives an aspect-ratio box's height from its
-     content on every layout pass, so dragging the PiP inflates it without
-     bound (measured 160px -> 26,843,546px in Safari, which then breaks the
-     drag clamp). 12.375rem is 22rem * 9/16. */
   height: 12.375rem;
   border-radius: 0.5rem;
   overflow: hidden;

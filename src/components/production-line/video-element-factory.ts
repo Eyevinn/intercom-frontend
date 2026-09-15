@@ -1,4 +1,7 @@
 /* eslint-disable no-param-reassign, @typescript-eslint/no-use-before-define */
+import fullscreenIcon from "../../assets/icons/fullscreen.svg?raw";
+import fullscreenExitIcon from "../../assets/icons/fullscreen_exit.svg?raw";
+
 type VideoWithIOSFullscreen = HTMLVideoElement & {
   webkitEnterFullscreen?: () => void;
 };
@@ -62,10 +65,16 @@ const WHIP_COLOR = "rgba(89, 203, 232, 0.82)";
 const OPTIONS_BTN_BG_DEFAULT = "rgba(0, 0, 0, 0.45)";
 const OPTIONS_BTN_BG_PINNED = "rgba(89, 203, 232, 0.80)";
 
-const FS_ENTER_SVG =
-  '<svg xmlns="http://www.w3.org/2000/svg" height="18" viewBox="0 -960 960 960" width="18" fill="currentColor"><path d="M120-120v-200h80v120h120v80H120Zm520 0v-80h120v-120h80v200H640ZM120-640v-200h200v80H200v120h-80Zm640 0v-120H640v-80h200v200h-80Z"/></svg>';
-const FS_EXIT_SVG =
-  '<svg xmlns="http://www.w3.org/2000/svg" height="18" viewBox="0 -960 960 960" width="18" fill="currentColor"><path d="M240-120v-120H120v-80h200v200h-80Zm400 0v-200h200v80H720v120h-80ZM120-640v-80h120v-120h80v200H120Zm520 0v-200h80v120h120v80H640Z"/></svg>';
+const ICON_SIZE = "1.8rem";
+
+const setButtonIcon = (btn: HTMLButtonElement, icon: string) => {
+  btn.innerHTML = icon;
+  const svg = btn.firstElementChild;
+  if (!svg) return;
+  svg.setAttribute("width", ICON_SIZE);
+  svg.setAttribute("height", ICON_SIZE);
+  svg.setAttribute("fill", "currentColor");
+};
 
 const applyLabelStyle = (label: HTMLSpanElement) => {
   label.style.position = "absolute";
@@ -120,7 +129,7 @@ export const createVideoTileContainer = (): {
   fsBtn.style.opacity = "0.7";
   fsBtn.style.transition = "opacity 0.15s, background 0.15s";
   fsBtn.title = "Fullscreen";
-  fsBtn.innerHTML = FS_ENTER_SVG;
+  setButtonIcon(fsBtn, fullscreenIcon);
 
   fsBtn.addEventListener("mouseenter", () => {
     fsBtn.style.opacity = "1";
@@ -133,7 +142,7 @@ export const createVideoTileContainer = (): {
 
   const handleFsChange = () => {
     const isFs = document.fullscreenElement === container;
-    fsBtn.innerHTML = isFs ? FS_EXIT_SVG : FS_ENTER_SVG;
+    setButtonIcon(fsBtn, isFs ? fullscreenExitIcon : fullscreenIcon);
     fsBtn.title = isFs ? "Exit fullscreen" : "Fullscreen";
     const pip = container.querySelector<HTMLDivElement>("[data-camera-pip]");
     if (pip) {
@@ -207,11 +216,6 @@ export const createVideoTileContainer = (): {
   pip.style.bottom = "1rem";
   pip.style.left = "1rem";
   pip.style.width = "22rem";
-  // Definite height rather than aspectRatio: with a <video> child sized at
-  // height: 100%, WebKit re-derives an aspect-ratio box's height from its
-  // content on every layout pass, so dragging the PiP inflates it without
-  // bound (measured 160px -> 26,843,546px in Safari) and leaves the video
-  // short of the frame. 12.375rem is 22rem * 9/16.
   pip.style.height = "12.375rem";
   pip.style.borderRadius = "0.5rem";
   pip.style.overflow = "hidden";
@@ -398,28 +402,10 @@ export const updateVideoTileContainerPinned = (
   btn.style.opacity = isPinned ? "1" : "0.7";
 };
 
-// How long without a freshly presented video frame before a tile is treated
-// as stalled and hidden. Long enough to ride out normal jitter AND transient
-// stalls (a keyframe wait after an SFU simulcast-layer switch, a brief
-// requestVideoFrameCallback throttle when the tile is briefly off-screen or
-// under load) so they show as a momentary freeze rather than a hide/re-show
-// flicker; short enough that a departed source's frozen frame doesn't linger.
 const FRAME_STALL_MS = 3000;
 
-// Per-element teardown for the frame-liveness monitor below. A WeakMap keeps
-// the element clean and lets the entry be GC'd with the element.
 const frameMonitorCleanups = new WeakMap<HTMLVideoElement, () => void>();
 
-// Owns a remote tile's visibility: shows it once real video frames are being
-// presented and hides it again when they stop — driven by
-// requestVideoFrameCallback (actual presented frames), NOT the participant
-// list or the track `mute` event. Both of those are unreliable for an SMB
-// ssrc-rewrite egress slot: when the last publisher leaves, the bridge keeps
-// the egress alive in last-N mode, so `mute` fires late or never and the
-// participant's `hasVideo` flag lags the real media (which previously caused
-// either a frozen last frame on leave or a wrongly-hidden tile on rejoin).
-// Frame flow is the one signal that distinguishes frozen from live.
-// Idempotent: re-attaching cancels the previous monitor on the same element.
 export const attachShowWhenReady = (
   videoElement: HTMLVideoElement,
   container: HTMLElement
@@ -481,15 +467,6 @@ export const attachShowWhenReady = (
   };
   frameHandle = rvfc.call(videoElement, onFrame);
 
-  // Hide ONLY when the receiver track is actually muted. rVFC AND currentTime
-  // both get throttled together when the element isn't being composited
-  // (off-screen, or under compositor/main-thread load) while the media keeps
-  // decoding fine — confirmed in the wild as a hide/show flicker with NO
-  // getStats freeze (framesDecoded kept advancing). `track.muted` is driven by
-  // real RTP reception, not rendering, so it stays false through such a
-  // throttle and only goes true when the media genuinely stops — which is the
-  // only time we want to blank the tile. The frame/currentTime stalls are kept
-  // as a grace window so a brief (<3s) mute doesn't flap the tile.
   const stallTimer = setInterval(() => {
     if (aborted) return;
     const now = performance.now();
@@ -507,10 +484,6 @@ export const attachShowWhenReady = (
     const framesStalled = now - lastFrameAt > FRAME_STALL_MS;
     const mediaStalled = now - lastMediaAdvanceAt > FRAME_STALL_MS;
 
-    // Hide only when frames AND currentTime have both stalled past the grace
-    // window AND the track is genuinely muted. rVFC + currentTime can both be
-    // throttled while media still flows (off-screen / compositor load); the
-    // track.muted gate prevents hiding the tile in that case.
     if (framesStalled && mediaStalled && mediaStopped) {
       setVisible(false);
     }
@@ -529,8 +502,6 @@ export const attachShowWhenReady = (
   });
 };
 
-// Stops a tile's frame-liveness monitor (timer + rVFC loop). Call when the
-// underlying track has genuinely ended and the element is being torn down.
 export const stopFrameMonitor = (videoElement: HTMLVideoElement): void => {
   frameMonitorCleanups.get(videoElement)?.();
 };
@@ -546,7 +517,7 @@ export const createVideoElement = ({
 
   videoElement.id = `rtc-video-${lineId}-${Date.now()}`;
   videoElement.autoplay = true;
-  videoElement.playsInline = true; // Required for iOS/Safari autoplay
+  videoElement.playsInline = true;
   videoElement.muted = true;
   videoElement.srcObject = stream;
 

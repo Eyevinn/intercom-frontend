@@ -39,10 +39,8 @@ export const useInitiateProductionCall = ({
         // On quick page load, permission may not yet be confirmed, causing
         // getUpdatedDevices() to return empty arrays — skip validation in
         // that case and let getUserMedia handle truly unavailable devices.
-        // If the stored input/output device is no longer available, fall
-        // back to the first available device rather than blocking the
-        // user. Only error if there are zero output devices at all (and
-        // we're on a browser that exposes audiooutput selection).
+        // If the stored input device is no longer available, fall back to
+        // the first available device rather than blocking the user.
         let effectiveAudioInput = payload.joinProductionOptions.audioinput;
         let effectiveAudioOutput = payload.audiooutput;
 
@@ -61,9 +59,6 @@ export const useInitiateProductionCall = ({
 
           if (!outputDeviceExists && !isBrowserSafari && !isMobile && !isIpad) {
             if (updatedDevices.output.length > 0) {
-              // Stored output device gone but another exists — mirror
-              // the input fallback so a missing/unplugged speaker
-              // doesn't block joining.
               effectiveAudioOutput = updatedDevices.output[0].deviceId;
             } else {
               dispatch({

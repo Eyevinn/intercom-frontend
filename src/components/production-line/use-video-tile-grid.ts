@@ -57,17 +57,6 @@ export const useVideoTileGrid = ({
         (p) => p.sessionId === tracked && p.isActive && p.hasVideo
       );
       if (liveBacking) return;
-      // The egress is a single persistent ssrc-rewrite slot: its track stays
-      // `live` across source swaps/leaves and only momentarily stops carrying
-      // media while no publisher feeds it. Keep the tile MOUNTED as long as
-      // the track is live so an `unmute` (re-pin / rejoin) can recover it in
-      // place — removing it from the DOM on a mere silence caused a detach
-      // race (rvfc doesn't fire while detached; Safari loses the decode
-      // pipeline) that left the tile black after the source returned.
-      // Showing/hiding the tile (frozen-frame suppression) is owned by the
-      // per-element frame-liveness monitor in attachShowWhenReady, which keys
-      // off actual presented frames rather than this list or the `mute` event.
-      // Only drop the slot once the track has genuinely ended.
       const trackAlive =
         el.srcObject instanceof MediaStream &&
         el.srcObject.getVideoTracks().some((t) => t.readyState === "live");
@@ -92,7 +81,6 @@ export const useVideoTileGrid = ({
       updateVideoTileLabel(videoEl, name, isWhip);
     });
 
-    // Remove stale tiles then reorder (pinned tile first).
     Array.from(mainGrid.children).forEach((child) => {
       if (!currentTileSet.has(child)) mainGrid.removeChild(child);
     });
@@ -119,8 +107,6 @@ export const useVideoTileGrid = ({
     tileMatches,
   ]);
 
-  // Auto-clear the pin when the pinned tile's underlying stream is
-  // removed (publisher left the line).
   useEffect(() => {
     if (!pinnedContainer) return;
     const tiles = (videoElements || []).map((el) => el.parentElement ?? el);
@@ -129,7 +115,6 @@ export const useVideoTileGrid = ({
     }
   }, [videoElements, pinnedContainer, onAutoUnpin]);
 
-  // Update the pinned-tile visual state (CSS order + container styling).
   useEffect(() => {
     (videoElements || []).forEach((el) => {
       const tile = el.parentElement as HTMLElement;
@@ -197,10 +182,6 @@ export const useVideoTileGrid = ({
       };
     });
 
-    // Wait until the SFU has acknowledged the pin swap before listening for
-    // the "first new frame" — otherwise the previous publisher's video keeps
-    // flowing during the backend round-trip and an rvfc fire would clear the
-    // spinner over a frozen old frame.
     const pinSettled = pendingPinPromiseRef.current ?? Promise.resolve();
 
     pinSettled.finally(() => {
@@ -229,8 +210,6 @@ export const useVideoTileGrid = ({
           };
           handleRef.value = rvfc.call(videoEl, onFrame);
         } else {
-          // No rvfc support — fall back to clearing immediately after the
-          // backend confirms; better than holding a spinner forever.
           clear();
         }
       });
