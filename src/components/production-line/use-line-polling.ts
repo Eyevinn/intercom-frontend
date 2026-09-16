@@ -10,6 +10,13 @@ type TProps = {
   joinProductionOptions: TJoinProductionOptions | null;
 };
 
+const isAbortError = (err: unknown): boolean =>
+  err instanceof DOMException && err.name === "AbortError";
+
+// Fetches the line once for its metadata, then keeps the participant list
+// current through the manager's long-poll endpoint instead of interval polling:
+// each request is held open server-side until participants change (or it times
+// out), and is re-issued immediately when it resolves.
 export const useLinePolling = ({ callId, joinProductionOptions }: TProps) => {
   const [line, setLine] = useState<TLine | null>(null);
   const [, dispatch] = useGlobalState();
@@ -17,49 +24,78 @@ export const useLinePolling = ({ callId, joinProductionOptions }: TProps) => {
   useEffect(() => {
     if (!joinProductionOptions) return noop;
 
+    let cancelled = false;
     let consecutiveFailureCount = 0;
+    const controller = new AbortController();
     const productionId = parseInt(joinProductionOptions.productionId, 10);
     const lineId = parseInt(joinProductionOptions.lineId, 10);
 
-    const interval = window.setInterval(() => {
-      API.fetchProductionLine(productionId, lineId)
-        .then((l) => {
-          consecutiveFailureCount = 0;
-          setLine(l);
-        })
-        .catch(() => {
-          consecutiveFailureCount += 1;
-          logger.red(
-            `Error fetching production line ${productionId}/${lineId}. For call-id: ${callId}`
-          );
-          if (consecutiveFailureCount >= 5) {
-            dispatch({
-              type: "ERROR",
-              payload: {
-                callId,
-                error: new Error(
-                  `Could not fetch production line ${productionId}/${lineId}. For call-id: ${callId}`
-                ),
-              },
-            });
-          }
-          if (consecutiveFailureCount >= 10) {
-            dispatch({
-              type: "ERROR",
-              payload: {
-                callId,
-                error: new Error(
-                  "Line polling stopped after 10 consecutive failures."
-                ),
-              },
-            });
-            window.clearInterval(interval);
-          }
+    const handleFailure = () => {
+      consecutiveFailureCount += 1;
+      logger.red(
+        `Error fetching production line ${productionId}/${lineId}. For call-id: ${callId}`
+      );
+      if (consecutiveFailureCount >= 5) {
+        dispatch({
+          type: "ERROR",
+          payload: {
+            callId,
+            error: new Error(
+              `Could not fetch production line ${productionId}/${lineId}. For call-id: ${callId}`
+            ),
+          },
         });
-    }, 1000);
+      }
+      if (consecutiveFailureCount >= 10) {
+        dispatch({
+          type: "ERROR",
+          payload: {
+            callId,
+            error: new Error(
+              "Line polling stopped after 10 consecutive failures."
+            ),
+          },
+        });
+        return false;
+      }
+      return true;
+    };
+
+    const poll = async () => {
+      if (cancelled) return;
+      try {
+        const participants = await API.fetchLineParticipants(
+          productionId,
+          lineId,
+          controller.signal
+        );
+        if (cancelled) return;
+        consecutiveFailureCount = 0;
+        setLine((prev) => (prev ? { ...prev, participants } : prev));
+      } catch (err) {
+        if (cancelled || isAbortError(err)) return;
+        if (!handleFailure()) return;
+      }
+      poll();
+    };
+
+    // Seed metadata (name, id, programOutputLine, ...) before long-polling —
+    // the long-poll endpoint returns participants only.
+    API.fetchProductionLine(productionId, lineId)
+      .then((l) => {
+        if (cancelled) return;
+        consecutiveFailureCount = 0;
+        setLine(l);
+        poll();
+      })
+      .catch((err) => {
+        if (cancelled || isAbortError(err)) return;
+        if (handleFailure()) poll();
+      });
 
     return () => {
-      window.clearInterval(interval);
+      cancelled = true;
+      controller.abort();
     };
   }, [callId, dispatch, joinProductionOptions]);
 
