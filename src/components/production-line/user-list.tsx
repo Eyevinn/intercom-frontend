@@ -58,6 +58,9 @@ const UserName = styled.span`
   text-overflow: ellipsis;
   white-space: nowrap;
   min-width: 0;
+  /* Prevent descenders (j, g, y, p, q) from being clipped by overflow: hidden */
+  line-height: 1.5;
+  padding-bottom: 0.2rem;
 `;
 
 const User = styled.div`
