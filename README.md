@@ -32,6 +32,8 @@ Decide whether or not debug mode should be on or not `VITE_DEBUG_MODE=true`
 
 Choose desired level of logging `VITE_DEV_LOGGER_LEVEL=3`
 
+Optionally set an OSC login URL with `AUTH=https://app.osaas.io/?redirect=/dashboard/service/eyevinn-intercom-manager`. When this build-time env var is set, the app redirects the browser to it whenever the manager returns a 401 (expired token or not logged in), letting the user (re)authenticate. When unset, behavior is unchanged.
+
 ```
 LOGGER LEVELS
 0 = no logs
