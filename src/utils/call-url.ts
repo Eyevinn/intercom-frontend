@@ -30,6 +30,22 @@ export function decodeCallsParam(param: string | null): CallRef[] {
   }, []);
 }
 
+/** Host[:port] only — reject schemes, paths, userinfo, and other SSRF-friendly shapes. */
+const COMPANION_HOST_RE =
+  /^(?:(?:\[[0-9a-fA-F:.]+\]|[A-Za-z0-9.-]+))(?::\d{1,5})?$/;
+
+export function isValidCompanionHost(hostPort: string): boolean {
+  if (!hostPort || hostPort.length > 253) return false;
+  if (!COMPANION_HOST_RE.test(hostPort)) return false;
+  // Reject port 0 and oversized ports.
+  const colon = hostPort.lastIndexOf(":");
+  if (colon > 0 && !hostPort.endsWith("]")) {
+    const port = Number(hostPort.slice(colon + 1));
+    if (!Number.isInteger(port) || port < 1 || port > 65535) return false;
+  }
+  return true;
+}
+
 export function buildCallsUrl(calls: CallRef[], companionUrl?: string): string {
   const base =
     calls.length === 0 ? "/calls" : `/calls?lines=${encodeCallsParam(calls)}`;
@@ -42,21 +58,6 @@ export function buildCallsUrl(calls: CallRef[], companionUrl?: string): string {
     }
   }
   return url;
-}
-
-/** Host[:port] only — reject schemes, paths, userinfo, and other SSRF-friendly shapes. */
-const COMPANION_HOST_RE = /^(?:(?:\[[0-9a-fA-F:.]+\]|[A-Za-z0-9.-]+))(?::\d{1,5})?$/;
-
-export function isValidCompanionHost(hostPort: string): boolean {
-  if (!hostPort || hostPort.length > 253) return false;
-  if (!COMPANION_HOST_RE.test(hostPort)) return false;
-  // Reject port 0 and oversized ports.
-  const colon = hostPort.lastIndexOf(":");
-  if (colon > 0 && !hostPort.endsWith("]")) {
-    const port = Number(hostPort.slice(colon + 1));
-    if (!Number.isInteger(port) || port < 1 || port > 65535) return false;
-  }
-  return true;
 }
 
 export function parseCompanionParam(param: string | null): string | undefined {
