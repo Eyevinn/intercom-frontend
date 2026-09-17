@@ -146,7 +146,7 @@ export const ProductionLine = ({
   });
 
   const videoEnabled = joinProductionOptions?.videoEnabled ?? false;
-  const [inputVideoStream] = useVideoInput({
+  const [inputVideoStream, , resetVideoInput] = useVideoInput({
     videoInputId: videoEnabled
       ? (joinProductionOptions?.videoinput ?? "no-device")
       : null,
@@ -441,6 +441,7 @@ export const ProductionLine = ({
   const exit = useCallback(() => {
     setConnectionActive(false);
     playExitSound();
+    resetVideoInput();
     dispatch({
       type: "REMOVE_CALL",
       payload: { id },
@@ -450,7 +451,28 @@ export const ProductionLine = ({
     if (isSingleCall) {
       navigate("/");
     }
-  }, [dispatch, id, playExitSound, isSingleCall, navigate, deregisterCall]);
+  }, [
+    dispatch,
+    id,
+    playExitSound,
+    resetVideoInput,
+    isSingleCall,
+    navigate,
+    deregisterCall,
+  ]);
+
+  // Stop camera tracks on unmount so the hardware/indicator is released even
+  // when the component is torn down without going through the exit button.
+  const resetVideoInputRef = useRef(resetVideoInput);
+  useEffect(() => {
+    resetVideoInputRef.current = resetVideoInput;
+  }, [resetVideoInput]);
+  useEffect(
+    () => () => {
+      resetVideoInputRef.current();
+    },
+    []
+  );
 
   useLineHotkeys({
     muteInput,

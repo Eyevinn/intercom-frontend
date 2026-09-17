@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { stopFrameMonitor } from "./video-element-factory.ts";
 
 export const useVideoElements = () => {
   const [videoElements, setVideoElements] = useState<HTMLVideoElement[]>([]);
@@ -10,6 +11,7 @@ export const useVideoElements = () => {
 
   const cleanUpVideo = useCallback(() => {
     videoElementsRef.current.forEach((el) => {
+      stopFrameMonitor(el);
       el.pause();
       // eslint-disable-next-line no-param-reassign
       el.srcObject = null;
