@@ -130,3 +130,32 @@ describe("parseCompanionParam", () => {
     expect(parseCompanionParam("example.com")).toBe("ws://example.com");
   });
 });
+
+describe("parseCompanionParam rejects unsafe hosts", () => {
+  it.each([
+    "attacker.com/malicious",
+    "user@evil.com",
+    "//evil.com",
+    "host:99999",
+    "host:0",
+    "evil.com/path",
+    " user.com ",
+  ])("rejects %s", (raw) => {
+    expect(parseCompanionParam(raw)).toBeUndefined();
+  });
+
+  it("accepts a bare host and host:port", () => {
+    expect(parseCompanionParam("companion.example")).toBe("ws://companion.example");
+    expect(parseCompanionParam("companion.example:8080")).toBe(
+      "ws://companion.example:8080"
+    );
+  });
+
+  it("strips accidental ws scheme then validates", () => {
+    expect(parseCompanionParam("ws://companion.example:8080")).toBe(
+      "ws://companion.example:8080"
+    );
+    expect(parseCompanionParam("ws://user@evil.com")).toBeUndefined();
+  });
+});
+
