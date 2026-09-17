@@ -5,7 +5,7 @@ import { Modal } from "../../modal/modal";
 type TShareLineLinkModalProps = {
   urls: string[];
   isCopyProduction?: boolean;
-  onRefresh: () => void;
+  onRefresh: (options: { guest: boolean }) => void;
   onClose: () => void;
 };
 
@@ -21,6 +21,25 @@ const Note = styled.p`
   color: rgba(255, 255, 255, 0.4);
   margin: 0.35rem 0 1.25rem;
   line-height: 1.4;
+`;
+
+const CheckboxRow = styled.label`
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+  font-size: 1.4rem;
+  color: rgba(255, 255, 255, 0.85);
+  cursor: pointer;
+  user-select: none;
+
+  input[type="checkbox"] {
+    width: 1.6rem;
+    height: 1.6rem;
+    cursor: pointer;
+    accent-color: #59cbe8;
+    flex-shrink: 0;
+  }
 `;
 
 const RowsContainer = styled.div`
@@ -146,6 +165,7 @@ export const ShareLineLinkModal = ({
   const [isLoading, setIsLoading] = useState(false);
   const [copied, setCopied] = useState(false);
   const [copiedRows, setCopiedRows] = useState<Record<number, boolean>>({});
+  const [restrictAccess, setRestrictAccess] = useState(false);
 
   useEffect(() => {
     const copyTimers = copyTimerRefs.current;
@@ -156,15 +176,23 @@ export const ShareLineLinkModal = ({
     };
   }, []);
 
-  const handleRefresh = useCallback(() => {
-    setIsLoading(true);
-    setCopied(false);
-    setCopiedRows({});
-    onRefresh();
-    refreshTimerRef.current = setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
-  }, [onRefresh]);
+  const handleRefresh = useCallback(
+    (guest: boolean) => {
+      setIsLoading(true);
+      setCopied(false);
+      setCopiedRows({});
+      onRefresh({ guest });
+      refreshTimerRef.current = setTimeout(() => {
+        setIsLoading(false);
+      }, 1000);
+    },
+    [onRefresh]
+  );
+
+  const handleRestrictToggle = (checked: boolean) => {
+    setRestrictAccess(checked);
+    handleRefresh(checked);
+  };
 
   const handleCopySingle = () => {
     const url = urls[0];
@@ -172,7 +200,7 @@ export const ShareLineLinkModal = ({
     navigator.clipboard.writeText(url).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-      handleRefresh();
+      handleRefresh(restrictAccess);
     });
   };
 
@@ -185,7 +213,7 @@ export const ShareLineLinkModal = ({
       copyTimerRefs.current[index] = setTimeout(() => {
         setCopiedRows((prev) => ({ ...prev, [index]: false }));
       }, 2000);
-      handleRefresh();
+      handleRefresh(restrictAccess);
     });
   };
 
@@ -248,6 +276,18 @@ export const ShareLineLinkModal = ({
           {singleLineLabel()}
         </FullWidthCopyButton>
       )}
+      <CheckboxRow>
+        <input
+          type="checkbox"
+          checked={restrictAccess}
+          onChange={(e) => handleRestrictToggle(e.target.checked)}
+        />
+        Restrict recipients to {isCopyProduction ? "these calls" : "this call"}
+      </CheckboxRow>
+      <Note>
+        Recipients of a restricted link only see the call they were invited to.
+        This tailors their view — it is not an access-control boundary.
+      </Note>
     </Modal>
   );
 };

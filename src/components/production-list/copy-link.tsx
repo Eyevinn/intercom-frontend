@@ -19,41 +19,39 @@ export const CopyLink = ({
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const { shareUrl, url } = useShareUrl();
 
-  const handleGenerateProductionUrls = useCallback(async () => {
-    const urls = await Promise.all(
-      production.lines.map(async (item) => {
-        const generatedUrl = await shareUrl({
-          productionId: production.productionId,
-          lineId: item.id,
-        });
-        return ` ${item.name}: ${generatedUrl}`;
-      })
-    );
-    setProductionUrls(urls);
-  }, [production.productionId, production.lines, shareUrl]);
+  const handleGenerateProductionUrls = useCallback(
+    async (guest: boolean) => {
+      const urls = await Promise.all(
+        production.lines.map(async (item) => {
+          const generatedUrl = await shareUrl({
+            productionId: production.productionId,
+            lineId: item.id,
+            guest,
+          });
+          return ` ${item.name}: ${generatedUrl}`;
+        })
+      );
+      setProductionUrls(urls);
+    },
+    [production.productionId, production.lines, shareUrl]
+  );
+
+  const generate = (guest: boolean) => {
+    if (isCopyProduction) {
+      handleGenerateProductionUrls(guest);
+    } else {
+      shareUrl({
+        productionId: production.productionId,
+        lineId: line.id,
+        guest,
+      });
+    }
+  };
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (isCopyProduction) {
-      handleGenerateProductionUrls();
-    } else {
-      shareUrl({
-        productionId: production.productionId,
-        lineId: line.id,
-      });
-    }
+    generate(false);
     setIsModalOpen(true);
-  };
-
-  const handleRefresh = () => {
-    if (isCopyProduction) {
-      handleGenerateProductionUrls();
-    } else {
-      shareUrl({
-        productionId: production.productionId,
-        lineId: line.id,
-      });
-    }
   };
 
   return (
@@ -69,7 +67,7 @@ export const CopyLink = ({
         <ShareLineLinkModal
           isCopyProduction={isCopyProduction}
           urls={isCopyProduction ? productionUrls : [url]}
-          onRefresh={handleRefresh}
+          onRefresh={({ guest }) => generate(guest)}
           onClose={() => setIsModalOpen(false)}
         />
       )}

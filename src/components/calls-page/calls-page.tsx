@@ -22,6 +22,7 @@ import { PageHeader } from "../page-layout/page-header";
 import { useAudioCue } from "../production-line/use-audio-cue";
 import { useGlobalHotkeys } from "../production-line/use-line-hotkeys";
 import { ShareUrlModal } from "../share-url-modal/share-url-modal";
+import { useIsGuest } from "../../hooks/use-is-guest";
 import { useInitiateProductionCall } from "../../hooks/use-initiate-production-call";
 import { UserSettings } from "../user-settings/user-settings";
 import { ConfirmationModal } from "../verify-decision/confirmation-modal";
@@ -155,6 +156,7 @@ export const CallsPage = () => {
 
   const { productionId: paramProductionId, lineId: paramLineId } = useParams();
   const { search } = useLocation();
+  const isGuest = useIsGuest();
   const autoCompanionUrl = parseCompanionParam(
     new URLSearchParams(search).get("companion")
   );
@@ -452,7 +454,7 @@ export const CallsPage = () => {
       <PageHeader
         title={!isEmpty ? "Calls" : ""}
         titleAdornment={
-          !isEmpty ? (
+          !isEmpty && !isGuest ? (
             <ShareAdornment>
               <CopyIconWrapper
                 title="Share lines URL"
@@ -465,7 +467,7 @@ export const CallsPage = () => {
             </ShareAdornment>
           ) : undefined
         }
-        hasNavigateToRoot
+        hasNavigateToRoot={!isGuest}
         onNavigateToRoot={() => {
           if (isEmpty) {
             runExitAllCalls();
@@ -549,22 +551,24 @@ export const CallsPage = () => {
             />
           )}
         <CallsContainer>
-          {addCallActive && (productionId || addCallPreSelected) && (
-            <JoinProduction
-              customGlobalMute={customGlobalMute}
-              addAdditionalCallId={
-                productionId ??
-                addCallPreSelected?.preSelectedProductionId ??
-                ""
-              }
-              prefetchedProduction={prefetchedProduction}
-              prefetchedProductionList={prefetchedProductionList}
-              closeAddCallView={() => setAddCallActive(false)}
-              className="calls-page"
-              hideUsername
-              hideDevices
-            />
-          )}
+          {addCallActive &&
+            !isGuest &&
+            (productionId || addCallPreSelected) && (
+              <JoinProduction
+                customGlobalMute={customGlobalMute}
+                addAdditionalCallId={
+                  productionId ??
+                  addCallPreSelected?.preSelectedProductionId ??
+                  ""
+                }
+                prefetchedProduction={prefetchedProduction}
+                prefetchedProductionList={prefetchedProductionList}
+                closeAddCallView={() => setAddCallActive(false)}
+                className="calls-page"
+                hideUsername
+                hideDevices
+              />
+            )}
           {!!(
             userSettings &&
             userSettings.username &&
