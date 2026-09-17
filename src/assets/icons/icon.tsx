@@ -32,6 +32,8 @@ import Pin from "./pin.svg?react";
 import Unpin from "./unpin.svg?react";
 import Fullscreen from "./fullscreen.svg?react";
 import FullscreenExit from "./fullscreen_exit.svg?react";
+import Play from "./play.svg?react";
+import Stop from "./stop.svg?react";
 
 export const MicMuted = () => <MicMute />;
 
@@ -87,8 +89,6 @@ export const HelpIcon = () => <Help />;
 
 export const WarningIcon = () => <Warning />;
 
-export const DeleteIcon = () => <DeleteSvg />;
-
 export const VideoOnIcon = () => <VideoOn />;
 
 export const VideoOffIcon = () => <VideoOff />;
@@ -100,3 +100,9 @@ export const UnpinIcon = () => <Unpin />;
 export const FullscreenIcon = () => <Fullscreen />;
 
 export const FullscreenExitIcon = () => <FullscreenExit />;
+
+export const PlayIcon = () => <Play />;
+
+export const StopIcon = () => <Stop />;
+
+export const DeleteIcon = () => <DeleteSvg />;

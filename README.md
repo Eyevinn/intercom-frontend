@@ -42,6 +42,12 @@ LOGGER LEVELS
 
 `npm run dev` to start a dev server
 
+### IO Bridge
+
+The frontend includes an IO bridge management page at `/manage-io-bridge` for creating and managing SRT-to-WebRTC transmitters and WebRTC-to-SRT receivers. The page is accessible via a button on the landing page when the backend has at least one gateway configured (`WHIP_GATEWAY_URL` or `WHEP_GATEWAY_URL`).
+
+The bridge configuration is fetched from the backend's `/api/v1/bridge/config` endpoint — no additional frontend environment variables are needed.
+
 ### Preview
 
 <img alt="Production list" src="https://github.com/user-attachments/assets/25bbcff9-5175-4fae-9eed-07fa9c166d6b" />
