@@ -25,6 +25,9 @@
     "e2e:report": "playwright show-report"
   },
   "license": "MIT",
+  "overrides": {
+    "ws": "^8.20.2"
+  },
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
