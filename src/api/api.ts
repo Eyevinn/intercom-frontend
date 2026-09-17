@@ -143,8 +143,8 @@ export type TPatchReceiver = {
 };
 
 export type TBridgeConfig = {
-  whipGatewayEnabled: boolean;
-  whepGatewayEnabled: boolean;
+  transmittersEnabled: boolean;
+  receiversEnabled: boolean;
 };
 
 export type TListProductionsResponse = {

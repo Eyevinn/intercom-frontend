@@ -88,7 +88,7 @@ export const ProductionsListContainer = () => {
 
   const { config: bridgeConfig } = useBridgeConfig();
   const bridgeEnabled =
-    bridgeConfig?.whipGatewayEnabled || bridgeConfig?.whepGatewayEnabled;
+    bridgeConfig?.transmittersEnabled || bridgeConfig?.receiversEnabled;
 
   const showRefreshing = useRefreshAnimation({
     reloadProductionList,

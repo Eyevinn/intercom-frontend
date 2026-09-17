@@ -29,7 +29,7 @@ export const IOBridgePage = ({ setApiError }: { setApiError: () => void }) => {
 
   // Only fetch transmitters if WHIP gateway is enabled
   const { transmitters, error, setIntervalLoad, refresh } = useListTransmitters(
-    config?.whipGatewayEnabled ?? false
+    config?.transmittersEnabled ?? false
   );
 
   // Only fetch receivers if WHEP gateway is enabled
@@ -38,7 +38,7 @@ export const IOBridgePage = ({ setApiError }: { setApiError: () => void }) => {
     error: receiverError,
     setIntervalLoad: setReceiverIntervalLoad,
     refresh: refreshReceivers,
-  } = useListReceivers(config?.whepGatewayEnabled ?? false);
+  } = useListReceivers(config?.receiversEnabled ?? false);
 
   const list = Array.isArray(transmitters) ? transmitters : [];
   const receiverList = Array.isArray(receivers) ? receivers : [];
@@ -49,30 +49,30 @@ export const IOBridgePage = ({ setApiError }: { setApiError: () => void }) => {
 
   // Only poll transmitters if WHIP gateway is enabled
   useEffect(() => {
-    if (!config?.whipGatewayEnabled) return undefined;
+    if (!config?.transmittersEnabled) return undefined;
     const interval = window.setInterval(
       () => setIntervalLoad((prev) => prev + 1),
       1000
     );
     return () => window.clearInterval(interval);
-  }, [setIntervalLoad, config?.whipGatewayEnabled]);
+  }, [setIntervalLoad, config?.transmittersEnabled]);
 
   // Only poll receivers if WHEP gateway is enabled
   useEffect(() => {
-    if (!config?.whepGatewayEnabled) return undefined;
+    if (!config?.receiversEnabled) return undefined;
     const interval = window.setInterval(
       () => setReceiverIntervalLoad((prev) => prev + 1),
       1000
     );
     return () => window.clearInterval(interval);
-  }, [setReceiverIntervalLoad, config?.whepGatewayEnabled]);
+  }, [setReceiverIntervalLoad, config?.receiversEnabled]);
 
   // If no gateways are configured, don't show the page
   if (configLoading) {
     return null; // or a loading spinner
   }
 
-  if (!config || (!config.whipGatewayEnabled && !config.whepGatewayEnabled)) {
+  if (!config || (!config.transmittersEnabled && !config.receiversEnabled)) {
     return null;
   }
 
@@ -80,7 +80,7 @@ export const IOBridgePage = ({ setApiError }: { setApiError: () => void }) => {
     <>
       <PageHeader title="Manage I/O Bridges" hasNavigateToRoot>
         <div style={{ display: "flex", gap: "10px" }}>
-          {config.whipGatewayEnabled && (
+          {config.transmittersEnabled && (
             <PrimaryButton
               type="button"
               onClick={() => setShowAddTransmitterModal(true)}
@@ -88,7 +88,7 @@ export const IOBridgePage = ({ setApiError }: { setApiError: () => void }) => {
               Add SRT to WHIP transmitter
             </PrimaryButton>
           )}
-          {config.whepGatewayEnabled && (
+          {config.receiversEnabled && (
             <PrimaryButton
               type="button"
               onClick={() => setShowAddReceiverModal(true)}
@@ -104,7 +104,7 @@ export const IOBridgePage = ({ setApiError }: { setApiError: () => void }) => {
 
       <Tabs tabs={IO_TABS} activeTab={activeTab} onChange={setActiveTab} />
 
-      {activeTab === "transmitters" && config.whipGatewayEnabled && (
+      {activeTab === "transmitters" && config.transmittersEnabled && (
         <TransmitterContainer>
           <ListWrapper>
             {list.map((t) => (
@@ -120,7 +120,7 @@ export const IOBridgePage = ({ setApiError }: { setApiError: () => void }) => {
         </TransmitterContainer>
       )}
 
-      {activeTab === "receivers" && config.whepGatewayEnabled && (
+      {activeTab === "receivers" && config.receiversEnabled && (
         <TransmitterContainer>
           <ListWrapper>
             {receiverList.map((r) => (

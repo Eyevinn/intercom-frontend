@@ -18,7 +18,7 @@ export const useBridgeConfig = () => {
           err instanceof Error ? err.message : "Failed to fetch bridge config"
         );
         // If config endpoint fails, assume no gateways are available
-        setConfig({ whipGatewayEnabled: false, whepGatewayEnabled: false });
+        setConfig({ transmittersEnabled: false, receiversEnabled: false });
       } finally {
         setLoading(false);
       }
