@@ -111,6 +111,23 @@ export enum TSrtMode {
   LISTENER = "listener",
 }
 
+export type TBridgeFilter = {
+  productionId?: string | number | null;
+  lineId?: string | number | null;
+};
+
+const bridgeFilterQuery = (filter?: TBridgeFilter): string => {
+  const params = new URLSearchParams();
+  if (filter?.productionId !== undefined && filter?.productionId !== null) {
+    params.set("productionId", String(filter.productionId));
+  }
+  if (filter?.lineId !== undefined && filter?.lineId !== null) {
+    params.set("lineId", String(filter.lineId));
+  }
+  const query = params.toString();
+  return query ? `?${query}` : "";
+};
+
 export enum TBridgeState {
   IDLE = "idle",
   RUNNING = "running",
@@ -485,9 +502,11 @@ export const API = {
         body: JSON.stringify(data),
       })
     ),
-  fetchTransmitterList: (): Promise<TSavedTransmitter[]> =>
+  fetchTransmitterList: (
+    filter?: TBridgeFilter
+  ): Promise<TSavedTransmitter[]> =>
     handleFetchRequest<{ transmitters: TSavedTransmitter[] }>(
-      fetch(`${API_URL}bridge/tx`, {
+      fetch(`${API_URL}bridge/tx${bridgeFilterQuery(filter)}`, {
         method: "GET",
         headers: {
           ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
@@ -559,9 +578,9 @@ export const API = {
         body: JSON.stringify(data),
       })
     ),
-  fetchReceiverList: (): Promise<TSavedReceiver[]> =>
+  fetchReceiverList: (filter?: TBridgeFilter): Promise<TSavedReceiver[]> =>
     handleFetchRequest<{ receivers: TSavedReceiver[] }>(
-      fetch(`${API_URL}bridge/rx`, {
+      fetch(`${API_URL}bridge/rx${bridgeFilterQuery(filter)}`, {
         method: "GET",
         headers: {
           ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),

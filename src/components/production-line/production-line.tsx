@@ -17,6 +17,9 @@ import { ExpandableSection, InnerDiv } from "../shared/shared-components.ts";
 import { ConfirmationModal } from "../verify-decision/confirmation-modal.tsx";
 import { CallHeaderComponent } from "./call-header.tsx";
 import { CollapsableSection } from "./collapsable-section.tsx";
+import { BridgeControls, TBridgeControlItem } from "./bridge-controls.tsx";
+import { useLineInputs } from "../../hooks/use-line-inputs.ts";
+import { useLineOutputs } from "../../hooks/use-line-outputs.ts";
 import { ExitCallButton } from "./exit-call-button.tsx";
 import { SettingsModal } from "./settings-modal.tsx";
 import { LongPressToTalkButton } from "./long-press-to-talk-button.tsx";
@@ -184,6 +187,55 @@ export const ProductionLine = ({
   ]);
 
   const line = useLinePolling({ callId: id, joinProductionOptions });
+
+  const bridgeProductionId = joinProductionOptions?.productionId ?? null;
+  const bridgeLineId = joinProductionOptions?.lineId ?? null;
+
+  const {
+    transmitters,
+    busyId: inputBusyId,
+    error: inputError,
+    start: startInput,
+    stop: stopInput,
+  } = useLineInputs({
+    productionId: bridgeProductionId,
+    lineId: bridgeLineId,
+  });
+
+  const {
+    receivers,
+    busyId: outputBusyId,
+    error: outputError,
+    start: startOutput,
+    stop: stopOutput,
+  } = useLineOutputs({
+    productionId: bridgeProductionId,
+    lineId: bridgeLineId,
+  });
+
+  const inputBridges: TBridgeControlItem[] = useMemo(
+    () =>
+      transmitters.map((t) => ({
+        // eslint-disable-next-line no-underscore-dangle
+        id: t._id,
+        name: t.label || "",
+        detail: t.srtUrl || `Port ${t.port}`,
+        status: t.status,
+      })),
+    [transmitters]
+  );
+
+  const outputBridges: TBridgeControlItem[] = useMemo(
+    () =>
+      receivers.map((r) => ({
+        // eslint-disable-next-line no-underscore-dangle
+        id: r._id,
+        name: r.label || "",
+        detail: r.srtUrl,
+        status: r.status,
+      })),
+    [receivers]
+  );
   const isProgramOutputLine = line && line.programOutputLine;
   const isProgramUser =
     joinProductionOptions && joinProductionOptions.isProgramUser;
@@ -956,6 +1008,30 @@ export const ProductionLine = ({
                             setConnectionActive={() =>
                               setConnectionActive(false)
                             }
+                          />
+                        </CollapsableSection>
+                      )}
+                      {inputBridges.length > 0 && (
+                        <CollapsableSection title="Inputs" startOpen>
+                          <BridgeControls
+                            variant="input"
+                            bridges={inputBridges}
+                            busyId={inputBusyId}
+                            error={inputError}
+                            onStart={startInput}
+                            onStop={stopInput}
+                          />
+                        </CollapsableSection>
+                      )}
+                      {outputBridges.length > 0 && (
+                        <CollapsableSection title="Outputs" startOpen>
+                          <BridgeControls
+                            variant="output"
+                            bridges={outputBridges}
+                            busyId={outputBusyId}
+                            error={outputError}
+                            onStart={startOutput}
+                            onStop={stopOutput}
                           />
                         </CollapsableSection>
                       )}
