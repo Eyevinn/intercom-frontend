@@ -158,6 +158,7 @@ export const CreateProductionPage = () => {
       productionName: "",
       defaultLine: "",
       defaultLineProgramOutput: false,
+      defaultLineVideoEnabled: false,
       lines: [],
     },
   });
@@ -466,6 +467,25 @@ export const CreateProductionPage = () => {
               </CheckboxWrapper>
             )}
           />
+          <Controller
+            name="defaultLineVideoEnabled"
+            control={control}
+            render={({ field }) => (
+              <CheckboxWrapper>
+                <Checkbox
+                  label="Video Enabled"
+                  checked={field.value || false}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    field.onChange(e.target.checked)
+                  }
+                />
+                <InfoTooltip>
+                  When enabled, participants can optionally share their camera
+                  in this line.
+                </InfoTooltip>
+              </CheckboxWrapper>
+            )}
+          />
         </LineInputRow>
         <ErrorMessage
           errors={errors}
@@ -507,6 +527,25 @@ export const CreateProductionPage = () => {
                     In an <strong>Audio Feed</strong> line, listeners are not
                     able to talk. Only the <strong>Audio Feed</strong> will be
                     heard.
+                  </InfoTooltip>
+                </CheckboxWrapper>
+              )}
+            />
+            <Controller
+              name={`lines.${index}.videoEnabled`}
+              control={control}
+              render={({ field: controllerField }) => (
+                <CheckboxWrapper>
+                  <Checkbox
+                    label="Video Enabled"
+                    checked={controllerField.value || false}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      controllerField.onChange(e.target.checked)
+                    }
+                  />
+                  <InfoTooltip>
+                    When enabled, participants can optionally share their camera
+                    in this line.
                   </InfoTooltip>
                 </CheckboxWrapper>
               )}

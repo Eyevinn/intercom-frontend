@@ -5,6 +5,7 @@ import {
   ChevronUpIcon,
   ChevronDownIcon,
   TVIcon,
+  VideoOnIcon,
   WhipIcon,
   ShareIcon,
 } from "../../assets/icons/icon";
@@ -193,6 +194,11 @@ export const CallHeaderComponent = ({
             <TVIcon />
           </AudioFeedIcon>
         )}
+        {!open && line?.videoEnabled && (
+          <AudioFeedIcon open={false}>
+            <VideoOnIcon />
+          </AudioFeedIcon>
+        )}
         <CallProductionNameWrapper>
           <CallNameRow title={`${production?.name} / ${line?.name}`}>
             <CallProductionNamePrefix>
@@ -260,6 +266,12 @@ export const CallHeaderComponent = ({
         <AudioFeedIcon open={open}>
           <TVIcon />
           Audio feed
+        </AudioFeedIcon>
+      )}
+      {line?.videoEnabled && open && (
+        <AudioFeedIcon open={open}>
+          <VideoOnIcon />
+          Video enabled
         </AudioFeedIcon>
       )}
       {shareModalOpen && (

@@ -42,6 +42,7 @@ export const useInitiateProductionCall = ({
         // If the stored input device is no longer available, fall back to
         // the first available device rather than blocking the user.
         let effectiveAudioInput = payload.joinProductionOptions.audioinput;
+        let effectiveAudioOutput = payload.audiooutput;
 
         if (updatedDevices.input.length > 0) {
           const inputDeviceExists = updatedDevices.input.some(
@@ -53,17 +54,21 @@ export const useInitiateProductionCall = ({
           }
 
           const outputDeviceExists = updatedDevices.output.some(
-            (device) => device.deviceId === payload.audiooutput
+            (device) => device.deviceId === effectiveAudioOutput
           );
 
           if (!outputDeviceExists && !isBrowserSafari && !isMobile && !isIpad) {
-            dispatch({
-              type: "ERROR",
-              payload: {
-                error: new Error("Selected devices are not available"),
-              },
-            });
-            return false;
+            if (updatedDevices.output.length > 0) {
+              effectiveAudioOutput = updatedDevices.output[0].deviceId;
+            } else {
+              dispatch({
+                type: "ERROR",
+                payload: {
+                  error: new Error("Selected devices are not available"),
+                },
+              });
+              return false;
+            }
           }
         }
 
@@ -78,12 +83,14 @@ export const useInitiateProductionCall = ({
                 ...payload.joinProductionOptions,
                 audioinput: effectiveAudioInput,
               },
-              audiooutput: payload.audiooutput,
+              audiooutput: effectiveAudioOutput,
               mediaStreamInput: null,
+              mediaStreamVideoInput: null,
               dominantSpeaker: null,
               audioLevelAboveThreshold: false,
               connectionState: null,
               audioElements: null,
+              videoElements: null,
               sessionId: null,
               dataChannel: null,
               isRemotelyMuted: false,

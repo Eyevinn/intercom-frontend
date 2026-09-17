@@ -25,6 +25,13 @@ import VolumeOff from "./volume_off.svg?react";
 import VolumeOn from "./volume_on.svg?react";
 import Warning from "./warning.svg?react";
 import WhipSvg from "./whip_user.svg?react";
+import DeleteSvg from "./delete.svg?react";
+import VideoOn from "./video_on.svg?react";
+import VideoOff from "./video_off.svg?react";
+import Pin from "./pin.svg?react";
+import Unpin from "./unpin.svg?react";
+import Fullscreen from "./fullscreen.svg?react";
+import FullscreenExit from "./fullscreen_exit.svg?react";
 
 export const MicMuted = () => <MicMute />;
 
@@ -79,3 +86,17 @@ export const SaveIcon = () => <Save />;
 export const HelpIcon = () => <Help />;
 
 export const WarningIcon = () => <Warning />;
+
+export const DeleteIcon = () => <DeleteSvg />;
+
+export const VideoOnIcon = () => <VideoOn />;
+
+export const VideoOffIcon = () => <VideoOff />;
+
+export const PinIcon = () => <Pin />;
+
+export const UnpinIcon = () => <Unpin />;
+
+export const FullscreenIcon = () => <Fullscreen />;
+
+export const FullscreenExitIcon = () => <FullscreenExit />;

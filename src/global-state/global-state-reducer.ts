@@ -10,6 +10,7 @@ export const initialGlobalState: TGlobalState = {
   devices: {
     input: null,
     output: null,
+    videoInput: null,
   },
   userSettings: {},
   selectedProductionId: null,
@@ -22,24 +23,23 @@ export const globalReducer: Reducer<TGlobalState, TGlobalStateAction> = (
   state,
   action
 ): TGlobalState => {
-  // Simple Debug
-  // logger.cyan(
-  //   `Global state action: ${action.type}, payload: ${action.payload}`
-  // );
   switch (action.type) {
     case "ERROR": {
       const { callId, error } = action.payload;
 
-      if (callId && error) {
+      if (callId) {
         // Call-specific error
+        const callErrors = { ...state.error.callErrors };
+        if (error) {
+          callErrors[callId] = error;
+        } else {
+          delete callErrors[callId];
+        }
         return {
           ...state,
           error: {
             ...state.error,
-            callErrors: {
-              ...state.error.callErrors,
-              [callId]: error,
-            },
+            callErrors,
           },
         };
       }

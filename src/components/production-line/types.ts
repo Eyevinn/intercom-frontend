@@ -5,10 +5,12 @@ export type TJoinProductionOptions = {
   username: string;
   // Not all devices have input available
   audioinput?: string;
+  videoinput?: string;
   lineUsedForProgramOutput: boolean;
   isProgramUser: boolean;
   lineName?: string;
   productionName?: string;
+  videoEnabled?: boolean;
 };
 
 export type Hotkeys = {
@@ -26,6 +28,8 @@ export type TParticipant = {
   endpointId: string;
   isActive: boolean;
   isWhip: boolean;
+  isWhepReceiver?: boolean;
+  hasVideo: boolean;
 };
 
 export type TLine = {
@@ -34,6 +38,8 @@ export type TLine = {
   smbConferenceId?: string;
   participants: TParticipant[];
   programOutputLine?: boolean;
+  videoEnabled?: boolean;
+  whepSourceSessionId?: string | null;
 };
 
 export type TBasicProduction = {

@@ -20,10 +20,14 @@ export const useLinePolling = ({ callId, joinProductionOptions }: TProps) => {
     let consecutiveFailureCount = 0;
     const productionId = parseInt(joinProductionOptions.productionId, 10);
     const lineId = parseInt(joinProductionOptions.lineId, 10);
+    const ERROR_AFTER_FAILURES = 5;
 
     const interval = window.setInterval(() => {
       API.fetchProductionLine(productionId, lineId)
         .then((l) => {
+          if (consecutiveFailureCount >= ERROR_AFTER_FAILURES) {
+            dispatch({ type: "ERROR", payload: { callId, error: null } });
+          }
           consecutiveFailureCount = 0;
           setLine(l);
         })
@@ -32,7 +36,7 @@ export const useLinePolling = ({ callId, joinProductionOptions }: TProps) => {
           logger.red(
             `Error fetching production line ${productionId}/${lineId}. For call-id: ${callId}`
           );
-          if (consecutiveFailureCount >= 5) {
+          if (consecutiveFailureCount === ERROR_AFTER_FAILURES) {
             dispatch({
               type: "ERROR",
               payload: {
@@ -42,18 +46,6 @@ export const useLinePolling = ({ callId, joinProductionOptions }: TProps) => {
                 ),
               },
             });
-          }
-          if (consecutiveFailureCount >= 10) {
-            dispatch({
-              type: "ERROR",
-              payload: {
-                callId,
-                error: new Error(
-                  "Line polling stopped after 10 consecutive failures."
-                ),
-              },
-            });
-            window.clearInterval(interval);
           }
         });
     }, 1000);
