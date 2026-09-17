@@ -21,6 +21,7 @@ import { TBasicProductionResponse } from "../../api/api";
 import { KebabMenu } from "./kebab-menu";
 import { useShareUrl } from "../../hooks/use-share-url";
 import { useIsGuest } from "../../hooks/use-is-guest";
+import { DEFAULT_RESTRICT_SHARE } from "../../utils/guest-session";
 import { ShareLineLinkModal } from "../generate-urls/share-line-link/share-line-link-modal";
 
 const CallHeaderTexts = styled(HeaderTexts)`
@@ -169,6 +170,7 @@ export const CallHeaderComponent = ({
         shareUrl({
           productionId: production.productionId,
           lineId: line.id,
+          guest: DEFAULT_RESTRICT_SHARE,
         });
       }
       setShareModalOpen(true);

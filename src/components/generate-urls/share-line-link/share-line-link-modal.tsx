@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import styled from "@emotion/styled";
 import { Modal } from "../../modal/modal";
+import { DEFAULT_RESTRICT_SHARE } from "../../../utils/guest-session";
 
 type TShareLineLinkModalProps = {
   urls: string[];
@@ -165,7 +166,7 @@ export const ShareLineLinkModal = ({
   const [isLoading, setIsLoading] = useState(false);
   const [copied, setCopied] = useState(false);
   const [copiedRows, setCopiedRows] = useState<Record<number, boolean>>({});
-  const [restrictAccess, setRestrictAccess] = useState(false);
+  const [restrictAccess, setRestrictAccess] = useState(DEFAULT_RESTRICT_SHARE);
 
   useEffect(() => {
     const copyTimers = copyTimerRefs.current;

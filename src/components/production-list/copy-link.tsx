@@ -2,6 +2,7 @@ import { useCallback, useState } from "react";
 import { TBasicProductionResponse } from "../../api/api";
 import { ShareIcon } from "../../assets/icons/icon";
 import { useShareUrl } from "../../hooks/use-share-url";
+import { DEFAULT_RESTRICT_SHARE } from "../../utils/guest-session";
 import { CopyIconWrapper } from "../copy-button/copy-components";
 import { ShareLineLinkModal } from "../generate-urls/share-line-link/share-line-link-modal";
 import { TLine } from "../production-line/types";
@@ -50,7 +51,7 @@ export const CopyLink = ({
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    generate(false);
+    generate(DEFAULT_RESTRICT_SHARE);
     setIsModalOpen(true);
   };
 

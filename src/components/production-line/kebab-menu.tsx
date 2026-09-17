@@ -6,6 +6,7 @@ import { ShareLineLinkModal } from "../generate-urls/share-line-link/share-line-
 import { useShareUrl } from "../../hooks/use-share-url";
 import { TBasicProductionResponse } from "../../api/api";
 import { useIsGuest } from "../../hooks/use-is-guest";
+import { DEFAULT_RESTRICT_SHARE } from "../../utils/guest-session";
 import { TLine } from "./types";
 
 const MenuWrapper = styled.div`
@@ -140,6 +141,7 @@ export const KebabMenu = ({
       shareUrl({
         productionId: production.productionId,
         lineId: line.id,
+        guest: DEFAULT_RESTRICT_SHARE,
       });
     }
     setActiveModal("share");

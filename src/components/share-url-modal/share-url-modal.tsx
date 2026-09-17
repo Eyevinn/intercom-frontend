@@ -2,7 +2,10 @@ import { useEffect, useMemo, useState } from "react";
 import styled from "@emotion/styled";
 import { API } from "../../api/api";
 import { Modal } from "../modal/modal";
-import { appendGuestParam } from "../../utils/guest-session";
+import {
+  DEFAULT_RESTRICT_SHARE,
+  appendGuestParam,
+} from "../../utils/guest-session";
 
 const Description = styled.p`
   font-size: 1.4rem;
@@ -108,7 +111,7 @@ export const ShareUrlModal = ({
 }: ShareUrlModalProps) => {
   const [state, setState] = useState<FetchState>({ status: "loading" });
   const [includeCompanion, setIncludeCompanion] = useState(false);
-  const [restrictAccess, setRestrictAccess] = useState(false);
+  const [restrictAccess, setRestrictAccess] = useState(DEFAULT_RESTRICT_SHARE);
   const [copied, setCopied] = useState(false);
   const [nonce, setNonce] = useState(0);
 
@@ -156,8 +159,8 @@ export const ShareUrlModal = ({
   };
 
   const buttonLabel = () => {
-    if (copied) return "\u2713 Link copied!";
-    if (isLoading) return "Generating link\u2026";
+    if (copied) return "Link copied!";
+    if (isLoading) return "Generating link…";
     if (isError) return "Failed to generate link";
     return "Copy link";
   };
@@ -205,7 +208,7 @@ export const ShareUrlModal = ({
       </CheckboxRow>
       <Note>
         Recipients of a restricted link only see the calls they were invited to.
-        This tailors their view \u2014 it is not an access-control boundary.
+        This tailors their view — it is not an access-control boundary.
       </Note>
     </Modal>
   );

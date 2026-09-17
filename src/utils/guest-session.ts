@@ -1,5 +1,7 @@
 export const GUEST_URL_PARAM = "guest";
 
+export const DEFAULT_RESTRICT_SHARE = true;
+
 const GUEST_FLAG_KEY = "intercom_guest_session";
 const GUEST_PATH_KEY = "intercom_guest_path";
 
