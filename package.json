@@ -39,6 +39,9 @@
     "react-router": "^7.18.3",
     "react-router-dom": "^7.18.3"
   },
+  "overrides": {
+    "fast-uri": ">=3.1.2"
+  },
   "devDependencies": {
     "@commitlint/cli": "^20.2.0",
     "@commitlint/config-conventional": "^20.4.3",
