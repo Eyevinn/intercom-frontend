@@ -139,6 +139,7 @@ export const IOBridgePage = ({ setApiError }: { setApiError: () => void }) => {
       {showAddTransmitterModal && (
         <Modal onClose={() => setShowAddTransmitterModal(false)}>
           <AddTransmitterForm
+            supportsPassThrough={config.supportsPassThrough}
             onSave={async () => {
               setShowAddTransmitterModal(false);
               await refresh();

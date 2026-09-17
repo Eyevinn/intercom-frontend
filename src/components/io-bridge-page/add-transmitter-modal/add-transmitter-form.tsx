@@ -36,9 +36,13 @@ type FormValues = {
 
 type AddTransmitterFormProps = {
   onSave?: () => void;
+  supportsPassThrough?: boolean;
 };
 
-export const AddTransmitterForm = ({ onSave }: AddTransmitterFormProps) => {
+export const AddTransmitterForm = ({
+  onSave,
+  supportsPassThrough = false,
+}: AddTransmitterFormProps) => {
   const srtModeOptions = ["caller", "listener"];
   const [createTransmitter, setCreateTransmitter] = useState<FormValues | null>(
     null
@@ -265,15 +269,17 @@ export const AddTransmitterForm = ({ onSave }: AddTransmitterFormProps) => {
           </div>
         </Collapsible>
 
-        <FormItem fieldName="passThroughUrl" errors={errors}>
-          <FieldHeader>
-            <BoldText>SRT Restream URL</BoldText> (Optional)
-          </FieldHeader>
-          <FormInput
-            // eslint-disable-next-line
-            {...register("passThroughUrl")}
-          />
-        </FormItem>
+        {supportsPassThrough && (
+          <FormItem fieldName="passThroughUrl" errors={errors}>
+            <FieldHeader>
+              <BoldText>SRT Restream URL</BoldText> (Optional)
+            </FieldHeader>
+            <FormInput
+              // eslint-disable-next-line
+              {...register("passThroughUrl")}
+            />
+          </FormItem>
+        )}
 
         <ButtonWrapper>
           <SubmitButton

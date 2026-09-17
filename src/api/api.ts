@@ -145,6 +145,7 @@ export type TPatchReceiver = {
 export type TBridgeConfig = {
   transmittersEnabled: boolean;
   receiversEnabled: boolean;
+  supportsPassThrough: boolean;
 };
 
 export type TListProductionsResponse = {
