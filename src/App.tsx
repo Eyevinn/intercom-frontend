@@ -29,6 +29,7 @@ import { ManageProductionsPage } from "./components/manage-productions-page/mana
 import { CreateProductionPage } from "./components/create-production/create-production-page.tsx";
 import { useSetupTokenRefresh } from "./hooks/use-reauth.tsx";
 import { TUserSettings } from "./components/user-settings/types";
+import { RequireNonGuest } from "./components/auth/require-non-guest.tsx";
 import { PresetProvider } from "./contexts/preset-context.tsx";
 
 const DisplayBoxPositioningContainer = styled(FlexContainer)`
@@ -153,21 +154,29 @@ const AppContent = ({
                   <Route
                     path="/"
                     element={
-                      <LandingPage setApiError={() => setApiError(true)} />
+                      <RequireNonGuest>
+                        <LandingPage setApiError={() => setApiError(true)} />
+                      </RequireNonGuest>
                     }
                     errorElement={<ErrorPage />}
                   />
                   <Route
                     path="/create"
-                    element={<CreateProductionPage />}
+                    element={
+                      <RequireNonGuest>
+                        <CreateProductionPage />
+                      </RequireNonGuest>
+                    }
                     errorElement={<ErrorPage />}
                   />
                   <Route
                     path="/manage"
                     element={
-                      <ManageProductionsPage
-                        setApiError={() => setApiError(true)}
-                      />
+                      <RequireNonGuest>
+                        <ManageProductionsPage
+                          setApiError={() => setApiError(true)}
+                        />
+                      </RequireNonGuest>
                     }
                     errorElement={<ErrorPage />}
                   />
@@ -181,7 +190,14 @@ const AppContent = ({
                     element={<CallsPage />}
                     errorElement={<ErrorPage />}
                   />
-                  <Route path="/lines" element={<LinesToCallsRedirect />} />
+                  <Route
+                    path="/lines"
+                    element={
+                      <RequireNonGuest>
+                        <LinesToCallsRedirect />
+                      </RequireNonGuest>
+                    }
+                  />
                   <Route path="*" element={<NotFound />} />
                 </>
               </Routes>
