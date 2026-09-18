@@ -2,7 +2,6 @@ FROM nginx:1.29.0
 ARG PORT=8080
 ARG MANAGER_URL
 EXPOSE $PORT
-EXPOSE $MANAGER_URL
 
 RUN apt-get update
 RUN apt-get install -y curl
