@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useNavigate } from "react-router";
 import styled from "@emotion/styled";
 import { useGlobalState } from "../../global-state/context-provider";
@@ -8,6 +8,7 @@ import { ProductionsList } from "../production-list/productions-list";
 import { PageHeader } from "../page-layout/page-header";
 import { ManagePresetsList } from "./manage-presets-list";
 import { InfoTooltip } from "../info-tooltip/info-tooltip";
+import { sortByName } from "../../utils/sort-by-name";
 
 const SectionHeader = styled.h2`
   font-size: 2rem;
@@ -35,6 +36,11 @@ export const ManageProductionsPage = ({
   const [{ apiError, reloadProductionList }, dispatch] = useGlobalState();
   const { productions, doInitialLoad, error, setIntervalLoad } =
     useFetchProductionList(PRODUCTION_LIST_FILTER);
+
+  const sortedProductions = useMemo(
+    () => sortByName(productions?.productions ?? []),
+    [productions]
+  );
 
   const showRefreshing = useRefreshAnimation({
     reloadProductionList,
@@ -86,13 +92,13 @@ export const ManageProductionsPage = ({
             </InfoTooltip>
           </SectionHeader>
           <ProductionsList
-            productions={productions.productions}
+            productions={sortedProductions}
             error={error}
             managementMode
           />
         </>
       )}
-      <ManagePresetsList productions={productions?.productions ?? []} />
+      <ManagePresetsList productions={sortedProductions} />
     </>
   );
 };
