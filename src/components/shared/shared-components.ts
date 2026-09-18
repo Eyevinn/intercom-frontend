@@ -33,18 +33,35 @@ export const HeaderIcon = styled.div`
   }
 `;
 
-export const CollapsibleItemWrapper = styled.div`
-  text-align: start;
-  color: #ffffff;
-  background-color: transparent;
+export const CardGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 2rem;
+  align-items: start;
+  padding: 0 2rem 2rem 2rem;
+
+  ${mediaQueries.isLargeScreen} {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  ${mediaQueries.isMediumScreen} {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  ${mediaQueries.isSmallScreen} {
+    grid-template-columns: minmax(0, 1fr);
+  }
+`;
+
+export const CardGridCell = styled.div`
+  min-width: 0;
+`;
+
+export const CardGridItem = styled.div`
   flex: 0 0 calc(25% - 2rem);
   ${isMobile ? `flex-grow: 1;` : `flex-grow: 0;`}
-  justify-content: start;
   min-width: 34rem;
-  border: 1px solid #424242;
-  border-radius: 0.5rem;
   margin: 0 2rem 2rem 0;
-  cursor: pointer;
 
   ${mediaQueries.isLargeScreen} {
     flex: 0 0 calc(33.333% - 2rem);
@@ -57,6 +74,22 @@ export const CollapsibleItemWrapper = styled.div`
   ${mediaQueries.isSmallScreen} {
     flex: 0 0 calc(100% - 2rem);
     min-width: 0;
+  }
+`;
+
+export const CollapsibleItemWrapper = styled.div`
+  text-align: start;
+  color: #ffffff;
+  background-color: transparent;
+  width: 100%;
+  min-width: 0;
+  border: 1px solid #424242;
+  border-radius: 0.5rem;
+  cursor: pointer;
+
+  &.filled {
+    background-color: #32383b;
+    border-color: #4a5054;
   }
 `;
 

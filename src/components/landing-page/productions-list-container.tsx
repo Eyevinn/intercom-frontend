@@ -1,6 +1,7 @@
-import { useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import styled from "@emotion/styled";
 import { useNavigate } from "react-router";
+import { arrayMove } from "@dnd-kit/sortable";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { useRefreshAnimation } from "./use-refresh-animation.ts";
 import { useFetchProductionList } from "./use-fetch-production-list.ts";
@@ -11,6 +12,44 @@ import { PrimaryButton } from "../form-elements/form-elements";
 import { HideOnSmallScreen } from "../generic-components";
 import { PresetList } from "./presets-list";
 import { InfoTooltip } from "../info-tooltip/info-tooltip";
+import { TBasicProductionResponse } from "../../api/api.ts";
+import { sortByName } from "../../utils/sort-by-name.ts";
+
+const SORT_ORDER_KEY = "production-sort-order";
+
+const getSavedOrder = (): string[] => {
+  try {
+    const saved = localStorage.getItem(SORT_ORDER_KEY);
+    return saved ? JSON.parse(saved) : [];
+  } catch {
+    return [];
+  }
+};
+
+const saveOrder = (ids: string[]) => {
+  localStorage.setItem(SORT_ORDER_KEY, JSON.stringify(ids));
+};
+
+const applyStoredOrder = (
+  productions: TBasicProductionResponse[]
+): TBasicProductionResponse[] => {
+  const sorted = sortByName(productions);
+  const savedOrder = getSavedOrder();
+  if (!savedOrder.length) return sorted;
+
+  const productionMap = new Map(sorted.map((p) => [p.productionId, p]));
+
+  const ordered = savedOrder.reduce<TBasicProductionResponse[]>((acc, id) => {
+    const prod = productionMap.get(id);
+    if (prod) {
+      acc.push(prod);
+      productionMap.delete(id);
+    }
+    return acc;
+  }, []);
+
+  return [...ordered, ...productionMap.values()];
+};
 
 const HeaderButton = styled(PrimaryButton)`
   margin-left: 1rem;
@@ -90,6 +129,30 @@ export const ProductionsListContainer = () => {
     doInitialLoad,
   });
 
+  const [orderedProductions, setOrderedProductions] = useState<
+    TBasicProductionResponse[]
+  >([]);
+
+  useEffect(() => {
+    if (productions?.productions.length) {
+      setOrderedProductions(applyStoredOrder(productions.productions));
+    } else {
+      setOrderedProductions([]);
+    }
+  }, [productions]);
+
+  const handleReorder = useCallback((activeId: string, overId: string) => {
+    setOrderedProductions((prev) => {
+      const oldIndex = prev.findIndex((p) => p.productionId === activeId);
+      const newIndex = prev.findIndex((p) => p.productionId === overId);
+      if (oldIndex === -1 || newIndex === -1) return prev;
+
+      const newOrder = arrayMove(prev, oldIndex, newIndex);
+      saveOrder(newOrder.map((p) => p.productionId));
+      return newOrder;
+    });
+  }, []);
+
   useEffect(() => {
     const interval = window.setInterval(() => {
       setIntervalLoad(true);
@@ -152,10 +215,14 @@ export const ProductionsListContainer = () => {
           </EmptyStateButton>
         </EmptyState>
       )}
-      {!!productions?.productions.length && (
-        <ProductionsList productions={productions.productions} error={error} />
+      {!!orderedProductions.length && (
+        <ProductionsList
+          productions={orderedProductions}
+          error={error}
+          onReorder={handleReorder}
+        />
       )}
-      <PresetList productions={productions?.productions ?? []} />
+      <PresetList productions={orderedProductions} />
     </>
   );
 };

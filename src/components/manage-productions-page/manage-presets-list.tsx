@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import styled from "@emotion/styled";
 import { TBasicProductionResponse, TPreset, TPresetCall } from "../../api/api";
 import { usePresetContext } from "../../contexts/preset-context";
@@ -33,6 +33,7 @@ import {
   DeleteButton,
 } from "../delete-button/delete-button-components";
 import { ConfirmationModal } from "../verify-decision/confirmation-modal";
+import { sortByName } from "../../utils/sort-by-name";
 
 const SectionHeader = styled.h2`
   font-size: 2rem;
@@ -911,6 +912,7 @@ const ManagePresetCard = ({
     <CollapsibleItem
       headerContent={headerContent}
       expandedContent={expandedContent}
+      className="filled"
       // eslint-disable-next-line no-underscore-dangle
       testId={`manage-preset-${preset._id}`}
     />
@@ -923,6 +925,8 @@ type ManagePresetsListProps = {
 
 export const ManagePresetsList = ({ productions }: ManagePresetsListProps) => {
   const { presets, loading, deletePreset, updatePreset } = usePresetContext();
+
+  const sortedPresets = useMemo(() => sortByName(presets), [presets]);
 
   const handleUpdate = useCallback(
     async (
@@ -958,7 +962,7 @@ export const ManagePresetsList = ({ productions }: ManagePresetsListProps) => {
         </InfoTooltip>
       </SectionHeader>
       <ListWrapper>
-        {presets.map((preset) => (
+        {sortedPresets.map((preset) => (
           <ManagePresetCard
             // eslint-disable-next-line no-underscore-dangle
             key={preset._id}
