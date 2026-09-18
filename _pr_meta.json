@@ -1,0 +1,9 @@
+{
+  "repo": "Eyevinn/intercom-frontend",
+  "number": 671,
+  "base": "main",
+  "head": "fix/issue-627",
+  "fork": "VedantMadane/Eyevinn-intercom-frontend",
+  "title": "fix: Validate companion host before WebSocket URL construction",
+  "url": "https://github.com/Eyevinn/intercom-frontend/pull/671"
+}

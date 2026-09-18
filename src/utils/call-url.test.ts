@@ -4,6 +4,7 @@ import {
   encodeCallsParam,
   decodeCallsParam,
   parseCompanionParam,
+  isValidCompanionHost,
 } from "./call-url";
 
 describe("buildCallsUrl", () => {
@@ -88,6 +89,26 @@ describe("buildCallsUrl round-trip", () => {
   });
 });
 
+describe("isValidCompanionHost", () => {
+  // Regression: locks in the SSRF-hardening behaviour so future edits to the
+  // host[:port] validator cannot silently reintroduce scheme/path/userinfo or
+  // out-of-range port acceptance.
+  it.each([
+    ["localhost", true],
+    ["localhost:8080", true],
+    ["[::1]", true],
+    ["[::1]:443", true],
+    ["", false],
+    ["http://evil.com", false],
+    ["host/path", false],
+    ["host:99999", false], // port out of range
+    ["host:0", false], // port zero
+    ["a".repeat(254), false], // over-length host (> 253)
+  ])("%s -> %s", (host, expected) => {
+    expect(isValidCompanionHost(host)).toBe(expected);
+  });
+});
+
 describe("buildCallsUrl — companion URL", () => {
   it("appends companion param by stripping the ws:// prefix", () => {
     const url = buildCallsUrl(
@@ -115,6 +136,25 @@ describe("buildCallsUrl — companion URL", () => {
       "/calls?lines=p1:l1"
     );
   });
+
+  it("omits the companion param entirely for an invalid host", () => {
+    // Regression: an SSRF-shaped companion must never leak into the URL.
+    const url = buildCallsUrl(
+      [{ productionId: "p1", lineId: "l1" }],
+      "http://evil.com/path"
+    );
+    expect(url).toBe("/calls?lines=p1:l1");
+    expect(url).not.toContain("companion=");
+  });
+
+  it("includes the companion param for a valid host", () => {
+    const url = buildCallsUrl(
+      [{ productionId: "p1", lineId: "l1" }],
+      "ws://companion.example:8080"
+    );
+    expect(url).toBe("/calls?lines=p1:l1&companion=companion.example:8080");
+    expect(url).toContain("companion=companion.example:8080");
+  });
 });
 
 describe("parseCompanionParam", () => {
@@ -128,5 +168,43 @@ describe("parseCompanionParam", () => {
 
   it("wraps a bare hostname in ws://", () => {
     expect(parseCompanionParam("example.com")).toBe("ws://example.com");
+  });
+});
+
+describe("parseCompanionParam rejects unsafe hosts", () => {
+  it.each([
+    "attacker.com/malicious",
+    "user@evil.com",
+    "//evil.com",
+    "host:99999",
+    "host:0",
+    "evil.com/path",
+    " user.com ",
+  ])("rejects %s", (raw) => {
+    expect(parseCompanionParam(raw)).toBeUndefined();
+  });
+
+  it("accepts a bare host and host:port", () => {
+    expect(parseCompanionParam("companion.example")).toBe(
+      "ws://companion.example"
+    );
+    expect(parseCompanionParam("companion.example:8080")).toBe(
+      "ws://companion.example:8080"
+    );
+  });
+
+  it("strips accidental ws scheme then validates", () => {
+    expect(parseCompanionParam("ws://companion.example:8080")).toBe(
+      "ws://companion.example:8080"
+    );
+    expect(parseCompanionParam("ws://user@evil.com")).toBeUndefined();
+  });
+
+  it("strips an accidental wss scheme and re-wraps a valid host as ws://", () => {
+    // Real behaviour: the scheme is normalised away and the returned URL is
+    // always ws:// regardless of the incoming ws:// or wss:// prefix.
+    expect(parseCompanionParam("wss://companion.example:8080")).toBe(
+      "ws://companion.example:8080"
+    );
   });
 });
