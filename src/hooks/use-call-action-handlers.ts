@@ -58,8 +58,22 @@ export function useCallActionHandlers({
         element.volume = newVal;
       });
     });
-    setActionHandler("push_to_talk_start", () => startTalking());
-    setActionHandler("push_to_talk_stop", () => stopTalking());
+    setActionHandler("push_to_talk_start", () => {
+      // Program output lines never expose a push-to-talk control in the UI, so
+      // ignore the corresponding Companion action to keep behaviour consistent.
+      if (isProgramOutputLine) {
+        return;
+      }
+
+      startTalking();
+    });
+    setActionHandler("push_to_talk_stop", () => {
+      if (isProgramOutputLine) {
+        return;
+      }
+
+      stopTalking();
+    });
   }, [
     value,
     setValue,
