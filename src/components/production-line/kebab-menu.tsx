@@ -5,6 +5,8 @@ import { GenerateWhipWhepUrlModal } from "../generate-urls/generate-whip-whep-ur
 import { ShareLineLinkModal } from "../generate-urls/share-line-link/share-line-link-modal";
 import { useShareUrl } from "../../hooks/use-share-url";
 import { TBasicProductionResponse } from "../../api/api";
+import { useIsGuest } from "../../hooks/use-is-guest";
+import { DEFAULT_RESTRICT_SHARE } from "../../utils/guest-session";
 import { TLine } from "./types";
 
 const MenuWrapper = styled.div`
@@ -94,6 +96,7 @@ export const KebabMenu = ({
   const buttonRef = useRef<HTMLButtonElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { shareUrl, url } = useShareUrl();
+  const isGuest = useIsGuest();
 
   const openMenu = useCallback(() => {
     if (buttonRef.current) {
@@ -138,20 +141,29 @@ export const KebabMenu = ({
       shareUrl({
         productionId: production.productionId,
         lineId: line.id,
+        guest: DEFAULT_RESTRICT_SHARE,
       });
     }
     setActiveModal("share");
     setIsOpen(false);
   }, [production, line, shareUrl]);
 
-  const handleShareRefresh = useCallback(() => {
-    if (production && line) {
-      shareUrl({
-        productionId: production.productionId,
-        lineId: line.id,
-      });
-    }
-  }, [production, line, shareUrl]);
+  const handleShareRefresh = useCallback(
+    ({ guest }: { guest: boolean }) => {
+      if (production && line) {
+        shareUrl({
+          productionId: production.productionId,
+          lineId: line.id,
+          guest,
+        });
+      }
+    },
+    [production, line, shareUrl]
+  );
+
+  const canShowHotkeys = !!(showHotkeys && onOpenHotkeys);
+
+  if (isGuest && !canShowHotkeys) return null;
 
   return (
     <MenuWrapper ref={menuRef}>
@@ -174,35 +186,39 @@ export const KebabMenu = ({
             top={dropdownPos.top}
             left={dropdownPos.left}
           >
-            {showHotkeys && onOpenHotkeys && (
+            {canShowHotkeys && (
               <DropdownItem
                 type="button"
                 role="menuitem"
                 onClick={() => {
-                  onOpenHotkeys();
+                  onOpenHotkeys?.();
                   setIsOpen(false);
                 }}
               >
                 Hotkeys
               </DropdownItem>
             )}
-            <DropdownItem
-              type="button"
-              role="menuitem"
-              onClick={handleShareClick}
-            >
-              Share
-            </DropdownItem>
-            <DropdownItem
-              type="button"
-              role="menuitem"
-              onClick={() => {
-                setActiveModal("whip-whep");
-                setIsOpen(false);
-              }}
-            >
-              WebRTC
-            </DropdownItem>
+            {!isGuest && (
+              <DropdownItem
+                type="button"
+                role="menuitem"
+                onClick={handleShareClick}
+              >
+                Share
+              </DropdownItem>
+            )}
+            {!isGuest && (
+              <DropdownItem
+                type="button"
+                role="menuitem"
+                onClick={() => {
+                  setActiveModal("whip-whep");
+                  setIsOpen(false);
+                }}
+              >
+                WebRTC
+              </DropdownItem>
+            )}
           </DropdownMenu>,
           document.body
         )}
