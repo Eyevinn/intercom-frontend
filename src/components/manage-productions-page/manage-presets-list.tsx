@@ -3,6 +3,7 @@ import styled from "@emotion/styled";
 import { TBasicProductionResponse, TPreset, TPresetCall } from "../../api/api";
 import { usePresetContext } from "../../contexts/preset-context";
 import { CollapsibleItem } from "../shared/collapsible-item";
+import { CardGrid, CardGridCell } from "../shared/shared-components";
 import { InfoTooltip } from "../info-tooltip/info-tooltip";
 import {
   UsersIcon,
@@ -48,13 +49,6 @@ const SectionHeader = styled.h2`
   span {
     top: 1px;
   }
-`;
-
-const ListWrapper = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  padding: 0 0 0 2rem;
-  align-items: flex-start;
 `;
 
 const PresetName = styled.span`
@@ -961,18 +955,19 @@ export const ManagePresetsList = ({ productions }: ManagePresetsListProps) => {
           configurations it belongs to.
         </InfoTooltip>
       </SectionHeader>
-      <ListWrapper>
+      <CardGrid>
         {sortedPresets.map((preset) => (
-          <ManagePresetCard
-            // eslint-disable-next-line no-underscore-dangle
-            key={preset._id}
-            preset={preset}
-            productions={productions}
-            onUpdate={handleUpdate}
-            onDelete={handleDelete}
-          />
+          // eslint-disable-next-line no-underscore-dangle
+          <CardGridCell key={preset._id}>
+            <ManagePresetCard
+              preset={preset}
+              productions={productions}
+              onUpdate={handleUpdate}
+              onDelete={handleDelete}
+            />
+          </CardGridCell>
         ))}
-      </ListWrapper>
+      </CardGrid>
     </>
   );
 };

@@ -1,6 +1,5 @@
 import styled from "@emotion/styled";
 import { mediaQueries } from "../generic-components";
-import { isMobile } from "../../bowser";
 
 export const HeaderWrapper = styled.div`
   width: 100%;
@@ -55,26 +54,6 @@ export const CardGrid = styled.div`
 
 export const CardGridCell = styled.div`
   min-width: 0;
-`;
-
-export const CardGridItem = styled.div`
-  flex: 0 0 calc(25% - 2rem);
-  ${isMobile ? `flex-grow: 1;` : `flex-grow: 0;`}
-  min-width: 34rem;
-  margin: 0 2rem 2rem 0;
-
-  ${mediaQueries.isLargeScreen} {
-    flex: 0 0 calc(33.333% - 2rem);
-  }
-
-  ${mediaQueries.isMediumScreen} {
-    flex: 0 0 calc(50% - 2rem);
-  }
-
-  ${mediaQueries.isSmallScreen} {
-    flex: 0 0 calc(100% - 2rem);
-    min-width: 0;
-  }
 `;
 
 export const CollapsibleItemWrapper = styled.div`

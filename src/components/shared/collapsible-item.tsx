@@ -1,4 +1,5 @@
 import { useState, ReactNode } from "react";
+import styled from "@emotion/styled";
 import {
   CollapsibleItemWrapper,
   HeaderWrapper,
@@ -8,6 +9,10 @@ import {
   InnerDiv,
 } from "./shared-components";
 import { ChevronUpIcon, ChevronDownIcon } from "../../assets/icons/icon";
+
+const CollapsibleHeaderTexts = styled(HeaderTexts)`
+  min-height: 3rem;
+`;
 
 type CollapsibleItemProps = {
   headerContent: ReactNode;
@@ -41,7 +46,7 @@ export const CollapsibleItem = ({
   return (
     <CollapsibleItemWrapper className={className} data-testid={testId}>
       <HeaderWrapper onClick={handleHeaderClick}>
-        <HeaderTexts>{headerContent}</HeaderTexts>
+        <CollapsibleHeaderTexts>{headerContent}</CollapsibleHeaderTexts>
         <HeaderIcon data-testid="chevron">
           {open ? <ChevronUpIcon /> : <ChevronDownIcon />}
         </HeaderIcon>

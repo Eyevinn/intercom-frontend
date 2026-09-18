@@ -1,7 +1,7 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { ReactNode } from "react";
-import { CardGridItem } from "../shared/shared-components";
+import { CardGridCell } from "../shared/shared-components";
 
 type SortablePresetCardProps = {
   id: string;
@@ -30,9 +30,9 @@ export const SortablePresetCard = ({
 
   /* eslint-disable react/jsx-props-no-spreading */
   return (
-    <CardGridItem ref={setNodeRef} style={style} {...attributes} {...listeners}>
+    <CardGridCell ref={setNodeRef} style={style} {...attributes} {...listeners}>
       {children}
-    </CardGridItem>
+    </CardGridCell>
   );
   /* eslint-enable react/jsx-props-no-spreading */
 };

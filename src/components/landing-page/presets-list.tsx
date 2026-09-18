@@ -32,6 +32,7 @@ import {
 } from "../production-list/production-list-components";
 import { sortByName } from "../../utils/sort-by-name";
 import { SortablePresetCard } from "./sortable-preset-card";
+import { CardGrid } from "../shared/shared-components";
 
 const CompanionRow = styled.div`
   font-size: 1.2rem;
@@ -60,13 +61,6 @@ const EmptyPresetText = styled.p`
   span {
     font-style: normal;
   }
-`;
-
-const ListWrapper = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  padding: 0 0 0 2rem;
-  align-items: flex-start;
 `;
 
 const PresetName = styled.span`
@@ -429,7 +423,7 @@ export const PresetList = ({ productions }: PresetListProps) => {
         onDragEnd={handleDragEnd}
       >
         <SortableContext items={presetIds} strategy={rectSortingStrategy}>
-          <ListWrapper>
+          <CardGrid>
             {orderedPresets.map((preset) => (
               <SortablePresetCard
                 // eslint-disable-next-line no-underscore-dangle
@@ -440,7 +434,7 @@ export const PresetList = ({ productions }: PresetListProps) => {
                 <PresetCard preset={preset} productions={productions} />
               </SortablePresetCard>
             ))}
-          </ListWrapper>
+          </CardGrid>
         </SortableContext>
       </DndContext>
     </>
