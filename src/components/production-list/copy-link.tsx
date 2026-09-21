@@ -2,6 +2,7 @@ import { useCallback, useState } from "react";
 import { TBasicProductionResponse } from "../../api/api";
 import { ShareIcon } from "../../assets/icons/icon";
 import { useShareUrl } from "../../hooks/use-share-url";
+import { DEFAULT_RESTRICT_SHARE } from "../../utils/guest-session";
 import { CopyIconWrapper } from "../copy-button/copy-components";
 import { ShareLineLinkModal } from "../generate-urls/share-line-link/share-line-link-modal";
 import { TLine } from "../production-line/types";
@@ -19,41 +20,39 @@ export const CopyLink = ({
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const { shareUrl, url } = useShareUrl();
 
-  const handleGenerateProductionUrls = useCallback(async () => {
-    const urls = await Promise.all(
-      production.lines.map(async (item) => {
-        const generatedUrl = await shareUrl({
-          productionId: production.productionId,
-          lineId: item.id,
-        });
-        return ` ${item.name}: ${generatedUrl}`;
-      })
-    );
-    setProductionUrls(urls);
-  }, [production.productionId, production.lines, shareUrl]);
+  const handleGenerateProductionUrls = useCallback(
+    async (guest: boolean) => {
+      const urls = await Promise.all(
+        production.lines.map(async (item) => {
+          const generatedUrl = await shareUrl({
+            productionId: production.productionId,
+            lineId: item.id,
+            guest,
+          });
+          return ` ${item.name}: ${generatedUrl}`;
+        })
+      );
+      setProductionUrls(urls);
+    },
+    [production.productionId, production.lines, shareUrl]
+  );
+
+  const generate = (guest: boolean) => {
+    if (isCopyProduction) {
+      handleGenerateProductionUrls(guest);
+    } else {
+      shareUrl({
+        productionId: production.productionId,
+        lineId: line.id,
+        guest,
+      });
+    }
+  };
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (isCopyProduction) {
-      handleGenerateProductionUrls();
-    } else {
-      shareUrl({
-        productionId: production.productionId,
-        lineId: line.id,
-      });
-    }
+    generate(DEFAULT_RESTRICT_SHARE);
     setIsModalOpen(true);
-  };
-
-  const handleRefresh = () => {
-    if (isCopyProduction) {
-      handleGenerateProductionUrls();
-    } else {
-      shareUrl({
-        productionId: production.productionId,
-        lineId: line.id,
-      });
-    }
   };
 
   return (
@@ -69,7 +68,7 @@ export const CopyLink = ({
         <ShareLineLinkModal
           isCopyProduction={isCopyProduction}
           urls={isCopyProduction ? productionUrls : [url]}
-          onRefresh={handleRefresh}
+          onRefresh={({ guest }) => generate(guest)}
           onClose={() => setIsModalOpen(false)}
         />
       )}
