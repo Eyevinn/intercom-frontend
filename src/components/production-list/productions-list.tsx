@@ -4,9 +4,14 @@ import {
   DndContext,
   closestCenter,
   PointerSensor,
+  KeyboardSensor,
   DragEndEvent,
 } from "@dnd-kit/core";
-import { SortableContext, rectSortingStrategy } from "@dnd-kit/sortable";
+import {
+  SortableContext,
+  rectSortingStrategy,
+  sortableKeyboardCoordinates,
+} from "@dnd-kit/sortable";
 import { useCallback } from "react";
 import { TBasicProductionResponse } from "../../api/api.ts";
 import { LocalError } from "../error.tsx";
@@ -32,6 +37,9 @@ export const ProductionsList = ({
       activationConstraint: {
         distance: 8,
       },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
     })
   );
 
@@ -39,7 +47,7 @@ export const ProductionsList = ({
     (event: DragEndEvent) => {
       const { active, over } = event;
       if (over && active.id !== over.id && onReorder) {
-        onReorder(active.id as string, over.id as string);
+        onReorder(String(active.id), String(over.id));
       }
     },
     [onReorder]

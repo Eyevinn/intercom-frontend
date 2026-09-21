@@ -14,42 +14,17 @@ import { PresetList } from "./presets-list";
 import { InfoTooltip } from "../info-tooltip/info-tooltip";
 import { TBasicProductionResponse } from "../../api/api.ts";
 import { sortByName } from "../../utils/sort-by-name.ts";
+import {
+  applyStoredOrder as applyOrder,
+  saveOrder,
+} from "../../utils/list-order.ts";
 
 const SORT_ORDER_KEY = "production-sort-order";
 
-const getSavedOrder = (): string[] => {
-  try {
-    const saved = localStorage.getItem(SORT_ORDER_KEY);
-    return saved ? JSON.parse(saved) : [];
-  } catch {
-    return [];
-  }
-};
-
-const saveOrder = (ids: string[]) => {
-  localStorage.setItem(SORT_ORDER_KEY, JSON.stringify(ids));
-};
-
 const applyStoredOrder = (
   productions: TBasicProductionResponse[]
-): TBasicProductionResponse[] => {
-  const sorted = sortByName(productions);
-  const savedOrder = getSavedOrder();
-  if (!savedOrder.length) return sorted;
-
-  const productionMap = new Map(sorted.map((p) => [p.productionId, p]));
-
-  const ordered = savedOrder.reduce<TBasicProductionResponse[]>((acc, id) => {
-    const prod = productionMap.get(id);
-    if (prod) {
-      acc.push(prod);
-      productionMap.delete(id);
-    }
-    return acc;
-  }, []);
-
-  return [...ordered, ...productionMap.values()];
-};
+): TBasicProductionResponse[] =>
+  applyOrder(sortByName(productions), (p) => p.productionId, SORT_ORDER_KEY);
 
 const HeaderButton = styled(PrimaryButton)`
   margin-left: 1rem;
@@ -148,7 +123,10 @@ export const ProductionsListContainer = () => {
       if (oldIndex === -1 || newIndex === -1) return prev;
 
       const newOrder = arrayMove(prev, oldIndex, newIndex);
-      saveOrder(newOrder.map((p) => p.productionId));
+      saveOrder(
+        SORT_ORDER_KEY,
+        newOrder.map((p) => p.productionId)
+      );
       return newOrder;
     });
   }, []);

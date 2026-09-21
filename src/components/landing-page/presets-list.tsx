@@ -7,12 +7,14 @@ import {
   DndContext,
   closestCenter,
   PointerSensor,
+  KeyboardSensor,
   DragEndEvent,
 } from "@dnd-kit/core";
 import {
   SortableContext,
   rectSortingStrategy,
   arrayMove,
+  sortableKeyboardCoordinates,
 } from "@dnd-kit/sortable";
 import { usePresetContext } from "../../contexts/preset-context";
 import { buildCallsUrl } from "../../utils/call-url";
@@ -31,6 +33,10 @@ import {
   ParticipantCountWrapper,
 } from "../production-list/production-list-components";
 import { sortByName } from "../../utils/sort-by-name";
+import {
+  applyStoredOrder as applyOrder,
+  saveOrder,
+} from "../../utils/list-order";
 import { SortablePresetCard } from "./sortable-preset-card";
 import { CardGrid } from "../shared/shared-components";
 
@@ -324,38 +330,13 @@ const PresetCard = ({ preset, productions }: PresetCardProps) => {
 
 const PRESET_SORT_ORDER_KEY = "preset-sort-order";
 
-const getSavedPresetOrder = (): string[] => {
-  try {
-    const saved = localStorage.getItem(PRESET_SORT_ORDER_KEY);
-    return saved ? JSON.parse(saved) : [];
-  } catch {
-    return [];
-  }
-};
-
-const savePresetOrder = (ids: string[]) => {
-  localStorage.setItem(PRESET_SORT_ORDER_KEY, JSON.stringify(ids));
-};
-
-const applyStoredPresetOrder = (presets: TPreset[]): TPreset[] => {
-  const sorted = sortByName(presets);
-  const savedOrder = getSavedPresetOrder();
-  if (!savedOrder.length) return sorted;
-
-  // eslint-disable-next-line no-underscore-dangle
-  const presetMap = new Map(sorted.map((p) => [p._id, p]));
-
-  const ordered = savedOrder.reduce<TPreset[]>((acc, id) => {
-    const preset = presetMap.get(id);
-    if (preset) {
-      acc.push(preset);
-      presetMap.delete(id);
-    }
-    return acc;
-  }, []);
-
-  return [...ordered, ...presetMap.values()];
-};
+const applyStoredPresetOrder = (presets: TPreset[]): TPreset[] =>
+  applyOrder(
+    sortByName(presets),
+    // eslint-disable-next-line no-underscore-dangle
+    (p) => p._id,
+    PRESET_SORT_ORDER_KEY
+  );
 
 type PresetListProps = {
   productions: TBasicProductionResponse[];
@@ -378,6 +359,9 @@ export const PresetList = ({ productions }: PresetListProps) => {
       activationConstraint: {
         distance: 8,
       },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
     })
   );
 
@@ -391,7 +375,10 @@ export const PresetList = ({ productions }: PresetListProps) => {
         if (oldIndex === -1 || newIndex === -1) return prev;
 
         const newOrder = arrayMove(prev, oldIndex, newIndex);
-        savePresetOrder(newOrder.map((p) => p._id));
+        saveOrder(
+          PRESET_SORT_ORDER_KEY,
+          newOrder.map((p) => p._id)
+        );
         return newOrder;
         /* eslint-enable no-underscore-dangle */
       });
