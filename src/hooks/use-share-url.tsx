@@ -2,6 +2,7 @@ import { useState } from "react";
 import logger from "../utils/logger";
 import { useShareLine } from "../components/production-line/use-share-line";
 import { buildCallsUrl } from "../utils/call-url";
+import { appendGuestParam } from "../utils/guest-session";
 
 export const useShareUrl = () => {
   const [url, setUrl] = useState<string>("");
@@ -10,11 +11,14 @@ export const useShareUrl = () => {
   const shareUrl = async ({
     productionId,
     lineId,
+    guest = false,
   }: {
     productionId: string;
     lineId: string;
+    guest?: boolean;
   }) => {
-    const path = buildCallsUrl([{ productionId, lineId }]);
+    const callsPath = buildCallsUrl([{ productionId, lineId }]);
+    const path = guest ? appendGuestParam(callsPath) : callsPath;
 
     try {
       const res = await shareLine({ path });
