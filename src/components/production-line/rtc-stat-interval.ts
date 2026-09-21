@@ -76,6 +76,18 @@ const createAnalyserContext = (
 
   try {
     const audioContext = new AudioContextCtor();
+
+    // Browsers auto-suspend an AudioContext created without a user gesture.
+    // A suspended context does not process audio, so the analyser would always
+    // read silence and the muted-speaker activity feedback would never fire.
+    // Resume it (best-effort) so the analyser reflects the live stream.
+    if (audioContext.state === "suspended") {
+      audioContext.resume().catch(() => {
+        // Ignore resume rejections (e.g. missing user gesture); the context
+        // will resume on the next successful attempt.
+      });
+    }
+
     const source = audioContext.createMediaStreamSource(stream);
     const analyser = audioContext.createAnalyser();
     analyser.fftSize = 256;
