@@ -48,8 +48,19 @@ describe("maybeRedirectToAuth", () => {
     expect(assignSpy).not.toHaveBeenCalled();
   });
 
-  it("does not redirect if already at the AUTH url (loop guard)", () => {
-    vi.stubEnv("AUTH", window.location.href);
+  it("does not redirect if already on the AUTH origin (loop guard)", () => {
+    // Same-origin as the current test location — the terminating condition that
+    // means we've already landed on the auth destination.
+    vi.stubEnv("AUTH", `${window.location.origin}/login?next=/dashboard`);
+
+    const result = maybeRedirectToAuth(401);
+
+    expect(result).toBe(false);
+    expect(assignSpy).not.toHaveBeenCalled();
+  });
+
+  it("does not redirect for a malformed AUTH url", () => {
+    vi.stubEnv("AUTH", "http://[::bad-url");
 
     const result = maybeRedirectToAuth(401);
 

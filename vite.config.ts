@@ -6,9 +6,13 @@ import svgr from "vite-plugin-svgr";
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react(), svgr()],
-  // Expose the literally-named `AUTH` build-time env var (no VITE_ prefix) to
-  // `import.meta.env` in addition to the default `VITE_`-prefixed vars.
-  envPrefix: ["VITE_", "AUTH"],
+  // Expose ONLY the exact `AUTH` build-time env var to the client bundle. Using
+  // `envPrefix: ["AUTH"]` would be a prefix match and leak every `AUTH*` var, so
+  // instead define just `import.meta.env.AUTH` explicitly. The default `VITE_`
+  // prefix behavior is left untouched by not overriding `envPrefix`.
+  define: {
+    "import.meta.env.AUTH": JSON.stringify(process.env.AUTH ?? ""),
+  },
   test: {
     globals: true,
     environment: "happy-dom",

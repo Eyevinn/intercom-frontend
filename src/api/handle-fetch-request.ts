@@ -1,5 +1,3 @@
-import { maybeRedirectToAuth } from "./redirect-on-auth-failure.ts";
-
 const isSuccessful = (r: Response) => r.status >= 200 && r.status <= 399;
 
 export const handleFetchRequest = async <T>(
@@ -21,9 +19,6 @@ export const handleFetchRequest = async <T>(
 
   if (!isSuccess) {
     const { status } = response;
-    // When built with the `AUTH` env var, redirect to the OSC login URL on a
-    // 401 before throwing. No-op (and existing reauth flow runs) when unset.
-    maybeRedirectToAuth(status);
     let err: Error;
     if (text) {
       err = new Error(text);
