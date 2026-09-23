@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import styled from "@emotion/styled";
 import { useNavigate } from "react-router";
 import {
@@ -13,7 +13,6 @@ import {
 import {
   SortableContext,
   rectSortingStrategy,
-  arrayMove,
   sortableKeyboardCoordinates,
 } from "@dnd-kit/sortable";
 import { usePresetContext } from "../../contexts/preset-context";
@@ -32,11 +31,7 @@ import {
   ParticipantCount,
   ParticipantCountWrapper,
 } from "../production-list/production-list-components";
-import { sortByName } from "../../utils/sort-by-name";
-import {
-  applyStoredOrder as applyOrder,
-  saveOrder,
-} from "../../utils/list-order";
+import { useOrderedList } from "../../hooks/use-ordered-list";
 import { SortablePresetCard } from "./sortable-preset-card";
 import { CardGrid } from "../shared/shared-components";
 
@@ -330,30 +325,22 @@ const PresetCard = ({ preset, productions }: PresetCardProps) => {
 
 const PRESET_SORT_ORDER_KEY = "preset-sort-order";
 
-const applyStoredPresetOrder = (presets: TPreset[]): TPreset[] =>
-  applyOrder(
-    sortByName(presets),
-    // eslint-disable-next-line no-underscore-dangle
-    (p) => p._id,
-    PRESET_SORT_ORDER_KEY
-  );
+const EMPTY_PRESETS: TPreset[] = [];
 
-type PresetListProps = {
+// eslint-disable-next-line no-underscore-dangle
+const getPresetId = (p: TPreset) => p._id;
+
+type PresetsGridProps = {
+  presets: TPreset[];
   productions: TBasicProductionResponse[];
+  onReorder: (activeId: string, overId: string) => void;
 };
 
-export const PresetList = ({ productions }: PresetListProps) => {
-  const { presets, loading } = usePresetContext();
-  const [orderedPresets, setOrderedPresets] = useState<TPreset[]>([]);
-
-  useEffect(() => {
-    if (presets.length) {
-      setOrderedPresets(applyStoredPresetOrder(presets));
-    } else {
-      setOrderedPresets([]);
-    }
-  }, [presets]);
-
+export const PresetsGrid = ({
+  presets,
+  productions,
+  onReorder,
+}: PresetsGridProps) => {
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -365,30 +352,53 @@ export const PresetList = ({ productions }: PresetListProps) => {
     })
   );
 
-  const handleDragEnd = useCallback((event: DragEndEvent) => {
-    const { active, over } = event;
-    if (over && active.id !== over.id) {
-      setOrderedPresets((prev) => {
-        /* eslint-disable no-underscore-dangle */
-        const oldIndex = prev.findIndex((p) => p._id === active.id);
-        const newIndex = prev.findIndex((p) => p._id === over.id);
-        if (oldIndex === -1 || newIndex === -1) return prev;
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      const { active, over } = event;
+      if (over && active.id !== over.id) {
+        onReorder(String(active.id), String(over.id));
+      }
+    },
+    [onReorder]
+  );
 
-        const newOrder = arrayMove(prev, oldIndex, newIndex);
-        saveOrder(
-          PRESET_SORT_ORDER_KEY,
-          newOrder.map((p) => p._id)
-        );
-        return newOrder;
-        /* eslint-enable no-underscore-dangle */
-      });
-    }
-  }, []);
+  const presetIds = presets.map(getPresetId);
+
+  return (
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      onDragEnd={handleDragEnd}
+    >
+      <SortableContext items={presetIds} strategy={rectSortingStrategy}>
+        <CardGrid>
+          {presets.map((preset) => (
+            <SortablePresetCard
+              key={getPresetId(preset)}
+              id={getPresetId(preset)}
+            >
+              <PresetCard preset={preset} productions={productions} />
+            </SortablePresetCard>
+          ))}
+        </CardGrid>
+      </SortableContext>
+    </DndContext>
+  );
+};
+
+type PresetListProps = {
+  productions: TBasicProductionResponse[];
+};
+
+export const PresetList = ({ productions }: PresetListProps) => {
+  const { presets, loading } = usePresetContext();
+  const { ordered: orderedPresets, reorder: handleReorder } = useOrderedList(
+    presets ?? EMPTY_PRESETS,
+    getPresetId,
+    PRESET_SORT_ORDER_KEY
+  );
 
   if (loading || orderedPresets.length === 0) return null;
-
-  // eslint-disable-next-line no-underscore-dangle
-  const presetIds = orderedPresets.map((p) => p._id);
 
   return (
     <>
@@ -404,26 +414,11 @@ export const PresetList = ({ productions }: PresetListProps) => {
           </InfoTooltip>
         }
       />
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragEnd={handleDragEnd}
-      >
-        <SortableContext items={presetIds} strategy={rectSortingStrategy}>
-          <CardGrid>
-            {orderedPresets.map((preset) => (
-              <SortablePresetCard
-                // eslint-disable-next-line no-underscore-dangle
-                key={preset._id}
-                // eslint-disable-next-line no-underscore-dangle
-                id={preset._id}
-              >
-                <PresetCard preset={preset} productions={productions} />
-              </SortablePresetCard>
-            ))}
-          </CardGrid>
-        </SortableContext>
-      </DndContext>
+      <PresetsGrid
+        presets={orderedPresets}
+        productions={productions}
+        onReorder={handleReorder}
+      />
     </>
   );
 };

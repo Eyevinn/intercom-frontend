@@ -1,7 +1,6 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect } from "react";
 import styled from "@emotion/styled";
 import { useNavigate } from "react-router";
-import { arrayMove } from "@dnd-kit/sortable";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { useRefreshAnimation } from "./use-refresh-animation.ts";
 import { useFetchProductionList } from "./use-fetch-production-list.ts";
@@ -13,18 +12,13 @@ import { HideOnSmallScreen } from "../generic-components";
 import { PresetList } from "./presets-list";
 import { InfoTooltip } from "../info-tooltip/info-tooltip";
 import { TBasicProductionResponse } from "../../api/api.ts";
-import { sortByName } from "../../utils/sort-by-name.ts";
-import {
-  applyStoredOrder as applyOrder,
-  saveOrder,
-} from "../../utils/list-order.ts";
+import { useOrderedList } from "../../hooks/use-ordered-list.ts";
 
 const SORT_ORDER_KEY = "production-sort-order";
 
-const applyStoredOrder = (
-  productions: TBasicProductionResponse[]
-): TBasicProductionResponse[] =>
-  applyOrder(sortByName(productions), (p) => p.productionId, SORT_ORDER_KEY);
+const EMPTY_PRODUCTIONS: TBasicProductionResponse[] = [];
+
+const getProductionId = (p: TBasicProductionResponse) => p.productionId;
 
 const HeaderButton = styled(PrimaryButton)`
   margin-left: 1rem;
@@ -104,32 +98,12 @@ export const ProductionsListContainer = () => {
     doInitialLoad,
   });
 
-  const [orderedProductions, setOrderedProductions] = useState<
-    TBasicProductionResponse[]
-  >([]);
-
-  useEffect(() => {
-    if (productions?.productions.length) {
-      setOrderedProductions(applyStoredOrder(productions.productions));
-    } else {
-      setOrderedProductions([]);
-    }
-  }, [productions]);
-
-  const handleReorder = useCallback((activeId: string, overId: string) => {
-    setOrderedProductions((prev) => {
-      const oldIndex = prev.findIndex((p) => p.productionId === activeId);
-      const newIndex = prev.findIndex((p) => p.productionId === overId);
-      if (oldIndex === -1 || newIndex === -1) return prev;
-
-      const newOrder = arrayMove(prev, oldIndex, newIndex);
-      saveOrder(
-        SORT_ORDER_KEY,
-        newOrder.map((p) => p.productionId)
-      );
-      return newOrder;
-    });
-  }, []);
+  const { ordered: orderedProductions, reorder: handleReorder } =
+    useOrderedList(
+      productions?.productions ?? EMPTY_PRODUCTIONS,
+      getProductionId,
+      SORT_ORDER_KEY
+    );
 
   useEffect(() => {
     const interval = window.setInterval(() => {

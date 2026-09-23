@@ -1,5 +1,10 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { applyStoredOrder, getSavedOrder, saveOrder } from "./list-order";
+import {
+  applyStoredOrder,
+  getSavedOrder,
+  reorderByIds,
+  saveOrder,
+} from "./list-order";
 
 const KEY = "test-sort-order";
 
@@ -114,5 +119,66 @@ describe("applyStoredOrder", () => {
     applyStoredOrder(input, getId, KEY);
 
     expect(ids(input)).toEqual(["a", "b"]);
+  });
+});
+
+describe("reorderByIds", () => {
+  const getId = (item: TItem) => item.id;
+
+  it("moves the active item to the position of the item it was dropped on", () => {
+    const result = reorderByIds(items(["a", "b", "c"]), getId, "a", "c", KEY);
+
+    expect(ids(result)).toEqual(["b", "c", "a"]);
+  });
+
+  it("moves an item backwards as well as forwards", () => {
+    const result = reorderByIds(items(["a", "b", "c"]), getId, "c", "a", KEY);
+
+    expect(ids(result)).toEqual(["c", "a", "b"]);
+  });
+
+  it("persists the new order so it survives a refetch", () => {
+    const source = items(["a", "b", "c"]);
+    reorderByIds(source, getId, "a", "c", KEY);
+
+    expect(getSavedOrder(KEY)).toEqual(["b", "c", "a"]);
+    expect(ids(applyStoredOrder(source, getId, KEY))).toEqual(["b", "c", "a"]);
+  });
+
+  it("returns the original array when the active id is unknown", () => {
+    const source = items(["a", "b"]);
+    const result = reorderByIds(source, getId, "gone", "a", KEY);
+
+    expect(result).toBe(source);
+  });
+
+  it("returns the original array when the target id is unknown", () => {
+    const source = items(["a", "b"]);
+    const result = reorderByIds(source, getId, "a", "gone", KEY);
+
+    expect(result).toBe(source);
+  });
+
+  it("persists nothing when the reorder is a no-op", () => {
+    reorderByIds(items(["a", "b"]), getId, "a", "gone", KEY);
+
+    expect(getSavedOrder(KEY)).toEqual([]);
+  });
+
+  it("does not mutate the input array", () => {
+    const source = items(["a", "b", "c"]);
+    reorderByIds(source, getId, "a", "c", KEY);
+
+    expect(ids(source)).toEqual(["a", "b", "c"]);
+  });
+
+  it("does not throw when persistence fails", () => {
+    vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+      throw new Error("QuotaExceededError");
+    });
+
+    const result = reorderByIds(items(["a", "b"]), getId, "a", "b", KEY);
+
+    expect(ids(result)).toEqual(["b", "a"]);
   });
 });
