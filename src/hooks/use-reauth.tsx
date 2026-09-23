@@ -24,11 +24,16 @@ const attemptReauth = async (): Promise<Error | null> => {
     } catch (error) {
       lastError = error instanceof Error ? error : new Error(String(error));
       const { status } = lastError as Error & { status?: number };
-      const is405Error = status === 405 || lastError.message.includes("405");
-      if (is405Error) {
-        // 405 means this backend doesn't implement /reauth (not behind OSC) —
-        // this is a definitive signal, not a transient failure, so don't burn
-        // the remaining attempts or sleeps
+      const isNoOscTokenError =
+        status === 404 ||
+        status === 405 ||
+        lastError.message.includes("404") ||
+        lastError.message.includes("405");
+      if (isNoOscTokenError) {
+        // 404/405 means no OSC token is configured on this backend (the
+        // manager returns 405 "No OSC_ACCESS_TOKEN set" now, older versions
+        // returned 404) — this is a definitive signal, not a transient
+        // failure, so don't burn the remaining attempts or sleeps
         return lastError;
       }
       if (attempt < REAUTH_MAX_ATTEMPTS) {
@@ -68,10 +73,15 @@ export const useSetupTokenRefresh = () => {
           // Don't dispatch 500 errors as they're expected when initial OSC token expires
           return;
         }
-        const is405Error = status === 405 || lastError.message.includes("405");
-        if (is405Error) {
-          // This backend doesn't implement /reauth (not behind OSC) — stop
-          // trying permanently, no error banner, no console noise
+        const isNoOscTokenError =
+          status === 404 ||
+          status === 405 ||
+          lastError.message.includes("404") ||
+          lastError.message.includes("405");
+        if (isNoOscTokenError) {
+          // No OSC token configured on this backend (manager returns 405 now,
+          // older versions returned 404) — stop trying permanently, no error
+          // banner, no console noise
           if (intervalRef.current) {
             clearInterval(intervalRef.current);
             intervalRef.current = null;

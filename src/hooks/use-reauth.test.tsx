@@ -70,6 +70,30 @@ describe("useSetupTokenRefresh", () => {
     expect(mockDispatch).not.toHaveBeenCalled();
   });
 
+  it("on 404, calls API.reauth exactly once, dispatches no ERROR, and clears the hourly interval permanently", async () => {
+    mockAPI.reauth.mockRejectedValue(makeStatusError(404, "Not Found"));
+
+    const { result } = renderHook(() => useSetupTokenRefresh());
+
+    await act(async () => {
+      result.current.setupTokenRefresh();
+      // Flush the immediately-invoked reauth() call (no sleeps expected)
+      await vi.runOnlyPendingTimersAsync();
+    });
+
+    expect(mockAPI.reauth).toHaveBeenCalledTimes(1);
+    expect(mockDispatch).not.toHaveBeenCalled();
+
+    // Advance well past the hourly interval — if it were still armed,
+    // API.reauth would be called again
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(2 * 60 * 60 * 1000);
+    });
+
+    expect(mockAPI.reauth).toHaveBeenCalledTimes(1);
+    expect(mockDispatch).not.toHaveBeenCalled();
+  });
+
   it("on a non-405 failure (403), still retries 3 times and dispatches the ERROR", async () => {
     mockAPI.reauth.mockRejectedValue(makeStatusError(403, "Forbidden"));
 
