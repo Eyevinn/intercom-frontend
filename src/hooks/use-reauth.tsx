@@ -1,6 +1,7 @@
 import { useCallback, useRef } from "react";
 import { useGlobalState } from "../global-state/context-provider";
 import { API } from "../api/api";
+import { maybeRedirectToAuth } from "../api/redirect-on-auth-failure";
 
 const REAUTH_MAX_ATTEMPTS = 3;
 const REAUTH_RETRY_DELAY_MS = 3000;
@@ -85,6 +86,12 @@ export const useSetupTokenRefresh = () => {
             clearInterval(intervalRef.current);
             intervalRef.current = null;
           }
+          return;
+        }
+        // Reauth has exhausted its retries. If a 401 persists and an OSC login
+        // URL was configured (AUTH build-time var), redirect there so the user
+        // can re-authenticate; otherwise fall through to the error banner.
+        if (status === 401 && maybeRedirectToAuth(status)) {
           return;
         }
         const codePart = status != null ? status.toString() : "";

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useGlobalState } from "../../global-state/context-provider";
 import { API, TListProductionsResponse } from "../../api/api.ts";
+import { maybeRedirectToAuth } from "../../api/redirect-on-auth-failure.ts";
 
 export type GetProductionListFilter = {
   limit?: string;
@@ -52,8 +53,13 @@ export const useFetchProductionList = (filter?: GetProductionListFilter) => {
 
           const { status } = e as Error & { status?: number };
           if (status === 401) {
-            API.reauth().catch(() => {
-              // Reauth failed — next interval poll will retry
+            // Give reauth its chance first; only redirect to the OSC login URL
+            // (when the AUTH build-time var is set) once reauth itself fails.
+            API.reauth().catch((reauthError) => {
+              const reauthStatus = (reauthError as Error & { status?: number })
+                .status;
+              maybeRedirectToAuth(reauthStatus ?? 401);
+              // If no redirect is configured, the next interval poll will retry.
             });
             return;
           }
