@@ -1,6 +1,20 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import styled from "@emotion/styled";
 import { useNavigate } from "react-router";
+import {
+  useSensors,
+  useSensor,
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  KeyboardSensor,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  rectSortingStrategy,
+  sortableKeyboardCoordinates,
+} from "@dnd-kit/sortable";
 import { usePresetContext } from "../../contexts/preset-context";
 import { buildCallsUrl } from "../../utils/call-url";
 import { TBasicProductionResponse, TPreset } from "../../api/api";
@@ -17,6 +31,9 @@ import {
   ParticipantCount,
   ParticipantCountWrapper,
 } from "../production-list/production-list-components";
+import { useOrderedList } from "../../hooks/use-ordered-list";
+import { SortablePresetCard } from "./sortable-preset-card";
+import { CardGrid } from "../shared/shared-components";
 
 const CompanionRow = styled.div`
   font-size: 1.2rem;
@@ -45,13 +62,6 @@ const EmptyPresetText = styled.p`
   span {
     font-style: normal;
   }
-`;
-
-const ListWrapper = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  padding: 0 0 0 2rem;
-  align-items: flex-start;
 `;
 
 const PresetName = styled.span`
@@ -289,6 +299,7 @@ const PresetCard = ({ preset, productions }: PresetCardProps) => {
       <CollapsibleItem
         headerContent={headerContent}
         expandedContent={expandedContent}
+        className="filled"
         // eslint-disable-next-line no-underscore-dangle
         testId={`preset-${preset._id}`}
       />
@@ -312,14 +323,82 @@ const PresetCard = ({ preset, productions }: PresetCardProps) => {
   );
 };
 
+const PRESET_SORT_ORDER_KEY = "preset-sort-order";
+
+const EMPTY_PRESETS: TPreset[] = [];
+
+// eslint-disable-next-line no-underscore-dangle
+const getPresetId = (p: TPreset) => p._id;
+
+type PresetsGridProps = {
+  presets: TPreset[];
+  productions: TBasicProductionResponse[];
+  onReorder: (activeId: string, overId: string) => void;
+};
+
+export const PresetsGrid = ({
+  presets,
+  productions,
+  onReorder,
+}: PresetsGridProps) => {
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      const { active, over } = event;
+      if (over && active.id !== over.id) {
+        onReorder(String(active.id), String(over.id));
+      }
+    },
+    [onReorder]
+  );
+
+  const presetIds = presets.map(getPresetId);
+
+  return (
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      onDragEnd={handleDragEnd}
+    >
+      <SortableContext items={presetIds} strategy={rectSortingStrategy}>
+        <CardGrid>
+          {presets.map((preset) => (
+            <SortablePresetCard
+              key={getPresetId(preset)}
+              id={getPresetId(preset)}
+            >
+              <PresetCard preset={preset} productions={productions} />
+            </SortablePresetCard>
+          ))}
+        </CardGrid>
+      </SortableContext>
+    </DndContext>
+  );
+};
+
 type PresetListProps = {
   productions: TBasicProductionResponse[];
 };
 
 export const PresetList = ({ productions }: PresetListProps) => {
   const { presets, loading } = usePresetContext();
+  const { ordered: orderedPresets, reorder: handleReorder } = useOrderedList(
+    presets ?? EMPTY_PRESETS,
+    getPresetId,
+    PRESET_SORT_ORDER_KEY
+  );
 
-  if (loading || presets.length === 0) return null;
+  if (loading || orderedPresets.length === 0) return null;
 
   return (
     <>
@@ -335,16 +414,11 @@ export const PresetList = ({ productions }: PresetListProps) => {
           </InfoTooltip>
         }
       />
-      <ListWrapper>
-        {presets.map((preset) => (
-          <PresetCard
-            // eslint-disable-next-line no-underscore-dangle
-            key={preset._id}
-            preset={preset}
-            productions={productions}
-          />
-        ))}
-      </ListWrapper>
+      <PresetsGrid
+        presets={orderedPresets}
+        productions={productions}
+        onReorder={handleReorder}
+      />
     </>
   );
 };

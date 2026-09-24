@@ -11,6 +11,14 @@ import { PrimaryButton } from "../form-elements/form-elements";
 import { HideOnSmallScreen } from "../generic-components";
 import { PresetList } from "./presets-list";
 import { InfoTooltip } from "../info-tooltip/info-tooltip";
+import { TBasicProductionResponse } from "../../api/api.ts";
+import { useOrderedList } from "../../hooks/use-ordered-list.ts";
+
+const SORT_ORDER_KEY = "production-sort-order";
+
+const EMPTY_PRODUCTIONS: TBasicProductionResponse[] = [];
+
+const getProductionId = (p: TBasicProductionResponse) => p.productionId;
 
 const HeaderButton = styled(PrimaryButton)`
   margin-left: 1rem;
@@ -90,6 +98,13 @@ export const ProductionsListContainer = () => {
     doInitialLoad,
   });
 
+  const { ordered: orderedProductions, reorder: handleReorder } =
+    useOrderedList(
+      productions?.productions ?? EMPTY_PRODUCTIONS,
+      getProductionId,
+      SORT_ORDER_KEY
+    );
+
   useEffect(() => {
     const interval = window.setInterval(() => {
       setIntervalLoad(true);
@@ -152,10 +167,14 @@ export const ProductionsListContainer = () => {
           </EmptyStateButton>
         </EmptyState>
       )}
-      {!!productions?.productions.length && (
-        <ProductionsList productions={productions.productions} error={error} />
+      {!!orderedProductions.length && (
+        <ProductionsList
+          productions={orderedProductions}
+          error={error}
+          onReorder={handleReorder}
+        />
       )}
-      <PresetList productions={productions?.productions ?? []} />
+      <PresetList productions={orderedProductions} />
     </>
   );
 };
