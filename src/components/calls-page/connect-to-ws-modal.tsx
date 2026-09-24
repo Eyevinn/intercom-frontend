@@ -7,6 +7,11 @@ import {
 } from "../form-elements/form-elements";
 import { Modal } from "../modal/modal";
 import { InfoTooltip } from "../info-tooltip/info-tooltip";
+import {
+  buildCompanionWsUrl,
+  companionWsScheme,
+  isValidCompanionHost,
+} from "../../utils/call-url";
 
 const ButtonWrapper = styled.div`
   display: flex;
@@ -53,7 +58,8 @@ export const ConnectToWsModal = ({
   onClose,
   initialUrl,
 }: ConnectToWsModalProps) => {
-  const PROTOCOL = "ws://";
+  // Scheme derived from the page protocol (wss:// on https) — see call-url.ts.
+  const PROTOCOL = `${companionWsScheme()}://`;
   const toHostPort = (url: string) => {
     if (url.startsWith("ws://")) return url.slice(5);
     if (url.startsWith("wss://")) return url.slice(6);
@@ -84,14 +90,10 @@ export const ConnectToWsModal = ({
     setHostPort(withoutProtocol);
   };
 
-  const isValidHostPort = (input: string): boolean => {
-    const pattern = /^([a-zA-Z0-9.-]+|\[[\da-fA-F:]+\])(:\d{1,5})?$/;
-    return pattern.test(input);
-  };
-
   const submit = () => {
-    if (hostPort && isValidHostPort(hostPort)) {
-      handleConnect(`${PROTOCOL}${hostPort}`);
+    const url = buildCompanionWsUrl(hostPort);
+    if (url) {
+      handleConnect(url);
     }
   };
 
@@ -136,7 +138,7 @@ export const ConnectToWsModal = ({
         <SecondaryButton onClick={onClose}>Cancel</SecondaryButton>
         <PrimaryButton
           onClick={submit}
-          disabled={!hostPort || !isValidHostPort(hostPort)}
+          disabled={!hostPort || !isValidCompanionHost(hostPort)}
         >
           Connect
         </PrimaryButton>

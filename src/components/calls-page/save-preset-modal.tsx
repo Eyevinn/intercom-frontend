@@ -11,6 +11,11 @@ import {
   StyledWarningMessage,
 } from "../form-elements/form-elements";
 import { InfoTooltip } from "../info-tooltip/info-tooltip";
+import {
+  buildCompanionWsUrl,
+  companionWsScheme,
+  isValidCompanionHost,
+} from "../../utils/call-url";
 
 const FormRow = styled.div`
   display: flex;
@@ -116,11 +121,6 @@ const RadioDot = styled.span<{ active: boolean }>`
   }
 `;
 
-const isValidHostPort = (input: string): boolean => {
-  const pattern = /^([a-zA-Z0-9.-]+|\[[\da-fA-F:]+\])(:\d{1,5})?$/;
-  return pattern.test(input);
-};
-
 type FormValues = {
   name: string;
 };
@@ -163,7 +163,8 @@ export const SavePresetModal = ({
     },
   });
   const [saveError, setSaveError] = useState<string | null>(null);
-  const COMPANION_PROTOCOL = "ws://";
+  // Scheme derived from the page protocol (wss:// on https) — see call-url.ts.
+  const COMPANION_PROTOCOL = `${companionWsScheme()}://`;
   const initialHostPort = companionUrl
     ? companionUrl.replace(/^wss?:\/\//, "").replace(/\/$/, "")
     : "";
@@ -174,7 +175,7 @@ export const SavePresetModal = ({
   const isCompanionValid =
     !includeCompanion ||
     companionHostPort === "" ||
-    isValidHostPort(companionHostPort);
+    isValidCompanionHost(companionHostPort);
 
   const handleCompanionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const v = e.target.value.trim();
@@ -186,7 +187,7 @@ export const SavePresetModal = ({
 
   const companionUrlToSave =
     includeCompanion && companionHostPort
-      ? `${COMPANION_PROTOCOL}${companionHostPort}`
+      ? buildCompanionWsUrl(companionHostPort)
       : undefined;
 
   const onSubmit = async ({ name }: FormValues) => {

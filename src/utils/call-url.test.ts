@@ -1,11 +1,23 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, afterEach } from "vitest";
 import {
   buildCallsUrl,
   encodeCallsParam,
   decodeCallsParam,
   parseCompanionParam,
+  buildCompanionWsUrl,
+  companionWsScheme,
   isValidCompanionHost,
 } from "./call-url";
+
+// happy-dom serves tests from an http:// origin by default. Override just the
+// protocol so we can assert scheme selection on both http and https pages.
+const originalLocation = window.location;
+function setPageProtocol(protocol: "http:" | "https:") {
+  Object.defineProperty(window, "location", {
+    configurable: true,
+    value: { ...originalLocation, protocol },
+  });
+}
 
 describe("buildCallsUrl", () => {
   it("returns /calls when given an empty list", () => {
@@ -200,11 +212,52 @@ describe("parseCompanionParam rejects unsafe hosts", () => {
     expect(parseCompanionParam("ws://user@evil.com")).toBeUndefined();
   });
 
-  it("strips an accidental wss scheme and re-wraps a valid host as ws://", () => {
-    // Real behaviour: the scheme is normalised away and the returned URL is
+  it("strips an accidental wss scheme and re-wraps a valid host as ws:// on http", () => {
+    // On an http page the scheme is normalised away and the returned URL is
     // always ws:// regardless of the incoming ws:// or wss:// prefix.
     expect(parseCompanionParam("wss://companion.example:8080")).toBe(
       "ws://companion.example:8080"
     );
+  });
+});
+
+describe("protocol-aware companion scheme (#662)", () => {
+  afterEach(() => {
+    Object.defineProperty(window, "location", {
+      configurable: true,
+      value: originalLocation,
+    });
+  });
+
+  it("selects wss on an https page", () => {
+    setPageProtocol("https:");
+    expect(companionWsScheme()).toBe("wss");
+    expect(parseCompanionParam("host:8080")).toBe("wss://host:8080");
+    expect(buildCompanionWsUrl("host:8080")).toBe("wss://host:8080");
+  });
+
+  it("selects ws on an http page", () => {
+    setPageProtocol("http:");
+    expect(companionWsScheme()).toBe("ws");
+    expect(parseCompanionParam("host:8080")).toBe("ws://host:8080");
+    expect(buildCompanionWsUrl("host:8080")).toBe("ws://host:8080");
+  });
+
+  it("derives the scheme from the page, not an attacker-supplied prefix", () => {
+    // On http, an incoming wss:// prefix must NOT force an encrypted scheme,
+    // and on https an incoming ws:// prefix must NOT downgrade to plaintext.
+    setPageProtocol("http:");
+    expect(buildCompanionWsUrl("wss://host:8080")).toBe("ws://host:8080");
+    setPageProtocol("https:");
+    expect(buildCompanionWsUrl("ws://host:8080")).toBe("wss://host:8080");
+  });
+
+  it("still rejects unsafe hosts regardless of page protocol (#671 preserved)", () => {
+    setPageProtocol("https:");
+    expect(buildCompanionWsUrl("evil.com/path")).toBeUndefined();
+    expect(buildCompanionWsUrl("user@evil.com")).toBeUndefined();
+    expect(buildCompanionWsUrl("host:99999")).toBeUndefined();
+    expect(buildCompanionWsUrl("host:0")).toBeUndefined();
+    expect(buildCompanionWsUrl(null)).toBeUndefined();
   });
 });

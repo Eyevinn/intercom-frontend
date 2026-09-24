@@ -60,10 +60,33 @@ export function buildCallsUrl(calls: CallRef[], companionUrl?: string): string {
   return url;
 }
 
-export function parseCompanionParam(param: string | null): string | undefined {
+/**
+ * Choose the WebSocket scheme from the PAGE protocol, never from an
+ * attacker-supplied prefix. On an https page we must use `wss://` — an
+ * `ws://` connection would be blocked as mixed content and, where allowed,
+ * would carry companion control traffic in the clear. On http we keep `ws://`.
+ */
+export function companionWsScheme(): "ws" | "wss" {
+  return typeof window !== "undefined" && window.location?.protocol === "https:"
+    ? "wss"
+    : "ws";
+}
+
+/**
+ * Validate a bare host[:port] (reusing the #671 SSRF hardening) and wrap it in
+ * a protocol-aware `ws://` / `wss://` URL. Any incoming scheme is stripped
+ * BEFORE validation and BEFORE the scheme is chosen, so an attacker-supplied
+ * `wss://` prefix can never influence the security decision (no scheme
+ * confusion). Returns undefined for hosts that fail validation.
+ */
+export function buildCompanionWsUrl(param: string | null): string | undefined {
   if (!param) return undefined;
   // Strip accidental scheme if present, then validate host[:port] only.
   const hostPort = param.replace(/^wss?:\/\//i, "");
   if (!isValidCompanionHost(hostPort)) return undefined;
-  return `ws://${hostPort}`;
+  return `${companionWsScheme()}://${hostPort}`;
+}
+
+export function parseCompanionParam(param: string | null): string | undefined {
+  return buildCompanionWsUrl(param);
 }
