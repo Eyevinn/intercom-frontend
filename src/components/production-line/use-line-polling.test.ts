@@ -194,9 +194,12 @@ describe("useLinePolling", () => {
       await flush();
       expect(mockFetchLineParticipants).toHaveBeenCalledTimes(1);
 
-      // Advancing the backoff timer triggers exactly one more attempt.
+      // Advancing past the (jittered) first backoff triggers exactly one more
+      // attempt. The first delay is ~1000ms ±20% jitter, so advance clear of
+      // the upper bound; the next backoff (~2000ms+) has not elapsed yet, so
+      // the count lands at exactly 2.
       await act(async () => {
-        await vi.advanceTimersByTimeAsync(1000);
+        await vi.advanceTimersByTimeAsync(1500);
       });
       expect(mockFetchLineParticipants).toHaveBeenCalledTimes(2);
     });
