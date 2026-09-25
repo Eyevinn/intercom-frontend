@@ -4,6 +4,7 @@ import { API } from "../../api/api.ts";
 import { TJoinProductionOptions, TLine } from "./types.ts";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
 import logger from "../../utils/logger.ts";
+import { backoffDelayMs } from "../../utils/backoff.ts";
 
 type TProps = {
   callId: string;
@@ -12,14 +13,6 @@ type TProps = {
 
 const isAbortError = (err: unknown): boolean =>
   err instanceof DOMException && err.name === "AbortError";
-
-// Exponential backoff between failed long-poll attempts so a persistently
-// failing endpoint is not hammered with immediate retries.
-const BASE_BACKOFF_MS = 1000;
-const MAX_BACKOFF_MS = 30000;
-
-const backoffDelayMs = (failureCount: number): number =>
-  Math.min(BASE_BACKOFF_MS * 2 ** (failureCount - 1), MAX_BACKOFF_MS);
 
 // Fetches the line once for its metadata, then keeps the participant list
 // current through the manager's long-poll endpoint instead of interval polling:
