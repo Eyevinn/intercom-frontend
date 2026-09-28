@@ -80,7 +80,6 @@ export const LineBlockTexts = styled.div`
 export const LineBlockTitle = styled.div`
   font-weight: bold;
   font-size: 1.5rem;
-  margin-bottom: 0.2rem;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -92,6 +91,7 @@ export const LineBlockTitleWrapper = styled.div`
   gap: 0.5rem;
   min-width: 0;
   overflow: hidden;
+  margin-bottom: 0.2rem;
 
   &.management {
     margin-right: 1rem;
