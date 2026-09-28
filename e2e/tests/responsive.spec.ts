@@ -125,18 +125,15 @@ test.describe("Responsive Layout", () => {
     }) => {
       test.skip(!isSmallViewport(), "Only applies to small viewports");
       await landingPage.gotoWithSettings("TestUser");
-      const morning = await landingPage.page
-        .getByText("Morning Show")
-        .first()
-        .boundingBox();
-      const evening = await landingPage.page
-        .getByText("Evening News")
-        .first()
-        .boundingBox();
-      expect(morning).not.toBeNull();
-      expect(evening).not.toBeNull();
-      // On small screens, cards should stack (evening below morning)
-      expect(evening!.y).toBeGreaterThan(morning!.y);
+      const cards = landingPage.page.locator('[data-testid^="production-"]');
+      await expect(cards.first()).toBeVisible();
+      expect(await cards.count()).toBeGreaterThan(1);
+      const first = await cards.nth(0).boundingBox();
+      const second = await cards.nth(1).boundingBox();
+      expect(first).not.toBeNull();
+      expect(second).not.toBeNull();
+      expect(second!.y).toBeGreaterThan(first!.y);
+      expect(second!.x).toBeCloseTo(first!.x, 0);
     });
 
     test("empty state is centered and visible", async ({

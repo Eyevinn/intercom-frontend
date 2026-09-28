@@ -21,6 +21,8 @@ import { TLine } from "./types";
 import { TBasicProductionResponse } from "../../api/api";
 import { KebabMenu } from "./kebab-menu";
 import { useShareUrl } from "../../hooks/use-share-url";
+import { useIsGuest } from "../../hooks/use-is-guest";
+import { DEFAULT_RESTRICT_SHARE } from "../../utils/guest-session";
 import { ShareLineLinkModal } from "../generate-urls/share-line-link/share-line-link-modal";
 
 const CallHeaderTexts = styled(HeaderTexts)`
@@ -152,6 +154,7 @@ export const CallHeaderComponent = ({
 }) => {
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const { shareUrl, url } = useShareUrl();
+  const isGuest = useIsGuest();
 
   const totalUsers = useMemo(() => {
     return line?.participants.filter((p) => !p.isWhip).length || 0;
@@ -168,6 +171,7 @@ export const CallHeaderComponent = ({
         shareUrl({
           productionId: production.productionId,
           lineId: line.id,
+          guest: DEFAULT_RESTRICT_SHARE,
         });
       }
       setShareModalOpen(true);
@@ -175,14 +179,18 @@ export const CallHeaderComponent = ({
     [production, line, shareUrl]
   );
 
-  const handleShareRefresh = useCallback(() => {
-    if (production && line) {
-      shareUrl({
-        productionId: production.productionId,
-        lineId: line.id,
-      });
-    }
-  }, [production, line, shareUrl]);
+  const handleShareRefresh = useCallback(
+    ({ guest }: { guest: boolean }) => {
+      if (production && line) {
+        shareUrl({
+          productionId: production.productionId,
+          lineId: line.id,
+          guest,
+        });
+      }
+    },
+    [production, line, shareUrl]
+  );
 
   return (
     <CallHeader open={open} onClick={setOpen}>
@@ -243,7 +251,7 @@ export const CallHeaderComponent = ({
           <UsersIcon />
           <ParticipantCount>{totalUsers}</ParticipantCount>
         </ParticipantCountWrapper>
-        {production && line && (
+        {production && line && !isGuest && (
           <MobileOnly>
             <ShareButton
               role="button"

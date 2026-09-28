@@ -110,6 +110,12 @@ const establishConnection = ({
 }: TEstablishConnection): { teardown: () => void } => {
   const lineId = joinProductionOptions.lineId || "unknown";
 
+  // Track the latest remote audio stream so the stats interval can tap a
+  // WebAudio analyser on it. This provides voice-activity detection that is
+  // independent of the <audio> element's muted/volume state (needed on
+  // Chromium, where inbound-rtp audioLevel drops to ~0 when muted).
+  let remoteStream: MediaStream | null = null;
+
   const onRtcTrack = ({ streams, track }: RTCTrackEvent) => {
     if (track.kind === "audio") {
       const selectedStream = streams[0];
@@ -124,6 +130,9 @@ const establishConnection = ({
         });
         return;
       }
+
+      remoteStream = selectedStream;
+
       const audioElement = createAudioElement({
         stream: selectedStream,
         lineId,
@@ -262,6 +271,7 @@ const establishConnection = ({
     rtcPeerConnection,
     callId,
     dispatch,
+    getRemoteStream: () => remoteStream,
   });
 
   return {

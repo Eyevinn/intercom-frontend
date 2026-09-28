@@ -1,7 +1,11 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import styled from "@emotion/styled";
 import { API } from "../../api/api";
 import { Modal } from "../modal/modal";
+import {
+  DEFAULT_RESTRICT_SHARE,
+  appendGuestParam,
+} from "../../utils/guest-session";
 
 const Description = styled.p`
   font-size: 1.4rem;
@@ -96,122 +100,66 @@ type FetchState =
   | { status: "ready"; url: string }
   | { status: "error" };
 
+const withParam = (path: string, key: string, value: string): string =>
+  `${path}${path.includes("?") ? "&" : "?"}${key}=${value}`;
+
 export const ShareUrlModal = ({
   path,
   companionUrl,
   title = "Share",
   onClose,
 }: ShareUrlModalProps) => {
-  const [baseState, setBaseState] = useState<FetchState>({ status: "loading" });
-  const [withCompanionState, setWithCompanionState] =
-    useState<FetchState | null>(null);
+  const [state, setState] = useState<FetchState>({ status: "loading" });
   const [includeCompanion, setIncludeCompanion] = useState(false);
+  const [restrictAccess, setRestrictAccess] = useState(DEFAULT_RESTRICT_SHARE);
   const [copied, setCopied] = useState(false);
-  const postCopyCancel = useRef<(() => void) | null>(null);
-
-  // Cancel any in-flight post-copy fetch on unmount.
-  useEffect(() => {
-    return () => {
-      postCopyCancel.current?.();
-    };
-  }, []);
+  const [nonce, setNonce] = useState(0);
 
   const companionHostPort = companionUrl
     ? companionUrl.replace(/^wss?:\/\//, "")
     : undefined;
 
-  const companionPath = companionHostPort
-    ? `${path}${path.includes("?") ? "&" : "?"}companion=${companionHostPort}`
-    : undefined;
+  const effectivePath = useMemo(() => {
+    let result = path;
+    if (includeCompanion && companionHostPort) {
+      result = withParam(result, "companion", companionHostPort);
+    }
+    if (restrictAccess) {
+      result = appendGuestParam(result);
+    }
+    return result;
+  }, [path, includeCompanion, companionHostPort, restrictAccess]);
 
   useEffect(() => {
     let cancelled = false;
-    API.shareUrl({ path })
+    setState({ status: "loading" });
+    API.shareUrl({ path: effectivePath })
       .then((res) => {
-        if (!cancelled) setBaseState({ status: "ready", url: res.url });
+        if (!cancelled) setState({ status: "ready", url: res.url });
       })
       .catch(() => {
-        if (!cancelled) setBaseState({ status: "error" });
+        if (!cancelled) setState({ status: "error" });
       });
     return () => {
       cancelled = true;
     };
-  }, [path]);
+  }, [effectivePath, nonce]);
 
-  const handleCompanionToggle = (checked: boolean) => {
-    setIncludeCompanion(checked);
-    setCopied(false);
-
-    if (!checked || !companionPath) return;
-
-    // Already fetched — reuse cached result
-    if (withCompanionState !== null) return;
-
-    setWithCompanionState({ status: "loading" });
-    API.shareUrl({ path: companionPath })
-      .then((res) => {
-        setWithCompanionState({ status: "ready", url: res.url });
-      })
-      .catch(() => {
-        setWithCompanionState({ status: "error" });
-      });
-  };
-
-  // While companion fetch is in-flight, keep showing the base URL so the
-  // button doesn't flicker. Only switch once the companion result is ready.
-  const activeState =
-    includeCompanion &&
-    companionPath &&
-    withCompanionState?.status !== "loading"
-      ? (withCompanionState ?? baseState)
-      : baseState;
-
-  const isLoading = activeState.status === "loading";
-  const isError = activeState.status === "error";
-  const url = activeState.status === "ready" ? activeState.url : "";
+  const isLoading = state.status === "loading";
+  const isError = state.status === "error";
+  const url = state.status === "ready" ? state.url : "";
 
   const handleCopy = () => {
     if (!url) return;
     navigator.clipboard.writeText(url).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-
-      // Immediately start fetching a replacement so the modal always shows a fresh link.
-      if (includeCompanion && companionPath) {
-        setWithCompanionState({ status: "loading" });
-        let cancelled = false;
-        API.shareUrl({ path: companionPath })
-          .then((res) => {
-            if (!cancelled)
-              setWithCompanionState({ status: "ready", url: res.url });
-          })
-          .catch(() => {
-            if (!cancelled) setWithCompanionState({ status: "error" });
-          });
-        // Store the cancel flag on the closure; component unmount cleans up
-        // by capturing it in the outer ref below.
-        postCopyCancel.current = () => {
-          cancelled = true;
-        };
-      } else {
-        setBaseState({ status: "loading" });
-        let cancelled = false;
-        API.shareUrl({ path })
-          .then((res) => {
-            if (!cancelled) setBaseState({ status: "ready", url: res.url });
-          })
-          .catch(() => {
-            if (!cancelled) setBaseState({ status: "error" });
-          });
-        postCopyCancel.current = () => {
-          cancelled = true;
-        };
-      }
+      setNonce((n) => n + 1);
     });
   };
 
   const buttonLabel = () => {
-    if (copied) return "✓ Link copied!";
+    if (copied) return "Link copied!";
     if (isLoading) return "Generating link…";
     if (isError) return "Failed to generate link";
     return "Copy link";
@@ -229,7 +177,7 @@ export const ShareUrlModal = ({
         copied={copied}
         isError={isError}
         isLoading={isLoading}
-        disabled={isLoading && !copied}
+        disabled={(isLoading && !copied) || isError}
         onClick={handleCopy}
       >
         {buttonLabel()}
@@ -239,11 +187,29 @@ export const ShareUrlModal = ({
           <input
             type="checkbox"
             checked={includeCompanion}
-            onChange={(e) => handleCompanionToggle(e.target.checked)}
+            onChange={(e) => {
+              setIncludeCompanion(e.target.checked);
+              setCopied(false);
+            }}
           />
           Include companion URL
         </CheckboxRow>
       )}
+      <CheckboxRow>
+        <input
+          type="checkbox"
+          checked={restrictAccess}
+          onChange={(e) => {
+            setRestrictAccess(e.target.checked);
+            setCopied(false);
+          }}
+        />
+        Restrict recipients to these calls
+      </CheckboxRow>
+      <Note>
+        Recipients of a restricted link only see the calls they were invited to.
+        This tailors their view — it is not an access-control boundary.
+      </Note>
     </Modal>
   );
 };

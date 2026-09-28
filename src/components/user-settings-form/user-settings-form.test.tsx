@@ -149,6 +149,47 @@ describe("UserSettingsForm — lineId auto-selection fix", () => {
     expect(joinButton).not.toBeDisabled();
   });
 
+  // ── Test 3b: Join enabled for the initially auto-selected first line ──────
+  // Regression for #612: once the user has joined a line, SELECT_PRODUCTION_ID
+  // sets a global selectedProductionId. Re-opening the join form (with the
+  // production already available on the first render, as the "Add Line" flow
+  // does via prefetchedProduction) used to run reset({ productionId }) after
+  // the line auto-selection effect, wiping the lineId and leaving isValid
+  // false. The Join button was then wrongly disabled until the user switched
+  // to another line and back. It must be enabled on mount.
+
+  it("Join button is enabled on mount for the first line when a production is already globally selected", async () => {
+    mockUseGlobalState.mockReturnValue([
+      { ...mockState, selectedProductionId: productionWithLines.productionId },
+      mockDispatch,
+    ]);
+
+    await act(async () => {
+      render(
+        <UserSettingsForm
+          isJoinProduction
+          addAdditionalCallId={productionWithLines.productionId}
+          prefetchedProduction={productionWithLines}
+          prefetchedProductionList={productionList}
+          buttonText="Join"
+          defaultValues={{
+            ...defaultValues,
+            productionId: productionWithLines.productionId,
+          }}
+          hideUsername
+          hideDevices
+        />
+      );
+    });
+
+    // combobox[0] is the production select, combobox[1] is the line select.
+    const lineSelect = screen.getAllByRole("combobox")[1] as HTMLSelectElement;
+    expect(lineSelect.value).toBe("line-1");
+
+    const joinButton = screen.getByRole("button", { name: "Join" });
+    expect(joinButton).not.toBeDisabled();
+  });
+
   // ── Test 3: first line auto-selected in line dropdown ────────────────────
 
   it("line dropdown shows the first line selected after choosing a production", async () => {

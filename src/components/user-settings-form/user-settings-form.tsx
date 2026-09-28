@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { useEffect, useState, Dispatch, SetStateAction } from "react";
+import { useEffect, useRef, useState, Dispatch, SetStateAction } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { isBrowserFirefox, isBrowserSafari } from "../../bowser";
 import { useGlobalState } from "../../global-state/context-provider";
@@ -247,11 +247,23 @@ export const UserSettingsForm = ({
   }, [devices.input, getValues, setValue]);
 
   // If user selects a production from the productionlist
+  // Track the last applied global production id so we only reset the form when
+  // the user actually switches to a different production. Resetting on the
+  // initial mount value would clobber the line auto-selected by the effect
+  // above and leave the Join button disabled until a line is re-selected (#612).
+  const appliedGlobalProductionId = useRef<string | null>(null);
   useEffect(() => {
     if (globalSelectedProductionId && isJoinProduction) {
-      reset({
-        productionId: `${globalSelectedProductionId}`,
-      });
+      const nextId = `${globalSelectedProductionId}`;
+      if (
+        appliedGlobalProductionId.current !== null &&
+        appliedGlobalProductionId.current !== nextId
+      ) {
+        reset({
+          productionId: nextId,
+        });
+      }
+      appliedGlobalProductionId.current = nextId;
     }
   }, [reset, globalSelectedProductionId, isJoinProduction]);
 
