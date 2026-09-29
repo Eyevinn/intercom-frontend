@@ -9,6 +9,9 @@ export enum Colors {
   white = "37",
 }
 
+// `VITE_DEBUG_MODE` gates all verbose/data logging. It is unset — and therefore
+// defaults to `false` — in the production build pipeline, so debug output
+// (including sanitized SDP) is never emitted in production. Do not enable it there.
 const env = import.meta.env.VITE_DEBUG_MODE;
 
 // LOGGER LEVELS
@@ -23,6 +26,37 @@ const loggerLevel = env === "true" ? devLoggerLevel : productionLoggerLevel;
 
 type MsgType = string | number | object | null | boolean | undefined;
 
+// Strip IP/topology-bearing lines from an SDP body before it is logged. Removes
+// connection (`c=`), ICE candidate (`a=candidate`) and SSRC (`a=ssrc`) lines,
+// which expose internal/external IP addresses and stream identifiers. Non-SDP
+// media/codec lines (e.g. `m=`, `a=rtpmap`) are preserved.
+export function sanitizeSdp(sdp: string): string {
+  return sdp
+    .split("\n")
+    .filter(
+      (line) =>
+        !line.startsWith("c=") &&
+        !line.startsWith("a=candidate") &&
+        !line.startsWith("a=ssrc")
+    )
+    .join("\n");
+}
+
+// An SDP body begins with the version line `v=0`.
+const looksLikeSdp = (value: string): boolean => value.startsWith("v=0");
+
+// Serialise a log payload, sanitizing any SDP it contains. SDP can arrive as a
+// raw string or nested inside a payload object (e.g. `{ sdp: "..." }`), so the
+// replacer inspects every string value and only rewrites the ones that look like
+// SDP, leaving all other logging untouched.
+function serialize(msg: MsgType): string {
+  return JSON.stringify(msg, (_key, value) =>
+    typeof value === "string" && looksLikeSdp(value)
+      ? sanitizeSdp(value)
+      : value
+  );
+}
+
 // Check if we're in a browser that supports CSS styling in console
 const isBrowserWithCSSSupport =
   typeof window !== "undefined" &&
@@ -33,7 +67,7 @@ class Logger {
   private prefix: string = "";
 
   private formatMessage(msg: MsgType): string {
-    return this.prefix + JSON.stringify(msg);
+    return this.prefix + serialize(msg);
   }
 
   log(colorCode: string, msg: MsgType) {
@@ -102,7 +136,7 @@ class Logger {
       }
       this.log(
         "36",
-        `${msgType}|${`${massagedMsgResource}: `}${JSON.stringify(msg)}`
+        `${msgType}|${`${massagedMsgResource}: `}${serialize(msg)}`
       );
     }
   }
