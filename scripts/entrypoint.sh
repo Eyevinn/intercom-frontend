@@ -1,6 +1,22 @@
 #!/bin/bash
 
 LISTENPORT="${PORT:-3000}"
+
+# Validate LISTENPORT is a plain integer in the valid TCP port range (1-65535)
+# before using it in the sed command below. An unvalidated value containing a
+# forward slash (e.g. "3000/tcp") would break the sed expression ("unterminated
+# substitution") and crash-loop the container. Fail fast with a clear message.
+case "$LISTENPORT" in
+  ''|*[!0-9]*)
+    echo "entrypoint.sh: invalid PORT '$LISTENPORT': must be an integer between 1 and 65535" >&2
+    exit 1
+    ;;
+esac
+if [ "$LISTENPORT" -lt 1 ] || [ "$LISTENPORT" -gt 65535 ]; then
+  echo "entrypoint.sh: invalid PORT '$LISTENPORT': must be an integer between 1 and 65535" >&2
+  exit 1
+fi
+
 sed -i "s/listen\s*8080;/listen $LISTENPORT;/" /etc/nginx/conf.d/default.conf
 API_URL="${MANAGER_URL:-/}"
 
