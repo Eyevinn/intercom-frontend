@@ -11,13 +11,15 @@ type TProps = {
   joinProductionOptions: TJoinProductionOptions | null;
 };
 
+const LINE_METADATA_REFRESH_MS = 1000;
+
 const isAbortError = (err: unknown): boolean =>
   err instanceof DOMException && err.name === "AbortError";
 
-// Fetches the line once for its metadata, then keeps the participant list
-// current through the manager's long-poll endpoint instead of interval polling:
-// each request is held open server-side until participants change (or it times
-// out), and is re-issued immediately when it resolves.
+// Keeps the participant list current through the manager's long-poll endpoint
+// (each request is held open server-side until participants change, then is
+// re-issued immediately), and refreshes the rest of the line on an interval
+// since the long-poll does not carry line-level fields.
 export const useLinePolling = ({ callId, joinProductionOptions }: TProps) => {
   const [line, setLine] = useState<TLine | null>(null);
   const [, dispatch] = useGlobalState();
@@ -49,19 +51,6 @@ export const useLinePolling = ({ callId, joinProductionOptions }: TProps) => {
           },
         });
       }
-      if (consecutiveFailureCount >= 10) {
-        dispatch({
-          type: "ERROR",
-          payload: {
-            callId,
-            error: new Error(
-              "Line polling stopped after 10 consecutive failures."
-            ),
-          },
-        });
-        return false;
-      }
-      return true;
     };
 
     // Clear a previously surfaced polling error once a request succeeds again.
@@ -86,12 +75,11 @@ export const useLinePolling = ({ callId, joinProductionOptions }: TProps) => {
         })
         .catch((err) => {
           if (cancelled || isAbortError(err)) return;
-          if (handleFailure()) {
-            retryTimeout = setTimeout(
-              poll,
-              backoffDelayMs(consecutiveFailureCount)
-            );
-          }
+          handleFailure();
+          retryTimeout = setTimeout(
+            poll,
+            backoffDelayMs(consecutiveFailureCount)
+          );
         });
     };
 
@@ -110,19 +98,39 @@ export const useLinePolling = ({ callId, joinProductionOptions }: TProps) => {
         })
         .catch((err) => {
           if (cancelled || isAbortError(err)) return;
-          if (handleFailure()) {
-            retryTimeout = setTimeout(
-              seed,
-              backoffDelayMs(consecutiveFailureCount)
-            );
-          }
+          handleFailure();
+          retryTimeout = setTimeout(
+            seed,
+            backoffDelayMs(consecutiveFailureCount)
+          );
+        });
+    };
+
+    const refreshLineMetadata = () => {
+      API.fetchProductionLine(productionId, lineId)
+        .then((l) => {
+          if (cancelled) return;
+          setLine((prev) =>
+            prev ? { ...l, participants: prev.participants } : l
+          );
+        })
+        .catch(() => {
+          if (cancelled) return;
+          logger.red(
+            `Error refreshing line metadata ${productionId}/${lineId}. For call-id: ${callId}`
+          );
         });
     };
 
     seed();
+    const metadataInterval = window.setInterval(
+      refreshLineMetadata,
+      LINE_METADATA_REFRESH_MS
+    );
 
     return () => {
       cancelled = true;
+      window.clearInterval(metadataInterval);
       if (retryTimeout !== null) clearTimeout(retryTimeout);
       controller.abort();
     };
