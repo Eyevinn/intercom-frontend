@@ -38,4 +38,33 @@ describe("resolveIceServers", () => {
 
     expect(() => resolveIceServers("{broken")).not.toThrow();
   });
+
+  it("falls back to defaults and warns when valid JSON is not an array", () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    expect(resolveIceServers("5")).toEqual(DEFAULT_ICE_SERVERS);
+    expect(resolveIceServers("null")).toEqual(DEFAULT_ICE_SERVERS);
+    expect(resolveIceServers('{"urls":"stun:stun.example.com:3478"}')).toEqual(
+      DEFAULT_ICE_SERVERS
+    );
+    expect(warnSpy).toHaveBeenCalledTimes(3);
+  });
+
+  it("falls back to defaults and warns when no array element has urls", () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    expect(resolveIceServers('[{"foo":"bar"}]')).toEqual(DEFAULT_ICE_SERVERS);
+    expect(warnSpy).toHaveBeenCalledOnce();
+  });
+
+  it("drops array elements that lack urls but keeps valid ones", () => {
+    const configured = JSON.stringify([
+      { foo: "bar" },
+      { urls: "stun:stun.example.com:3478" },
+    ]);
+
+    expect(resolveIceServers(configured)).toEqual([
+      { urls: "stun:stun.example.com:3478" },
+    ]);
+  });
 });
