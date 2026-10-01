@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useNavigate, useParams } from "react-router";
-import { API } from "../../api/api.ts";
 import { isBrowserFirefox, isMobile, isTablet } from "../../bowser.ts";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { CallState } from "../../global-state/types.ts";
@@ -150,6 +149,7 @@ export const ProductionLine = ({
     videoInputId: videoEnabled
       ? (joinProductionOptions?.videoinput ?? "no-device")
       : null,
+    callId: id,
     dispatch,
   });
 
@@ -630,29 +630,14 @@ export const ProductionLine = ({
     onAutoUnpin: handleAutoUnpin,
   });
 
-  const [siblingLineParticipants, setSiblingLineParticipants] = useState<
-    import("./types.ts").TParticipant[]
-  >([]);
-  useEffect(() => {
-    if (!shadowJoinOptions) {
-      setSiblingLineParticipants([]);
-      return undefined;
-    }
-    const productionId = parseInt(shadowJoinOptions.productionId, 10);
-    const lineId = parseInt(shadowJoinOptions.lineId, 10);
-    const interval = window.setInterval(() => {
-      API.fetchProductionLine(productionId, lineId)
-        .then((l: import("./types.ts").TLine) =>
-          setSiblingLineParticipants(l.participants)
-        )
-        .catch(() => {});
-    }, 2000);
-    return () => window.clearInterval(interval);
-  }, [shadowJoinOptions]);
+  const siblingLine = useLinePolling({
+    callId: id,
+    joinProductionOptions: shadowJoinOptions,
+  });
 
   const whipParticipantName = useMemo(
-    () => siblingLineParticipants.find((p) => p.isWhip)?.name ?? null,
-    [siblingLineParticipants]
+    () => siblingLine?.participants.find((p) => p.isWhip)?.name ?? null,
+    [siblingLine]
   );
 
   const pgmStream = useMemo(() => {

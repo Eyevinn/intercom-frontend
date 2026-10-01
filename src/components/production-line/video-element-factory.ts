@@ -129,15 +129,22 @@ export const createVideoTileContainer = (): {
   fsBtn.style.opacity = "0.7";
   fsBtn.style.transition = "opacity 0.15s, background 0.15s";
   fsBtn.title = "Fullscreen";
+  fsBtn.dataset.tileOptionsBtn = "true";
   setButtonIcon(fsBtn, fullscreenIcon);
+
+  const restingBtnBg = () =>
+    container.dataset.pinned === "true"
+      ? OPTIONS_BTN_BG_PINNED
+      : OPTIONS_BTN_BG_DEFAULT;
 
   fsBtn.addEventListener("mouseenter", () => {
     fsBtn.style.opacity = "1";
     fsBtn.style.background = "rgba(0, 0, 0, 0.65)";
   });
   fsBtn.addEventListener("mouseleave", () => {
-    fsBtn.style.opacity = "0.7";
-    fsBtn.style.background = OPTIONS_BTN_BG_DEFAULT;
+    fsBtn.style.opacity =
+      restingBtnBg() === OPTIONS_BTN_BG_PINNED ? "1" : "0.7";
+    fsBtn.style.background = restingBtnBg();
   });
 
   const handleFsChange = () => {

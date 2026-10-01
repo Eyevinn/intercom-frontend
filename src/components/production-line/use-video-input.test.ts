@@ -28,7 +28,7 @@ describe("useVideoInput", () => {
     });
 
     const { result } = renderHook(() =>
-      useVideoInput({ videoInputId: "cam-1", dispatch })
+      useVideoInput({ videoInputId: "cam-1", callId: "call-1", dispatch })
     );
 
     await waitFor(() => {
@@ -54,7 +54,7 @@ describe("useVideoInput", () => {
     });
 
     const { result } = renderHook(() =>
-      useVideoInput({ videoInputId: "no-device", dispatch })
+      useVideoInput({ videoInputId: "no-device", callId: "call-1", dispatch })
     );
 
     expect(() => {

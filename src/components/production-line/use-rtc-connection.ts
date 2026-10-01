@@ -81,7 +81,7 @@ const applyVideoSenderParameters = async (sender: RTCRtpSender) => {
   try {
     await sender.setParameters(params);
   } catch (err) {
-    console.warn("[useRtcConnection] setParameters failed", err);
+    logger.yellow(`[useRtcConnection] setParameters failed: ${String(err)}`);
   }
 };
 

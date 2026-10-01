@@ -2,9 +2,11 @@ import { Dispatch, useCallback, useEffect, useState } from "react";
 import { noop } from "../../helpers";
 import { TJoinProductionOptions } from "./types.ts";
 import { TGlobalStateAction } from "../../global-state/global-state-actions.ts";
+import logger from "../../utils/logger.ts";
 
 type TGetVideoDeviceOptions = {
   videoInputId: TJoinProductionOptions["videoinput"] | null;
+  callId: string;
   dispatch: Dispatch<TGlobalStateAction>;
 };
 
@@ -15,12 +17,17 @@ type TUseVideoInput = (
 ) => [TUseVideoInputValues, boolean, () => void];
 
 // A hook for fetching the user selected video input as a MediaStream
-export const useVideoInput: TUseVideoInput = ({ videoInputId, dispatch }) => {
+export const useVideoInput: TUseVideoInput = ({
+  videoInputId,
+  callId,
+  dispatch,
+}) => {
   const [videoInput, setVideoInput] = useState<TUseVideoInputValues>(null);
   const [videoInputError, setVideoInputError] = useState<boolean>(false);
 
   useEffect(() => {
     let aborted = false;
+    let acquired: MediaStream | null = null;
 
     if (videoInputId === null) {
       setVideoInput("no-device");
@@ -45,15 +52,20 @@ export const useVideoInput: TUseVideoInput = ({ videoInputId, dispatch }) => {
     navigator.mediaDevices
       .getUserMedia({ video: videoConstraints })
       .then((stream) => {
-        if (aborted) return;
+        if (aborted) {
+          stream.getTracks().forEach((t) => t.stop());
+          return;
+        }
+        acquired = stream;
         setVideoInput(stream);
       })
       .catch((err: unknown) => {
-        console.error("[useVideoInput] getUserMedia rejected", err);
+        logger.red(`[useVideoInput] getUserMedia rejected: ${String(err)}`);
         setVideoInputError(true);
         dispatch({
           type: "ERROR",
           payload: {
+            callId,
             error: new Error("Selected camera is not available"),
           },
         });
@@ -61,8 +73,9 @@ export const useVideoInput: TUseVideoInput = ({ videoInputId, dispatch }) => {
 
     return () => {
       aborted = true;
+      if (acquired) acquired.getTracks().forEach((t) => t.stop());
     };
-  }, [videoInputId, dispatch]);
+  }, [videoInputId, callId, dispatch]);
 
   const reset = useCallback(() => {
     if (videoInput && videoInput !== "no-device") {
