@@ -67,4 +67,31 @@ describe("resolveIceServers", () => {
       { urls: "stun:stun.example.com:3478" },
     ]);
   });
+
+  it("falls back to defaults when a urls value has no valid scheme or is not a string", () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    // missing scheme, typo'd scheme, non-string, and a bad entry inside a urls array
+    expect(resolveIceServers('[{"urls":"stun.example.com:3478"}]')).toEqual(
+      DEFAULT_ICE_SERVERS
+    );
+    expect(resolveIceServers('[{"urls":"sturn:stun.example.com"}]')).toEqual(
+      DEFAULT_ICE_SERVERS
+    );
+    expect(resolveIceServers('[{"urls":123}]')).toEqual(DEFAULT_ICE_SERVERS);
+    expect(
+      resolveIceServers('[{"urls":["stun:ok.example.com","http://bad"]}]')
+    ).toEqual(DEFAULT_ICE_SERVERS);
+    expect(warnSpy).toHaveBeenCalledTimes(4);
+  });
+
+  it("accepts a urls array of valid stun/turn strings", () => {
+    const configured = JSON.stringify([
+      { urls: ["stun:stun.example.com:3478", "turns:turn.example.com:5349"] },
+    ]);
+
+    expect(resolveIceServers(configured)).toEqual([
+      { urls: ["stun:stun.example.com:3478", "turns:turn.example.com:5349"] },
+    ]);
+  });
 });

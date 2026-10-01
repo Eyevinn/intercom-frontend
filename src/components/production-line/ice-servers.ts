@@ -15,11 +15,28 @@ export const DEFAULT_ICE_SERVERS: RTCIceServer[] = [
   { urls: "stun:stun1.l.google.com:19302" },
 ];
 
-const hasUrls = (entry: unknown): entry is RTCIceServer =>
-  typeof entry === "object" &&
-  entry !== null &&
-  "urls" in entry &&
-  Boolean((entry as RTCIceServer).urls);
+// Schemes the browser accepts in an RTCIceServer `urls` entry. Anything else
+// makes `new RTCPeerConnection({ iceServers })` throw at construction.
+const ICE_URL_SCHEME = /^(stun|stuns|turn|turns):/;
+
+const isValidIceUrl = (url: unknown): url is string =>
+  typeof url === "string" && ICE_URL_SCHEME.test(url);
+
+// A usable RTCIceServer has `urls` set to a well-formed STUN/TURN URL string,
+// or a non-empty array of such strings. Validating this up front keeps the
+// "never breaks call setup" guarantee: a valid-JSON-but-wrong-shape value
+// (`5`, `null`, `{"urls":"…"}`, `[{"foo":"bar"}]`, `[{"urls":"no-scheme"}]`,
+// `[{"urls":123}]`) is rejected here instead of throwing at construction.
+const isValidIceServer = (entry: unknown): entry is RTCIceServer => {
+  if (typeof entry !== "object" || entry === null || !("urls" in entry)) {
+    return false;
+  }
+  const { urls } = entry as RTCIceServer;
+  if (Array.isArray(urls)) {
+    return urls.length > 0 && urls.every(isValidIceUrl);
+  }
+  return isValidIceUrl(urls);
+};
 
 export const resolveIceServers = (
   rawIceServers: string | undefined = import.meta.env.VITE_ICE_SERVERS
@@ -39,23 +56,17 @@ export const resolveIceServers = (
     return DEFAULT_ICE_SERVERS;
   }
 
-  // A valid-JSON value that is not an RTCIceServer[] (e.g. `5`, `null`,
-  // `{"urls":"…"}`, `[{"foo":"bar"}]`) would otherwise reach
-  // `new RTCPeerConnection({ iceServers })` and throw at construction, so
-  // validate the shape here and keep the "never breaks call setup" guarantee.
   if (!Array.isArray(parsed)) {
     console.warn(
-      "VITE_ICE_SERVERS is not a JSON array, falling back to default ICE servers.",
-      parsed
+      "VITE_ICE_SERVERS is not a JSON array, falling back to default ICE servers."
     );
     return DEFAULT_ICE_SERVERS;
   }
 
-  const iceServers = parsed.filter(hasUrls);
+  const iceServers = parsed.filter(isValidIceServer);
   if (iceServers.length === 0) {
     console.warn(
-      "VITE_ICE_SERVERS contained no valid RTCIceServer entries, falling back to default ICE servers.",
-      parsed
+      "VITE_ICE_SERVERS contained no valid RTCIceServer entries (each needs a stun:/stuns:/turn:/turns: `urls` value), falling back to default ICE servers."
     );
     return DEFAULT_ICE_SERVERS;
   }
