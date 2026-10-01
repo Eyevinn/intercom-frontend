@@ -11,6 +11,7 @@ import {
   isRemoteMute,
 } from "./data-channel-parser.ts";
 import { waitForIceGathering } from "./ice-gathering.ts";
+import { resolveIceServers } from "./ice-servers.ts";
 import { startRtcStatInterval } from "./rtc-stat-interval.ts";
 import { TJoinProductionOptions } from "./types.ts";
 import { useAudioElements } from "./use-audio-elements.ts";
@@ -211,10 +212,7 @@ export const useRtcConnection = ({
   const [rtcPeerConnection] = useState<RTCPeerConnection>(
     () =>
       new RTCPeerConnection({
-        iceServers: [
-          { urls: "stun:stun.l.google.com:19302" },
-          { urls: "stun:stun1.l.google.com:19302" },
-        ],
+        iceServers: resolveIceServers(),
       })
   );
   const [, dispatch] = useGlobalState();
