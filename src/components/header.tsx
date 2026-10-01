@@ -7,6 +7,7 @@ import { mediaQueries } from "./generic-components.ts";
 import { useGlobalState } from "../global-state/context-provider.tsx";
 import { useAudioCue } from "./production-line/use-audio-cue.ts";
 import { ConfirmationModal } from "./verify-decision/confirmation-modal.tsx";
+import { useIsGuest } from "../hooks/use-is-guest.ts";
 
 const HeaderWrapper = styled.div`
   width: 100%;
@@ -14,7 +15,7 @@ const HeaderWrapper = styled.div`
   margin: 0 0 1rem 0;
 `;
 
-const HomeButton = styled.button`
+const HomeButton = styled.button<{ isGuest?: boolean }>`
   background: ${backgroundColour};
   border: none;
   padding: 1rem;
@@ -23,7 +24,7 @@ const HomeButton = styled.button`
   width: fit-content;
   font-size: 3rem;
   font-weight: semi-bold;
-  cursor: pointer;
+  cursor: ${({ isGuest }) => (isGuest ? "default" : "pointer")};
   color: rgba(255, 255, 255, 0.87);
 
   svg {
@@ -50,6 +51,7 @@ export const Header: FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { playExitSound } = useAudioCue();
+  const isGuest = useIsGuest();
   const isEmpty = Object.values(calls).length === 0;
 
   const runExitAllCalls = () => {
@@ -69,6 +71,9 @@ export const Header: FC = () => {
   };
 
   const returnToRoot = () => {
+    if (isGuest) {
+      return;
+    }
     if (location.pathname.includes("/line") && isEmpty) {
       runExitAllCalls();
     } else if (location.pathname.includes("/line")) {
@@ -81,7 +86,11 @@ export const Header: FC = () => {
   return (
     <>
       <HeaderWrapper>
-        <HomeButton onClick={returnToRoot}>
+        <HomeButton
+          onClick={returnToRoot}
+          isGuest={isGuest}
+          aria-disabled={isGuest}
+        >
           <HeadsetIcon />
           Open Intercom
         </HomeButton>

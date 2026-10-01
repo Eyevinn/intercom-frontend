@@ -95,7 +95,7 @@ export const ProductionsListItem = ({
       headerContent={headerContent}
       expandedContent={expandedContent}
       onHeaderClick={handleHeaderClick}
-      className={totalUsers > 0 ? "active" : ""}
+      className={`filled${totalUsers > 0 ? " active" : ""}`}
       testId={`production-${production.name}`}
     />
   );

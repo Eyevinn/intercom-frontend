@@ -4,6 +4,7 @@ import { MicMuted, MicUnmuted } from "../../assets/icons/icon";
 import { isMobile, isTablet } from "../../bowser";
 import { PrimaryButton, SecondaryButton } from "../form-elements/form-elements";
 import { ConnectToWSButton } from "./connect-to-ws-button";
+import { useIsGuest } from "../../hooks/use-is-guest";
 import { useGlobalMuteToggle } from "./use-global-mute-toggle";
 import { SavePresetModal } from "./save-preset-modal";
 import { useGlobalState } from "../../global-state/context-provider";
@@ -104,6 +105,8 @@ export const HeaderActions = ({
     setIsMasterInputMuted,
     setIsSettingGlobalMute,
   });
+  const isGuest = useIsGuest();
+
   const [showPresetModal, setShowPresetModal] = useState(false);
 
   const activeCompanionUrl =
@@ -123,7 +126,7 @@ export const HeaderActions = ({
             {isMasterInputMuted ? <MicMuted /> : <MicUnmuted />}
           </MuteAllCallsBtn>
         )}
-        {!isEmpty && !isMobile && !isTablet && (
+        {!isEmpty && !isMobile && !isTablet && !isGuest && (
           <ConnectToWSButton
             callActionHandlers={callActionHandlers}
             callIndexMap={callIndexMap}
@@ -135,12 +138,12 @@ export const HeaderActions = ({
             onCompanionUrlChange={onCompanionUrlChange}
           />
         )}
-        {!isEmpty && (
+        {!isEmpty && !isGuest && (
           <SavePresetBtn type="button" onClick={() => setShowPresetModal(true)}>
             {isMobile ? "Save" : "Save as Configuration"}
           </SavePresetBtn>
         )}
-        {!isEmpty && (
+        {!isEmpty && !isGuest && (
           <AddCallContainer>
             <SecondaryButton
               type="button"

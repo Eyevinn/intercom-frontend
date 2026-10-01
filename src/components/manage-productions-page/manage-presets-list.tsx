@@ -1,8 +1,9 @@
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import styled from "@emotion/styled";
 import { TBasicProductionResponse, TPreset, TPresetCall } from "../../api/api";
 import { usePresetContext } from "../../contexts/preset-context";
 import { CollapsibleItem } from "../shared/collapsible-item";
+import { CardGrid, CardGridCell } from "../shared/shared-components";
 import { InfoTooltip } from "../info-tooltip/info-tooltip";
 import {
   UsersIcon,
@@ -33,6 +34,7 @@ import {
   DeleteButton,
 } from "../delete-button/delete-button-components";
 import { ConfirmationModal } from "../verify-decision/confirmation-modal";
+import { sortByName } from "../../utils/sort-by-name";
 
 const SectionHeader = styled.h2`
   font-size: 2rem;
@@ -47,13 +49,6 @@ const SectionHeader = styled.h2`
   span {
     top: 1px;
   }
-`;
-
-const ListWrapper = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  padding: 0 0 0 2rem;
-  align-items: flex-start;
 `;
 
 const PresetName = styled.span`
@@ -911,6 +906,7 @@ const ManagePresetCard = ({
     <CollapsibleItem
       headerContent={headerContent}
       expandedContent={expandedContent}
+      className="filled"
       // eslint-disable-next-line no-underscore-dangle
       testId={`manage-preset-${preset._id}`}
     />
@@ -923,6 +919,8 @@ type ManagePresetsListProps = {
 
 export const ManagePresetsList = ({ productions }: ManagePresetsListProps) => {
   const { presets, loading, deletePreset, updatePreset } = usePresetContext();
+
+  const sortedPresets = useMemo(() => sortByName(presets), [presets]);
 
   const handleUpdate = useCallback(
     async (
@@ -957,18 +955,19 @@ export const ManagePresetsList = ({ productions }: ManagePresetsListProps) => {
           configurations it belongs to.
         </InfoTooltip>
       </SectionHeader>
-      <ListWrapper>
-        {presets.map((preset) => (
-          <ManagePresetCard
-            // eslint-disable-next-line no-underscore-dangle
-            key={preset._id}
-            preset={preset}
-            productions={productions}
-            onUpdate={handleUpdate}
-            onDelete={handleDelete}
-          />
+      <CardGrid>
+        {sortedPresets.map((preset) => (
+          // eslint-disable-next-line no-underscore-dangle
+          <CardGridCell key={preset._id}>
+            <ManagePresetCard
+              preset={preset}
+              productions={productions}
+              onUpdate={handleUpdate}
+              onDelete={handleDelete}
+            />
+          </CardGridCell>
         ))}
-      </ListWrapper>
+      </CardGrid>
     </>
   );
 };
