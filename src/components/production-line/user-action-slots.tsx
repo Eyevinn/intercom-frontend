@@ -112,14 +112,11 @@ export const UserActionSlots = ({
   onSetWhep,
   onRequestMute,
 }: UserActionSlotsProps) => {
-  const canTargetVideo =
-    !isYou &&
-    p.isActive &&
-    !programOutputLine &&
-    !p.isWhepReceiver &&
-    p.hasVideo;
-  const showWhepControl = !!videoEnabled && canTargetVideo && !!onSetWhep;
-  const showPinControl = !!videoEnabled && canTargetVideo && !!onPin;
+  const isVideoTargetable =
+    p.isActive && !programOutputLine && !p.isWhepReceiver && p.hasVideo;
+  const showWhepControl = !!videoEnabled && isVideoTargetable && !!onSetWhep;
+  const showPinControl =
+    !!videoEnabled && !isYou && isVideoTargetable && !!onPin;
   const showMuteControl =
     !isYou && p.isActive && !programOutputLine && !p.isWhip;
 
@@ -139,7 +136,8 @@ export const UserActionSlots = ({
     whepTooltip = "WHIP session can not be WHEP source";
   }
 
-  const showSelfWhepIndicator = isYou && p.sessionId === whepSourceSessionId;
+  const showSelfWhepIndicator =
+    isYou && p.sessionId === whepSourceSessionId && !showWhepControl;
 
   return (
     <Wrapper>
