@@ -28,6 +28,8 @@ import { InfoTooltip } from "../info-tooltip/info-tooltip";
 import {
   ButtonsWrapper,
   DeleteButton,
+  DeleteButtonWrapper,
+  DeleteDisabledInfo,
   SpinnerWrapper,
 } from "../delete-button/delete-button-components";
 import { useHasDuplicateLineName } from "../../hooks/use-has-duplicate-line-name.ts";
@@ -59,6 +61,10 @@ export const ManageProductionButtons: FC<ManageProductionButtonsProps> = (
   props
 ) => {
   const { production, isDeleteProductionDisabled } = props;
+
+  const deleteDisabledReason =
+    "This production cannot be deleted while it has active participants.";
+  const deleteDisabledInfoId = `delete-production-disabled-${production.productionId}`;
 
   const [, dispatch] = useGlobalState();
   const [removeProductionId, setRemoveProductionId] = useState<string>("");
@@ -255,19 +261,31 @@ export const ManageProductionButtons: FC<ManageProductionButtonsProps> = (
             Add Line
           </SecondaryButton>
         )}
-        <DeleteButton
-          type="button"
-          disabled={isDeleteProductionDisabled}
-          onClick={() => setDisplayConfirmationModal(true)}
+        <DeleteButtonWrapper
+          title={isDeleteProductionDisabled ? deleteDisabledReason : undefined}
         >
-          Delete Production
-          {deleteProductionLoading && (
-            <SpinnerWrapper>
-              <Spinner className="production-list" />
-            </SpinnerWrapper>
-          )}
-        </DeleteButton>
+          <DeleteButton
+            type="button"
+            disabled={isDeleteProductionDisabled}
+            aria-describedby={
+              isDeleteProductionDisabled ? deleteDisabledInfoId : undefined
+            }
+            onClick={() => setDisplayConfirmationModal(true)}
+          >
+            Delete Production
+            {deleteProductionLoading && (
+              <SpinnerWrapper>
+                <Spinner className="production-list" />
+              </SpinnerWrapper>
+            )}
+          </DeleteButton>
+        </DeleteButtonWrapper>
       </ButtonsWrapper>
+      {isDeleteProductionDisabled && (
+        <DeleteDisabledInfo id={deleteDisabledInfoId}>
+          {deleteDisabledReason}
+        </DeleteDisabledInfo>
+      )}
       {displayConfirmationModal &&
         (() => {
           const affected = presets.filter((g) =>
