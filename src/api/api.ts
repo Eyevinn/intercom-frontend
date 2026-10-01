@@ -199,6 +199,26 @@ export const API = {
         },
       })
     ),
+  // Long poll endpoint: the request is held open by the manager until the
+  // participant list changes or a server-side timeout elapses, then resolves
+  // with the current participants. Callers re-issue it in a loop.
+  fetchLineParticipants: (
+    productionId: number,
+    lineId: number,
+    signal?: AbortSignal
+  ): Promise<TParticipant[]> =>
+    handleFetchRequest<TParticipant[]>(
+      fetch(
+        `${API_URL}production/${productionId}/line/${lineId}/participants`,
+        {
+          method: "POST",
+          headers: {
+            ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
+          },
+          signal,
+        }
+      )
+    ),
   addProductionLine: (
     productionId: string,
     name: string,
