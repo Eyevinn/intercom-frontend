@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-import { generateWhipUrl } from "../../../utils/generateWhipUrl";
+import { generateWhipUrl } from "../../../utils/generate-whip-url";
 import { CopyButton } from "../../copy-button/copy-button";
 import { DecorativeLabel } from "../../form-elements/form-elements";
 import { Modal } from "../../modal/modal";
