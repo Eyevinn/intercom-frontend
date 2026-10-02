@@ -1,7 +1,7 @@
 import { useState } from "react";
 import styled from "@emotion/styled";
-import { generateWhipUrl } from "../../utils/generateWhipUrl";
-import { generateWhepUrl } from "../../utils/generateWhepUrl";
+import { generateWhipUrl } from "../../utils/generate-whip-url";
+import { generateWhepUrl } from "../../utils/generate-whep-url";
 import { DecorativeLabel, FormInput } from "../form-elements/form-elements";
 import { Modal } from "../modal/modal";
 
