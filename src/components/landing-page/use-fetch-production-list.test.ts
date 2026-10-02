@@ -5,6 +5,7 @@ import { useFetchProductionList } from "./use-fetch-production-list.ts";
 import { GlobalStateContext } from "../../global-state/context-provider.tsx";
 import { TGlobalState } from "../../global-state/types.ts";
 import { API } from "../../api/api.ts";
+import { authCircuitBreaker } from "../../api/auth-circuit-breaker.ts";
 
 // ── Mock API ────────────────────────────────────────────────────────────────
 
@@ -66,9 +67,11 @@ describe("useFetchProductionList", () => {
     vi.clearAllMocks();
     vi.useFakeTimers();
     mockReauth.mockResolvedValue(undefined);
+    authCircuitBreaker.resetForTests();
   });
 
   afterEach(() => {
+    authCircuitBreaker.resetForTests();
     vi.useRealTimers();
   });
 
@@ -155,7 +158,7 @@ describe("useFetchProductionList", () => {
   // ── 401 error handling ─────────────────────────────────────────────────────
 
   describe("401 error handling (regression: polling must not flood on 401)", () => {
-    it("calls API.reauth on a 401 error", async () => {
+    it("does NOT call API.reauth directly on a 401 (reauth is coordinated centrally by the auth circuit breaker)", async () => {
       mockListProductions.mockRejectedValue(make401Error());
 
       renderHook(
@@ -167,7 +170,7 @@ describe("useFetchProductionList", () => {
         await Promise.resolve();
       });
 
-      expect(mockReauth).toHaveBeenCalledTimes(1);
+      expect(mockReauth).not.toHaveBeenCalled();
     });
 
     it("does NOT dispatch API_NOT_AVAILABLE on a 401 error", async () => {
@@ -264,6 +267,79 @@ describe("useFetchProductionList", () => {
 
       expect(result.current.productions).toEqual(emptyProductionList);
       expect(result.current.error).toBeNull();
+    });
+  });
+
+  // ── Breaker-gated pause / resume ───────────────────────────────────────────
+
+  describe("pauses and resumes with the auth circuit breaker", () => {
+    it("skips the fetch while the breaker is coordinating a reauth, then resumes once healthy", async () => {
+      let resolveReauth!: () => void;
+      authCircuitBreaker.configure({
+        reauthRunner: () =>
+          new Promise<void>((resolve) => {
+            resolveReauth = resolve;
+          }),
+        onError: vi.fn(),
+      });
+      mockListProductions.mockResolvedValue(emptyProductionList);
+
+      // A 401 elsewhere trips the breaker into reauthing before the hook mounts.
+      await act(async () => {
+        authCircuitBreaker.report401();
+      });
+      expect(authCircuitBreaker.isPaused()).toBe(true);
+
+      const { result } = renderHook(
+        () => useFetchProductionList({ limit: "30", extended: "true" }),
+        { wrapper }
+      );
+
+      // Initial load is skipped — no request fired while paused.
+      await act(async () => {
+        await Promise.resolve();
+      });
+      expect(mockListProductions).not.toHaveBeenCalled();
+
+      // Reauth succeeds → breaker closes.
+      await act(async () => {
+        resolveReauth();
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+      expect(authCircuitBreaker.isActive()).toBe(true);
+
+      // The next interval tick now fetches, since the breaker is healthy again.
+      await act(async () => {
+        result.current.setIntervalLoad(true);
+        await Promise.resolve();
+      });
+      expect(mockListProductions).toHaveBeenCalledTimes(1);
+    });
+
+    it("skips the fetch while the breaker is tripped open (retrying)", async () => {
+      authCircuitBreaker.configure({
+        reauthRunner: () => Promise.reject(new Error("still down")),
+        onError: vi.fn(),
+      });
+      mockListProductions.mockResolvedValue(emptyProductionList);
+
+      await act(async () => {
+        authCircuitBreaker.report401();
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+      expect(authCircuitBreaker.isTripped()).toBe(true);
+
+      renderHook(
+        () => useFetchProductionList({ limit: "30", extended: "true" }),
+        { wrapper }
+      );
+
+      await act(async () => {
+        await Promise.resolve();
+      });
+      expect(mockListProductions).not.toHaveBeenCalled();
     });
   });
 
@@ -414,7 +490,7 @@ describe("useFetchProductionList", () => {
       expect(mockListProductions).toHaveBeenCalledTimes(11);
     });
 
-    it("reauth is called once per 401, not repeatedly within the same tick", async () => {
+    it("never triggers an independent reauth from the hook across repeated 401 ticks (coordination is the circuit breaker's job)", async () => {
       mockListProductions.mockRejectedValue(make401Error());
 
       const { result } = renderHook(
@@ -422,13 +498,13 @@ describe("useFetchProductionList", () => {
         { wrapper }
       );
 
-      // Initial load → 1 fetch → 1 reauth call
+      // Initial load → 1 fetch, no hook-level reauth
       await act(async () => {
         await Promise.resolve();
       });
-      expect(mockReauth).toHaveBeenCalledTimes(1);
+      expect(mockReauth).not.toHaveBeenCalled();
 
-      // 3 more interval ticks → 3 more reauth calls (one per tick, not cascading)
+      // 3 more interval ticks, still no hook-level reauth cascade
       await act(async () => {
         result.current.setIntervalLoad(true);
         await Promise.resolve();
@@ -442,7 +518,7 @@ describe("useFetchProductionList", () => {
         await Promise.resolve();
       });
 
-      expect(mockReauth).toHaveBeenCalledTimes(4);
+      expect(mockReauth).not.toHaveBeenCalled();
     });
   });
 });

@@ -5,6 +5,7 @@ import { useHeartbeat } from "./use-heartbeat.ts";
 import { GlobalStateContext } from "../../global-state/context-provider.tsx";
 import { TGlobalState } from "../../global-state/types.ts";
 import { API } from "../../api/api.ts";
+import { authCircuitBreaker } from "../../api/auth-circuit-breaker.ts";
 
 // ── Mock API ────────────────────────────────────────────────────────────────
 
@@ -58,10 +59,12 @@ describe("useHeartbeat", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.useFakeTimers();
+    authCircuitBreaker.resetForTests();
   });
 
   afterEach(() => {
     vi.useRealTimers();
+    authCircuitBreaker.resetForTests();
   });
 
   it("does nothing without a session id", async () => {
@@ -153,6 +156,97 @@ describe("useHeartbeat", () => {
       await vi.advanceTimersByTimeAsync(60000);
     });
     expect(mockHeartbeat).toHaveBeenCalledTimes(3);
+  });
+
+  it("pauses heartbeats while the auth circuit breaker is reauthing and resumes on success", async () => {
+    mockHeartbeat.mockResolvedValue("ok");
+    let resolveReauth!: () => void;
+    authCircuitBreaker.configure({
+      reauthRunner: () =>
+        new Promise<void>((resolve) => {
+          resolveReauth = resolve;
+        }),
+      onError: vi.fn(),
+    });
+
+    renderHook(() => useHeartbeat({ sessionId: "s1" }), { wrapper });
+
+    // A 401 elsewhere trips the breaker into reauthing before the first tick.
+    await act(async () => {
+      authCircuitBreaker.report401();
+    });
+    expect(authCircuitBreaker.isPaused()).toBe(true);
+
+    // The tick fires but must not send a heartbeat while paused.
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(10000);
+    });
+    expect(mockHeartbeat).not.toHaveBeenCalled();
+
+    // Reauth succeeds → breaker resumes → heartbeat loop continues.
+    await act(async () => {
+      resolveReauth();
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+    expect(authCircuitBreaker.isActive()).toBe(true);
+    expect(mockHeartbeat).toHaveBeenCalledTimes(1);
+  });
+
+  it("stops heartbeats when the auth circuit breaker trips open", async () => {
+    mockHeartbeat.mockResolvedValue("ok");
+    authCircuitBreaker.configure({
+      reauthRunner: () => Promise.reject(new Error("reauth failed")),
+      onError: vi.fn(),
+    });
+
+    renderHook(() => useHeartbeat({ sessionId: "s1" }), { wrapper });
+
+    await act(async () => {
+      authCircuitBreaker.report401();
+      await Promise.resolve();
+    });
+    expect(authCircuitBreaker.isTripped()).toBe(true);
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(60000);
+    });
+    expect(mockHeartbeat).not.toHaveBeenCalled();
+  });
+
+  it("resumes heartbeats after the breaker trips open and then auto-recovers", async () => {
+    mockHeartbeat.mockResolvedValue("ok");
+    let attempts = 0;
+    authCircuitBreaker.configure({
+      reauthRunner: () => {
+        attempts += 1;
+        // First reauth fails (breaker trips open), the scheduled half-open
+        // retry succeeds so the heartbeat loop must resume — not stay dead,
+        // which would let the manager reclaim the live SMB session.
+        return attempts === 1
+          ? Promise.reject(new Error("transient 500"))
+          : Promise.resolve();
+      },
+      onError: vi.fn(),
+    });
+
+    renderHook(() => useHeartbeat({ sessionId: "s1" }), { wrapper });
+
+    await act(async () => {
+      authCircuitBreaker.report401();
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+    expect(authCircuitBreaker.isTripped()).toBe(true);
+    expect(mockHeartbeat).not.toHaveBeenCalled();
+
+    // The half-open retry recovers the breaker and the heartbeat loop resumes.
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(40000);
+    });
+
+    expect(authCircuitBreaker.isActive()).toBe(true);
+    expect(mockHeartbeat).toHaveBeenCalled();
   });
 
   it("does not send or reschedule after unmount", async () => {

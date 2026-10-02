@@ -5,6 +5,7 @@ import { TJoinProductionOptions, TLine } from "./types.ts";
 import { useGlobalState } from "../../global-state/context-provider.tsx";
 import logger from "../../utils/logger.ts";
 import { backoffDelayMs } from "../../utils/backoff.ts";
+import { authCircuitBreaker } from "../../api/auth-circuit-breaker.ts";
 
 type TProps = {
   callId: string;
@@ -28,6 +29,7 @@ export const useLinePolling = ({ callId, joinProductionOptions }: TProps) => {
     let cancelled = false;
     let consecutiveFailureCount = 0;
     let retryTimeout: ReturnType<typeof setTimeout> | null = null;
+    let resumeUnsub: (() => void) | null = null;
     const controller = new AbortController();
     const productionId = parseInt(joinProductionOptions.productionId, 10);
     const lineId = parseInt(joinProductionOptions.lineId, 10);
@@ -63,11 +65,30 @@ export const useLinePolling = ({ callId, joinProductionOptions }: TProps) => {
       return true;
     };
 
+    // Respect the global auth circuit breaker. Returns true when the caller may
+    // proceed now; returns false when polling must wait — either a reauth is in
+    // flight, or the breaker has tripped open and is retrying on backoff. The
+    // breaker is not terminal, so in both cases we subscribe and re-run `fn`
+    // (with counters reset) once it recovers to healthy.
+    const gate = (fn: () => void): boolean => {
+      if (authCircuitBreaker.isActive()) return true;
+      if (resumeUnsub) return false; // already waiting for resume
+      resumeUnsub = authCircuitBreaker.subscribe(() => {
+        if (cancelled || !authCircuitBreaker.isActive()) return;
+        resumeUnsub?.();
+        resumeUnsub = null;
+        consecutiveFailureCount = 0;
+        fn();
+      });
+      return false;
+    };
+
     // Re-issue the long poll. On success it fires immediately (the request is
     // held open server-side, so this is not a busy loop); after a failure it
     // waits for an exponential backoff so a broken endpoint is not hot-looped.
     const poll = () => {
       if (cancelled) return;
+      if (!gate(poll)) return;
       API.fetchLineParticipants(productionId, lineId, controller.signal)
         .then((participants) => {
           if (cancelled) return;
@@ -91,6 +112,7 @@ export const useLinePolling = ({ callId, joinProductionOptions }: TProps) => {
     // backoff as poll() so a failing endpoint is not hammered here either.
     const seed = () => {
       if (cancelled) return;
+      if (!gate(seed)) return;
       API.fetchProductionLine(productionId, lineId)
         .then((l) => {
           if (cancelled) return;
@@ -114,6 +136,7 @@ export const useLinePolling = ({ callId, joinProductionOptions }: TProps) => {
     return () => {
       cancelled = true;
       if (retryTimeout !== null) clearTimeout(retryTimeout);
+      resumeUnsub?.();
       controller.abort();
     };
   }, [callId, dispatch, joinProductionOptions]);

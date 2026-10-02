@@ -1,7 +1,8 @@
-import { useCallback, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { useGlobalState } from "../global-state/context-provider";
 import { API } from "../api/api";
 import { maybeRedirectToAuth } from "../api/redirect-on-auth-failure";
+import { authCircuitBreaker } from "../api/auth-circuit-breaker";
 
 const REAUTH_MAX_ATTEMPTS = 3;
 const REAUTH_RETRY_DELAY_MS = 3000;
@@ -121,4 +122,75 @@ export const useSetupTokenRefresh = () => {
   }, [dispatch]);
 
   return { setupTokenRefresh };
+};
+
+// Wires the global auth circuit breaker to the real reauth network call and to
+// the global error state. Mount this once near the app root. When any API call
+// returns 401, `handleFetchRequest` trips the breaker, which pauses all polling
+// and runs this single coordinated reauth. On success every polling loop
+// resumes; on failure the breaker opens, polling stops, and the error below is
+// surfaced to the user (or the browser is redirected to the OSC login URL).
+export const useAuthCircuitBreaker = () => {
+  const [, dispatch] = useGlobalState();
+
+  useEffect(() => {
+    authCircuitBreaker.configure({
+      reauthRunner: async () => {
+        const lastError = await attemptReauth();
+        if (lastError) throw lastError;
+      },
+      onError: (error) => {
+        const { status } = error as Error & { status?: number };
+
+        // A persistent 401 after reauth exhausted its retries: redirect to the
+        // configured OSC login URL if one exists; otherwise fall through.
+        if (status === 401 && maybeRedirectToAuth(status)) {
+          return;
+        }
+
+        // 500 is expected when the initial OSC token expires, and 404/405 mean
+        // no OSC token is configured on this backend — neither should raise a
+        // hard error banner (mirrors the hourly-refresh behaviour). The breaker
+        // now retries on backoff instead of stopping all polling forever, so
+        // surface a non-fatal, auto-dismissing "reconnecting" warning rather
+        // than failing silently: the stall is visible but recovers on its own.
+        const isSuppressed =
+          status === 500 ||
+          status === 404 ||
+          status === 405 ||
+          error.message.includes("500") ||
+          error.message.includes("404") ||
+          error.message.includes("405");
+        if (isSuppressed) {
+          dispatch({
+            type: "WARNING",
+            payload: {
+              message: "Lost connection to the server. Trying to reconnect…",
+            },
+          });
+          return;
+        }
+
+        const codePart = status != null ? status.toString() : "";
+        dispatch({
+          type: "ERROR",
+          payload: {
+            error: new Error(
+              `Failed to reauth after ${REAUTH_MAX_ATTEMPTS} attempts - ${codePart}`
+            ),
+          },
+        });
+      },
+      // Once a half-open retry succeeds and the breaker recovers, clear the
+      // surfaced "reconnecting" warning so the banner does not linger.
+      onRecover: () => {
+        dispatch({ type: "WARNING", payload: { message: null } });
+      },
+    });
+
+    return () => {
+      // Return the breaker to a healthy state so a remount starts clean.
+      authCircuitBreaker.reset();
+    };
+  }, [dispatch]);
 };

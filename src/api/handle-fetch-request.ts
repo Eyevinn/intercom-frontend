@@ -1,3 +1,5 @@
+import { authCircuitBreaker } from "./auth-circuit-breaker.ts";
+
 const isSuccessful = (r: Response) => r.status >= 200 && r.status <= 399;
 
 export const handleFetchRequest = async <T>(
@@ -19,6 +21,12 @@ export const handleFetchRequest = async <T>(
 
   if (!isSuccess) {
     const { status } = response;
+    if (status === 401) {
+      // Single interception point for auth failures: let the global circuit
+      // breaker coordinate the pause/reauth/resume across every polling loop.
+      // Fire-and-forget — the breaker never rejects.
+      authCircuitBreaker.report401();
+    }
     let err: Error;
     if (text) {
       err = new Error(text);
