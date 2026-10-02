@@ -214,6 +214,41 @@ describe("useHeartbeat", () => {
     expect(mockHeartbeat).not.toHaveBeenCalled();
   });
 
+  it("resumes heartbeats after the breaker trips open and then auto-recovers", async () => {
+    mockHeartbeat.mockResolvedValue("ok");
+    let attempts = 0;
+    authCircuitBreaker.configure({
+      reauthRunner: () => {
+        attempts += 1;
+        // First reauth fails (breaker trips open), the scheduled half-open
+        // retry succeeds so the heartbeat loop must resume — not stay dead,
+        // which would let the manager reclaim the live SMB session.
+        return attempts === 1
+          ? Promise.reject(new Error("transient 500"))
+          : Promise.resolve();
+      },
+      onError: vi.fn(),
+    });
+
+    renderHook(() => useHeartbeat({ sessionId: "s1" }), { wrapper });
+
+    await act(async () => {
+      authCircuitBreaker.report401();
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+    expect(authCircuitBreaker.isTripped()).toBe(true);
+    expect(mockHeartbeat).not.toHaveBeenCalled();
+
+    // The half-open retry recovers the breaker and the heartbeat loop resumes.
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(40000);
+    });
+
+    expect(authCircuitBreaker.isActive()).toBe(true);
+    expect(mockHeartbeat).toHaveBeenCalled();
+  });
+
   it("does not send or reschedule after unmount", async () => {
     mockHeartbeat.mockResolvedValue("ok");
     const { unmount } = renderHook(() => useHeartbeat({ sessionId: "s1" }), {

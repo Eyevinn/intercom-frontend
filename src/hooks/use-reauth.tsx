@@ -149,8 +149,11 @@ export const useAuthCircuitBreaker = () => {
         }
 
         // 500 is expected when the initial OSC token expires, and 404/405 mean
-        // no OSC token is configured on this backend — neither should raise an
-        // error banner (mirrors the hourly-refresh behaviour).
+        // no OSC token is configured on this backend — neither should raise a
+        // hard error banner (mirrors the hourly-refresh behaviour). The breaker
+        // now retries on backoff instead of stopping all polling forever, so
+        // surface a non-fatal, auto-dismissing "reconnecting" warning rather
+        // than failing silently: the stall is visible but recovers on its own.
         const isSuppressed =
           status === 500 ||
           status === 404 ||
@@ -159,6 +162,12 @@ export const useAuthCircuitBreaker = () => {
           error.message.includes("404") ||
           error.message.includes("405");
         if (isSuppressed) {
+          dispatch({
+            type: "WARNING",
+            payload: {
+              message: "Lost connection to the server. Trying to reconnect…",
+            },
+          });
           return;
         }
 
@@ -171,6 +180,11 @@ export const useAuthCircuitBreaker = () => {
             ),
           },
         });
+      },
+      // Once a half-open retry succeeds and the breaker recovers, clear the
+      // surfaced "reconnecting" warning so the banner does not linger.
+      onRecover: () => {
+        dispatch({ type: "WARNING", payload: { message: null } });
       },
     });
 

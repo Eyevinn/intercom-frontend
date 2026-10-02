@@ -1,9 +1,15 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { authCircuitBreaker } from "./auth-circuit-breaker.ts";
 
 describe("authCircuitBreaker", () => {
   beforeEach(() => {
+    vi.useFakeTimers();
     authCircuitBreaker.resetForTests();
+  });
+
+  afterEach(() => {
+    authCircuitBreaker.resetForTests();
+    vi.useRealTimers();
   });
 
   it("starts closed and active", () => {
@@ -89,9 +95,147 @@ describe("authCircuitBreaker", () => {
     expect(reauthRunner).toHaveBeenCalledTimes(1);
   });
 
-  it("trips open when no reauth runner is configured", async () => {
+  it("does NOT trip open when a 401 arrives before a runner is configured (defensive guard)", async () => {
+    // A 401 can land before the React layer calls configure(). Rather than
+    // tripping open with a swallowed error (which would freeze polling), the
+    // breaker stays closed and remembers the report.
     await authCircuitBreaker.report401();
-    expect(authCircuitBreaker.isTripped()).toBe(true);
+    expect(authCircuitBreaker.isActive()).toBe(true);
+    expect(authCircuitBreaker.isTripped()).toBe(false);
+  });
+
+  it("replays a pre-configure 401 once the runner is wired in", async () => {
+    // 401 before configure() → remembered, no reauth yet.
+    await authCircuitBreaker.report401();
+    expect(authCircuitBreaker.isActive()).toBe(true);
+
+    const reauthRunner = vi.fn().mockResolvedValue(undefined);
+    authCircuitBreaker.configure({ reauthRunner, onError: vi.fn() });
+
+    // configure() replays the queued 401, so the coordinated reauth runs.
+    expect(reauthRunner).toHaveBeenCalledTimes(1);
+    await vi.runOnlyPendingTimersAsync();
+    expect(authCircuitBreaker.isActive()).toBe(true);
+  });
+
+  describe("half-open recovery (the breaker is not terminal)", () => {
+    it("auto-recovers via a half-open retry after it trips open", async () => {
+      let attempts = 0;
+      const reauthRunner = vi.fn().mockImplementation(() => {
+        attempts += 1;
+        // First attempt fails (trips open), the scheduled retry succeeds.
+        return attempts === 1
+          ? Promise.reject(new Error("transient 500"))
+          : Promise.resolve();
+      });
+      authCircuitBreaker.configure({ reauthRunner, onError: vi.fn() });
+
+      await authCircuitBreaker.report401();
+      expect(authCircuitBreaker.isTripped()).toBe(true);
+
+      // The half-open retry fires after the backoff and recovers the breaker.
+      await vi.advanceTimersByTimeAsync(40000);
+
+      expect(reauthRunner).toHaveBeenCalledTimes(2);
+      expect(authCircuitBreaker.isActive()).toBe(true);
+    });
+
+    it("keeps retrying while reauth keeps failing (never gives up terminally)", async () => {
+      const reauthRunner = vi.fn().mockRejectedValue(new Error("still down"));
+      authCircuitBreaker.configure({ reauthRunner, onError: vi.fn() });
+
+      await authCircuitBreaker.report401();
+      expect(authCircuitBreaker.isTripped()).toBe(true);
+      expect(reauthRunner).toHaveBeenCalledTimes(1);
+
+      // Successive backoff windows each fire another half-open attempt.
+      await vi.advanceTimersByTimeAsync(40000);
+      const afterFirstWindow = reauthRunner.mock.calls.length;
+      expect(afterFirstWindow).toBeGreaterThan(1);
+
+      await vi.advanceTimersByTimeAsync(40000);
+      expect(reauthRunner.mock.calls.length).toBeGreaterThan(afterFirstWindow);
+      expect(authCircuitBreaker.isTripped()).toBe(true);
+    });
+
+    it("fires onRecover (and notifies closed) when a retry recovers from open", async () => {
+      let attempts = 0;
+      const reauthRunner = vi.fn().mockImplementation(() => {
+        attempts += 1;
+        return attempts === 1
+          ? Promise.reject(new Error("transient"))
+          : Promise.resolve();
+      });
+      const onRecover = vi.fn();
+      authCircuitBreaker.configure({
+        reauthRunner,
+        onError: vi.fn(),
+        onRecover,
+      });
+
+      const states: string[] = [];
+      authCircuitBreaker.subscribe((s) => states.push(s));
+
+      await authCircuitBreaker.report401();
+      await vi.advanceTimersByTimeAsync(40000);
+
+      expect(onRecover).toHaveBeenCalledTimes(1);
+      expect(states).toEqual(["reauthing", "open", "reauthing", "closed"]);
+    });
+
+    it("does NOT fire onRecover on a first-attempt success (no outage to recover from)", async () => {
+      const reauthRunner = vi.fn().mockResolvedValue(undefined);
+      const onRecover = vi.fn();
+      authCircuitBreaker.configure({
+        reauthRunner,
+        onError: vi.fn(),
+        onRecover,
+      });
+
+      await authCircuitBreaker.report401();
+
+      expect(authCircuitBreaker.isActive()).toBe(true);
+      expect(onRecover).not.toHaveBeenCalled();
+    });
+
+    it("cancels the pending half-open retry on reset", async () => {
+      const reauthRunner = vi.fn().mockRejectedValue(new Error("down"));
+      authCircuitBreaker.configure({ reauthRunner, onError: vi.fn() });
+
+      await authCircuitBreaker.report401();
+      expect(authCircuitBreaker.isTripped()).toBe(true);
+      expect(reauthRunner).toHaveBeenCalledTimes(1);
+
+      authCircuitBreaker.reset();
+      expect(authCircuitBreaker.isActive()).toBe(true);
+
+      // No scheduled retry should fire after a reset.
+      await vi.advanceTimersByTimeAsync(60000);
+      expect(reauthRunner).toHaveBeenCalledTimes(1);
+    });
+
+    it("a reauth that was in flight when reset() ran cannot re-open the breaker", async () => {
+      let rejectReauth!: (err: Error) => void;
+      const reauthRunner = vi.fn().mockImplementation(
+        () =>
+          new Promise<void>((_, reject) => {
+            rejectReauth = reject;
+          })
+      );
+      authCircuitBreaker.configure({ reauthRunner, onError: vi.fn() });
+
+      const pending = authCircuitBreaker.report401();
+      expect(authCircuitBreaker.isPaused()).toBe(true);
+
+      // Teardown resets the breaker while the reauth is still in flight.
+      authCircuitBreaker.reset();
+      expect(authCircuitBreaker.isActive()).toBe(true);
+
+      // The late rejection must not trip the breaker back open.
+      rejectReauth(new Error("too late"));
+      await pending;
+      expect(authCircuitBreaker.isActive()).toBe(true);
+    });
   });
 
   it("reset returns the breaker to closed", async () => {

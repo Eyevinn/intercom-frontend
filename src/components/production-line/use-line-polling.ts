@@ -66,23 +66,21 @@ export const useLinePolling = ({ callId, joinProductionOptions }: TProps) => {
     };
 
     // Respect the global auth circuit breaker. Returns true when the caller may
-    // proceed now; returns false when polling is paused (reauth in flight, in
-    // which case `fn` is re-run on resume with counters reset) or stopped
-    // (reauth failed).
+    // proceed now; returns false when polling must wait — either a reauth is in
+    // flight, or the breaker has tripped open and is retrying on backoff. The
+    // breaker is not terminal, so in both cases we subscribe and re-run `fn`
+    // (with counters reset) once it recovers to healthy.
     const gate = (fn: () => void): boolean => {
-      if (authCircuitBreaker.isTripped()) return false;
-      if (authCircuitBreaker.isPaused()) {
-        resumeUnsub = authCircuitBreaker.subscribe(() => {
-          if (cancelled || authCircuitBreaker.isPaused()) return;
-          resumeUnsub?.();
-          resumeUnsub = null;
-          if (authCircuitBreaker.isTripped()) return;
-          consecutiveFailureCount = 0;
-          fn();
-        });
-        return false;
-      }
-      return true;
+      if (authCircuitBreaker.isActive()) return true;
+      if (resumeUnsub) return false; // already waiting for resume
+      resumeUnsub = authCircuitBreaker.subscribe(() => {
+        if (cancelled || !authCircuitBreaker.isActive()) return;
+        resumeUnsub?.();
+        resumeUnsub = null;
+        consecutiveFailureCount = 0;
+        fn();
+      });
+      return false;
     };
 
     // Re-issue the long poll. On success it fires immediately (the request is
