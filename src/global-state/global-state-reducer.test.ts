@@ -20,10 +20,12 @@ function createMockCallState(overrides: Partial<CallState> = {}): CallState {
   return {
     joinProductionOptions: null,
     mediaStreamInput: null,
+    mediaStreamVideoInput: null,
     dominantSpeaker: null,
     audioLevelAboveThreshold: false,
     connectionState: null,
     audioElements: null,
+    videoElements: null,
     sessionId: null,
     hotkeys: mockHotkeys,
     dataChannel: null,
@@ -57,7 +59,7 @@ describe("globalReducer", () => {
       error: { callErrors: null, globalError: null, globalWarning: null },
       reloadProductionList: false,
       reloadPresetList: false,
-      devices: { input: null, output: null },
+      devices: { input: null, output: null, videoInput: null },
       userSettings: {},
       selectedProductionId: null,
       calls: {},
@@ -203,6 +205,7 @@ describe("globalReducer", () => {
       const devices = {
         input: [{ deviceId: "mic-1" } as MediaDeviceInfo],
         output: [{ deviceId: "spk-1" } as MediaDeviceInfo],
+        videoInput: null,
       };
       const action: TGlobalStateAction = {
         type: "DEVICES_UPDATED",
@@ -487,7 +490,7 @@ describe("globalReducer", () => {
         { type: "PRODUCTION_LIST_FETCHED" },
         {
           type: "DEVICES_UPDATED",
-          payload: { input: null, output: null },
+          payload: { input: null, output: null, videoInput: null },
         },
         { type: "SELECT_PRODUCTION_ID", payload: "x" },
         {

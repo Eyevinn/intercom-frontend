@@ -29,6 +29,7 @@ import { ConfirmationModal } from "../verify-decision/confirmation-modal";
 import { HeaderActions } from "./header-actions";
 import { ProductionLines } from "./production-lines";
 import { ProgramLineJoinCard } from "./program-line-join-card";
+import { VideoLineJoinCard } from "./video-line-join-card";
 import { useCallsNavigation } from "./use-calls-navigation";
 import { useGlobalMuteHotkey } from "./use-global-mute-hotkey";
 import { usePreventPullToRefresh } from "./use-prevent-pull-to-refresh";
@@ -136,6 +137,16 @@ export const CallsPage = () => {
   const [pendingProgramLines, setPendingProgramLines] = useState<
     PendingProgramLine[]
   >([]);
+  type PendingVideoLine = {
+    productionId: string;
+    lineId: string;
+    lineName?: string;
+    productionName?: string;
+  };
+
+  const [pendingVideoRefs, setPendingVideoRefs] = useState<PendingVideoLine[]>(
+    []
+  );
   const {
     deregisterCall,
     registerCallList,
@@ -153,6 +164,7 @@ export const CallsPage = () => {
   const { initiateProductionCall } = useInitiateProductionCall({ dispatch });
   const autoJoinTriggeredRef = useRef(false);
   const pendingProgramKeysRef = useRef<Set<string>>(new Set());
+  const pendingVideoKeysRef = useRef<Set<string>>(new Set());
 
   const { productionId: paramProductionId, lineId: paramLineId } = useParams();
   const { search } = useLocation();
@@ -276,6 +288,7 @@ export const CallsPage = () => {
         );
 
         const program: PendingProgramLine[] = [];
+        const video: PendingVideoLine[] = [];
         const validRefs: typeof pendingCallRefs = [];
 
         pendingCallRefs.forEach((ref, i) => {
@@ -293,6 +306,13 @@ export const CallsPage = () => {
               productionName: prod.name,
               lineName: line.name,
             });
+          } else if (line.videoEnabled === true) {
+            video.push({
+              productionId: ref.productionId,
+              lineId: ref.lineId,
+              productionName: prod.name,
+              lineName: line.name,
+            });
           }
         });
 
@@ -301,6 +321,13 @@ export const CallsPage = () => {
             program.map((p) => `${p.productionId}:${p.lineId}`)
           );
           setPendingProgramLines(program);
+        }
+
+        if (video.length > 0) {
+          pendingVideoKeysRef.current = new Set(
+            video.map((r) => `${r.productionId}:${r.lineId}`)
+          );
+          setPendingVideoRefs(video);
         }
 
         if (validRefs.length !== pendingCallRefs.length) {
@@ -328,6 +355,7 @@ export const CallsPage = () => {
     autoJoinTriggeredRef.current = true;
 
     const programKeys = pendingProgramKeysRef.current;
+    const videoKeys = pendingVideoKeysRef.current;
 
     const existingKeys = new Set(
       Object.values(calls)
@@ -340,6 +368,7 @@ export const CallsPage = () => {
       .filter(
         (ref) =>
           !programKeys.has(`${ref.productionId}:${ref.lineId}`) &&
+          !videoKeys.has(`${ref.productionId}:${ref.lineId}`) &&
           !existingKeys.has(`${ref.productionId}:${ref.lineId}`)
       )
       .forEach((ref) => {
@@ -551,6 +580,42 @@ export const CallsPage = () => {
             />
           )}
         <CallsContainer>
+          {!!(
+            userSettings &&
+            userSettings.username &&
+            (userSettings.audioinput || userSettings.audiooutput)
+          ) &&
+            pendingVideoRefs
+              .filter(
+                (ref) =>
+                  !Object.values(calls).some(
+                    (c) =>
+                      c.joinProductionOptions?.productionId ===
+                        ref.productionId &&
+                      c.joinProductionOptions?.lineId === ref.lineId
+                  )
+              )
+              .map((ref) => (
+                <VideoLineJoinCard
+                  key={`${ref.productionId}:${ref.lineId}`}
+                  productionId={ref.productionId}
+                  lineId={ref.lineId}
+                  lineName={ref.lineName}
+                  productionName={ref.productionName}
+                  customGlobalMute={customGlobalMute}
+                  onJoined={() =>
+                    setPendingVideoRefs((prev) =>
+                      prev.filter(
+                        (r) =>
+                          !(
+                            r.productionId === ref.productionId &&
+                            r.lineId === ref.lineId
+                          )
+                      )
+                    )
+                  }
+                />
+              ))}
           {addCallActive &&
             !isGuest &&
             (productionId || addCallPreSelected) && (

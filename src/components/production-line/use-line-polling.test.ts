@@ -42,7 +42,7 @@ const mockState: TGlobalState = {
   reloadPresetList: false,
   production: null,
   selectedProductionId: null,
-  devices: { input: null, output: null },
+  devices: { input: null, output: null, videoInput: null },
   userSettings: null,
   apiError: false,
   websocket: null,
@@ -69,6 +69,7 @@ const participant = (name: string): TParticipant => ({
   endpointId: `endpoint-${name}`,
   isActive: true,
   isWhip: false,
+  hasVideo: false,
 });
 
 const line: TLine = {
@@ -204,7 +205,7 @@ describe("useLinePolling", () => {
       expect(mockFetchLineParticipants).toHaveBeenCalledTimes(2);
     });
 
-    it("stops polling after 10 consecutive failures", async () => {
+    it("keeps polling past 10 consecutive failures so a brief backend outage recovers on its own", async () => {
       mockFetchProductionLine.mockResolvedValue(line);
       mockFetchLineParticipants.mockRejectedValue(new Error("boom"));
 
@@ -215,7 +216,6 @@ describe("useLinePolling", () => {
 
       await flush();
 
-      // Drain all backoff timers well past the 10-failure bail-out.
       for (let i = 0; i < 15; i += 1) {
         // eslint-disable-next-line no-await-in-loop
         await act(async () => {
@@ -223,18 +223,18 @@ describe("useLinePolling", () => {
         });
       }
 
-      const callsAfterBailout = mockFetchLineParticipants.mock.calls.length;
+      const callsSoFar = mockFetchLineParticipants.mock.calls.length;
+      expect(callsSoFar).toBeGreaterThan(10);
 
-      // No further timers should be pending — the loop has bailed out.
+      // Still retrying — the loop never bails out.
       await act(async () => {
         await vi.advanceTimersByTimeAsync(60000);
       });
-
-      expect(mockFetchLineParticipants).toHaveBeenCalledTimes(
-        callsAfterBailout
+      expect(mockFetchLineParticipants.mock.calls.length).toBeGreaterThan(
+        callsSoFar
       );
-      expect(callsAfterBailout).toBe(10);
-      expect(mockDispatch).toHaveBeenCalledWith(
+
+      expect(mockDispatch).not.toHaveBeenCalledWith(
         expect.objectContaining({
           payload: expect.objectContaining({
             error: expect.objectContaining({
@@ -243,6 +243,62 @@ describe("useLinePolling", () => {
           }),
         })
       );
+    });
+  });
+
+  describe("line metadata refresh", () => {
+    it("picks up a whepSourceSessionId change for a client already in the call", async () => {
+      mockFetchProductionLine.mockResolvedValueOnce({
+        ...line,
+        whepSourceSessionId: null,
+      });
+      mockFetchLineParticipants
+        .mockResolvedValueOnce([participant("initial")])
+        .mockReturnValue(new Promise(() => {}));
+
+      const { result } = renderHook(
+        () => useLinePolling({ callId: "call-1", joinProductionOptions }),
+        { wrapper }
+      );
+
+      await flush();
+      expect(result.current?.whepSourceSessionId ?? null).toBeNull();
+
+      // Someone else sets the WHEP source server-side.
+      mockFetchProductionLine.mockResolvedValue({
+        ...line,
+        whepSourceSessionId: "session-other",
+      });
+
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(1500);
+      });
+
+      expect(result.current?.whepSourceSessionId).toBe("session-other");
+    });
+
+    it("does not let the metadata refresh clobber long-polled participants", async () => {
+      mockFetchProductionLine.mockResolvedValue({
+        ...line,
+        participants: [participant("stale")],
+      });
+      mockFetchLineParticipants
+        .mockResolvedValueOnce([participant("fresh")])
+        .mockReturnValue(new Promise(() => {}));
+
+      const { result } = renderHook(
+        () => useLinePolling({ callId: "call-1", joinProductionOptions }),
+        { wrapper }
+      );
+
+      await flush();
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(1500);
+      });
+
+      expect(result.current?.participants.map((p) => p.name)).toEqual([
+        "fresh",
+      ]);
     });
   });
 

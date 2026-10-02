@@ -1,6 +1,7 @@
 import styled from "@emotion/styled";
-import { MicMuted, UserIcon, WhipIcon } from "../../assets/icons/icon.tsx";
+import { UserIcon, WhipIcon } from "../../assets/icons/icon.tsx";
 import { TParticipant } from "./types.ts";
+import { UserActionSlots } from "./user-action-slots.tsx";
 
 const Container = styled.div`
   width: 100%;
@@ -105,35 +106,20 @@ const OnlineIndicator = styled.div`
   }
 `;
 
-const MuteParticipantButton = styled.button`
-  width: 3rem;
-  height: 3rem;
-  padding: 0.3rem;
-  margin: 0 0 0 0.5rem;
-  background: #302b2b;
-  border: 0.1rem solid #707070;
-  border-radius: 0.4rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-
-  svg {
-    fill: #f96c6c;
-    display: block;
-  }
-`;
-
 type TUserListOptions = {
   participants: TParticipant[];
   sessionId: string | null;
   dominantSpeaker: string | null;
   audioLevelAboveThreshold: boolean;
   programOutputLine?: boolean;
+  videoEnabled?: boolean;
+  pinnedVideoSessionId?: string | null;
+  whepSourceSessionId?: string | null;
   setConfirmModalOpen: (value: boolean) => void;
   setUserId: (value: string) => void;
   setUserName: (value: string) => void;
+  onPin?: (sessionId: string) => void;
+  onSetWhep?: (sessionId: string) => void;
 };
 
 export const UserList = ({
@@ -142,13 +128,23 @@ export const UserList = ({
   dominantSpeaker,
   audioLevelAboveThreshold,
   programOutputLine,
+  videoEnabled,
+  pinnedVideoSessionId,
+  whepSourceSessionId,
   setConfirmModalOpen,
   setUserId,
   setUserName,
+  onPin,
+  onSetWhep,
 }: TUserListOptions) => {
   if (!participants) return null;
 
   const isWhipOnLine = participants.some((p) => p.isWhip);
+
+  const pinnableCount = participants.filter(
+    (p) =>
+      p.sessionId !== sessionId && p.isActive && p.hasVideo && !p.isWhepReceiver
+  ).length;
 
   const getStatusClass = (isActive: boolean, isWhip: boolean) => {
     if (!isActive) return "inactive";
@@ -182,17 +178,22 @@ export const UserList = ({
                   {truncatedUsername} {p.isActive ? "" : "(inactive)"}
                 </UserName>
               </User>
-              {!isYou && p.isActive && !programOutputLine && !p.isWhip && (
-                <MuteParticipantButton
-                  onClick={() => {
-                    setUserId(p.endpointId);
-                    setUserName(p.name);
-                    setConfirmModalOpen(true);
-                  }}
-                >
-                  <MicMuted />
-                </MuteParticipantButton>
-              )}
+              <UserActionSlots
+                participant={p}
+                isYou={isYou}
+                programOutputLine={programOutputLine}
+                videoEnabled={videoEnabled}
+                pinnedVideoSessionId={pinnedVideoSessionId}
+                whepSourceSessionId={whepSourceSessionId}
+                pinnableCount={pinnableCount}
+                onPin={onPin}
+                onSetWhep={onSetWhep}
+                onRequestMute={(endpointId, name) => {
+                  setUserId(endpointId);
+                  setUserName(name);
+                  setConfirmModalOpen(true);
+                }}
+              />
             </UserWrapper>
           );
         })}

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { renderHook } from "@testing-library/react";
+import { renderHook, act } from "@testing-library/react";
 import { createElement, type ReactNode } from "react";
 import { useRtcConnection } from "./use-rtc-connection.ts";
 import { GlobalStateContext } from "../../global-state/context-provider.tsx";
@@ -8,7 +8,14 @@ import { TUseAudioInputValues } from "./use-audio-input.ts";
 
 // ── Global RTCPeerConnection stub (not available in happy-dom) ──────
 
+const rtcInstances: MockRTCPeerConnection[] = [];
+
 class MockRTCPeerConnection extends EventTarget {
+  constructor() {
+    super();
+    rtcInstances.push(this);
+  }
+
   connectionState: RTCPeerConnectionState = "new";
 
   iceGatheringState: RTCIceGatheringState = "new";
@@ -74,7 +81,7 @@ const mockState: TGlobalState = {
   reloadPresetList: false,
   production: null,
   selectedProductionId: null,
-  devices: { input: null, output: null },
+  devices: { input: null, output: null, videoInput: null },
   userSettings: null,
   apiError: false,
   websocket: null,
@@ -89,6 +96,8 @@ const wrapper = ({ children }: { children: ReactNode }) =>
 
 const defaultOptions = {
   inputAudioStream: null as TUseAudioInputValues,
+  inputVideoStream: null as null,
+  videoEnabled: false,
   sdpOffer: null,
   joinProductionOptions: null,
   audiooutput: undefined,
@@ -153,6 +162,61 @@ describe("useRtcConnection", () => {
         }),
       })
     );
+  });
+
+  it("clears a video tile's stale lastSessionId when its slot is recycled (unmute)", () => {
+    // The backend reuses a fixed pool of receive slots and never
+    // renegotiates: when the pinned publisher leaves and a new one is
+    // selected, SMB rewrites the new publisher onto the SAME slot/SSRC, which
+    // fires `unmute`. If the tile keeps the departed publisher's
+    // lastSessionId, computeVideoTileLabels can never rebind it and the grid
+    // drops it as stale → permanent black screen. unmute must void the
+    // binding so the matcher re-adopts the slot for the now-active source.
+    rtcInstances.length = 0;
+    const { result } = renderHook(
+      () =>
+        useRtcConnection({
+          ...defaultOptions,
+          inputAudioStream: "no-device",
+          sdpOffer: "v=0\r\n",
+          sessionId: "session-1",
+          joinProductionOptions: {
+            productionId: "1",
+            lineId: "line-1",
+            username: "user",
+            lineUsedForProgramOutput: false,
+            isProgramUser: false,
+          },
+        }),
+      { wrapper }
+    );
+
+    const pc = rtcInstances[rtcInstances.length - 1];
+    const stream = new MediaStream();
+    const track = Object.assign(new EventTarget(), {
+      kind: "video",
+      id: "video-track-1",
+    });
+
+    act(() => {
+      const trackEvent = Object.assign(new Event("track"), {
+        streams: [stream],
+        track,
+      });
+      pc.dispatchEvent(trackEvent);
+    });
+
+    const videoEl = result.current.videoElements[0];
+    expect(videoEl).toBeDefined();
+
+    // The grid binds the tile to the publisher currently feeding the slot.
+    videoEl.dataset.lastSessionId = "departed-publisher";
+
+    act(() => {
+      track.dispatchEvent(new Event("unmute"));
+    });
+
+    expect(videoEl.dataset.lastSessionId).toBe("");
   });
 
   it("does not connect when inputAudioStream is null", () => {
