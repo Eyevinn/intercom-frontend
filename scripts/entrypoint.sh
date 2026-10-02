@@ -21,14 +21,8 @@ if [ "$LISTENPORT" -lt 1 ] || [ "$LISTENPORT" -gt 65535 ]; then
 fi
 
 sed -i "s/listen\s*8080;/listen $LISTENPORT;/" /etc/nginx/conf.d/default.conf
-API_URL="${MANAGER_URL:-/}"
 
-if [ ! -z "$OSC_HOSTNAME" ]; then
-  API_URL="https://$OSC_HOSTNAME/"
-fi
-
-echo "VITE_BACKEND_URL=$API_URL"
-
-VITE_BACKEND_URL=$API_URL AUTH=$AUTH npm run build && \
-  cp -r /app/dist/* /usr/share/nginx/html/ && \
-  nginx -g 'daemon off;'
+# The static bundle is now produced at image build time (multi-stage build)
+# and already copied into /usr/share/nginx/html, so no Node.js build step runs
+# here. VITE_BACKEND_URL / AUTH are baked in at build time via build args.
+exec nginx -g 'daemon off;'
