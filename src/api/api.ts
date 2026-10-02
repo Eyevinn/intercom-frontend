@@ -1,9 +1,8 @@
 import { handleFetchRequest } from "./handle-fetch-request.ts";
+import { getBackendUrl } from "../utils/runtime-config.ts";
 
 const API_VERSION = import.meta.env.VITE_BACKEND_API_VERSION ?? "api/v1/";
-const API_URL = `${(
-  import.meta.env.VITE_BACKEND_URL ?? window.location.origin
-).replace(/\/+$/, "")}/${API_VERSION}`;
+const API_URL = `${getBackendUrl()}/${API_VERSION}`;
 const API_KEY = import.meta.env.VITE_BACKEND_API_KEY;
 
 export type TPresetCall = {
