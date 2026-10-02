@@ -5,7 +5,6 @@ import {
   SpeakerOff,
   SpeakerOn,
 } from "../../assets/icons/icon";
-import { isIOSMobile, isIpad } from "../../bowser";
 import { VolumeSlider } from "../volume-slider/volume-slider";
 import { ButtonIcon, UserControlBtn } from "./production-line-components";
 import { TJoinProductionOptions, TLine } from "./types";
@@ -46,11 +45,9 @@ export const UserControls = ({
 }) => {
   return (
     <>
-      {!isIOSMobile &&
-        !isIpad &&
-        !(line?.programOutputLine && joinProductionOptions.isProgramUser) && (
-          <VolumeSlider value={value} handleInputChange={handleInputChange} />
-        )}
+      {!(line?.programOutputLine && joinProductionOptions.isProgramUser) && (
+        <VolumeSlider value={value} handleInputChange={handleInputChange} />
+      )}
       <ButtonWrapper>
         {!(line?.programOutputLine && joinProductionOptions.isProgramUser) && (
           <ControlButton
