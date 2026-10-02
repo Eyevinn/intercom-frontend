@@ -12,6 +12,10 @@
   </head>
   <body>
     <div id="root"></div>
+    <!-- Runtime configuration (window.__ENV__), regenerated per deployment by
+         the container entrypoint. Loaded as a classic script before the app
+         module so it is available synchronously when the bundle evaluates. -->
+    <script src="/env.js"></script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
