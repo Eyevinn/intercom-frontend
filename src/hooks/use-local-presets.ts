@@ -13,7 +13,7 @@ const subscribe = (listener: () => void) => {
   };
 };
 
-const readStorage = (): string => localStorage.getItem(STORAGE_KEY) ?? "[]";
+const readStorage = (): string => sessionStorage.getItem(STORAGE_KEY) ?? "[]";
 
 const getSnapshot = () => readStorage();
 
@@ -31,7 +31,7 @@ const loadPresets = (): TPreset[] => {
 };
 
 const savePresets = (presets: TPreset[]) => {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(presets));
+  sessionStorage.setItem(STORAGE_KEY, JSON.stringify(presets));
   notifyListeners();
 };
 
