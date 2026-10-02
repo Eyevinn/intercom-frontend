@@ -155,7 +155,7 @@ describe("useFetchProductionList", () => {
   // ── 401 error handling ─────────────────────────────────────────────────────
 
   describe("401 error handling (regression: polling must not flood on 401)", () => {
-    it("calls API.reauth on a 401 error", async () => {
+    it("does NOT call API.reauth directly on a 401 (reauth is coordinated centrally by the auth circuit breaker)", async () => {
       mockListProductions.mockRejectedValue(make401Error());
 
       renderHook(
@@ -167,7 +167,7 @@ describe("useFetchProductionList", () => {
         await Promise.resolve();
       });
 
-      expect(mockReauth).toHaveBeenCalledTimes(1);
+      expect(mockReauth).not.toHaveBeenCalled();
     });
 
     it("does NOT dispatch API_NOT_AVAILABLE on a 401 error", async () => {
@@ -414,7 +414,7 @@ describe("useFetchProductionList", () => {
       expect(mockListProductions).toHaveBeenCalledTimes(11);
     });
 
-    it("reauth is called once per 401, not repeatedly within the same tick", async () => {
+    it("never triggers an independent reauth from the hook across repeated 401 ticks (coordination is the circuit breaker's job)", async () => {
       mockListProductions.mockRejectedValue(make401Error());
 
       const { result } = renderHook(
@@ -422,13 +422,13 @@ describe("useFetchProductionList", () => {
         { wrapper }
       );
 
-      // Initial load → 1 fetch → 1 reauth call
+      // Initial load → 1 fetch, no hook-level reauth
       await act(async () => {
         await Promise.resolve();
       });
-      expect(mockReauth).toHaveBeenCalledTimes(1);
+      expect(mockReauth).not.toHaveBeenCalled();
 
-      // 3 more interval ticks → 3 more reauth calls (one per tick, not cascading)
+      // 3 more interval ticks, still no hook-level reauth cascade
       await act(async () => {
         result.current.setIntervalLoad(true);
         await Promise.resolve();
@@ -442,7 +442,7 @@ describe("useFetchProductionList", () => {
         await Promise.resolve();
       });
 
-      expect(mockReauth).toHaveBeenCalledTimes(4);
+      expect(mockReauth).not.toHaveBeenCalled();
     });
   });
 });

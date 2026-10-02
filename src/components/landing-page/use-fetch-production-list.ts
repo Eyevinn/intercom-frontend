@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useGlobalState } from "../../global-state/context-provider";
 import { API, TListProductionsResponse } from "../../api/api.ts";
-import { maybeRedirectToAuth } from "../../api/redirect-on-auth-failure.ts";
+import { authCircuitBreaker } from "../../api/auth-circuit-breaker.ts";
 
 export type GetProductionListFilter = {
   limit?: string;
@@ -23,13 +23,21 @@ export const useFetchProductionList = (filter?: GetProductionListFilter) => {
   // TODO improve performance: this makes the call 3 times
   useEffect(() => {
     let aborted = false;
-    if (
+    const shouldFetch =
       reloadProductionList ||
       intervalLoad ||
       doInitialLoad ||
       // offset-param is never present on launch-page
-      (filter?.offset ? manageProdPaginationUpdate : false)
-    ) {
+      (filter?.offset ? manageProdPaginationUpdate : false);
+
+    if (shouldFetch && !authCircuitBreaker.isActive()) {
+      // A global auth failure is being coordinated by the circuit breaker
+      // (reauth in flight or failed). Skip this cycle rather than firing a
+      // request that would just 401 again; the next interval tick retries once
+      // the breaker is healthy.
+      setIntervalLoad(false);
+      setDoInitialLoad(false);
+    } else if (shouldFetch) {
       const searchParams = new URLSearchParams(filter).toString();
       API.listProductions({ searchParams })
         .then((result) => {
@@ -52,15 +60,11 @@ export const useFetchProductionList = (filter?: GetProductionListFilter) => {
           setDoInitialLoad(false);
 
           const { status } = e as Error & { status?: number };
-          if (status === 401) {
-            // Give reauth its chance first; only redirect to the OSC login URL
-            // (when the AUTH build-time var is set) once reauth itself fails.
-            API.reauth().catch((reauthError) => {
-              const reauthStatus = (reauthError as Error & { status?: number })
-                .status;
-              maybeRedirectToAuth(reauthStatus ?? 401);
-              // If no redirect is configured, the next interval poll will retry.
-            });
+          if (status === 401 || !authCircuitBreaker.isActive()) {
+            // 401s are handled centrally by the auth circuit breaker (tripped in
+            // handleFetchRequest), which runs a single coordinated reauth and
+            // pauses all polling — do not surface an error or trigger an
+            // independent reauth from here.
             return;
           }
 

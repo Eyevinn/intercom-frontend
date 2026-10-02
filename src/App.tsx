@@ -27,7 +27,10 @@ import { Header } from "./components/header.tsx";
 import { useLocalUserSettings } from "./hooks/use-local-user-settings.ts";
 import { ManageProductionsPage } from "./components/manage-productions-page/manage-productions-page.tsx";
 import { CreateProductionPage } from "./components/create-production/create-production-page.tsx";
-import { useSetupTokenRefresh } from "./hooks/use-reauth.tsx";
+import {
+  useAuthCircuitBreaker,
+  useSetupTokenRefresh,
+} from "./hooks/use-reauth.tsx";
 import { TUserSettings } from "./components/user-settings/types";
 import { RequireNonGuest } from "./components/auth/require-non-guest.tsx";
 import { PresetProvider } from "./contexts/preset-context.tsx";
@@ -81,6 +84,10 @@ const AppContent = ({
   setApiError,
 }: AppContentProps) => {
   const { setupTokenRefresh } = useSetupTokenRefresh();
+
+  // Wire the global auth circuit breaker (pauses all polling and runs a single
+  // coordinated reauth when any API call returns 401).
+  useAuthCircuitBreaker();
 
   useEffect(() => {
     const cleanup = setupTokenRefresh();
