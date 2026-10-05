@@ -163,12 +163,13 @@ export const SavePresetModal = ({
     },
   });
   const [saveError, setSaveError] = useState<string | null>(null);
-  // Scheme derived from the page protocol (wss:// on https) — see call-url.ts.
-  const COMPANION_PROTOCOL = `${companionWsScheme()}://`;
   const initialHostPort = companionUrl
     ? companionUrl.replace(/^wss?:\/\//, "").replace(/\/$/, "")
     : "";
   const [companionHostPort, setCompanionHostPort] = useState(initialHostPort);
+  // Scheme derived from the page protocol and host (wss:// on https, except
+  // ws:// for loopback hosts) — see call-url.ts.
+  const COMPANION_PROTOCOL = `${companionWsScheme(companionHostPort)}://`;
   const [includeCompanion, setIncludeCompanion] = useState(true);
   const showCompanion = !!companionUrl;
 
