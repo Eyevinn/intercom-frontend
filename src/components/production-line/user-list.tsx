@@ -1,5 +1,10 @@
 import styled from "@emotion/styled";
-import { MicMuted, UserIcon, WhipIcon } from "../../assets/icons/icon.tsx";
+import {
+  LogoutIcon,
+  MicMuted,
+  UserIcon,
+  WhipIcon,
+} from "../../assets/icons/icon.tsx";
 import { TParticipant } from "./types.ts";
 
 const Container = styled.div`
@@ -105,6 +110,12 @@ const OnlineIndicator = styled.div`
   }
 `;
 
+const ParticipantControls = styled.div`
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+`;
+
 const MuteParticipantButton = styled.button`
   width: 3rem;
   height: 3rem;
@@ -125,6 +136,27 @@ const MuteParticipantButton = styled.button`
   }
 `;
 
+const KickParticipantButton = styled.button`
+  width: 3rem;
+  height: 3rem;
+  padding: 0.3rem;
+  margin: 0 0 0 0.5rem;
+  background: #302b2b;
+  border: 0.1rem solid #707070;
+  border-radius: 0.4rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  svg {
+    fill: #f96c6c;
+    display: block;
+    width: 2rem;
+  }
+`;
+
 type TUserListOptions = {
   participants: TParticipant[];
   sessionId: string | null;
@@ -134,6 +166,9 @@ type TUserListOptions = {
   setConfirmModalOpen: (value: boolean) => void;
   setUserId: (value: string) => void;
   setUserName: (value: string) => void;
+  setKickModalOpen: (value: boolean) => void;
+  setKickSessionId: (value: string) => void;
+  setKickUserName: (value: string) => void;
 };
 
 export const UserList = ({
@@ -145,6 +180,9 @@ export const UserList = ({
   setConfirmModalOpen,
   setUserId,
   setUserName,
+  setKickModalOpen,
+  setKickSessionId,
+  setKickUserName,
 }: TUserListOptions) => {
   if (!participants) return null;
 
@@ -183,15 +221,30 @@ export const UserList = ({
                 </UserName>
               </User>
               {!isYou && p.isActive && !programOutputLine && !p.isWhip && (
-                <MuteParticipantButton
-                  onClick={() => {
-                    setUserId(p.endpointId);
-                    setUserName(p.name);
-                    setConfirmModalOpen(true);
-                  }}
-                >
-                  <MicMuted />
-                </MuteParticipantButton>
+                <ParticipantControls>
+                  <MuteParticipantButton
+                    aria-label={`Mute ${p.name}`}
+                    title={`Mute ${p.name}`}
+                    onClick={() => {
+                      setUserId(p.endpointId);
+                      setUserName(p.name);
+                      setConfirmModalOpen(true);
+                    }}
+                  >
+                    <MicMuted />
+                  </MuteParticipantButton>
+                  <KickParticipantButton
+                    aria-label={`Kick ${p.name}`}
+                    title={`Kick ${p.name}`}
+                    onClick={() => {
+                      setKickSessionId(p.sessionId);
+                      setKickUserName(p.name);
+                      setKickModalOpen(true);
+                    }}
+                  >
+                    <LogoutIcon />
+                  </KickParticipantButton>
+                </ParticipantControls>
               )}
             </UserWrapper>
           );

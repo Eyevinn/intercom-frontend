@@ -7,6 +7,7 @@ import { CallState } from "../../global-state/types.ts";
 import { useCallActionHandlers } from "../../hooks/use-call-action-handlers.ts";
 import { CallData } from "../../hooks/use-call-list.ts";
 import { usePushToTalk } from "../../hooks/use-push-to-talk.ts";
+import { API } from "../../api/api.ts";
 import logger from "../../utils/logger.ts";
 import { DisplayWarning } from "../display-box.tsx";
 import { FlexContainer } from "../generic-components.ts";
@@ -91,6 +92,10 @@ export const ProductionLine = ({
   const [muteError, setMuteError] = useState(false);
   const [userId, setUserId] = useState("");
   const [userName, setUserName] = useState("");
+  const [kickModalOpen, setKickModalOpen] = useState(false);
+  const [kickError, setKickError] = useState(false);
+  const [kickSessionId, setKickSessionId] = useState("");
+  const [kickUserName, setKickUserName] = useState("");
   const [open, setOpen] = useState<boolean>(!isMobile);
   const [hotkeysModalOpen, setHotkeysModalOpen] = useState(false);
   const {
@@ -283,6 +288,12 @@ export const ProductionLine = ({
   }, [confirmModalOpen]);
 
   useEffect(() => {
+    if (!kickModalOpen) {
+      setKickError(false);
+    }
+  }, [kickModalOpen]);
+
+  useEffect(() => {
     if (isRemotelyMuted && !isProgramOutputLine) {
       muteInput(true);
     }
@@ -440,6 +451,31 @@ export const ProductionLine = ({
     }
   };
 
+  const kickParticipant = async () => {
+    const productionId =
+      joinProductionOptions?.productionId || production?.productionId;
+    const lineId = joinProductionOptions?.lineId || line?.id;
+
+    if (!productionId || !lineId || !kickSessionId) {
+      setKickError(true);
+      logger.red("Missing production, line or session id for kick.");
+      return;
+    }
+
+    try {
+      await API.forceDisconnectParticipant({
+        productionId,
+        lineId,
+        sessionId: kickSessionId,
+      });
+      setKickError(false);
+      setKickModalOpen(false);
+    } catch (e) {
+      setKickError(true);
+      logger.red(`Failed to kick participant: ${e}`);
+    }
+  };
+
   // TODO detect if browser back button is pressed and run exit();
 
   return (
@@ -571,6 +607,9 @@ export const ProductionLine = ({
                             setConfirmModalOpen={setConfirmModalOpen}
                             setUserId={setUserId}
                             setUserName={setUserName}
+                            setKickModalOpen={setKickModalOpen}
+                            setKickSessionId={setKickSessionId}
+                            setKickUserName={setKickUserName}
                           />
                         )}
                       </CollapsableSection>
@@ -607,6 +646,23 @@ export const ProductionLine = ({
                         }
                         onConfirm={muteParticipant}
                         onCancel={() => setConfirmModalOpen(false)}
+                      />
+                    )}
+                    {kickModalOpen && (
+                      <ConfirmationModal
+                        title="Confirm"
+                        description={
+                          kickError
+                            ? "Something went wrong, Please try again"
+                            : `Are you sure you want to kick ${kickUserName}?`
+                        }
+                        confirmationText={
+                          kickError
+                            ? ""
+                            : `This will disconnect ${kickUserName} from the line.`
+                        }
+                        onConfirm={kickParticipant}
+                        onCancel={() => setKickModalOpen(false)}
                       />
                     )}
                   </ListWrapper>
