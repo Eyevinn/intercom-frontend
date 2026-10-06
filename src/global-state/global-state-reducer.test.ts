@@ -28,6 +28,7 @@ function createMockCallState(overrides: Partial<CallState> = {}): CallState {
     hotkeys: mockHotkeys,
     dataChannel: null,
     isRemotelyMuted: false,
+    isRemotelyDisconnected: false,
     ...overrides,
   };
 }

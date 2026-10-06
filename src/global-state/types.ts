@@ -29,6 +29,7 @@ export interface CallState {
   hotkeys: Hotkeys;
   dataChannel: RTCDataChannel | null;
   isRemotelyMuted: boolean;
+  isRemotelyDisconnected: boolean;
 }
 
 export type TGlobalState = {

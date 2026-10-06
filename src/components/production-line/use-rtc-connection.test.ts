@@ -8,6 +8,10 @@ import { TUseAudioInputValues } from "./use-audio-input.ts";
 
 // ── Global RTCPeerConnection stub (not available in happy-dom) ──────
 
+// Captures the data-channel "message" listener registered by
+// establishConnection so tests can drive incoming messages through it.
+let capturedMessageHandler: ((event: MessageEvent) => void) | null = null;
+
 class MockRTCPeerConnection extends EventTarget {
   connectionState: RTCPeerConnectionState = "new";
 
@@ -21,10 +25,17 @@ class MockRTCPeerConnection extends EventTarget {
 
   close = vi.fn();
 
-  createDataChannel = vi.fn().mockReturnValue({
-    addEventListener: vi.fn(),
+  createDataChannel = vi.fn().mockImplementation(() => ({
+    readyState: "open",
+    addEventListener: vi.fn(
+      (event: string, handler: (event: MessageEvent) => void) => {
+        if (event === "message") {
+          capturedMessageHandler = handler;
+        }
+      }
+    ),
     removeEventListener: vi.fn(),
-  });
+  }));
 
   setRemoteDescription = vi.fn().mockResolvedValue(undefined);
 
@@ -98,9 +109,24 @@ const defaultOptions = {
 
 // ── Tests ──────────────────────────────────────────────────────────
 
+const connectedOptions = {
+  ...defaultOptions,
+  sdpOffer: "v=0\r\n",
+  sessionId: "session-1",
+  inputAudioStream: "no-device" as TUseAudioInputValues,
+  joinProductionOptions: {
+    productionId: "1",
+    lineId: "line-1",
+    username: "user",
+    lineUsedForProgramOutput: false,
+    isProgramUser: false,
+  },
+};
+
 describe("useRtcConnection", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    capturedMessageHandler = null;
   });
 
   it("returns null connectionState initially", () => {
@@ -178,6 +204,93 @@ describe("useRtcConnection", () => {
         type: "UPDATE_CALL",
         payload: expect.objectContaining({
           updates: expect.objectContaining({ dataChannel: expect.anything() }),
+        }),
+      })
+    );
+  });
+});
+
+describe("useRtcConnection data channel message handling", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    capturedMessageHandler = null;
+  });
+
+  it("registers a data channel message handler when connected", () => {
+    renderHook(() => useRtcConnection(connectedOptions), { wrapper });
+
+    expect(capturedMessageHandler).toBeTypeOf("function");
+  });
+
+  it("dispatches isRemotelyMuted on a mute EndpointMessage", () => {
+    renderHook(() => useRtcConnection(connectedOptions), { wrapper });
+
+    capturedMessageHandler?.({
+      data: JSON.stringify({
+        type: "EndpointMessage",
+        payload: { muteParticipant: "mute" },
+        to: "ep-1",
+        from: "ep-2",
+      }),
+    } as MessageEvent);
+
+    expect(mockDispatch).toHaveBeenCalledWith({
+      type: "UPDATE_CALL",
+      payload: {
+        id: "test-call-id",
+        updates: { isRemotelyMuted: true },
+      },
+    });
+  });
+
+  it("dispatches isRemotelyDisconnected on a forceDisconnect EndpointMessage", () => {
+    renderHook(() => useRtcConnection(connectedOptions), { wrapper });
+
+    capturedMessageHandler?.({
+      data: JSON.stringify({
+        type: "EndpointMessage",
+        payload: { forceDisconnect: "disconnect" },
+        to: "ep-1",
+        from: "ep-2",
+      }),
+    } as MessageEvent);
+
+    expect(mockDispatch).toHaveBeenCalledWith({
+      type: "UPDATE_CALL",
+      payload: {
+        id: "test-call-id",
+        updates: { isRemotelyDisconnected: true },
+      },
+    });
+    expect(mockDispatch).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        payload: expect.objectContaining({
+          updates: expect.objectContaining({
+            isRemotelyMuted: expect.anything(),
+          }),
+        }),
+      })
+    );
+  });
+
+  it("does not force-disconnect on a self-addressed forceDisconnect echo", () => {
+    renderHook(() => useRtcConnection(connectedOptions), { wrapper });
+
+    capturedMessageHandler?.({
+      data: JSON.stringify({
+        type: "EndpointMessage",
+        payload: { forceDisconnect: "disconnect" },
+        to: "ep-1",
+        from: "ep-1",
+      }),
+    } as MessageEvent);
+
+    expect(mockDispatch).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        payload: expect.objectContaining({
+          updates: expect.objectContaining({
+            isRemotelyDisconnected: expect.anything(),
+          }),
         }),
       })
     );
