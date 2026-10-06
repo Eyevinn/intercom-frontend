@@ -87,6 +87,7 @@ export const useInitiateProductionCall = ({
               sessionId: null,
               dataChannel: null,
               isRemotelyMuted: false,
+              isRemotelyDisconnected: false,
               hotkeys: {
                 muteHotkey: "m",
                 speakerHotkey: "n",

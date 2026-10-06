@@ -9,6 +9,7 @@ import { createAudioElement } from "./audio-element-factory.ts";
 import {
   parseDataChannelMessage,
   isRemoteMute,
+  isForceDisconnect,
 } from "./data-channel-parser.ts";
 import { waitForIceGathering } from "./ice-gathering.ts";
 import { startRtcStatInterval } from "./rtc-stat-interval.ts";
@@ -136,13 +137,26 @@ const establishConnection = ({
         },
       });
     } else if (message.type === "EndpointMessage") {
-      dispatch({
-        type: "UPDATE_CALL",
-        payload: {
-          id: callId,
-          updates: { isRemotelyMuted: isRemoteMute(message) },
-        },
-      });
+      if (isForceDisconnect(message)) {
+        // A client with admin rights kicked this participant. Flag the call so
+        // production-line can tear down the RTCPeerConnection, leave the line
+        // and surface a "You were removed from the call" notification.
+        dispatch({
+          type: "UPDATE_CALL",
+          payload: {
+            id: callId,
+            updates: { isRemotelyDisconnected: true },
+          },
+        });
+      } else {
+        dispatch({
+          type: "UPDATE_CALL",
+          payload: {
+            id: callId,
+            updates: { isRemotelyMuted: isRemoteMute(message) },
+          },
+        });
+      }
     } else {
       logger.red("Unexpected data channel message structure");
     }

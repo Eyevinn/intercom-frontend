@@ -104,6 +104,7 @@ export const ProductionLine = ({
     hotkeys: savedHotkeys,
     dataChannel,
     isRemotelyMuted,
+    isRemotelyDisconnected,
   } = callState;
   const { isActiveParticipant } = useActiveParticipant(
     audioLevelAboveThreshold
@@ -302,6 +303,19 @@ export const ProductionLine = ({
       navigate("/");
     }
   }, [dispatch, id, playExitSound, isSingleCall, navigate, deregisterCall]);
+
+  useEffect(() => {
+    if (!isRemotelyDisconnected) return;
+
+    // A client force-disconnected (kicked) this participant. Tear down the
+    // RTCPeerConnection and leave the line via the normal exit flow, then
+    // surface a dismissible notification explaining what happened.
+    dispatch({
+      type: "WARNING",
+      payload: { message: "You were removed from the call" },
+    });
+    exit();
+  }, [isRemotelyDisconnected, dispatch, exit]);
 
   useLineHotkeys({
     muteInput,
