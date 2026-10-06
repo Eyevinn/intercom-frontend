@@ -61,15 +61,37 @@ export function buildCallsUrl(calls: CallRef[], companionUrl?: string): string {
 }
 
 /**
- * Choose the WebSocket scheme from the PAGE protocol, never from an
- * attacker-supplied prefix. On an https page we must use `wss://` — an
- * `ws://` connection would be blocked as mixed content and, where allowed,
- * would carry companion control traffic in the clear. On http we keep `ws://`.
+ * True for loopback hosts (`localhost`, `*.localhost`, `127.0.0.0/8`, `[::1]`).
+ * Browsers treat these as potentially trustworthy, so a `ws://` connection to
+ * them is allowed from an https page and the traffic never leaves the machine.
  */
-export function companionWsScheme(): "ws" | "wss" {
-  return typeof window !== "undefined" && window.location?.protocol === "https:"
-    ? "wss"
-    : "ws";
+export function isLoopbackCompanionHost(hostPort: string): boolean {
+  const host = hostPort.startsWith("[")
+    ? hostPort.slice(0, hostPort.indexOf("]") + 1)
+    : hostPort.replace(/:\d*$/, "");
+  const lower = host.toLowerCase();
+  return (
+    lower === "localhost" ||
+    lower.endsWith(".localhost") ||
+    /^127(?:\.\d{1,3}){3}$/.test(lower) ||
+    lower === "[::1]"
+  );
+}
+
+/**
+ * Choose the WebSocket scheme from the PAGE protocol and the validated host,
+ * never from an attacker-supplied prefix. On an https page we must use
+ * `wss://` — an `ws://` connection would be blocked as mixed content and,
+ * where allowed, would carry companion control traffic in the clear. The
+ * exception is a loopback host: Companion running on the same machine
+ * typically serves plain `ws://`, browsers permit it, and nothing crosses the
+ * network. On http we keep `ws://`.
+ */
+export function companionWsScheme(hostPort?: string): "ws" | "wss" {
+  const isHttps =
+    typeof window !== "undefined" && window.location?.protocol === "https:";
+  if (!isHttps) return "ws";
+  return hostPort && isLoopbackCompanionHost(hostPort) ? "ws" : "wss";
 }
 
 /**
@@ -84,7 +106,7 @@ export function buildCompanionWsUrl(param: string | null): string | undefined {
   // Strip accidental scheme if present, then validate host[:port] only.
   const hostPort = param.replace(/^wss?:\/\//i, "");
   if (!isValidCompanionHost(hostPort)) return undefined;
-  return `${companionWsScheme()}://${hostPort}`;
+  return `${companionWsScheme(hostPort)}://${hostPort}`;
 }
 
 export function parseCompanionParam(param: string | null): string | undefined {

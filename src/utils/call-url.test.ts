@@ -6,6 +6,7 @@ import {
   parseCompanionParam,
   buildCompanionWsUrl,
   companionWsScheme,
+  isLoopbackCompanionHost,
   isValidCompanionHost,
 } from "./call-url";
 
@@ -259,5 +260,55 @@ describe("protocol-aware companion scheme (#662)", () => {
     expect(buildCompanionWsUrl("host:99999")).toBeUndefined();
     expect(buildCompanionWsUrl("host:0")).toBeUndefined();
     expect(buildCompanionWsUrl(null)).toBeUndefined();
+  });
+});
+
+describe("loopback companion hosts on https pages", () => {
+  afterEach(() => {
+    Object.defineProperty(window, "location", {
+      configurable: true,
+      value: originalLocation,
+    });
+  });
+
+  it("detects loopback hosts", () => {
+    expect(isLoopbackCompanionHost("localhost")).toBe(true);
+    expect(isLoopbackCompanionHost("localhost:16622")).toBe(true);
+    expect(isLoopbackCompanionHost("LocalHost:16622")).toBe(true);
+    expect(isLoopbackCompanionHost("companion.localhost:8080")).toBe(true);
+    expect(isLoopbackCompanionHost("127.0.0.1:16622")).toBe(true);
+    expect(isLoopbackCompanionHost("127.1.2.3")).toBe(true);
+    expect(isLoopbackCompanionHost("[::1]:16622")).toBe(true);
+    expect(isLoopbackCompanionHost("[::1]")).toBe(true);
+  });
+
+  it("does not treat non-loopback hosts as loopback", () => {
+    expect(isLoopbackCompanionHost("192.168.1.50:16622")).toBe(false);
+    expect(isLoopbackCompanionHost("localhost.evil.com:8080")).toBe(false);
+    expect(isLoopbackCompanionHost("evillocalhost:8080")).toBe(false);
+    expect(isLoopbackCompanionHost("127.0.0.1.evil.com")).toBe(false);
+    expect(isLoopbackCompanionHost("[::2]:8080")).toBe(false);
+    expect(isLoopbackCompanionHost("example.com")).toBe(false);
+  });
+
+  it("uses ws:// for loopback hosts on an https page", () => {
+    setPageProtocol("https:");
+    expect(companionWsScheme("localhost:16622")).toBe("ws");
+    expect(buildCompanionWsUrl("localhost:16622")).toBe("ws://localhost:16622");
+    expect(buildCompanionWsUrl("wss://127.0.0.1:16622")).toBe(
+      "ws://127.0.0.1:16622"
+    );
+    expect(parseCompanionParam("[::1]:16622")).toBe("ws://[::1]:16622");
+  });
+
+  it("keeps wss:// for non-loopback hosts on an https page", () => {
+    setPageProtocol("https:");
+    expect(companionWsScheme()).toBe("wss");
+    expect(buildCompanionWsUrl("ws://192.168.1.50:16622")).toBe(
+      "wss://192.168.1.50:16622"
+    );
+    expect(buildCompanionWsUrl("localhost.evil.com:8080")).toBe(
+      "wss://localhost.evil.com:8080"
+    );
   });
 });

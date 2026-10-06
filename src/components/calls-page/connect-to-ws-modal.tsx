@@ -58,8 +58,6 @@ export const ConnectToWsModal = ({
   onClose,
   initialUrl,
 }: ConnectToWsModalProps) => {
-  // Scheme derived from the page protocol (wss:// on https) — see call-url.ts.
-  const PROTOCOL = `${companionWsScheme()}://`;
   const toHostPort = (url: string) => {
     if (url.startsWith("ws://")) return url.slice(5);
     if (url.startsWith("wss://")) return url.slice(6);
@@ -76,6 +74,10 @@ export const ConnectToWsModal = ({
   }, [isOpen, initialUrl]);
 
   if (!isOpen) return null;
+
+  // Scheme derived from the page protocol and host (wss:// on https, except
+  // ws:// for loopback hosts) — see call-url.ts.
+  const PROTOCOL = `${companionWsScheme(hostPort)}://`;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const v = e.target.value.trim();

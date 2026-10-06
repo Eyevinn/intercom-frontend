@@ -1,3 +1,5 @@
+import { getAuthUrl } from "../utils/runtime-config.ts";
+
 /**
  * When the app is built with the `AUTH` env var set to an OSC login URL and the
  * manager keeps returning HTTP 401 after the in-app reauth flow has already had
@@ -16,8 +18,8 @@
 export const maybeRedirectToAuth = (status: number): boolean => {
   if (status !== 401) return false;
 
-  const authUrl = import.meta.env.AUTH;
-  if (typeof authUrl !== "string" || authUrl.length === 0) return false;
+  const authUrl = getAuthUrl();
+  if (authUrl.length === 0) return false;
 
   // Loop guard: don't redirect if we are already on the auth destination.
   // Comparing origins (rather than the full href, which carries the app's own

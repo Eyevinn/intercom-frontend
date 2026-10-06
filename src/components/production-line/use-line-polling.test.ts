@@ -6,6 +6,7 @@ import { GlobalStateContext } from "../../global-state/context-provider.tsx";
 import { TGlobalState } from "../../global-state/types.ts";
 import { TJoinProductionOptions, TLine, TParticipant } from "./types.ts";
 import { API } from "../../api/api.ts";
+import { authCircuitBreaker } from "../../api/auth-circuit-breaker.ts";
 
 // ── Mock API ────────────────────────────────────────────────────────────────
 
@@ -92,9 +93,11 @@ describe("useLinePolling", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.useFakeTimers();
+    authCircuitBreaker.resetForTests();
   });
 
   afterEach(() => {
+    authCircuitBreaker.resetForTests();
     vi.useRealTimers();
   });
 
@@ -299,6 +302,89 @@ describe("useLinePolling", () => {
       expect(result.current?.participants.map((p) => p.name)).toEqual([
         "fresh",
       ]);
+    });
+  });
+
+  describe("auth circuit breaker gating", () => {
+    it("pauses the initial seed while the breaker is reauthing and runs it on resume", async () => {
+      let resolveReauth!: () => void;
+      authCircuitBreaker.configure({
+        reauthRunner: () =>
+          new Promise<void>((resolve) => {
+            resolveReauth = resolve;
+          }),
+        onError: vi.fn(),
+      });
+      mockFetchProductionLine.mockResolvedValue(line);
+      mockFetchLineParticipants.mockReturnValue(new Promise(() => {}));
+
+      // A 401 elsewhere trips the breaker into reauthing before we mount.
+      await act(async () => {
+        authCircuitBreaker.report401();
+      });
+      expect(authCircuitBreaker.isPaused()).toBe(true);
+
+      renderHook(
+        () => useLinePolling({ callId: "call-1", joinProductionOptions }),
+        { wrapper }
+      );
+      await flush();
+
+      // Gated — the seed must not fire while a coordinated reauth is in flight.
+      expect(mockFetchProductionLine).not.toHaveBeenCalled();
+
+      // Reauth succeeds → breaker closes → the gated seed runs.
+      await act(async () => {
+        resolveReauth();
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+      await flush();
+
+      expect(authCircuitBreaker.isActive()).toBe(true);
+      expect(mockFetchProductionLine).toHaveBeenCalledTimes(1);
+    });
+
+    it("resumes the seed after the breaker trips open and auto-recovers (not terminal)", async () => {
+      let attempts = 0;
+      authCircuitBreaker.configure({
+        reauthRunner: () => {
+          attempts += 1;
+          return attempts === 1
+            ? Promise.reject(new Error("transient"))
+            : Promise.resolve();
+        },
+        onError: vi.fn(),
+      });
+      mockFetchProductionLine.mockResolvedValue(line);
+      mockFetchLineParticipants.mockReturnValue(new Promise(() => {}));
+
+      await act(async () => {
+        authCircuitBreaker.report401();
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+      expect(authCircuitBreaker.isTripped()).toBe(true);
+
+      renderHook(
+        () => useLinePolling({ callId: "call-1", joinProductionOptions }),
+        { wrapper }
+      );
+      await flush();
+      expect(mockFetchProductionLine).not.toHaveBeenCalled();
+
+      // Half-open retry recovers the breaker → the gated seed resumes.
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(40000);
+      });
+      await flush();
+
+      // The gated seed resumed. The exact count is deliberately not pinned:
+      // the line-metadata refresh interval also calls fetchProductionLine once
+      // a second, and this test advances the clock 40s to reach the half-open
+      // retry. What matters is 0 calls while gated -> at least one after.
+      expect(authCircuitBreaker.isActive()).toBe(true);
+      expect(mockFetchProductionLine).toHaveBeenCalled();
     });
   });
 
