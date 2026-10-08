@@ -14,6 +14,11 @@ The solution is built on top of WebRTC technology and provides a user-friendly i
 
 - [Open Intercom Server](https://github.com/Eyevinn/intercom-manager/) running and reachable
 
+## Documentation
+
+- [Audio Guide: External Audio Sources and Equipment](docs/audio-guide.md) — how to
+  configure microphones, headsets/speakers, WHIP/WHEP endpoints, and Audio Feed lines.
+
 ## Hosted Solution
 
 Available as an open web service in [Eyevinn Open Source Cloud](https://www.osaas.io). Read this [documentation to quickly get started](https://docs.osaas.io/osaas.wiki/Service%3A-Intercom.html) with the hosted solution.
