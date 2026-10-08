@@ -175,6 +175,3 @@ the program source; pick **Listener** to monitor it.
 - **Newly connected equipment not showing** — use **Reload devices**; on desktop
   Firefox reset the microphone permission and reload the page.
 - **WHIP/WHEP copy buttons disabled** — enter a username first.
-</content>
-
-</invoke>

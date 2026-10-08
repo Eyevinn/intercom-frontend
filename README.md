@@ -16,8 +16,7 @@ The solution is built on top of WebRTC technology and provides a user-friendly i
 
 ## Documentation
 
-- [Audio Guide: External Audio Sources and Equipment](docs/audio-guide.md) — how to
-  configure microphones, headsets/speakers, WHIP/WHEP endpoints, and Audio Feed lines.
+- [Audio Guide: External Audio Sources and Equipment](docs/audio-guide.md) — how to configure microphones, headsets/speakers, WHIP/WHEP endpoints, and Audio Feed lines.
 
 ## Hosted Solution
 
