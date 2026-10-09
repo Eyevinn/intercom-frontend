@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   parseDataChannelMessage,
   isRemoteMute,
+  isForceDisconnect,
   type EndpointMessage,
 } from "./data-channel-parser.ts";
 
@@ -51,6 +52,24 @@ describe("parseDataChannelMessage", () => {
     expect(result.type).toBe("EndpointMessage");
     if (result.type === "EndpointMessage") {
       expect(result.payload.muteParticipant).toBe("unmute");
+    }
+  });
+
+  it("parses an EndpointMessage with forceDisconnect payload", () => {
+    const data = JSON.stringify({
+      type: "EndpointMessage",
+      payload: { forceDisconnect: "disconnect" },
+      to: "ep-1",
+      from: "ep-2",
+    });
+
+    const result = parseDataChannelMessage(data);
+
+    expect(result.type).toBe("EndpointMessage");
+    if (result.type === "EndpointMessage") {
+      expect(result.payload.forceDisconnect).toBe("disconnect");
+      expect(result.to).toBe("ep-1");
+      expect(result.from).toBe("ep-2");
     }
   });
 
@@ -127,5 +146,40 @@ describe("isRemoteMute", () => {
     };
 
     expect(isRemoteMute(msg)).toBe(false);
+  });
+});
+
+describe("isForceDisconnect", () => {
+  it("returns true when forceDisconnect is disconnect and to !== from", () => {
+    const msg: EndpointMessage = {
+      type: "EndpointMessage",
+      payload: { forceDisconnect: "disconnect" },
+      to: "ep-1",
+      from: "ep-2",
+    };
+
+    expect(isForceDisconnect(msg)).toBe(true);
+  });
+
+  it("returns false for a mute message", () => {
+    const msg: EndpointMessage = {
+      type: "EndpointMessage",
+      payload: { muteParticipant: "mute" },
+      to: "ep-1",
+      from: "ep-2",
+    };
+
+    expect(isForceDisconnect(msg)).toBe(false);
+  });
+
+  it("returns false when to === from (self-addressed echo)", () => {
+    const msg: EndpointMessage = {
+      type: "EndpointMessage",
+      payload: { forceDisconnect: "disconnect" },
+      to: "ep-1",
+      from: "ep-1",
+    };
+
+    expect(isForceDisconnect(msg)).toBe(false);
   });
 });

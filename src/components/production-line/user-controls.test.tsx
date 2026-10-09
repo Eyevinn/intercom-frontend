@@ -1,16 +1,19 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { UserControls } from "./user-controls";
 import { TJoinProductionOptions, TLine } from "./types";
 
-// Simulate an iOS mobile / iPad device. The volume slider must still render in
-// this case (regression test for #621 — sliders were previously hidden on
-// mobile/touch devices).
-vi.mock("../../bowser", () => ({
-  isIOSMobile: true,
-  isIpad: true,
-  isMobile: true,
+// Mutable mock of the bowser device-detection helpers so individual tests can
+// simulate different platforms. The volume slider must be hidden on iPhone and
+// iPad (regression test for #727 — the slider has no effect on those devices,
+// where volume is controlled by the hardware).
+const mockBowser = vi.hoisted(() => ({
+  isIOSMobile: false,
+  isIpad: false,
+  isMobile: false,
 }));
+
+vi.mock("../../bowser", () => mockBowser);
 
 const baseJoinOptions: TJoinProductionOptions = {
   productionId: "p1",
@@ -42,24 +45,33 @@ const renderControls = (overrides?: {
   );
 
 describe("UserControls volume slider", () => {
-  it("renders the volume slider on mobile/touch devices for a regular line", () => {
+  beforeEach(() => {
+    mockBowser.isIOSMobile = false;
+    mockBowser.isIpad = false;
+    mockBowser.isMobile = false;
+  });
+
+  it("renders the volume slider on a desktop device for a regular line", () => {
     renderControls();
 
     expect(screen.getByRole("slider")).toBeInTheDocument();
   });
 
-  it("renders the volume slider on mobile/touch devices for PGM (non-program user)", () => {
-    renderControls({
-      line: {
-        name: "PGM",
-        id: "pgm1",
-        participants: [],
-        programOutputLine: true,
-      },
-      joinProductionOptions: { isProgramUser: false },
-    });
+  it("hides the volume slider on iPhone (iOS mobile)", () => {
+    mockBowser.isIOSMobile = true;
+    mockBowser.isMobile = true;
 
-    expect(screen.getByRole("slider")).toBeInTheDocument();
+    renderControls();
+
+    expect(screen.queryByRole("slider")).toBeNull();
+  });
+
+  it("hides the volume slider on iPad", () => {
+    mockBowser.isIpad = true;
+
+    renderControls();
+
+    expect(screen.queryByRole("slider")).toBeNull();
   });
 
   it("still hides the volume slider for a program user on the program output line", () => {

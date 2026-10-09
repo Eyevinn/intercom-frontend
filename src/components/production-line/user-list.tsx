@@ -120,6 +120,9 @@ type TUserListOptions = {
   setUserName: (value: string) => void;
   onPin?: (sessionId: string) => void;
   onSetWhep?: (sessionId: string) => void;
+  setKickModalOpen: (value: boolean) => void;
+  setKickSessionId: (value: string) => void;
+  setKickUserName: (value: string) => void;
 };
 
 export const UserList = ({
@@ -136,6 +139,9 @@ export const UserList = ({
   setUserName,
   onPin,
   onSetWhep,
+  setKickModalOpen,
+  setKickSessionId,
+  setKickUserName,
 }: TUserListOptions) => {
   if (!participants) return null;
 
@@ -192,6 +198,11 @@ export const UserList = ({
                   setUserId(endpointId);
                   setUserName(name);
                   setConfirmModalOpen(true);
+                }}
+                onRequestKick={(kickSessionId, name) => {
+                  setKickSessionId(kickSessionId);
+                  setKickUserName(name);
+                  setKickModalOpen(true);
                 }}
               />
             </UserWrapper>

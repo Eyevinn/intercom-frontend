@@ -109,6 +109,12 @@ type TUpdateLineNameOptions = {
   name: string;
 };
 
+type TForceDisconnectParticipantOptions = {
+  productionId: string;
+  lineId: string;
+  sessionId: string;
+};
+
 export const API = {
   createProduction: async ({ name, lines }: TCreateProductionOptions) =>
     handleFetchRequest<TBasicProductionResponse>(
@@ -300,6 +306,26 @@ export const API = {
       })
     ),
 
+  // Force-disconnect (kick) a participant from a line by their backend
+  // session id. The manager expires the participant's SMB endpoint, removes
+  // the session and notifies the line, so the kicked participant leaves for
+  // everyone. Admin-side action — calls the HTTP endpoint directly.
+  forceDisconnectParticipant: ({
+    productionId,
+    lineId,
+    sessionId,
+  }: TForceDisconnectParticipantOptions): Promise<string> =>
+    handleFetchRequest<string>(
+      fetch(
+        `${API_URL}production/${productionId}/line/${lineId}/participants/${sessionId}/disconnect`,
+        {
+          method: "POST",
+          headers: {
+            ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
+          },
+        }
+      )
+    ),
   offerAudioSession: ({
     productionId,
     lineId,

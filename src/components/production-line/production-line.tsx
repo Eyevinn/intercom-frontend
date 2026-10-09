@@ -7,6 +7,7 @@ import { CallState } from "../../global-state/types.ts";
 import { useCallActionHandlers } from "../../hooks/use-call-action-handlers.ts";
 import { CallData } from "../../hooks/use-call-list.ts";
 import { usePushToTalk } from "../../hooks/use-push-to-talk.ts";
+import { API } from "../../api/api.ts";
 import logger from "../../utils/logger.ts";
 import { DisplayWarning } from "../display-box.tsx";
 import { FlexContainer } from "../generic-components.ts";
@@ -120,6 +121,10 @@ export const ProductionLine = ({
   const [pendingWhepTargetSessionId, setPendingWhepTargetSessionId] = useState<
     string | null
   >(null);
+  const [kickModalOpen, setKickModalOpen] = useState(false);
+  const [kickError, setKickError] = useState(false);
+  const [kickSessionId, setKickSessionId] = useState("");
+  const [kickUserName, setKickUserName] = useState("");
   const [open, setOpen] = useState<boolean>(!isMobile);
   const [hotkeysModalOpen, setHotkeysModalOpen] = useState(false);
   const {
@@ -134,6 +139,7 @@ export const ProductionLine = ({
     hotkeys: savedHotkeys,
     dataChannel,
     isRemotelyMuted,
+    isRemotelyDisconnected,
   } = callState;
   const { isActiveParticipant } = useActiveParticipant(
     audioLevelAboveThreshold
@@ -431,6 +437,12 @@ export const ProductionLine = ({
   }, [confirmModalOpen]);
 
   useEffect(() => {
+    if (!kickModalOpen) {
+      setKickError(false);
+    }
+  }, [kickModalOpen]);
+
+  useEffect(() => {
     if (isRemotelyMuted && !isProgramOutputLine) {
       muteInput(true);
     }
@@ -473,6 +485,19 @@ export const ProductionLine = ({
     },
     []
   );
+
+  useEffect(() => {
+    if (!isRemotelyDisconnected) return;
+
+    // A client force-disconnected (kicked) this participant. Tear down the
+    // RTCPeerConnection and leave the line via the normal exit flow, then
+    // surface a dismissible notification explaining what happened.
+    dispatch({
+      type: "WARNING",
+      payload: { message: "You were removed from the call" },
+    });
+    exit();
+  }, [isRemotelyDisconnected, dispatch, exit]);
 
   useLineHotkeys({
     muteInput,
@@ -785,6 +810,31 @@ export const ProductionLine = ({
     setUserOptionsTarget(null);
   };
 
+  const kickParticipant = async () => {
+    const productionId =
+      joinProductionOptions?.productionId || production?.productionId;
+    const lineId = joinProductionOptions?.lineId || line?.id;
+
+    if (!productionId || !lineId || !kickSessionId) {
+      setKickError(true);
+      logger.red("Missing production, line or session id for kick.");
+      return;
+    }
+
+    try {
+      await API.forceDisconnectParticipant({
+        productionId,
+        lineId,
+        sessionId: kickSessionId,
+      });
+      setKickError(false);
+      setKickModalOpen(false);
+    } catch (e) {
+      setKickError(true);
+      logger.red(`Failed to kick participant: ${e}`);
+    }
+  };
+
   // TODO detect if browser back button is pressed and run exit();
 
   return (
@@ -984,6 +1034,9 @@ export const ProductionLine = ({
                             }
                             onPin={handlePin}
                             onSetWhep={handleSetWhep}
+                            setKickModalOpen={setKickModalOpen}
+                            setKickSessionId={setKickSessionId}
+                            setKickUserName={setKickUserName}
                           />
                         )}
                       </CollapsableSection>
@@ -1029,6 +1082,24 @@ export const ProductionLine = ({
                         confirmationText={whepConfirmTexts.confirmationText}
                         onConfirm={confirmSetWhep}
                         onCancel={() => setPendingWhepTargetSessionId(null)}
+                      />
+                    )}
+
+                    {kickModalOpen && (
+                      <ConfirmationModal
+                        title="Confirm"
+                        description={
+                          kickError
+                            ? "Something went wrong, Please try again"
+                            : `Are you sure you want to kick ${kickUserName}?`
+                        }
+                        confirmationText={
+                          kickError
+                            ? ""
+                            : `This will disconnect ${kickUserName} from the line.`
+                        }
+                        onConfirm={kickParticipant}
+                        onCancel={() => setKickModalOpen(false)}
                       />
                     )}
                   </ListWrapper>

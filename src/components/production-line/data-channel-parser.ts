@@ -10,7 +10,7 @@ export type DominantSpeakerMessage = {
 
 export type EndpointMessage = {
   type: "EndpointMessage";
-  payload: { muteParticipant: string };
+  payload: { muteParticipant?: string; forceDisconnect?: string };
   to: string;
   from: string;
 };
@@ -52,8 +52,10 @@ export const parseDataChannelMessage = (
     "from" in message &&
     message.payload &&
     typeof message.payload === "object" &&
-    "muteParticipant" in message.payload &&
-    typeof message.payload.muteParticipant === "string"
+    (("muteParticipant" in message.payload &&
+      typeof message.payload.muteParticipant === "string") ||
+      ("forceDisconnect" in message.payload &&
+        typeof message.payload.forceDisconnect === "string"))
   ) {
     return message as EndpointMessage;
   }
@@ -66,3 +68,11 @@ export const parseDataChannelMessage = (
  */
 export const isRemoteMute = (msg: EndpointMessage): boolean =>
   msg.payload.muteParticipant === "mute" && msg.to !== msg.from;
+
+/**
+ * Determine if the participant was force-disconnected (kicked) by another
+ * client based on an EndpointMessage. Mirrors `isRemoteMute`: the message must
+ * carry the `forceDisconnect` command and must not be a self-addressed echo.
+ */
+export const isForceDisconnect = (msg: EndpointMessage): boolean =>
+  msg.payload.forceDisconnect === "disconnect" && msg.to !== msg.from;

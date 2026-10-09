@@ -1,5 +1,6 @@
 import styled from "@emotion/styled";
 import {
+  LogoutIcon,
   MicMuted,
   PinIcon,
   UnpinIcon,
@@ -25,6 +26,27 @@ const MuteParticipantButton = styled.button`
   svg {
     fill: #f96c6c;
     display: block;
+  }
+`;
+
+const KickParticipantButton = styled.button`
+  width: 3rem;
+  height: 3rem;
+  padding: 0.3rem;
+  margin: 0 0 0 0.5rem;
+  background: #302b2b;
+  border: 0.1rem solid #707070;
+  border-radius: 0.4rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  svg {
+    fill: #f96c6c;
+    display: block;
+    width: 2rem;
   }
 `;
 
@@ -98,6 +120,7 @@ type UserActionSlotsProps = {
   onPin?: (sessionId: string) => void;
   onSetWhep?: (sessionId: string) => void;
   onRequestMute: (endpointId: string, name: string) => void;
+  onRequestKick: (sessionId: string, name: string) => void;
 };
 
 export const UserActionSlots = ({
@@ -111,6 +134,7 @@ export const UserActionSlots = ({
   onPin,
   onSetWhep,
   onRequestMute,
+  onRequestKick,
 }: UserActionSlotsProps) => {
   const isVideoTargetable =
     p.isActive && !programOutputLine && !p.isWhepReceiver && p.hasVideo;
@@ -119,6 +143,9 @@ export const UserActionSlots = ({
     !!videoEnabled && !isYou && isVideoTargetable && !!onPin;
   const showMuteControl =
     !isYou && p.isActive && !programOutputLine && !p.isWhip;
+  // Kick targets the same audience as mute: another active, non-WHIP
+  // participant on a non-program line.
+  const showKickControl = showMuteControl;
 
   const isPinned = pinnedVideoSessionId === p.sessionId;
   const pinDisabled = isPinned && pinnableCount <= 1;
@@ -181,6 +208,18 @@ export const UserActionSlots = ({
           <ActiveIconWrapper>
             <WhipIcon />
           </ActiveIconWrapper>
+        </Tooltip>
+      ) : (
+        <Slot />
+      )}
+      {showKickControl ? (
+        <Tooltip tooltipText={`Kick ${p.name}`}>
+          <KickParticipantButton
+            aria-label={`Kick ${p.name}`}
+            onClick={() => onRequestKick(p.sessionId, p.name)}
+          >
+            <LogoutIcon />
+          </KickParticipantButton>
         </Tooltip>
       ) : (
         <Slot />
