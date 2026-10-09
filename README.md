@@ -20,7 +20,7 @@ The solution is built on top of WebRTC technology and provides a user-friendly i
 
 ## Hosted Solution
 
-Available as an open web service in [Eyevinn Open Source Cloud](https://www.osaas.io). Read this [documentation to quickly get started](https://docs.osaas.io/osaas.wiki/Service%3A-Intercom.html) with the hosted solution.
+Available as an open web service in [Eyevinn Open Source Cloud](https://www.osaas.io/?utm_source=github&utm_medium=readme&utm_campaign=intercom). Read this [documentation to quickly get started](https://docs.osaas.io/osaas.wiki/Service%3A-Intercom.html?utm_source=github&utm_medium=readme&utm_campaign=intercom) with the hosted solution.
 
 ## Get Started
 
@@ -56,14 +56,14 @@ LOGGER LEVELS
 
 ### Open Intercom Server in Open Source Cloud
 
-To develop using a server hosted by [Open Source Cloud](https://www.osaas.io/), you need to provide a bearer token (service access token) in the Authorization header. The environment should be set to:
+To develop using a server hosted by [Open Source Cloud](https://www.osaas.io/?utm_source=github&utm_medium=readme&utm_campaign=intercom), you need to provide a bearer token (service access token) in the Authorization header. The environment should be set to:
 
 ```
 export VITE_BACKEND_URL=https://<instance>.eyevinn-intercom-manager.auto.prod.osaas.io/
 export OSC_ACCESS_TOKEN=<personal-access-token>
 ```
 
-The `<personal-access-token>` is found in the settings menu in the [user interface](https://app.osaas.io). To get the service access token you run the following command in your terminal.
+The `<personal-access-token>` is found in the settings menu in the [user interface](https://app.osaas.io/?utm_source=github&utm_medium=readme&utm_campaign=intercom). To get the service access token you run the following command in your terminal.
 
 ```bash
 % npx -y @osaas/cli service-access-token eyevinn-intercom-manager
@@ -248,7 +248,7 @@ Read our blogs and articles here:
 
 - [Developer blogs](https://dev.to/video)
 - [Medium](https://eyevinntechnology.medium.com)
-- [OSC](https://www.osaas.io)
+- [OSC](https://www.osaas.io/?utm_source=github&utm_medium=readme&utm_campaign=intercom)
 - [LinkedIn](https://www.linkedin.com/company/eyevinn/)
 
 Want to know more about Eyevinn, contact us at info@eyevinn.se!
