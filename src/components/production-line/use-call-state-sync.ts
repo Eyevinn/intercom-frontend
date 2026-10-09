@@ -4,6 +4,7 @@ import { TGlobalStateAction } from "../../global-state/global-state-actions";
 type TStateUpdates = {
   connectionState: RTCPeerConnectionState | null;
   audioElements: HTMLAudioElement[];
+  videoElements: HTMLVideoElement[];
   sessionId: string | null;
 };
 
@@ -40,6 +41,16 @@ export const useCallStateSync = ({
       },
     });
   }, [stateUpdates.audioElements, callId, dispatch]);
+
+  useEffect(() => {
+    dispatch({
+      type: "UPDATE_CALL",
+      payload: {
+        id: callId,
+        updates: { videoElements: stateUpdates.videoElements },
+      },
+    });
+  }, [stateUpdates.videoElements, callId, dispatch]);
 
   useEffect(() => {
     if (stateUpdates.sessionId !== null) {

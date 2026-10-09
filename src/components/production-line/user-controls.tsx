@@ -4,6 +4,8 @@ import {
   MicUnmuted,
   SpeakerOff,
   SpeakerOn,
+  VideoOnIcon,
+  VideoOffIcon,
 } from "../../assets/icons/icon";
 import { isIOSMobile, isIpad } from "../../bowser";
 import { VolumeSlider } from "../volume-slider/volume-slider";
@@ -30,9 +32,13 @@ export const UserControls = ({
   isInputMuted,
   inputAudioStream,
   value,
+  videoEnabled,
+  isVideoMuted,
+  hasCamera,
   muteOutput,
   muteInput,
   handleInputChange,
+  toggleVideo,
 }: {
   line: TLine | null;
   joinProductionOptions: TJoinProductionOptions;
@@ -40,9 +46,13 @@ export const UserControls = ({
   isInputMuted: boolean;
   inputAudioStream: TUseAudioInputValues;
   value: number;
+  videoEnabled?: boolean;
+  isVideoMuted?: boolean;
+  hasCamera?: boolean;
   muteOutput: () => void;
   muteInput: () => void;
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  toggleVideo?: () => void;
 }) => {
   return (
     <>
@@ -77,6 +87,14 @@ export const UserControls = ({
               </ButtonIcon>
             </ControlButton>
           )}
+
+        {videoEnabled && hasCamera && toggleVideo && (
+          <ControlButton type="button" onClick={toggleVideo}>
+            <ButtonIcon className={isVideoMuted ? "mute" : "unmuted"}>
+              {isVideoMuted ? <VideoOffIcon /> : <VideoOnIcon />}
+            </ButtonIcon>
+          </ControlButton>
+        )}
       </ButtonWrapper>
     </>
   );

@@ -12,6 +12,7 @@ const participant: TParticipant = {
   endpointId: "endpoint-1",
   isActive: true,
   isWhip: false,
+  hasVideo: false,
 };
 
 const renderList = (overrides?: {

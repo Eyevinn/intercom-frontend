@@ -25,75 +25,61 @@ export const useUpdateCallDevice = ({
   const [{ userSettings }, dispatch] = useGlobalState();
 
   useEffect(() => {
-    if (!isBrowserFirefox) {
+    if (!isBrowserFirefox && joinProductionOptions && audioElements) {
       const audioInputTheSame =
-        joinProductionOptions?.audioinput === userSettings?.audioinput;
+        joinProductionOptions.audioinput === userSettings?.audioinput;
       const audioOutputTheSame = audiooutput === userSettings?.audiooutput;
-      const payload = {
-        joinProductionOptions: {
-          productionId: joinProductionOptions?.productionId,
-          lineId: joinProductionOptions?.lineId,
-          username: joinProductionOptions?.username,
-          audioinput: userSettings?.audioinput,
-          lineUsedForProgramOutput:
-            joinProductionOptions?.lineUsedForProgramOutput,
-          isProgramUser: joinProductionOptions?.isProgramUser,
-        },
-        audiooutput: userSettings?.audiooutput || audiooutput,
-      };
+      const newAudiooutput = userSettings?.audiooutput || audiooutput;
 
-      // Check if all payload properties are defined
-      const allPropertiesDefined = Object.values(
-        payload.joinProductionOptions
-      ).every((v) => v !== undefined);
+      if (audioInputTheSame && audioOutputTheSame) return;
 
-      if ((!audioInputTheSame || !audioOutputTheSame) && audioElements) {
-        if (audioInputTheSame && !audioOutputTheSame) {
-          audioElements.forEach((audioElement) => {
-            audioElement.setSinkId(payload.audiooutput || "");
-          });
-          dispatch({
-            type: "UPDATE_CALL",
-            payload: {
-              id,
-              updates: {
-                audiooutput: payload.audiooutput,
-              },
+      if (audioInputTheSame && !audioOutputTheSame) {
+        audioElements.forEach((audioElement) => {
+          audioElement.setSinkId(newAudiooutput || "");
+        });
+        dispatch({
+          type: "UPDATE_CALL",
+          payload: {
+            id,
+            updates: {
+              audiooutput: newAudiooutput,
             },
-          });
-        } else if (allPropertiesDefined) {
-          setConnectionActive(false);
-          resetAudioInput();
-          muteInput(true);
+          },
+        });
+      } else if (
+        userSettings?.audioinput &&
+        joinProductionOptions.productionId &&
+        joinProductionOptions.lineId &&
+        joinProductionOptions.username
+      ) {
+        setConnectionActive(false);
+        resetAudioInput();
+        muteInput(true);
 
-          // Create a non-nullable version of the payload for TypeScript
-          const safePayload = {
-            productionId: payload.joinProductionOptions.productionId!,
-            lineId: payload.joinProductionOptions.lineId!,
-            username: payload.joinProductionOptions.username!,
-            audioinput: payload.joinProductionOptions.audioinput!,
-            lineUsedForProgramOutput:
-              payload.joinProductionOptions.lineUsedForProgramOutput!,
-            isProgramUser: payload.joinProductionOptions.isProgramUser!,
-          };
+        // Spread the existing joinProductionOptions to preserve all
+        // fields (videoinput, videoEnabled, lineName, productionName)
+        // — otherwise a mic change drops the video track on reconnect.
+        const newJoinProductionOptions = {
+          ...joinProductionOptions,
+          audioinput: userSettings.audioinput,
+        };
 
-          dispatch({
-            type: "UPDATE_CALL",
-            payload: {
-              id,
-              updates: {
-                joinProductionOptions: safePayload,
-                audiooutput: payload.audiooutput,
-                mediaStreamInput: null,
-                dominantSpeaker: null,
-                audioLevelAboveThreshold: false,
-                connectionState: null,
-                audioElements: null,
-                sessionId: null,
-              },
+        dispatch({
+          type: "UPDATE_CALL",
+          payload: {
+            id,
+            updates: {
+              joinProductionOptions: newJoinProductionOptions,
+              audiooutput: newAudiooutput,
+              mediaStreamInput: null,
+              dominantSpeaker: null,
+              audioLevelAboveThreshold: false,
+              connectionState: null,
+              audioElements: null,
+              sessionId: null,
             },
-          });
-        }
+          },
+        });
       }
     }
   }, [

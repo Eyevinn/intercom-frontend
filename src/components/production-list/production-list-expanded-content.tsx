@@ -109,6 +109,7 @@ export const ProductionListExpandedContent = ({
         audioinput: userSettings?.audioinput,
         lineUsedForProgramOutput:
           getLineByLineId(lineId)?.programOutputLine || false,
+        videoEnabled: getLineByLineId(lineId)?.videoEnabled ?? false,
         isProgramUser: false,
       };
 
@@ -148,6 +149,7 @@ export const ProductionListExpandedContent = ({
         <Lineblock
           key={`line-${l.id}-${l.name}`}
           isProgramOutput={l.programOutputLine}
+          isVideoEnabled={l.videoEnabled}
           className={editNameOpen ? "edit-name-open" : ""}
         >
           <EditNameForm
@@ -181,7 +183,7 @@ export const ProductionListExpandedContent = ({
             <SecondaryButton
               type="button"
               onClick={() => {
-                if (l.programOutputLine) {
+                if (l.programOutputLine || l.videoEnabled) {
                   navigate(
                     buildCallsUrl([
                       {
