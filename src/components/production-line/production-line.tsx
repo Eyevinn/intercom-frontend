@@ -45,6 +45,7 @@ import { useUpdateCallDevice } from "./use-update-call-device.tsx";
 import { useVolumeReducer } from "./use-volume-reducer.tsx";
 import { UserControls } from "./user-controls.tsx";
 import { UserList } from "./user-list.tsx";
+import { AdminPanel, AdminPanelButton } from "./admin-panel.tsx";
 
 type TProductionLine = {
   id: string;
@@ -98,6 +99,7 @@ export const ProductionLine = ({
   const [kickUserName, setKickUserName] = useState("");
   const [open, setOpen] = useState<boolean>(!isMobile);
   const [hotkeysModalOpen, setHotkeysModalOpen] = useState(false);
+  const [adminPanelOpen, setAdminPanelOpen] = useState(false);
   const {
     joinProductionOptions,
     audiooutput,
@@ -613,6 +615,11 @@ export const ProductionLine = ({
                           />
                         )}
                       </CollapsableSection>
+                      {line && !line.programOutputLine && (
+                        <AdminPanelButton
+                          onClick={() => setAdminPanelOpen(true)}
+                        />
+                      )}
                       {production && line && (
                         <ButtonWrapper>
                           <ExitCallButton
@@ -670,6 +677,13 @@ export const ProductionLine = ({
               )}
             </InnerDiv>
           </ExpandableSection>
+          {adminPanelOpen && line && (
+            <AdminPanel
+              participants={line.participants}
+              sessionId={sessionId}
+              onClose={() => setAdminPanelOpen(false)}
+            />
+          )}
           {hotkeysModalOpen && savedHotkeys && joinProductionOptions && (
             <SettingsModal
               isOpen={hotkeysModalOpen}
