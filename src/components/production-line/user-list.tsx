@@ -6,6 +6,16 @@ import {
   WhipIcon,
 } from "../../assets/icons/icon.tsx";
 import { TParticipant } from "./types.ts";
+import {
+  getStatusClass,
+  ListWrapper,
+  OnlineIndicator,
+  Participant as User,
+  ParticipantControls,
+  ParticipantName as UserName,
+  ParticipantRow as UserWrapper,
+  truncateParticipantName,
+} from "./participant-list-primitives.ts";
 
 const Container = styled.div`
   width: 100%;
@@ -13,67 +23,9 @@ const Container = styled.div`
   flex-direction: column;
 `;
 
-const ListWrapper = styled.div`
-  border-radius: 1rem;
-  border: 0.2rem solid #434343;
-`;
-
-type TUserProps = {
-  isYou: boolean;
-};
-
 type TIsTalkingIndicator = {
   isTalking: boolean;
 };
-
-const UserWrapper = styled.div<TUserProps>`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1rem;
-  background: #1a1a1a;
-  color: #ddd;
-  border: transparent;
-  border-bottom: 0.1rem solid #464646;
-
-  &:only-of-type {
-    border-radius: 1rem;
-    border-bottom: 0;
-  }
-
-  &:first-of-type:not(:only-of-type) {
-    border-radius: 1rem 1rem 0 0;
-  }
-
-  &:last-of-type:not(:only-of-type) {
-    border-radius: 0 0 1rem 1rem;
-    border-bottom: 0;
-  }
-
-  svg {
-    fill: #4d4d4d;
-    width: 2rem;
-  }
-
-  ${({ isYou }) => (isYou ? `background: #353434;` : "")}
-`;
-
-const UserName = styled.span`
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  min-width: 0;
-  /* Prevent descenders (j, g, y, p, q) from being clipped by overflow: hidden */
-  line-height: 1.5;
-  padding-bottom: 0.2rem;
-`;
-
-const User = styled.div`
-  display: flex;
-  align-items: center;
-  min-width: 0;
-  overflow: hidden;
-`;
 
 const IsTalkingIndicator = styled.div<TIsTalkingIndicator>`
   width: 4rem;
@@ -90,30 +42,6 @@ const IsTalkingIndicator = styled.div<TIsTalkingIndicator>`
   border: 0.3rem solid #ddd;
   `
       : ""}
-`;
-
-const OnlineIndicator = styled.div`
-  width: 2.6rem;
-  height: 2.6rem;
-  border-radius: 5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #c7c7c7;
-
-  &.user {
-    background: #7be27b;
-  }
-
-  &.whip {
-    background: rgb(89, 203, 232);
-  }
-`;
-
-const ParticipantControls = styled.div`
-  display: flex;
-  align-items: center;
-  flex-shrink: 0;
 `;
 
 const MuteParticipantButton = styled.button`
@@ -188,18 +116,12 @@ export const UserList = ({
 
   const isWhipOnLine = participants.some((p) => p.isWhip);
 
-  const getStatusClass = (isActive: boolean, isWhip: boolean) => {
-    if (!isActive) return "inactive";
-    return isWhip ? "whip" : "user";
-  };
-
   return (
     <Container>
       <ListWrapper>
         {participants.map((p) => {
           const isYou = p.sessionId === sessionId;
-          const truncatedUsername =
-            p.name.length > 40 ? `${p.name.slice(0, 40)}...` : p.name;
+          const truncatedUsername = truncateParticipantName(p.name);
           return (
             <UserWrapper key={p.sessionId} isYou={isYou}>
               <User title={p.name}>

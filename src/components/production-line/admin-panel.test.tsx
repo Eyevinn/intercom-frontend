@@ -22,6 +22,22 @@ const me: TParticipant = {
   isWhip: false,
 };
 
+const whip: TParticipant = {
+  name: "Whip ingest",
+  sessionId: "session-whip",
+  endpointId: "endpoint-whip",
+  isActive: true,
+  isWhip: true,
+};
+
+const inactive: TParticipant = {
+  name: "Bob",
+  sessionId: "session-inactive",
+  endpointId: "endpoint-inactive",
+  isActive: false,
+  isWhip: false,
+};
+
 const renderPanel = (overrides?: { participants?: TParticipant[] }) => {
   const onClose = vi.fn();
   render(
@@ -69,6 +85,34 @@ describe("AdminPanel", () => {
 
     expect(
       screen.queryByRole("button", { name: `Mute ${me.name} (coming soon)` })
+    ).toBeNull();
+  });
+
+  it("does not render placeholder slots for WHIP participants", () => {
+    renderPanel({ participants: [me, whip] });
+
+    expect(screen.getByText(/Whip ingest/)).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: `Mute ${whip.name} (coming soon)` })
+    ).toBeNull();
+    expect(
+      screen.queryByRole("button", { name: `Kick ${whip.name} (coming soon)` })
+    ).toBeNull();
+  });
+
+  it("does not render placeholder slots for inactive participants", () => {
+    renderPanel({ participants: [me, inactive] });
+
+    expect(screen.getByText(/Bob/)).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", {
+        name: `Mute ${inactive.name} (coming soon)`,
+      })
+    ).toBeNull();
+    expect(
+      screen.queryByRole("button", {
+        name: `Kick ${inactive.name} (coming soon)`,
+      })
     ).toBeNull();
   });
 

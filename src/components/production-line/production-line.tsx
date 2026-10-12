@@ -681,6 +681,7 @@ export const ProductionLine = ({
             <AdminPanel
               participants={line.participants}
               sessionId={sessionId}
+              programOutputLine={line.programOutputLine}
               onClose={() => setAdminPanelOpen(false)}
             />
           )}

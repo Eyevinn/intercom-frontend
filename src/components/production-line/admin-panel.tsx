@@ -12,6 +12,16 @@ import {
   SecondaryButton,
 } from "../form-elements/form-elements.ts";
 import { TParticipant } from "./types.ts";
+import {
+  getStatusClass,
+  ListWrapper,
+  OnlineIndicator,
+  Participant,
+  ParticipantControls,
+  ParticipantName,
+  ParticipantRow,
+  truncateParticipantName,
+} from "./participant-list-primitives.ts";
 
 // Foundational admin-panel UI for issue #636 (sub-issue of #280). This panel
 // houses admin-only actions so they are not immediately visible to every
@@ -25,86 +35,11 @@ const EmptyState = styled.p`
   padding: 1rem 0;
 `;
 
-const ListWrapper = styled.div`
-  border-radius: 1rem;
-  border: 0.2rem solid #434343;
-`;
-
-type TParticipantRowProps = {
-  isYou: boolean;
-};
-
-const ParticipantRow = styled.div<TParticipantRowProps>`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1rem;
-  background: #1a1a1a;
-  color: #ddd;
-  border: transparent;
-  border-bottom: 0.1rem solid #464646;
-
-  &:only-of-type {
-    border-radius: 1rem;
-    border-bottom: 0;
-  }
-
-  &:first-of-type:not(:only-of-type) {
-    border-radius: 1rem 1rem 0 0;
-  }
-
-  &:last-of-type:not(:only-of-type) {
-    border-radius: 0 0 1rem 1rem;
-    border-bottom: 0;
-  }
-
-  svg {
-    fill: #4d4d4d;
-    width: 2rem;
-  }
-
-  ${({ isYou }) => (isYou ? `background: #353434;` : "")}
-`;
-
-const Participant = styled.div`
-  display: flex;
-  align-items: center;
-  min-width: 0;
-  overflow: hidden;
-`;
-
-const StatusIndicator = styled.div`
-  width: 2.6rem;
-  height: 2.6rem;
-  border-radius: 5rem;
+// The admin panel renders the status indicator directly inside the row (there
+// is no surrounding "is talking" wrapper like in UserList), so it extends the
+// shared OnlineIndicator with the spacing that wrapper would otherwise provide.
+const StatusIndicator = styled(OnlineIndicator)`
   margin-right: 1rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #c7c7c7;
-  flex-shrink: 0;
-
-  &.user {
-    background: #7be27b;
-  }
-
-  &.whip {
-    background: rgb(89, 203, 232);
-  }
-`;
-
-const ParticipantName = styled.span`
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  min-width: 0;
-  line-height: 1.5;
-  padding-bottom: 0.2rem;
-`;
-
-const ParticipantControls = styled.div`
-  display: flex;
-  align-items: center;
   flex-shrink: 0;
 `;
 
@@ -177,19 +112,16 @@ export const AdminPanelButton = ({ onClick }: TAdminPanelButtonProps) => {
 type TAdminPanelProps = {
   participants: TParticipant[];
   sessionId: string | null;
+  programOutputLine?: boolean;
   onClose: () => void;
 };
 
 export const AdminPanel = ({
   participants,
   sessionId,
+  programOutputLine,
   onClose,
 }: TAdminPanelProps) => {
-  const getStatusClass = (isActive: boolean, isWhip: boolean) => {
-    if (!isActive) return "inactive";
-    return isWhip ? "whip" : "user";
-  };
-
   return (
     <Modal onClose={onClose} title="Admin panel">
       {participants.length === 0 ? (
@@ -198,8 +130,7 @@ export const AdminPanel = ({
         <ListWrapper>
           {participants.map((p) => {
             const isYou = p.sessionId === sessionId;
-            const truncatedName =
-              p.name.length > 40 ? `${p.name.slice(0, 40)}...` : p.name;
+            const truncatedName = truncateParticipantName(p.name);
             return (
               <ParticipantRow key={p.sessionId} isYou={isYou}>
                 <Participant title={p.name}>
@@ -212,7 +143,18 @@ export const AdminPanel = ({
                     {truncatedName} {p.isActive ? "" : "(inactive)"}
                   </ParticipantName>
                 </Participant>
-                {!isYou && !p.isWhip && (
+                {/*
+                  Eligibility must match UserList (user-list.tsx) exactly so the
+                  two participant views stay consistent: skip yourself, inactive
+                  participants, program-output lines and WHIP ingests.
+
+                  These mute/kick slots are intentionally disabled placeholders.
+                  The functional mute/kick controls currently live in UserList
+                  (#673), rendered directly above the admin-panel button. This
+                  panel is the intended eventual home for those controls, so the
+                  temporary coexistence is deliberate rather than an oversight.
+                */}
+                {!isYou && p.isActive && !programOutputLine && !p.isWhip && (
                   <ParticipantControls>
                     <PlaceholderButton
                       type="button"
