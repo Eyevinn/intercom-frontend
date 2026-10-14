@@ -36,6 +36,8 @@ Decide whether or not debug mode should be on or not `VITE_DEBUG_MODE=true`
 
 Choose desired level of logging `VITE_DEV_LOGGER_LEVEL=3`
 
+Optionally override the WebRTC ICE servers with `VITE_ICE_SERVERS`, a JSON array of `RTCIceServer` objects (e.g. `VITE_ICE_SERVERS=[{"urls":"stun:stun.l.google.com:19302"}]`). When unset or invalid, the app falls back to the default Google STUN servers.
+
 Optionally set an OSC login URL with `AUTH=https://app.osaas.io/?redirect=/dashboard/service/eyevinn-intercom-manager`. When this env var is set and a 401 (expired token or not logged in) persists after the in-app reauth flow has already tried to renew the session, the app redirects the browser to it so the user can (re)authenticate. When unset, behavior is unchanged. In local development this is read from `.env.local` at build time; in the Docker image it is injected at container start (see [Docker Container](#docker-container)).
 
 ```

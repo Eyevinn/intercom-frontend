@@ -18,6 +18,40 @@ import { useAudioElements } from "./use-audio-elements.ts";
 import { TUseAudioInputValues } from "./use-audio-input.ts";
 import { useRtcDebugLogger } from "./use-rtc-debug-logger.ts";
 
+// Preserve the previous hardcoded Google STUN behaviour as the fallback when
+// VITE_ICE_SERVERS is unset or cannot be parsed.
+const DEFAULT_ICE_SERVERS: RTCIceServer[] = [
+  { urls: "stun:stun.l.google.com:19302" },
+  { urls: "stun:stun1.l.google.com:19302" },
+];
+
+// Resolve the ICE server list from the VITE_ICE_SERVERS env var (a JSON array
+// of RTCIceServer objects). Parse defensively: on any error, log a warning and
+// fall back to the default list so a malformed value never breaks the
+// connection path.
+const resolveIceServers = (): RTCIceServer[] => {
+  const raw = import.meta.env.VITE_ICE_SERVERS;
+
+  if (!raw) {
+    return DEFAULT_ICE_SERVERS;
+  }
+
+  try {
+    const parsed = JSON.parse(raw);
+
+    if (!Array.isArray(parsed) || parsed.length === 0) {
+      throw new Error("VITE_ICE_SERVERS must be a non-empty JSON array");
+    }
+
+    return parsed as RTCIceServer[];
+  } catch (e) {
+    logger.red(
+      `Failed to parse VITE_ICE_SERVERS, using default ICE servers: ${e}`
+    );
+    return DEFAULT_ICE_SERVERS;
+  }
+};
+
 type TRtcConnectionOptions = {
   inputAudioStream: TUseAudioInputValues;
   sdpOffer: string | null;
@@ -225,10 +259,7 @@ export const useRtcConnection = ({
   const [rtcPeerConnection] = useState<RTCPeerConnection>(
     () =>
       new RTCPeerConnection({
-        iceServers: [
-          { urls: "stun:stun.l.google.com:19302" },
-          { urls: "stun:stun1.l.google.com:19302" },
-        ],
+        iceServers: resolveIceServers(),
       })
   );
   const [, dispatch] = useGlobalState();
