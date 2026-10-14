@@ -90,6 +90,12 @@ Both are stored on `CallState`
 `isInputMuted` toggle. The two states are set by **different** inputs and are
 never collapsed into one another.
 
+Because `adminMuted` is now **persisted** rather than consumed, #678 must also
+drop the consume-and-reset step the current path performs in
+`use-mute-input.tsx:33-43` (§1.2 step 6), which dispatches `isRemotelyMuted:
+false` back to the store immediately after applying the mute. If that reset were
+kept, `adminMuted` could never stay set and an admin-only mute could not hold.
+
 ### 2.1 Effective mute
 
 Audio output is governed by the **effective mute**, the logical OR of the two
@@ -108,6 +114,26 @@ track.enabled = !(adminMuted || selfMuted)
 Because the two states are OR-combined and stored separately, clearing one does
 **not** clear the other. This is the mechanism that preserves a participant's
 self-mute choice across an admin-unmute.
+
+#### Program-output lines retain their existing special case
+
+The formula above is the rule for a **normal** line. It deliberately does **not**
+subsume the two program-output behaviours that §1.2 already relies on, and #678
+must preserve both rather than regressing them:
+
+- **Admin mute stays gated on `!isProgramOutputLine`.** Today the effect in
+  `production-line.tsx` applies a remote mute only `if (isRemotelyMuted &&
+  !isProgramOutputLine)`. The `adminMuted` layer inherits that gate: on a
+  program-output line `adminMuted` must not drive `track.enabled`, so switching to
+  the OR formula must not newly honour admin mute there.
+- **Forced mute for non-program users is unchanged.** `use-mute-input.tsx`
+  force-mutes when `isProgramOutputLine && !isProgramUser`; that forced mute is
+  independent of both `adminMuted` and `selfMuted` and must continue to apply.
+
+So the complete target rule is "normal lines follow
+`track.enabled = !(adminMuted || selfMuted)`; program-output lines keep the
+existing `isProgramOutputLine` / `isProgramUser` handling". Scoping the
+program-output dimension out of the OR formula is intentional — it is not a gap.
 
 ---
 
@@ -149,7 +175,9 @@ the state change, `effectiveMuted` is recomputed from the OR, so a
 self-muted participant stays muted.
 
 `isRemoteMute` / its unmute counterpart keep the `to !== from` guard so that
-self-addressed echoes are ignored.
+self-addressed echoes are ignored. As on the mute path, the `from` field on the
+`"unmute"` directive is injected by the SMB bridge (the sender does not set it),
+which is what makes the `to !== from` comparison meaningful.
 
 ### 3.3 Self-unmute (local action — not a data-channel directive)
 
@@ -202,10 +230,12 @@ their prior self-mute state (false) is restored.
 ## 5. Summary of the contract
 
 - Two independent, persisted booleans on `CallState`: `adminMuted` and
-  `selfMuted` (the latter supersedes the single-shot `isRemotelyMuted` +
-  `isInputMuted` behaviour described in Section 1).
-- `effectiveMuted = adminMuted || selfMuted`; input tracks follow
-  `track.enabled = !(adminMuted || selfMuted)`.
+  `selfMuted`. `adminMuted` supersedes the single-shot `isRemotelyMuted` role;
+  `selfMuted` is the persisted form of the local `isInputMuted` toggle (both
+  described in Section 1).
+- `effectiveMuted = adminMuted || selfMuted`; on **normal** lines input tracks
+  follow `track.enabled = !(adminMuted || selfMuted)`. Program-output lines keep
+  their existing `isProgramOutputLine` / `isProgramUser` handling (see §2.1).
 - Data-channel directives (`EndpointMessage.payload.muteParticipant`):
   `"mute"` sets `adminMuted = true`; the new `"unmute"` sets
   `adminMuted = false`. Neither touches `selfMuted`.
