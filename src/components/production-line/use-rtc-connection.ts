@@ -20,16 +20,37 @@ import { useRtcDebugLogger } from "./use-rtc-debug-logger.ts";
 
 // Preserve the previous hardcoded Google STUN behaviour as the fallback when
 // VITE_ICE_SERVERS is unset or cannot be parsed.
-const DEFAULT_ICE_SERVERS: RTCIceServer[] = [
+export const DEFAULT_ICE_SERVERS: RTCIceServer[] = [
   { urls: "stun:stun.l.google.com:19302" },
   { urls: "stun:stun1.l.google.com:19302" },
 ];
 
+// A valid RTCIceServer must be a non-null object whose `urls` is a non-empty
+// string or a non-empty array of strings.
+const isRTCIceServer = (value: unknown): value is RTCIceServer => {
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
+
+  const { urls } = value as { urls?: unknown };
+
+  if (typeof urls === "string") {
+    return urls.length > 0;
+  }
+
+  if (Array.isArray(urls)) {
+    return urls.length > 0 && urls.every((url) => typeof url === "string");
+  }
+
+  return false;
+};
+
 // Resolve the ICE server list from the VITE_ICE_SERVERS env var (a JSON array
-// of RTCIceServer objects). Parse defensively: on any error, log a warning and
-// fall back to the default list so a malformed value never breaks the
-// connection path.
-const resolveIceServers = (): RTCIceServer[] => {
+// of RTCIceServer objects). Parse and validate defensively: on any error, log a
+// warning and fall back to the default list so a malformed value never breaks
+// the connection path. ALL validation stays inside the try/catch so it can
+// never throw to the caller.
+export const resolveIceServers = (): RTCIceServer[] => {
   const raw = import.meta.env.VITE_ICE_SERVERS;
 
   if (!raw) {
@@ -43,7 +64,13 @@ const resolveIceServers = (): RTCIceServer[] => {
       throw new Error("VITE_ICE_SERVERS must be a non-empty JSON array");
     }
 
-    return parsed as RTCIceServer[];
+    if (!parsed.every(isRTCIceServer)) {
+      throw new Error(
+        "VITE_ICE_SERVERS entries must be RTCIceServer objects with a urls field"
+      );
+    }
+
+    return parsed;
   } catch (e) {
     logger.red(
       `Failed to parse VITE_ICE_SERVERS, using default ICE servers: ${e}`

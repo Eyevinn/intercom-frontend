@@ -8,6 +8,13 @@ interface ImportMetaEnv {
    * the app redirects here whenever the manager returns HTTP 401.
    */
   readonly AUTH?: string;
+
+  /**
+   * Optional WebRTC ICE servers as a JSON array of `RTCIceServer` objects (e.g.
+   * `VITE_ICE_SERVERS=[{"urls":"stun:stun.l.google.com:19302"}]`). When unset or
+   * invalid, the app falls back to the default Google STUN servers.
+   */
+  readonly VITE_ICE_SERVERS?: string;
 }
 
 interface ImportMeta {
