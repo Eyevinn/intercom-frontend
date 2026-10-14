@@ -79,9 +79,9 @@ message over the open SMB `RTCDataChannel`:
 The target client tracks **two independent boolean states** per call. Neither
 overwrites the other; they are composed at the point audio is applied.
 
-| State        | Owner              | Meaning                                                  |
-| ------------ | ------------------ | -------------------------------------------------------- |
-| `selfMuted`  | The participant    | The participant muted their own input.                   |
+| State        | Owner                     | Meaning                                                  |
+| ------------ | ------------------------- | -------------------------------------------------------- |
+| `selfMuted`  | The participant           | The participant muted their own input.                   |
 | `adminMuted` | An admin / another client | An admin forced this participant muted via data channel. |
 
 Both are stored on `CallState`
@@ -123,7 +123,7 @@ must preserve both rather than regressing them:
 
 - **Admin mute stays gated on `!isProgramOutputLine`.** Today the effect in
   `production-line.tsx` applies a remote mute only `if (isRemotelyMuted &&
-  !isProgramOutputLine)`. The `adminMuted` layer inherits that gate: on a
+!isProgramOutputLine)`. The `adminMuted` layer inherits that gate: on a
   program-output line `adminMuted` must not drive `track.enabled`, so switching to
   the OR formula must not newly honour admin mute there.
 - **Forced mute for non-program users is unchanged.** `use-mute-input.tsx`
@@ -200,14 +200,14 @@ A participant performing a local unmute clears only their `selfMuted`; if
 `enabled` is the resulting `MediaStreamTrack.enabled`
 (`!(adminMuted || selfMuted)`).
 
-| # | Start (`adminMuted`, `selfMuted`) | Event                                   | End (`adminMuted`, `selfMuted`) | `effectiveMuted` | `enabled` |
-| - | --------------------------------- | --------------------------------------- | ------------------------------- | ---------------- | --------- |
-| 1 | (false, false)                    | admin sends `mute`                      | (true, false)                   | true             | false     |
-| 2 | (true, false)                     | admin sends `unmute`                    | (false, false)                  | false            | true      |
-| 3 | (false, true)                     | admin sends `mute`                      | (true, true)                    | true             | false     |
-| 4 | (true, true)                      | admin sends `unmute`                    | (false, true)                   | true             | false     |
-| 5 | (true, false)                     | participant self-mutes                  | (true, true)                    | true             | false     |
-| 6 | (false, true)                     | participant self-unmutes                | (false, false)                  | false            | true      |
+| #   | Start (`adminMuted`, `selfMuted`) | Event                    | End (`adminMuted`, `selfMuted`) | `effectiveMuted` | `enabled` |
+| --- | --------------------------------- | ------------------------ | ------------------------------- | ---------------- | --------- |
+| 1   | (false, false)                    | admin sends `mute`       | (true, false)                   | true             | false     |
+| 2   | (true, false)                     | admin sends `unmute`     | (false, false)                  | false            | true      |
+| 3   | (false, true)                     | admin sends `mute`       | (true, true)                    | true             | false     |
+| 4   | (true, true)                      | admin sends `unmute`     | (false, true)                   | true             | false     |
+| 5   | (true, false)                     | participant self-mutes   | (true, true)                    | true             | false     |
+| 6   | (false, true)                     | participant self-unmutes | (false, false)                  | false            | true      |
 
 ### 4.1 Acceptance scenario (a): admin-unmute of a self-muted user leaves them muted
 
