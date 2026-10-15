@@ -26,6 +26,7 @@ import { useIsGuest } from "../../hooks/use-is-guest";
 import { useInitiateProductionCall } from "../../hooks/use-initiate-production-call";
 import { useWakeLock } from "../../hooks/use-wake-lock";
 import { UserSettings } from "../user-settings/user-settings";
+import { Tabs, TTab } from "../tabs/tabs";
 import { ConfirmationModal } from "../verify-decision/confirmation-modal";
 import { HeaderActions } from "./header-actions";
 import { ProductionLines } from "./production-lines";
@@ -431,6 +432,34 @@ export const CallsPage = () => {
 
   const { playExitSound } = useAudioCue();
 
+  const settingsTabs: TTab[] = [
+    {
+      id: "devices",
+      label: "Devices",
+      content: (
+        <UserSettings
+          buttonText="Save"
+          needsConfirmation
+          onSave={() => setShowSettings(false)}
+          hideTitle
+          hideUsername
+        />
+      ),
+    },
+    {
+      id: "profile",
+      label: "Profile",
+      content: (
+        <UserSettings
+          buttonText="Save"
+          onSave={() => setShowSettings(false)}
+          hideTitle
+          hideDevices
+        />
+      ),
+    },
+  ];
+
   const runExitAllCalls = async () => {
     setProductionId(null);
     playExitSound();
@@ -489,13 +518,8 @@ export const CallsPage = () => {
         )}
 
         {showSettings && (
-          <Modal onClose={() => setShowSettings(false)} title="User Settings">
-            <UserSettings
-              buttonText="Save"
-              needsConfirmation
-              onSave={() => setShowSettings(false)}
-              hideTitle
-            />
+          <Modal onClose={() => setShowSettings(false)} title="Settings">
+            <Tabs ariaLabel="Settings" tabs={settingsTabs} />
           </Modal>
         )}
 
