@@ -42,6 +42,8 @@ import { useLinePolling } from "./use-line-polling.ts";
 import { useMasterInputMute } from "./use-master-input-mute.ts";
 import { useMuteInput } from "./use-mute-input.tsx";
 import { useUpdateCallDevice } from "./use-update-call-device.tsx";
+import { useSessionRecovery } from "./use-session-recovery.ts";
+import { ReconnectBanner } from "./reconnect-banner.tsx";
 import { useVolumeReducer } from "./use-volume-reducer.tsx";
 import { UserControls } from "./user-controls.tsx";
 import { UserList } from "./user-list.tsx";
@@ -426,6 +428,21 @@ export const ProductionLine = ({
 
   const { loading, connectionError } = useIsLoading({ connectionState });
 
+  const handleRejoin = useCallback(() => {
+    dispatch({
+      type: "UPDATE_CALL",
+      payload: { id, updates: { connectionState: null } },
+    });
+  }, [dispatch, id]);
+
+  const {
+    phase: recoveryPhase,
+    attempt: connectionAttempt,
+    rejoin,
+    reportHeartbeat,
+    reportEstablishError,
+  } = useSessionRecovery({ connectionState, onRejoin: handleRejoin });
+
   useCheckBadLineData({
     joinProductionOptions,
     paramLineId,
@@ -504,8 +521,21 @@ export const ProductionLine = ({
             />
           </ConnectionErrorWrapper>
         ))}
+      {joinProductionOptions && !loading && (
+        <ReconnectBanner phase={recoveryPhase} onRejoin={rejoin} />
+      )}
       {connectionActive && (
         <SymphonyRtcConnectionComponent
+          key={connectionAttempt}
+          onHeartbeatStatus={reportHeartbeat}
+          // Only route establish failures into the recovery flow (retry with
+          // backoff) once we are rejoining (attempt > 0). On the very first
+          // attempt there is no established call to recover, so a failure keeps
+          // the original fatal ERROR path in useEstablishSession, which surfaces
+          // the "Connection failed" screen instead of silently retrying.
+          onEstablishError={
+            connectionAttempt > 0 ? reportEstablishError : undefined
+          }
           joinProductionOptions={joinProductionOptions}
           audiooutput={audiooutput || undefined}
           inputAudioStream={inputAudioStream}

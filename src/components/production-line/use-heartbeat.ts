@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { API } from "../../api/api.ts";
 import { noop } from "../../helpers.ts";
 import logger from "../../utils/logger.ts";
@@ -6,13 +6,32 @@ import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { backoffDelayMs } from "../../utils/backoff.ts";
 import { authCircuitBreaker } from "../../api/auth-circuit-breaker.ts";
 
-type TProps = { sessionId: string | null };
+// ok          - the manager acknowledged the heartbeat.
+// unreachable - the manager could not be reached (network error / 5xx), e.g.
+//               while it restarts. The loop keeps retrying with backoff.
+// lost        - the manager is up but no longer knows the session (404/410).
+//               The loop stops; the session has to be re-established.
+export type THeartbeatStatus = "ok" | "unreachable" | "lost";
+
+type TProps = {
+  sessionId: string | null;
+  onStatusChange?: (status: THeartbeatStatus) => void;
+};
+
+const isSessionGone = (status: number | undefined) =>
+  status === 404 || status === 410;
+
+const isManagerUnreachable = (status: number | undefined) =>
+  status === undefined || status === 429 || status >= 500;
 
 // Normal cadence between heartbeats while the session is healthy.
 const HEARTBEAT_INTERVAL_MS = 10_000;
 
-export const useHeartbeat = ({ sessionId }: TProps) => {
+export const useHeartbeat = ({ sessionId, onStatusChange }: TProps) => {
   const [, dispatch] = useGlobalState();
+  // Kept in a ref so a new callback identity never restarts the loop.
+  const onStatusChangeRef = useRef(onStatusChange);
+  onStatusChangeRef.current = onStatusChange;
 
   useEffect(() => {
     if (!sessionId) return noop;
@@ -67,11 +86,22 @@ export const useHeartbeat = ({ sessionId }: TProps) => {
           if (cancelled) return;
           failure401Count = 0;
           consecutiveFailureCount = 0;
+          onStatusChangeRef.current?.("ok");
           schedule(HEARTBEAT_INTERVAL_MS);
         })
         .catch((err) => {
           if (cancelled) return;
+          if (isSessionGone(err.status)) {
+            logger.red(
+              `Session ${sessionId} is no longer known by the server.`
+            );
+            onStatusChangeRef.current?.("lost");
+            return; // stop the loop — the session must be re-established
+          }
           consecutiveFailureCount += 1;
+          if (isManagerUnreachable(err.status)) {
+            onStatusChangeRef.current?.("unreachable");
+          }
           if (err.status === 401) {
             failure401Count += 1;
           }
