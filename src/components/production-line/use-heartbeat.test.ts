@@ -126,6 +126,57 @@ describe("useHeartbeat", () => {
     expect(mockHeartbeat).toHaveBeenCalledTimes(2);
   });
 
+  it("reports unreachable on network errors and ok once the manager is back", async () => {
+    const onStatusChange = vi.fn();
+    mockHeartbeat
+      .mockRejectedValueOnce(new TypeError("Failed to fetch"))
+      .mockResolvedValue("ok");
+    renderHook(() => useHeartbeat({ sessionId: "s1", onStatusChange }), {
+      wrapper,
+    });
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(10000);
+    });
+    expect(onStatusChange).toHaveBeenLastCalledWith("unreachable");
+
+    await act(async () => {
+      await vi.runOnlyPendingTimersAsync();
+    });
+    expect(onStatusChange).toHaveBeenLastCalledWith("ok");
+  });
+
+  it("reports unreachable on 5xx responses", async () => {
+    const onStatusChange = vi.fn();
+    mockHeartbeat.mockRejectedValue(error500());
+    renderHook(() => useHeartbeat({ sessionId: "s1", onStatusChange }), {
+      wrapper,
+    });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(10000);
+    });
+    expect(onStatusChange).toHaveBeenCalledWith("unreachable");
+  });
+
+  it("reports lost and stops when the session is gone (410)", async () => {
+    const onStatusChange = vi.fn();
+    mockHeartbeat.mockRejectedValue(
+      Object.assign(new Error("gone"), { status: 410 })
+    );
+    renderHook(() => useHeartbeat({ sessionId: "s1", onStatusChange }), {
+      wrapper,
+    });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(10000);
+    });
+    expect(onStatusChange).toHaveBeenCalledWith("lost");
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(120000);
+    });
+    expect(mockHeartbeat).toHaveBeenCalledTimes(1);
+  });
+
   it("stops and dispatches HEARTBEAT_ERROR after 3 consecutive 401s", async () => {
     mockHeartbeat.mockRejectedValue(error401());
     renderHook(() => useHeartbeat({ sessionId: "s1" }), { wrapper });

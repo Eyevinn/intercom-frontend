@@ -9,6 +9,9 @@ type TUseGetRtcOfferOptions = {
   joinProductionOptions: TJoinProductionOptions | null;
   callId: string;
   dispatch: Dispatch<TGlobalStateAction>;
+  // When provided, a failed session request is reported here instead of being
+  // dispatched as a call error (used while rejoining after a connection loss).
+  onError?: (error: Error) => void;
 };
 
 // A hook for fetching the web rtc sdp offer from the backend
@@ -16,7 +19,10 @@ export const useEstablishSession = ({
   joinProductionOptions,
   callId,
   dispatch,
+  onError,
 }: TUseGetRtcOfferOptions) => {
+  const onErrorRef = useRef(onError);
+  onErrorRef.current = onError;
   const [sdpOffer, setSdpOffer] = useState<string | null>(null);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const reqRef = useRef<{
@@ -63,6 +69,14 @@ export const useEstablishSession = ({
       .catch((e) => {
         if (!state.cancelled) {
           reqRef.current = null;
+          if (onErrorRef.current) {
+            onErrorRef.current(
+              e instanceof Error
+                ? e
+                : new Error("Failed to establish audio session.")
+            );
+            return;
+          }
           dispatch({
             type: "ERROR",
             payload: {
