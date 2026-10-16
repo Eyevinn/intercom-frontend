@@ -44,11 +44,18 @@ export const useSessionRecovery = ({ connectionState, onRejoin }: TProps) => {
   // "connected" from the previous connection must not complete the rejoin.
   const sawResetSinceRejoin = useRef(false);
   const onRejoinRef = useRef(onRejoin);
-  onRejoinRef.current = onRejoin;
 
-  if (connectionState === "connected") {
-    everConnected.current = true;
-  }
+  // Writing refs during render is unsafe under concurrent/StrictMode renders,
+  // so the latest callback and the "ever connected" flag are updated in effects.
+  useEffect(() => {
+    onRejoinRef.current = onRejoin;
+  }, [onRejoin]);
+
+  useEffect(() => {
+    if (connectionState === "connected") {
+      everConnected.current = true;
+    }
+  }, [connectionState]);
 
   const connectionLost = everConnected.current && connectionState === "failed";
   const needsRejoin =
@@ -89,6 +96,11 @@ export const useSessionRecovery = ({ connectionState, onRejoin }: TProps) => {
       () => {
         // The failure that triggered this rejoin is being handled now.
         setEstablishFailed(false);
+        // Count this rejoin so repeated session loss / peer failure (which do
+        // not go through reportEstablishError) back off instead of churning
+        // create+delete session/peer connections every cycle at 0ms. The count
+        // is reset only on a confirmed "connected" (or a manual rejoin).
+        failureCount.current += 1;
         startRejoin();
       },
       failureCount.current > 0

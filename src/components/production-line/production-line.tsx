@@ -528,6 +528,11 @@ export const ProductionLine = ({
         <SymphonyRtcConnectionComponent
           key={connectionAttempt}
           onHeartbeatStatus={reportHeartbeat}
+          // Only route establish failures into the recovery flow (retry with
+          // backoff) once we are rejoining (attempt > 0). On the very first
+          // attempt there is no established call to recover, so a failure keeps
+          // the original fatal ERROR path in useEstablishSession, which surfaces
+          // the "Connection failed" screen instead of silently retrying.
           onEstablishError={
             connectionAttempt > 0 ? reportEstablishError : undefined
           }

@@ -101,6 +101,74 @@ describe("useSessionRecovery", () => {
     expect(result.current.attempt).toBe(2);
   });
 
+  it("backs off on repeated session loss instead of rejoining at 0ms every cycle", async () => {
+    const { result, onRejoin } = setup();
+    // First loss rejoins immediately.
+    act(() => result.current.reportHeartbeat("lost"));
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(0);
+    });
+    expect(onRejoin).toHaveBeenCalledTimes(1);
+
+    // The rejoined session is lost again before it ever reconnects.
+    act(() => result.current.reportHeartbeat("lost"));
+    // This time a backoff applies, so there is no immediate rejoin.
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(0);
+    });
+    expect(onRejoin).toHaveBeenCalledTimes(1);
+
+    // The rejoin fires once the backoff window elapses.
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(10_000);
+    });
+    expect(onRejoin).toHaveBeenCalledTimes(2);
+  });
+
+  it("backs off on repeated peer-connection failure after connecting", async () => {
+    const { rerender, onRejoin } = setup();
+    // A connected peer connection fails → immediate rejoin.
+    rerender({ connectionState: "failed" });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(0);
+    });
+    expect(onRejoin).toHaveBeenCalledTimes(1);
+
+    // The fresh connection resets, then fails again before it connects.
+    rerender({ connectionState: null });
+    rerender({ connectionState: "failed" });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(0);
+    });
+    expect(onRejoin).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(10_000);
+    });
+    expect(onRejoin).toHaveBeenCalledTimes(2);
+  });
+
+  it("resets the backoff after a confirmed reconnect", async () => {
+    const { result, rerender, onRejoin } = setup();
+    act(() => result.current.reportHeartbeat("lost"));
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(0);
+    });
+    expect(onRejoin).toHaveBeenCalledTimes(1);
+
+    // The rejoin succeeds: reset state, then connect.
+    rerender({ connectionState: null });
+    rerender({ connectionState: "connected" });
+    expect(result.current.phase).toBe("ok");
+
+    // A later loss rejoins immediately again because the count was reset.
+    act(() => result.current.reportHeartbeat("lost"));
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(0);
+    });
+    expect(onRejoin).toHaveBeenCalledTimes(2);
+  });
+
   it("gives up after the recovery window and allows a manual rejoin", async () => {
     const { result, onRejoin } = setup();
     act(() => result.current.reportHeartbeat("unreachable"));
