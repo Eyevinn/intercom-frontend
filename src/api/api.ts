@@ -3,7 +3,16 @@ import { getBackendUrl } from "../utils/runtime-config.ts";
 
 const API_VERSION = import.meta.env.VITE_BACKEND_API_VERSION ?? "api/v1/";
 const API_URL = `${getBackendUrl()}/${API_VERSION}`;
-const API_KEY = import.meta.env.VITE_BACKEND_API_KEY;
+
+// NOTE (#625): the frontend never holds the manager API key. All `VITE_*` env
+// vars are public — compiled into the browser bundle at build time and readable
+// from DevTools — so a static API key must never be read here. Management
+// endpoints are authenticated by the OSC platform session instead: the browser
+// talks to the manager same-origin, the short-lived `*.sat` session cookie
+// (renewed by the `/reauth` flow) rides along automatically with every request,
+// and the platform attaches the real credential server-side. `fetch` defaults
+// to `credentials: "same-origin"`, so that cookie is sent without any extra
+// configuration here.
 
 export type TPresetCall = {
   productionId: string;
@@ -122,7 +131,6 @@ export const API = {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
         },
         body: JSON.stringify({
           name,
@@ -139,7 +147,6 @@ export const API = {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
         },
         body: JSON.stringify({
           name,
@@ -156,7 +163,6 @@ export const API = {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
         },
         body: JSON.stringify({
           name,
@@ -178,7 +184,6 @@ export const API = {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
         },
         body: JSON.stringify({ pinnedSessionId: sessionId }),
       })
@@ -199,7 +204,6 @@ export const API = {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
         },
         body: JSON.stringify({ pinnedSessionId }),
       })
@@ -212,45 +216,30 @@ export const API = {
     handleFetchRequest<TListProductionsResponse>(
       fetch(`${API_URL}productionlist?${searchParams}`, {
         method: "GET",
-        headers: {
-          ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
-        },
       })
     ),
   fetchProduction: (id: number): Promise<TBasicProductionResponse> =>
     handleFetchRequest<TBasicProductionResponse>(
       fetch(`${API_URL}production/${id}`, {
         method: "GET",
-        headers: {
-          ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
-        },
       })
     ),
   deleteProduction: (id: string): Promise<string> =>
     handleFetchRequest<string>(
       fetch(`${API_URL}production/${id}`, {
         method: "DELETE",
-        headers: {
-          ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
-        },
       })
     ),
   listProductionLines: (id: number) =>
     handleFetchRequest<TLine[]>(
       fetch(`${API_URL}production/${id}/line`, {
         method: "GET",
-        headers: {
-          ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
-        },
       })
     ),
   fetchProductionLine: (productionId: number, lineId: number): Promise<TLine> =>
     handleFetchRequest<TLine>(
       fetch(`${API_URL}production/${productionId}/line/${lineId}`, {
         method: "GET",
-        headers: {
-          ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
-        },
       })
     ),
   // Long poll endpoint: the request is held open by the manager until the
@@ -266,9 +255,6 @@ export const API = {
         `${API_URL}production/${productionId}/line/${lineId}/participants`,
         {
           method: "POST",
-          headers: {
-            ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
-          },
           signal,
         }
       )
@@ -284,7 +270,6 @@ export const API = {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
         },
         body: JSON.stringify({
           name,
@@ -300,9 +285,6 @@ export const API = {
     handleFetchRequest<string>(
       fetch(`${API_URL}production/${productionId}/line/${lineId}`, {
         method: "DELETE",
-        headers: {
-          ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
-        },
       })
     ),
 
@@ -320,9 +302,6 @@ export const API = {
         `${API_URL}production/${productionId}/line/${lineId}/participants/${sessionId}/disconnect`,
         {
           method: "POST",
-          headers: {
-            ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
-          },
         }
       )
     ),
@@ -336,7 +315,6 @@ export const API = {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
         },
         body: JSON.stringify({
           productionId,
@@ -354,7 +332,6 @@ export const API = {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
         },
         body: JSON.stringify({
           sdpAnswer,
@@ -367,18 +344,12 @@ export const API = {
     handleFetchRequest<string>(
       fetch(`${API_URL}session/${sessionId}`, {
         method: "DELETE",
-        headers: {
-          ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
-        },
       })
     ),
   heartbeat: ({ sessionId }: THeartbeatOptions): Promise<string> =>
     handleFetchRequest<string>(
       fetch(`${API_URL}heartbeat/${sessionId}`, {
         method: "GET",
-        headers: {
-          ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
-        },
       })
     ),
   shareUrl: ({ path }: TShareUrlOptions): Promise<TShareUrlResponse> => {
@@ -387,7 +358,6 @@ export const API = {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
         },
         body: JSON.stringify({
           path,
@@ -399,9 +369,6 @@ export const API = {
     return handleFetchRequest<void>(
       fetch(`${API_URL}reauth`, {
         method: "GET",
-        headers: {
-          ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
-        },
       })
     );
   },
@@ -415,7 +382,6 @@ export const API = {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
         },
         body: JSON.stringify(options),
       })
@@ -425,18 +391,12 @@ export const API = {
     handleFetchRequest<{ presets: TPreset[] }>(
       fetch(`${API_URL}preset`, {
         method: "GET",
-        headers: {
-          ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
-        },
       })
     ),
 
   deletePreset: async (id: string): Promise<void> => {
     const response = await fetch(`${API_URL}preset/${id}`, {
       method: "DELETE",
-      headers: {
-        ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
-      },
     });
     if (!response.ok || response.status !== 204) {
       await handleFetchRequest<void>(Promise.resolve(response));
@@ -456,7 +416,6 @@ export const API = {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
         },
         body: JSON.stringify(update),
       })

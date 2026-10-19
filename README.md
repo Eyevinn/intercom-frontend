@@ -20,7 +20,7 @@ The solution is built on top of WebRTC technology and provides a user-friendly i
 
 ## Hosted Solution
 
-Available as an open web service in [Eyevinn Open Source Cloud](https://www.osaas.io). Read this [documentation to quickly get started](https://docs.osaas.io/osaas.wiki/Service%3A-Intercom.html) with the hosted solution.
+Available as an open web service in [Eyevinn Open Source Cloud](https://www.osaas.io/?utm_source=github&utm_medium=readme&utm_campaign=intercom). Read this [documentation to quickly get started](https://docs.osaas.io/osaas.wiki/Service%3A-Intercom.html?utm_source=github&utm_medium=readme&utm_campaign=intercom) with the hosted solution.
 
 ## Get Started
 
@@ -56,40 +56,28 @@ LOGGER LEVELS
 
 ### Open Intercom Server in Open Source Cloud
 
-To develop using a server hosted by [Open Source Cloud](https://www.osaas.io/), you need to provide a bearer token (service access token) in the Authorization header. The environment should be set to:
+To develop using a server hosted by [Open Source Cloud](https://www.osaas.io/?utm_source=github&utm_medium=readme&utm_campaign=intercom), point the dev server at your instance:
 
 ```
 export VITE_BACKEND_URL=https://<instance>.eyevinn-intercom-manager.auto.prod.osaas.io/
-export OSC_ACCESS_TOKEN=<personal-access-token>
 ```
 
-The `<personal-access-token>` is found in the settings menu in the [user interface](https://app.osaas.io). To get the service access token you run the following command in your terminal.
-
-```bash
-% npx -y @osaas/cli service-access-token eyevinn-intercom-manager
-<service-access-token>
-```
-
-If you are developing against an intercom manager in OSC dev environment you use the `<personal-access-token>` that you have in the development environment and run the following instead.
-
-```bash
-% npx -y @osaas/cli --env dev service-access-token eyevinn-intercom-manager
-<service-access-token>
-```
-
-You also need to update the `VITE_BACKEND_URL` to point to your instance in OSC dev.
+If you are developing against an intercom manager in the OSC dev environment, point `VITE_BACKEND_URL` at your dev instance instead:
 
 ```bash
 export VITE_BACKEND_URL=https://<instance>.eyevinn-intercom-manager.auto.dev.osaas.io/
 ```
 
-Then you start the dev server with the `VITE_BACKEND_API_KEY` environment variable set. Either on the comand line or stored in the shell with `export VITE_BACKEND_API_KEY=<service-access-token>`. The token expires after a while so you might need to refresh the token using the same command above.
+> **Security note (#625):** the frontend must never carry a manager API key.
+> Every `VITE_*` variable is public — Vite inlines it into the browser bundle at
+> build time, where anyone can read it from DevTools — so there is no
+> `VITE_BACKEND_API_KEY`. Management endpoints are authenticated by the OSC
+> platform session instead: log in to Open Source Cloud in the same browser, and
+> the short-lived `*.sat` session cookie (kept fresh by the in-app `/reauth`
+> flow) is sent automatically with every same-origin request. The real
+> credential is attached server-side by the platform, never by the client.
 
-```bash
-% VITE_BACKEND_API_KEY=<service-access-token> npm run dev
-```
-
-As the Open Source Cloud platform apply same-origin principle you need to disable that check in your browser when developing locally. Example below on how to start Chrome on MacOS with this check disabled.
+Because the browser talks to the manager same-origin, you need to disable the browser's same-origin/CORS check when developing locally so the dev server can reach a remote OSC instance. Example below on how to start Chrome on MacOS with this check disabled.
 
 ```bash
 % open -a Google\ Chrome --args --disable-web-security --user-data-dir="/tmp"
@@ -248,7 +236,7 @@ Read our blogs and articles here:
 
 - [Developer blogs](https://dev.to/video)
 - [Medium](https://eyevinntechnology.medium.com)
-- [OSC](https://www.osaas.io)
+- [OSC](https://www.osaas.io/?utm_source=github&utm_medium=readme&utm_campaign=intercom)
 - [LinkedIn](https://www.linkedin.com/company/eyevinn/)
 
 Want to know more about Eyevinn, contact us at info@eyevinn.se!

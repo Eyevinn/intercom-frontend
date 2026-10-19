@@ -50,6 +50,8 @@ import { useLinePolling } from "./use-line-polling.ts";
 import { useMasterInputMute } from "./use-master-input-mute.ts";
 import { useMuteInput } from "./use-mute-input.tsx";
 import { useUpdateCallDevice } from "./use-update-call-device.tsx";
+import { useSessionRecovery } from "./use-session-recovery.ts";
+import { ReconnectBanner } from "./reconnect-banner.tsx";
 import { useVolumeReducer } from "./use-volume-reducer.tsx";
 import { UserControls } from "./user-controls.tsx";
 import { UserList } from "./user-list.tsx";
@@ -61,6 +63,7 @@ import { SelfPreviewTile } from "./self-preview-tile.tsx";
 import { ReturnFeedTile } from "./return-feed-tile.tsx";
 import { RemoteFullscreenControls } from "./remote-fullscreen-controls.tsx";
 import { VideoOptionsDialogue } from "./video-options-modal.tsx";
+import { AdminPanel, AdminPanelButton } from "./admin-panel.tsx";
 
 type TProductionLine = {
   id: string;
@@ -127,6 +130,7 @@ export const ProductionLine = ({
   const [kickUserName, setKickUserName] = useState("");
   const [open, setOpen] = useState<boolean>(!isMobile);
   const [hotkeysModalOpen, setHotkeysModalOpen] = useState(false);
+  const [adminPanelOpen, setAdminPanelOpen] = useState(false);
   const {
     joinProductionOptions,
     audiooutput,
@@ -605,6 +609,21 @@ export const ProductionLine = ({
 
   const { loading, connectionError } = useIsLoading({ connectionState });
 
+  const handleRejoin = useCallback(() => {
+    dispatch({
+      type: "UPDATE_CALL",
+      payload: { id, updates: { connectionState: null } },
+    });
+  }, [dispatch, id]);
+
+  const {
+    phase: recoveryPhase,
+    attempt: connectionAttempt,
+    rejoin,
+    reportHeartbeat,
+    reportEstablishError,
+  } = useSessionRecovery({ connectionState, onRejoin: handleRejoin });
+
   useCheckBadLineData({
     joinProductionOptions,
     paramLineId,
@@ -861,8 +880,21 @@ export const ProductionLine = ({
             />
           </ConnectionErrorWrapper>
         ))}
+      {joinProductionOptions && !loading && (
+        <ReconnectBanner phase={recoveryPhase} onRejoin={rejoin} />
+      )}
       {connectionActive && (
         <SymphonyRtcConnectionComponent
+          key={connectionAttempt}
+          onHeartbeatStatus={reportHeartbeat}
+          // Only route establish failures into the recovery flow (retry with
+          // backoff) once we are rejoining (attempt > 0). On the very first
+          // attempt there is no established call to recover, so a failure keeps
+          // the original fatal ERROR path in useEstablishSession, which surfaces
+          // the "Connection failed" screen instead of silently retrying.
+          onEstablishError={
+            connectionAttempt > 0 ? reportEstablishError : undefined
+          }
           joinProductionOptions={joinProductionOptions}
           audiooutput={audiooutput || undefined}
           inputAudioStream={inputAudioStream}
@@ -1040,6 +1072,11 @@ export const ProductionLine = ({
                           />
                         )}
                       </CollapsableSection>
+                      {line && !line.programOutputLine && (
+                        <AdminPanelButton
+                          onClick={() => setAdminPanelOpen(true)}
+                        />
+                      )}
                       {production && line && (
                         <ButtonWrapper>
                           <ExitCallButton
@@ -1107,6 +1144,14 @@ export const ProductionLine = ({
               )}
             </InnerDiv>
           </ExpandableSection>
+          {adminPanelOpen && line && (
+            <AdminPanel
+              participants={line.participants}
+              sessionId={sessionId}
+              programOutputLine={line.programOutputLine}
+              onClose={() => setAdminPanelOpen(false)}
+            />
+          )}
           {hotkeysModalOpen && savedHotkeys && joinProductionOptions && (
             <SettingsModal
               isOpen={hotkeysModalOpen}
