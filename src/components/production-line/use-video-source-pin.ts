@@ -1,5 +1,6 @@
 import { useCallback, useRef } from "react";
 import { API } from "../../api/api.ts";
+import logger from "../../utils/logger.ts";
 import { TJoinProductionOptions } from "./types.ts";
 
 const PIN_RETRY_DELAYS_MS = [300, 600, 1000, 1500, 2000];
@@ -38,7 +39,9 @@ export const useVideoSourcePin = ({
         productionId: joinProductionOptions.productionId,
         lineId: joinProductionOptions.lineId,
         sessionId: nextSessionId,
-      }).catch(() => {});
+      }).catch((err) => {
+        logger.red(`[useVideoSourcePin] setLineWhepSource failed: ${err}`);
+      });
     },
     [joinProductionOptions?.productionId, joinProductionOptions?.lineId]
   );

@@ -47,7 +47,7 @@ type TParticipant = {
   isActive: boolean;
   isWhip: boolean;
   isWhepReceiver?: boolean;
-  hasVideo: boolean;
+  hasVideo?: boolean;
 };
 
 type TLine = {

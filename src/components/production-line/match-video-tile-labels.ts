@@ -9,7 +9,7 @@ export type ParticipantInfo = {
   endpointId: string;
   isActive: boolean;
   isWhip: boolean;
-  hasVideo: boolean;
+  hasVideo?: boolean;
 };
 
 export type LabelResult = {

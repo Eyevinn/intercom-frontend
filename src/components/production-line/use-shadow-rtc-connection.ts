@@ -63,10 +63,19 @@ export const useShadowRtcConnection = (
     };
 
     const connect = async () => {
+      const productionIdNum = parseInt(productionId, 10);
+      const lineIdNum = parseInt(lineId, 10);
+      if (Number.isNaN(productionIdNum) || Number.isNaN(lineIdNum)) {
+        logger.red(
+          `Shadow RTC: invalid productionId "${productionId}" or lineId "${lineId}"`
+        );
+        return;
+      }
+
       // 1. Request an SDP offer for the shadow line.
       const { sdp: sdpOffer, sessionId } = await API.offerAudioSession({
-        productionId: parseInt(productionId, 10),
-        lineId: parseInt(lineId, 10),
+        productionId: productionIdNum,
+        lineId: lineIdNum,
         username,
       });
 

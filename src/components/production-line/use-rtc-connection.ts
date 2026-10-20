@@ -179,7 +179,9 @@ const establishConnection = ({
           videoElement.dataset.lastSessionId = "";
           const parent = videoElement.parentElement;
           if (parent) attachShowWhenReady(videoElement, parent);
-          videoElement.play().catch(() => {});
+          videoElement.play().catch((err) => {
+            logger.yellow(`[useRtcConnection] video play() failed: ${err}`);
+          });
           setVideoElements((current) => [...current]);
         });
 
@@ -328,7 +330,7 @@ export const useRtcConnection = ({
     if (noStreamError) {
       navigate("/");
     }
-  }, [navigate, noStreamError, callId]);
+  }, [navigate, noStreamError]);
 
   useEffect(() => {
     if (

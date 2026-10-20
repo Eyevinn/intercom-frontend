@@ -7,7 +7,7 @@ type TCheckboxProps = {
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 };
 
-const CheckboxWrapper = styled.div<{ disabled?: boolean }>`
+const CheckboxWrapper = styled.label<{ disabled?: boolean }>`
   display: flex;
   align-items: center;
   cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
@@ -44,6 +44,11 @@ const CheckboxComponent = styled.input`
     font-weight: bold;
   }
 
+  &:focus-visible {
+    outline: 0.2rem solid rgba(89, 203, 232, 1);
+    outline-offset: 0.2rem;
+  }
+
   &:hover:not(:disabled) {
     background-color: rgba(89, 203, 232, 1);
   }
@@ -54,7 +59,7 @@ const CheckboxComponent = styled.input`
   }
 `;
 
-const DisabledLabel = styled.label<{ disabled?: boolean }>`
+const LabelText = styled.span<{ disabled?: boolean }>`
   ${({ disabled }) => (disabled ? "opacity: 0.45; cursor: not-allowed;" : "")}
 `;
 
@@ -63,26 +68,14 @@ export const Checkbox = ({
   checked,
   disabled,
   onChange,
-}: TCheckboxProps) => {
-  const toggle = () => {
-    if (disabled) return;
-    const next = !checked;
-    onChange({
-      target: { checked: next, type: "checkbox" },
-      currentTarget: { checked: next, type: "checkbox" },
-    } as unknown as React.ChangeEvent<HTMLInputElement>);
-  };
-
-  return (
-    <CheckboxWrapper disabled={disabled} onClick={toggle}>
-      <CheckboxComponent
-        type="checkbox"
-        checked={!!checked}
-        disabled={disabled}
-        readOnly
-        tabIndex={-1}
-      />
-      <DisabledLabel disabled={disabled}>{label}</DisabledLabel>
-    </CheckboxWrapper>
-  );
-};
+}: TCheckboxProps) => (
+  <CheckboxWrapper disabled={disabled}>
+    <CheckboxComponent
+      type="checkbox"
+      checked={!!checked}
+      disabled={disabled}
+      onChange={onChange}
+    />
+    <LabelText disabled={disabled}>{label}</LabelText>
+  </CheckboxWrapper>
+);

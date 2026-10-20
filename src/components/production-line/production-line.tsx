@@ -62,7 +62,7 @@ import { sendPinnedEndpoint } from "./pin-data-channel.ts";
 import { SelfPreviewTile } from "./self-preview-tile.tsx";
 import { ReturnFeedTile } from "./return-feed-tile.tsx";
 import { RemoteFullscreenControls } from "./remote-fullscreen-controls.tsx";
-import { VideoOptionsDialogue } from "./video-options-modal.tsx";
+import { VideoOptionsDialogue } from "./video-options-dialogue.tsx";
 import { AdminPanel, AdminPanelButton } from "./admin-panel.tsx";
 
 type TProductionLine = {
