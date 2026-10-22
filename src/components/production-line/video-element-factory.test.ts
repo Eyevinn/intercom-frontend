@@ -7,23 +7,20 @@ import {
   isTileFullscreen,
   makePipDraggable,
   requestTileFullscreen,
+  setTileParticipantBacked,
   setTilePinTransitioning,
   setTilePipLabel,
   setTilePipStream,
   stopFrameMonitor,
   updateVideoTileContainerPinned,
   updateVideoTileLabel,
+  setVideoTileVisible,
 } from "./video-element-factory.ts";
 
 const OPTIONS_BTN_BG_DEFAULT = "rgba(0, 0, 0, 0.45)";
 const OPTIONS_BTN_BG_PINNED = "rgba(89, 203, 232, 0.80)";
 
 type FakeTrack = { muted: boolean; readyState: "live" | "ended" };
-type FrameCallback = (
-  now: number,
-  metadata: { presentedFrames: number }
-) => void;
-
 const createStream = (tracks: FakeTrack[] = []): MediaStream => {
   const stream = new MediaStream();
   vi.spyOn(stream, "getVideoTracks").mockReturnValue(
@@ -35,29 +32,6 @@ const createStream = (tracks: FakeTrack[] = []): MediaStream => {
 const setVideoSize = (video: HTMLVideoElement, w: number, h: number) => {
   Object.defineProperty(video, "videoWidth", { value: w, configurable: true });
   Object.defineProperty(video, "videoHeight", { value: h, configurable: true });
-};
-
-const installRvfc = (video: HTMLVideoElement) => {
-  const pending: FrameCallback[] = [];
-  let nextHandle = 0;
-  const requestVideoFrameCallback = vi.fn((cb: FrameCallback) => {
-    pending.push(cb);
-    nextHandle += 1;
-    return nextHandle;
-  });
-  const cancelVideoFrameCallback = vi.fn();
-  Object.assign(video, { requestVideoFrameCallback, cancelVideoFrameCallback });
-  const fireFrame = () => {
-    const cb = pending.shift();
-    if (!cb) throw new Error("no pending video frame callback");
-    cb(performance.now(), { presentedFrames: 1 });
-  };
-  return {
-    requestVideoFrameCallback,
-    cancelVideoFrameCallback,
-    fireFrame,
-    lastHandle: () => nextHandle,
-  };
 };
 
 const getTileParts = (container: HTMLElement) => ({
@@ -659,155 +633,30 @@ describe("video-element-factory", () => {
     });
   });
 
-  describe("attachShowWhenReady / stopFrameMonitor (rVFC path)", () => {
+  describe("attachShowWhenReady / stopFrameMonitor", () => {
     const setup = (tracks: FakeTrack[] = []) => {
-      vi.useFakeTimers({
-        toFake: [
-          "setTimeout",
-          "clearTimeout",
-          "setInterval",
-          "clearInterval",
-          "performance",
-          "Date",
-        ],
-      });
+      vi.useFakeTimers();
       const container = document.createElement("div");
       container.style.display = "none";
       const video = document.createElement("video");
       video.srcObject = createStream(tracks);
       container.appendChild(video);
-      const rvfc = installRvfc(video);
-      return { container, video, rvfc };
+      return { container, video };
     };
 
-    it("starts a frame callback loop and a stall interval", () => {
-      const { container, video, rvfc } = setup();
+    it("starts a single poll interval", () => {
+      const { container, video } = setup();
 
       attachShowWhenReady(video, container);
 
-      expect(rvfc.requestVideoFrameCallback).toHaveBeenCalledTimes(1);
       expect(vi.getTimerCount()).toBe(1);
       stopFrameMonitor(video);
     });
 
-    it("shows the container only after a frame with real dimensions", () => {
-      const { container, video, rvfc } = setup();
-      attachShowWhenReady(video, container);
-
-      rvfc.fireFrame();
-      expect(container.style.display).toBe("none");
-      expect(rvfc.requestVideoFrameCallback).toHaveBeenCalledTimes(2);
-
-      setVideoSize(video, 640, 360);
-      rvfc.fireFrame();
-      expect(container.style.display).toBe("block");
-      stopFrameMonitor(video);
-    });
-
-    it("hides the container when frames, media time and tracks all stall", () => {
-      const { container, video, rvfc } = setup([
-        { muted: true, readyState: "live" },
-      ]);
-      setVideoSize(video, 640, 360);
-      attachShowWhenReady(video, container);
-      rvfc.fireFrame();
-      expect(container.style.display).toBe("block");
-
-      vi.advanceTimersByTime(3000);
-      expect(container.style.display).toBe("block");
-
-      vi.advanceTimersByTime(500);
-      expect(container.style.display).toBe("none");
-      stopFrameMonitor(video);
-    });
-
-    it("keeps the container visible while the track is live and unmuted", () => {
-      const { container, video, rvfc } = setup([
+    it("shows immediately when dimensions are already known", () => {
+      const { container, video } = setup([
         { muted: false, readyState: "live" },
       ]);
-      setVideoSize(video, 640, 360);
-      attachShowWhenReady(video, container);
-      rvfc.fireFrame();
-
-      vi.advanceTimersByTime(10_000);
-
-      expect(container.style.display).toBe("block");
-      stopFrameMonitor(video);
-    });
-
-    it("keeps the container visible while media time keeps advancing", () => {
-      const { container, video, rvfc } = setup([
-        { muted: false, readyState: "ended" },
-      ]);
-      setVideoSize(video, 640, 360);
-      attachShowWhenReady(video, container);
-      rvfc.fireFrame();
-
-      for (let i = 1; i <= 20; i += 1) {
-        video.currentTime = i;
-        vi.advanceTimersByTime(500);
-      }
-
-      expect(container.style.display).toBe("block");
-      stopFrameMonitor(video);
-    });
-
-    it("stopFrameMonitor clears the interval and cancels the pending rVFC", () => {
-      const { container, video, rvfc } = setup([
-        { muted: true, readyState: "live" },
-      ]);
-      setVideoSize(video, 640, 360);
-      attachShowWhenReady(video, container);
-      rvfc.fireFrame();
-      expect(vi.getTimerCount()).toBe(1);
-
-      stopFrameMonitor(video);
-
-      expect(vi.getTimerCount()).toBe(0);
-      expect(rvfc.cancelVideoFrameCallback).toHaveBeenCalledWith(
-        rvfc.lastHandle()
-      );
-
-      vi.advanceTimersByTime(10_000);
-      expect(container.style.display).toBe("block");
-    });
-
-    it("ignores frame callbacks that arrive after stopFrameMonitor", () => {
-      const { container, video, rvfc } = setup();
-      attachShowWhenReady(video, container);
-
-      stopFrameMonitor(video);
-      setVideoSize(video, 640, 360);
-      rvfc.fireFrame();
-
-      expect(container.style.display).toBe("none");
-      expect(rvfc.requestVideoFrameCallback).toHaveBeenCalledTimes(1);
-    });
-
-    it("re-attaching tears down the previous monitor first", () => {
-      const { container, video, rvfc } = setup();
-
-      attachShowWhenReady(video, container);
-      attachShowWhenReady(video, container);
-
-      expect(vi.getTimerCount()).toBe(1);
-      expect(rvfc.cancelVideoFrameCallback).toHaveBeenCalledTimes(1);
-      stopFrameMonitor(video);
-      expect(vi.getTimerCount()).toBe(0);
-    });
-
-    it("stopFrameMonitor is a no-op for an unmonitored element", () => {
-      const video = document.createElement("video");
-
-      expect(() => stopFrameMonitor(video)).not.toThrow();
-    });
-  });
-
-  describe("attachShowWhenReady (no-rVFC fallback)", () => {
-    it("shows immediately when dimensions are already known", () => {
-      const container = document.createElement("div");
-      container.style.display = "none";
-      const video = document.createElement("video");
       setVideoSize(video, 640, 360);
 
       attachShowWhenReady(video, container);
@@ -817,9 +666,7 @@ describe("video-element-factory", () => {
     });
 
     it("shows on media events once dimensions appear", () => {
-      const container = document.createElement("div");
-      container.style.display = "none";
-      const video = document.createElement("video");
+      const { container, video } = setup();
       attachShowWhenReady(video, container);
 
       video.dispatchEvent(new Event("playing"));
@@ -831,19 +678,95 @@ describe("video-element-factory", () => {
       stopFrameMonitor(video);
     });
 
-    it("stopFrameMonitor removes the media event listeners", () => {
-      const container = document.createElement("div");
-      container.style.display = "none";
-      const video = document.createElement("video");
+    it("hides the tile on the next poll once every track is muted or ended", () => {
+      const track: FakeTrack = { muted: false, readyState: "live" };
+      const { container, video } = setup([track]);
+      setVideoSize(video, 640, 360);
+      attachShowWhenReady(video, container);
+      expect(container.style.display).toBe("block");
+
+      track.muted = true;
+      vi.advanceTimersByTime(500);
+      expect(container.style.display).toBe("none");
+
+      track.muted = false;
+      vi.advanceTimersByTime(500);
+      expect(container.style.display).toBe("block");
+      stopFrameMonitor(video);
+    });
+
+    it("keeps the tile hidden while it is not participant-backed, even on media events", () => {
+      const { container, video } = setup([
+        { muted: false, readyState: "live" },
+      ]);
+      setVideoSize(video, 640, 360);
+      attachShowWhenReady(video, container);
+      expect(container.style.display).toBe("block");
+
+      setTileParticipantBacked(video, false);
+      expect(container.style.display).toBe("none");
+
+      ["loadedmetadata", "resize", "playing", "canplay"].forEach((type) =>
+        video.dispatchEvent(new Event(type))
+      );
+      vi.advanceTimersByTime(5000);
+      expect(container.style.display).toBe("none");
+
+      setTileParticipantBacked(video, true);
+      expect(container.style.display).toBe("block");
+      stopFrameMonitor(video);
+    });
+
+    it("stopFrameMonitor clears the interval and the media event listeners", () => {
+      const { container, video } = setup([
+        { muted: false, readyState: "live" },
+      ]);
       attachShowWhenReady(video, container);
 
       stopFrameMonitor(video);
+      expect(vi.getTimerCount()).toBe(0);
+
       setVideoSize(video, 640, 360);
       ["loadedmetadata", "resize", "playing", "canplay"].forEach((type) =>
         video.dispatchEvent(new Event(type))
       );
-
+      vi.advanceTimersByTime(5000);
       expect(container.style.display).toBe("none");
+    });
+
+    it("re-attaching tears down the previous monitor first", () => {
+      const { container, video } = setup();
+
+      attachShowWhenReady(video, container);
+      attachShowWhenReady(video, container);
+
+      expect(vi.getTimerCount()).toBe(1);
+      stopFrameMonitor(video);
+      expect(vi.getTimerCount()).toBe(0);
+    });
+
+    it("stopFrameMonitor is a no-op for an unmonitored element", () => {
+      const video = document.createElement("video");
+
+      expect(() => stopFrameMonitor(video)).not.toThrow();
+    });
+  });
+
+  describe("setVideoTileVisible / setTileParticipantBacked", () => {
+    it("setVideoTileVisible toggles the container display", () => {
+      const container = document.createElement("div");
+
+      setVideoTileVisible(container, true);
+      expect(container.style.display).toBe("block");
+
+      setVideoTileVisible(container, false);
+      expect(container.style.display).toBe("none");
+    });
+
+    it("setTileParticipantBacked is a no-op for an element without a tile", () => {
+      const video = document.createElement("video");
+
+      expect(() => setTileParticipantBacked(video, false)).not.toThrow();
     });
   });
 });

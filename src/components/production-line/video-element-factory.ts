@@ -409,102 +409,76 @@ export const updateVideoTileContainerPinned = (
   btn.style.opacity = isPinned ? "1" : "0.7";
 };
 
-const FRAME_STALL_MS = 3000;
-
+const MEDIA_POLL_MS = 500;
 const frameMonitorCleanups = new WeakMap<HTMLVideoElement, () => void>();
+const participantBacked = new WeakMap<HTMLVideoElement, boolean>();
+const tileContainers = new WeakMap<HTMLVideoElement, HTMLElement>();
+
+export const setVideoTileVisible = (
+  container: HTMLElement,
+  visible: boolean
+): void => {
+  const next = visible ? "block" : "none";
+  if (container.style.display === next) return;
+  container.style.display = next;
+};
+
+const shouldTileBeVisible = (videoElement: HTMLVideoElement): boolean => {
+  if (participantBacked.get(videoElement) === false) return false;
+  if (!(videoElement.videoWidth > 0 && videoElement.videoHeight > 0)) {
+    return false;
+  }
+  const tracks =
+    videoElement.srcObject instanceof MediaStream
+      ? videoElement.srcObject.getVideoTracks()
+      : [];
+  return !(
+    tracks.length > 0 && tracks.every((t) => t.muted || t.readyState !== "live")
+  );
+};
+
+const syncTileVisibility = (videoElement: HTMLVideoElement): void => {
+  const container = tileContainers.get(videoElement);
+  if (!container) return;
+  setVideoTileVisible(container, shouldTileBeVisible(videoElement));
+};
+
+export const setTileParticipantBacked = (
+  videoElement: HTMLVideoElement,
+  backed: boolean
+): void => {
+  participantBacked.set(videoElement, backed);
+  syncTileVisibility(videoElement);
+};
+
+const VISIBILITY_EVENTS = [
+  "loadedmetadata",
+  "resize",
+  "playing",
+  "canplay",
+] as const;
 
 export const attachShowWhenReady = (
   videoElement: HTMLVideoElement,
   container: HTMLElement
 ): void => {
   frameMonitorCleanups.get(videoElement)?.();
+  tileContainers.set(videoElement, container);
 
   let aborted = false;
-  const setVisible = (visible: boolean) => {
-    const next = visible ? "block" : "none";
-    if (container.style.display === next) return;
-    container.style.display = next;
+  const sync = () => {
+    if (aborted) return;
+    syncTileVisibility(videoElement);
   };
 
-  type RVFCMetadata = { presentedFrames: number };
-  type RVFC = (cb: (now: number, metadata: RVFCMetadata) => void) => number;
-  type CVFC = (handle: number) => void;
-  const rvfc = (videoElement as unknown as { requestVideoFrameCallback?: RVFC })
-    .requestVideoFrameCallback;
-
-  // Without rVFC (older WebKit) we can't detect a stall — fall back to the
-  // original show-when-ready-only behaviour.
-  if (typeof rvfc !== "function") {
-    let shown = false;
-    const tryShow = () => {
-      if (shown) return;
-      if (videoElement.videoWidth > 0 && videoElement.videoHeight > 0) {
-        setVisible(true);
-        shown = true;
-      }
-    };
-    tryShow();
-    const onEvent = () => tryShow();
-    videoElement.addEventListener("loadedmetadata", onEvent);
-    videoElement.addEventListener("resize", onEvent);
-    videoElement.addEventListener("playing", onEvent);
-    videoElement.addEventListener("canplay", onEvent);
-    frameMonitorCleanups.set(videoElement, () => {
-      aborted = true;
-      videoElement.removeEventListener("loadedmetadata", onEvent);
-      videoElement.removeEventListener("resize", onEvent);
-      videoElement.removeEventListener("playing", onEvent);
-      videoElement.removeEventListener("canplay", onEvent);
-      frameMonitorCleanups.delete(videoElement);
-    });
-    return;
-  }
-
-  let lastFrameAt = performance.now();
-  let lastMediaTime = videoElement.currentTime;
-  let lastMediaAdvanceAt = performance.now();
-  let frameHandle: number | null = null;
-  const onFrame = () => {
-    if (aborted) return;
-    lastFrameAt = performance.now();
-    if (videoElement.videoWidth > 0 && videoElement.videoHeight > 0) {
-      setVisible(true);
-    }
-    frameHandle = rvfc.call(videoElement, onFrame);
-  };
-  frameHandle = rvfc.call(videoElement, onFrame);
-
-  const stallTimer = setInterval(() => {
-    if (aborted) return;
-    const now = performance.now();
-    if (videoElement.currentTime > lastMediaTime) {
-      lastMediaTime = videoElement.currentTime;
-      lastMediaAdvanceAt = now;
-    }
-    const tracks =
-      videoElement.srcObject instanceof MediaStream
-        ? videoElement.srcObject.getVideoTracks()
-        : [];
-    const mediaStopped =
-      tracks.length > 0 &&
-      tracks.every((t) => t.muted || t.readyState !== "live");
-    const framesStalled = now - lastFrameAt > FRAME_STALL_MS;
-    const mediaStalled = now - lastMediaAdvanceAt > FRAME_STALL_MS;
-
-    if (framesStalled && mediaStalled && mediaStopped) {
-      setVisible(false);
-    }
-  }, 500);
+  VISIBILITY_EVENTS.forEach((e) => videoElement.addEventListener(e, sync));
+  const poll = setInterval(sync, MEDIA_POLL_MS);
+  sync();
 
   frameMonitorCleanups.set(videoElement, () => {
     aborted = true;
-    clearInterval(stallTimer);
-    if (frameHandle != null) {
-      const cvfc = (
-        videoElement as unknown as { cancelVideoFrameCallback?: CVFC }
-      ).cancelVideoFrameCallback;
-      if (typeof cvfc === "function") cvfc.call(videoElement, frameHandle);
-    }
+    clearInterval(poll);
+    VISIBILITY_EVENTS.forEach((e) => videoElement.removeEventListener(e, sync));
     frameMonitorCleanups.delete(videoElement);
   });
 };

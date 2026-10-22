@@ -9,6 +9,7 @@ const setTilePipStream = vi.fn();
 const setTilePipLabel = vi.fn();
 const updateVideoTileLabel = vi.fn();
 const updateVideoTileContainerPinned = vi.fn();
+const setTileParticipantBacked = vi.fn();
 
 vi.mock("./video-element-factory.ts", () => ({
   setTilePinTransitioning: (tile: HTMLElement, on: boolean) =>
@@ -24,6 +25,8 @@ vi.mock("./video-element-factory.ts", () => ({
   ) => updateVideoTileLabel(el, name, isWhip),
   updateVideoTileContainerPinned: (tile: HTMLElement, isPinned: boolean) =>
     updateVideoTileContainerPinned(tile, isPinned),
+  setTileParticipantBacked: (el: HTMLVideoElement, backed: boolean) =>
+    setTileParticipantBacked(el, backed),
 }));
 
 // eslint-disable-next-line import/first
@@ -72,6 +75,7 @@ const baseProps = (overrides: Partial<Props> = {}): Props => ({
   tileMatches: [],
   pinnedContainer: null,
   pinnedSessionId: null,
+  selfSessionId: null,
   cameraStream: null,
   cameraLabel: null,
   pendingPinPromiseRef: {
@@ -277,6 +281,7 @@ describe("useVideoTileGrid", () => {
         baseProps({
           videoElements: [a.video, b.video],
           tileMatches: [match(null, "Alice"), match(null, "Camera 1", true)],
+          participants: [makeParticipant()],
         })
       );
       expect(updateVideoTileLabel).toHaveBeenCalledWith(
@@ -319,6 +324,12 @@ describe("useVideoTileGrid", () => {
   });
 
   describe("stale tile handling", () => {
+    const backedCalls = (el: HTMLVideoElement) =>
+      setTileParticipantBacked.mock.calls
+        .filter(([v]) => v === el)
+        .map(([, backed]) => backed);
+    const lastBacked = (el: HTMLVideoElement) => backedCalls(el).at(-1);
+
     it("records the matched sessionId on the video element", () => {
       const a = makeTile("a");
       renderGrid(
@@ -331,137 +342,172 @@ describe("useVideoTileGrid", () => {
       expect(a.video.dataset.lastSessionId).toBe("s1");
     });
 
-    it("keeps tiles with no tracked session (cannot judge staleness)", () => {
+    it("backs an untracked tile while some remote publisher is in the call", () => {
       const a = makeTile("a");
-      const { grid } = renderGrid(
-        baseProps({ videoElements: [a.video], tileMatches: [match(null)] })
-      );
-      expect(childIds(grid)).toEqual(["a"]);
-    });
-
-    it("keeps tiles backed by an active participant with video", () => {
-      const a = makeTile("a");
-      const { grid } = renderGrid(
+      renderGrid(
         baseProps({
           videoElements: [a.video],
-          tileMatches: [match("s1", "Alice")],
-          participants: [
-            makeParticipant({
-              sessionId: "s1",
-              isActive: true,
-              hasVideo: true,
-            }),
-          ],
+          tileMatches: [match(null)],
+          participants: [makeParticipant({ sessionId: "s1" })],
         })
       );
-      expect(childIds(grid)).toEqual(["a"]);
+      expect(lastBacked(a.video)).toBe(true);
     });
 
-    it("drops tiles whose participant is inactive and whose track is not live", () => {
+    it("backs tiles whose participant is active with video", () => {
       const a = makeTile("a");
-      const b = makeTile("b");
-      a.video.srcObject = new MediaStream([makeTrack("ended")]);
-      const { grid } = renderGrid(
-        baseProps({
-          videoElements: [a.video, b.video],
-          tileMatches: [match("s1", "Alice"), match(null)],
-          participants: [makeParticipant({ sessionId: "s1", isActive: false })],
-        })
-      );
-      expect(childIds(grid)).toEqual(["b"]);
-      expect(updateVideoTileLabel).not.toHaveBeenCalledWith(
-        a.video,
-        expect.anything(),
-        expect.anything()
-      );
-    });
-
-    it("drops tiles whose participant is active but has stopped sending video", () => {
-      const a = makeTile("a");
-      const { grid } = renderGrid(
-        baseProps({
-          videoElements: [a.video],
-          tileMatches: [match("s1", "Alice")],
-          participants: [
-            makeParticipant({
-              sessionId: "s1",
-              isActive: true,
-              hasVideo: false,
-            }),
-          ],
-        })
-      );
-      expect(childIds(grid)).toEqual([]);
-    });
-
-    it("drops tiles whose tracked participant has left entirely", () => {
-      const a = makeTile("a");
-      const { grid } = renderGrid(
-        baseProps({
-          videoElements: [a.video],
-          tileMatches: [match("s1", "Alice")],
-          participants: [],
-        })
-      );
-      expect(childIds(grid)).toEqual([]);
-    });
-
-    it("keeps a tile whose participant looks inactive while its video track is still live", () => {
-      const a = makeTile("a");
-      a.video.srcObject = new MediaStream([makeTrack("live")]);
-      const { grid } = renderGrid(
-        baseProps({
-          videoElements: [a.video],
-          tileMatches: [match("s1", "Alice")],
-          participants: [makeParticipant({ sessionId: "s1", isActive: false })],
-        })
-      );
-      expect(childIds(grid)).toEqual(["a"]);
-    });
-
-    it("falls back to dataset.lastSessionId once the match disappears", () => {
-      const a = makeTile("a");
-      const { grid, rerender } = renderGrid(
+      renderGrid(
         baseProps({
           videoElements: [a.video],
           tileMatches: [match("s1", "Alice")],
           participants: [makeParticipant({ sessionId: "s1" })],
         })
       );
-      expect(childIds(grid)).toEqual(["a"]);
+      expect(lastBacked(a.video)).toBe(true);
+      expect(updateVideoTileLabel).toHaveBeenCalledWith(
+        a.video,
+        "Alice",
+        false
+      );
+    });
+
+    it("unbacks every tile once no remote publisher is left, keeping them in the grid", () => {
+      const a = makeTile("a");
+      const b = makeTile("b");
+      const { grid } = renderGrid(
+        baseProps({
+          videoElements: [a.video, b.video],
+          tileMatches: [match("s1", "Alice"), match(null)],
+          participants: [],
+        })
+      );
+      expect(lastBacked(a.video)).toBe(false);
+      expect(lastBacked(b.video)).toBe(false);
+      expect(childIds(grid)).toEqual(["a", "b"]);
+    });
+
+    it("ignores self and WHEP receivers when deciding if anyone publishes", () => {
+      const a = makeTile("a");
+      renderGrid(
+        baseProps({
+          videoElements: [a.video],
+          tileMatches: [match(null)],
+          selfSessionId: "self",
+          participants: [
+            makeParticipant({ sessionId: "self" }),
+            makeParticipant({ sessionId: "r", isWhepReceiver: true }),
+          ],
+        })
+      );
+      expect(lastBacked(a.video)).toBe(false);
+    });
+
+    it("unbacks a tile whose participant is inactive, even if its track is still live", () => {
+      const a = makeTile("a");
+      a.video.srcObject = new MediaStream([makeTrack("live")]);
+      renderGrid(
+        baseProps({
+          videoElements: [a.video],
+          tileMatches: [match("s1", "Alice")],
+          participants: [
+            makeParticipant({ sessionId: "s1", isActive: false }),
+            makeParticipant({ sessionId: "s2" }),
+          ],
+        })
+      );
+      expect(lastBacked(a.video)).toBe(false);
+    });
+
+    it("unbacks a tile whose participant is active but has stopped sending video", () => {
+      const a = makeTile("a");
+      renderGrid(
+        baseProps({
+          videoElements: [a.video],
+          tileMatches: [match("s1", "Alice")],
+          participants: [
+            makeParticipant({ sessionId: "s1", hasVideo: false }),
+            makeParticipant({ sessionId: "s2" }),
+          ],
+        })
+      );
+      expect(lastBacked(a.video)).toBe(false);
+    });
+
+    it("clears the label and lastSessionId of an unbacked tile", () => {
+      const a = makeTile("a");
+      renderGrid(
+        baseProps({
+          videoElements: [a.video],
+          tileMatches: [match("s1", "Alice")],
+          participants: [makeParticipant({ sessionId: "s2" })],
+        })
+      );
+      expect(updateVideoTileLabel).toHaveBeenCalledWith(a.video, null, false);
+      expect(updateVideoTileLabel).not.toHaveBeenCalledWith(
+        a.video,
+        "Alice",
+        expect.anything()
+      );
+      expect(a.video.dataset.lastSessionId).toBe("");
+    });
+
+    it("falls back to dataset.lastSessionId once the match disappears", () => {
+      const a = makeTile("a");
+      const { rerender } = renderGrid(
+        baseProps({
+          videoElements: [a.video],
+          tileMatches: [match("s1", "Alice")],
+          participants: [
+            makeParticipant({ sessionId: "s1" }),
+            makeParticipant({ sessionId: "s2" }),
+          ],
+        })
+      );
+      expect(lastBacked(a.video)).toBe(true);
 
       rerender(
         baseProps({
           videoElements: [a.video],
           tileMatches: [match(null)],
-          participants: [makeParticipant({ sessionId: "s1", isActive: false })],
+          participants: [
+            makeParticipant({ sessionId: "s1", isActive: false }),
+            makeParticipant({ sessionId: "s2" }),
+          ],
         })
       );
-      expect(childIds(grid)).toEqual([]);
+      expect(lastBacked(a.video)).toBe(false);
     });
 
-    it("restores a stale tile once its participant becomes active with video again", () => {
+    it("backs the tile again when a new publisher takes over the slot", () => {
       const a = makeTile("a");
-      const { grid, rerender } = renderGrid(
+      const { rerender } = renderGrid(
         baseProps({
           videoElements: [a.video],
           tileMatches: [match("s1", "Alice")],
-          participants: [makeParticipant({ sessionId: "s1", isActive: false })],
+          participants: [makeParticipant({ sessionId: "s1" })],
         })
       );
-      expect(childIds(grid)).toEqual([]);
 
       rerender(
         baseProps({
           videoElements: [a.video],
-          tileMatches: [match("s1", "Alice")],
-          participants: [makeParticipant({ sessionId: "s1", isActive: true })],
+          tileMatches: [match(null)],
+          participants: [],
         })
       );
-      expect(childIds(grid)).toEqual(["a"]);
+      expect(lastBacked(a.video)).toBe(false);
+
+      rerender(
+        baseProps({
+          videoElements: [a.video],
+          tileMatches: [match(null)],
+          participants: [makeParticipant({ sessionId: "s2", name: "Bob" })],
+        })
+      );
+      expect(lastBacked(a.video)).toBe(true);
     });
 
-    it("keeps the pinned tile first even when an earlier tile is stale", () => {
+    it("keeps the pinned tile first even when an earlier tile is unbacked", () => {
       const a = makeTile("a");
       const b = makeTile("b");
       const c = makeTile("c");
@@ -469,11 +515,12 @@ describe("useVideoTileGrid", () => {
         baseProps({
           videoElements: [a.video, b.video, c.video],
           tileMatches: [match("gone"), match(null), match(null)],
-          participants: [],
+          participants: [makeParticipant({ sessionId: "s2" })],
           pinnedContainer: c.tile,
         })
       );
-      expect(childIds(grid)).toEqual(["c", "b"]);
+      expect(lastBacked(a.video)).toBe(false);
+      expect(childIds(grid)).toEqual(["c", "a", "b"]);
     });
   });
 

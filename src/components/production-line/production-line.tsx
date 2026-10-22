@@ -59,6 +59,7 @@ import { computeVideoTileLabels } from "./match-video-tile-labels.ts";
 import { useVideoTileGrid } from "./use-video-tile-grid.ts";
 import { useVideoSourcePin } from "./use-video-source-pin.ts";
 import { sendPinnedEndpoint } from "./pin-data-channel.ts";
+import { hasRemoteVideoPublisher } from "./pinnable-participants.ts";
 import { SelfPreviewTile } from "./self-preview-tile.tsx";
 import { ReturnFeedTile } from "./return-feed-tile.tsx";
 import { RemoteFullscreenControls } from "./remote-fullscreen-controls.tsx";
@@ -665,6 +666,7 @@ export const ProductionLine = ({
     tileMatches,
     pinnedContainer,
     pinnedSessionId,
+    selfSessionId: callState.sessionId ?? null,
     cameraStream:
       inputVideoStream && inputVideoStream !== "no-device"
         ? inputVideoStream
@@ -690,9 +692,18 @@ export const ProductionLine = ({
     return el.srcObject instanceof MediaStream ? el.srcObject : null;
   }, [videoEnabled, shadowVideoElements]);
 
+  const hasRemoteVideo = useMemo(
+    () =>
+      hasRemoteVideoPublisher(
+        line?.participants ?? [],
+        callState.sessionId ?? null
+      ),
+    [line?.participants, callState.sessionId]
+  );
+
   const pinnedRemoteStream = useMemo(() => {
     const elements = videoElements ?? [];
-    if (elements.length === 0) return null;
+    if (elements.length === 0 || !hasRemoteVideo) return null;
     const matchByPin = pinnedSessionId
       ? elements.find((el) => el.dataset.lastSessionId === pinnedSessionId)
       : null;
@@ -701,9 +712,10 @@ export const ProductionLine = ({
     return candidate?.srcObject instanceof MediaStream
       ? candidate.srcObject
       : null;
-  }, [videoElements, pinnedSessionId]);
+  }, [videoElements, pinnedSessionId, hasRemoteVideo]);
 
   const pinnedRemoteName = useMemo(() => {
+    if (!hasRemoteVideo) return null;
     if (pinnedSessionId) {
       return (
         line?.participants.find((p) => p.sessionId === pinnedSessionId)?.name ??
@@ -715,9 +727,10 @@ export const ProductionLine = ({
     const sid = candidate?.dataset.lastSessionId ?? null;
     if (!sid) return null;
     return line?.participants.find((p) => p.sessionId === sid)?.name ?? null;
-  }, [videoElements, pinnedSessionId, line?.participants]);
+  }, [videoElements, pinnedSessionId, line?.participants, hasRemoteVideo]);
 
   const pinnedRemoteIsWhip = useMemo(() => {
+    if (!hasRemoteVideo) return null;
     if (pinnedSessionId) {
       return (
         line?.participants.find((p) => p.sessionId === pinnedSessionId)
@@ -729,7 +742,7 @@ export const ProductionLine = ({
     const sid = candidate?.dataset.lastSessionId ?? null;
     if (!sid) return null;
     return line?.participants.find((p) => p.sessionId === sid)?.isWhip ?? null;
-  }, [videoElements, pinnedSessionId, line?.participants]);
+  }, [videoElements, pinnedSessionId, line?.participants, hasRemoteVideo]);
 
   const handleSetWhep = (targetSessionId: string) => {
     setPendingWhepTargetSessionId(targetSessionId);

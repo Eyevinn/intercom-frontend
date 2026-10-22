@@ -1,10 +1,12 @@
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import { LabelResult } from "./match-video-tile-labels.ts";
 import { TParticipant } from "./types.ts";
+import { hasRemoteVideoPublisher } from "./pinnable-participants.ts";
 import {
   setTilePinTransitioning,
   setTilePipStream,
   setTilePipLabel,
+  setTileParticipantBacked,
   updateVideoTileLabel,
   updateVideoTileContainerPinned,
 } from "./video-element-factory.ts";
@@ -15,6 +17,7 @@ type UseVideoTileGridArgs = {
   tileMatches: LabelResult[];
   pinnedContainer: HTMLElement | null;
   pinnedSessionId: string | null;
+  selfSessionId: string | null;
   cameraStream: MediaStream | null;
   cameraLabel: string | null;
   pendingPinPromiseRef: React.MutableRefObject<Promise<void> | null>;
@@ -31,6 +34,7 @@ export const useVideoTileGrid = ({
   tileMatches,
   pinnedContainer,
   pinnedSessionId,
+  selfSessionId,
   cameraStream,
   cameraLabel,
   pendingPinPromiseRef,
@@ -44,38 +48,43 @@ export const useVideoTileGrid = ({
 
     const elements = videoElements || [];
 
-    const staleVideoElements = new Set<HTMLVideoElement>();
+    const anyPublisher = hasRemoteVideoPublisher(participants, selfSessionId);
+    const unbackedElements = new Set<HTMLVideoElement>();
+
     elements.forEach((el, i) => {
       const sessionId = tileMatches[i]?.sessionId ?? null;
       if (sessionId) {
         // eslint-disable-next-line no-param-reassign
         el.dataset.lastSessionId = sessionId;
       }
-      const tracked = sessionId ?? el.dataset.lastSessionId ?? null;
-      if (!tracked) return;
-      const liveBacking = participants.some(
-        (p) => p.sessionId === tracked && p.isActive && p.hasVideo
-      );
-      if (liveBacking) return;
-      const trackAlive =
-        el.srcObject instanceof MediaStream &&
-        el.srcObject.getVideoTracks().some((t) => t.readyState === "live");
-      if (trackAlive) return;
-      staleVideoElements.add(el);
+      const tracked = sessionId || el.dataset.lastSessionId || null;
+      const backed =
+        anyPublisher &&
+        (!tracked ||
+          participants.some(
+            (p) => p.sessionId === tracked && p.isActive && p.hasVideo
+          ));
+
+      setTileParticipantBacked(el, backed);
+      if (!backed) {
+        unbackedElements.add(el);
+        // eslint-disable-next-line no-param-reassign
+        el.dataset.lastSessionId = "";
+      }
     });
 
-    const liveElements = staleVideoElements.size
-      ? elements.filter((el) => !staleVideoElements.has(el))
-      : elements;
-    const tiles = liveElements.map((el) => el.parentElement ?? el);
+    const tiles = elements.map((el) => el.parentElement ?? el);
     const currentTileSet = new Set<Element>(tiles);
 
     const pinnedParticipant = pinnedSessionId
       ? (participants.find((p) => p.sessionId === pinnedSessionId) ?? null)
       : null;
-    liveElements.forEach((videoEl) => {
-      const originalIdx = elements.indexOf(videoEl);
-      const match = tileMatches[originalIdx];
+    elements.forEach((videoEl, idx) => {
+      if (unbackedElements.has(videoEl)) {
+        updateVideoTileLabel(videoEl, null, false);
+        return;
+      }
+      const match = tileMatches[idx];
       const name = pinnedParticipant?.name ?? match?.name ?? null;
       const isWhip = pinnedParticipant?.isWhip ?? match?.isWhip ?? false;
       updateVideoTileLabel(videoEl, name, isWhip);
@@ -104,6 +113,7 @@ export const useVideoTileGrid = ({
     participants,
     pinnedContainer,
     pinnedSessionId,
+    selfSessionId,
     tileMatches,
   ]);
 
