@@ -80,14 +80,25 @@ const CloseButton = styled(PrimaryButton)`
 const OpenButton = styled(SecondaryButton)`
   margin-top: 1rem;
   width: 100%;
+  background: transparent;
+  border: 0.2rem solid rgba(89, 203, 232, 1);
+  color: rgba(89, 203, 232, 1);
+  box-shadow: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
+  gap: 1.2rem;
+
+  &:hover {
+    background: rgba(89, 203, 232, 0.1);
+  }
 
   svg {
-    width: 2rem;
-    height: 2rem;
+    width: 1.8rem;
+    height: 1.8rem;
+    flex-shrink: 0;
+    fill: currentColor;
+    transform: translateY(-0.1rem);
   }
 `;
 
