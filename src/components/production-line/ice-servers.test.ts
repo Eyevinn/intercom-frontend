@@ -1,0 +1,97 @@
+import { describe, it, expect, vi, afterEach } from "vitest";
+import { resolveIceServers, DEFAULT_ICE_SERVERS } from "./ice-servers.ts";
+
+describe("resolveIceServers", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("returns the Google STUN defaults when unset", () => {
+    expect(resolveIceServers(undefined)).toEqual(DEFAULT_ICE_SERVERS);
+  });
+
+  it("returns the Google STUN defaults when the value is an empty string", () => {
+    expect(resolveIceServers("")).toEqual(DEFAULT_ICE_SERVERS);
+  });
+
+  it("parses a valid JSON array of ICE servers", () => {
+    const configured = JSON.stringify([
+      { urls: "stun:stun.example.com:3478" },
+      { urls: "turn:turn.example.com:3478", username: "u", credential: "p" },
+    ]);
+
+    expect(resolveIceServers(configured)).toEqual([
+      { urls: "stun:stun.example.com:3478" },
+      { urls: "turn:turn.example.com:3478", username: "u", credential: "p" },
+    ]);
+  });
+
+  it("falls back to defaults and warns when the value is not valid JSON", () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    expect(resolveIceServers("not-json")).toEqual(DEFAULT_ICE_SERVERS);
+    expect(warnSpy).toHaveBeenCalledOnce();
+  });
+
+  it("does not throw on invalid JSON", () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    expect(() => resolveIceServers("{broken")).not.toThrow();
+  });
+
+  it("falls back to defaults and warns when valid JSON is not an array", () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    expect(resolveIceServers("5")).toEqual(DEFAULT_ICE_SERVERS);
+    expect(resolveIceServers("null")).toEqual(DEFAULT_ICE_SERVERS);
+    expect(resolveIceServers('{"urls":"stun:stun.example.com:3478"}')).toEqual(
+      DEFAULT_ICE_SERVERS
+    );
+    expect(warnSpy).toHaveBeenCalledTimes(3);
+  });
+
+  it("falls back to defaults and warns when no array element has urls", () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    expect(resolveIceServers('[{"foo":"bar"}]')).toEqual(DEFAULT_ICE_SERVERS);
+    expect(warnSpy).toHaveBeenCalledOnce();
+  });
+
+  it("drops array elements that lack urls but keeps valid ones", () => {
+    const configured = JSON.stringify([
+      { foo: "bar" },
+      { urls: "stun:stun.example.com:3478" },
+    ]);
+
+    expect(resolveIceServers(configured)).toEqual([
+      { urls: "stun:stun.example.com:3478" },
+    ]);
+  });
+
+  it("falls back to defaults when a urls value has no valid scheme or is not a string", () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    // missing scheme, typo'd scheme, non-string, and a bad entry inside a urls array
+    expect(resolveIceServers('[{"urls":"stun.example.com:3478"}]')).toEqual(
+      DEFAULT_ICE_SERVERS
+    );
+    expect(resolveIceServers('[{"urls":"sturn:stun.example.com"}]')).toEqual(
+      DEFAULT_ICE_SERVERS
+    );
+    expect(resolveIceServers('[{"urls":123}]')).toEqual(DEFAULT_ICE_SERVERS);
+    expect(
+      resolveIceServers('[{"urls":["stun:ok.example.com","http://bad"]}]')
+    ).toEqual(DEFAULT_ICE_SERVERS);
+    expect(warnSpy).toHaveBeenCalledTimes(4);
+  });
+
+  it("accepts a urls array of valid stun/turn strings", () => {
+    const configured = JSON.stringify([
+      { urls: ["stun:stun.example.com:3478", "turns:turn.example.com:5349"] },
+    ]);
+
+    expect(resolveIceServers(configured)).toEqual([
+      { urls: ["stun:stun.example.com:3478", "turns:turn.example.com:5349"] },
+    ]);
+  });
+});
