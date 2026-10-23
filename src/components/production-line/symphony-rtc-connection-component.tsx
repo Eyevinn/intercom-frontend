@@ -4,12 +4,15 @@ import { useEstablishSession } from "./use-establish-session";
 import { useRtcConnection } from "./use-rtc-connection";
 import { THeartbeatStatus, useHeartbeat } from "./use-heartbeat";
 import { TUseAudioInputValues } from "./use-audio-input";
+import { TUseVideoInputValues } from "./use-video-input";
 import { useCallStateSync } from "./use-call-state-sync";
 
 type SymphonyRtcConnectionComponentProps = {
   joinProductionOptions: TJoinProductionOptions | null;
   audiooutput: string | undefined;
   inputAudioStream: TUseAudioInputValues;
+  inputVideoStream: TUseVideoInputValues;
+  videoEnabled: boolean;
   callId: string;
   dispatch: React.Dispatch<TGlobalStateAction>;
   onHeartbeatStatus?: (status: THeartbeatStatus) => void;
@@ -20,6 +23,8 @@ export const SymphonyRtcConnectionComponent = ({
   joinProductionOptions,
   audiooutput,
   inputAudioStream,
+  inputVideoStream,
+  videoEnabled,
   callId,
   dispatch,
   onHeartbeatStatus,
@@ -32,8 +37,10 @@ export const SymphonyRtcConnectionComponent = ({
     onError: onEstablishError,
   });
 
-  const { connectionState, audioElements } = useRtcConnection({
+  const { connectionState, audioElements, videoElements } = useRtcConnection({
     inputAudioStream,
+    inputVideoStream,
+    videoEnabled,
     sdpOffer,
     joinProductionOptions,
     audiooutput,
@@ -50,6 +57,7 @@ export const SymphonyRtcConnectionComponent = ({
     stateUpdates: {
       connectionState,
       audioElements,
+      videoElements,
       sessionId,
     },
   });

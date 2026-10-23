@@ -56,6 +56,7 @@ export const useSubmitForm = ({
         username: payload.username || userSettings?.username || "",
         audioinput: resolvedAudioInput,
         lineUsedForProgramOutput: selectedLine?.programOutputLine || false,
+        videoEnabled: selectedLine?.videoEnabled ?? false,
         isProgramUser: isProgramUser || false,
         lineName: selectedLineName || selectedLine?.name,
         productionName: productionName || production?.name,

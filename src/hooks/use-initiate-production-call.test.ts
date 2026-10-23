@@ -206,10 +206,40 @@ describe("useInitiateProductionCall", () => {
   // ── Output device not found (non-Safari) ─────────────────────────────────
 
   describe("output device not found on non-Safari browser", () => {
-    it("returns false and dispatches ERROR when output device is missing", async () => {
+    it("falls back to first available output device when stored device is missing", async () => {
       mockGetUpdatedDevices.mockResolvedValue({
         input: [makeDevice("mic1")],
         output: [makeOutputDevice("other-spk")],
+      });
+
+      const { result } = renderHook(() =>
+        useInitiateProductionCall({ dispatch: mockDispatch })
+      );
+
+      let returnValue: boolean | undefined;
+      await act(async () => {
+        returnValue = await result.current.initiateProductionCall({
+          payload: defaultPayload,
+        });
+      });
+
+      expect(returnValue).toBe(true);
+      expect(mockDispatch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: "ADD_CALL",
+          payload: expect.objectContaining({
+            callState: expect.objectContaining({
+              audiooutput: "other-spk",
+            }),
+          }),
+        })
+      );
+    });
+
+    it("returns false and dispatches ERROR when no output devices exist at all", async () => {
+      mockGetUpdatedDevices.mockResolvedValue({
+        input: [makeDevice("mic1")],
+        output: [],
       });
 
       const { result } = renderHook(() =>

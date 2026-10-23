@@ -33,7 +33,11 @@ export type TPreset = {
 
 type TCreateProductionOptions = {
   name: string;
-  lines: { name: string; programOutputLine?: boolean }[];
+  lines: {
+    name: string;
+    programOutputLine?: boolean;
+    videoEnabled?: boolean;
+  }[];
 };
 
 type TParticipant = {
@@ -42,6 +46,8 @@ type TParticipant = {
   endpointId: string;
   isActive: boolean;
   isWhip: boolean;
+  isWhepReceiver?: boolean;
+  hasVideo?: boolean;
 };
 
 type TLine = {
@@ -50,6 +56,8 @@ type TLine = {
   smbConferenceId: string;
   participants: TParticipant[];
   programOutputLine?: boolean;
+  videoEnabled?: boolean;
+  whepSourceSessionId?: string | null;
 };
 
 export type TBasicProductionResponse = {
@@ -161,6 +169,45 @@ export const API = {
         }),
       })
     ),
+
+  setLineWhepSource: async ({
+    productionId,
+    lineId,
+    sessionId,
+  }: {
+    productionId: string;
+    lineId: string;
+    sessionId: string | null;
+  }): Promise<{ lineId: string; pinnedSessionId: string | null }> =>
+    handleFetchRequest<{ lineId: string; pinnedSessionId: string | null }>(
+      fetch(`${API_URL}production/${productionId}/line/${lineId}/whep-source`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ pinnedSessionId: sessionId }),
+      })
+    ),
+
+  setSessionVideoSource: async ({
+    sessionId,
+    pinnedSessionId,
+  }: {
+    sessionId: string;
+    pinnedSessionId: string | null;
+  }): Promise<{ sessionId: string; pinnedSessionId: string | null }> =>
+    handleFetchRequest<{
+      sessionId: string;
+      pinnedSessionId: string | null;
+    }>(
+      fetch(`${API_URL}session/${sessionId}/video-source`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ pinnedSessionId }),
+      })
+    ),
   listProductions: ({
     searchParams,
   }: {
@@ -215,7 +262,8 @@ export const API = {
   addProductionLine: (
     productionId: string,
     name: string,
-    programOutputLine?: boolean
+    programOutputLine?: boolean,
+    videoEnabled?: boolean
   ): Promise<TLine> =>
     handleFetchRequest<TLine>(
       fetch(`${API_URL}production/${productionId}/line`, {
@@ -226,6 +274,7 @@ export const API = {
         body: JSON.stringify({
           name,
           programOutputLine,
+          videoEnabled,
         }),
       })
     ),
@@ -337,12 +386,14 @@ export const API = {
         body: JSON.stringify(options),
       })
     ),
+
   listPresets: (): Promise<{ presets: TPreset[] }> =>
     handleFetchRequest<{ presets: TPreset[] }>(
       fetch(`${API_URL}preset`, {
         method: "GET",
       })
     ),
+
   deletePreset: async (id: string): Promise<void> => {
     const response = await fetch(`${API_URL}preset/${id}`, {
       method: "DELETE",
@@ -351,6 +402,7 @@ export const API = {
       await handleFetchRequest<void>(Promise.resolve(response));
     }
   },
+
   updatePreset: (
     id: string,
     update: {

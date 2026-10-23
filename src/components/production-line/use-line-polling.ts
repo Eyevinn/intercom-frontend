@@ -12,13 +12,15 @@ type TProps = {
   joinProductionOptions: TJoinProductionOptions | null;
 };
 
+const LINE_METADATA_REFRESH_MS = 1000;
+
 const isAbortError = (err: unknown): boolean =>
   err instanceof DOMException && err.name === "AbortError";
 
-// Fetches the line once for its metadata, then keeps the participant list
-// current through the manager's long-poll endpoint instead of interval polling:
-// each request is held open server-side until participants change (or it times
-// out), and is re-issued immediately when it resolves.
+// Keeps the participant list current through the manager's long-poll endpoint
+// (each request is held open server-side until participants change, then is
+// re-issued immediately), and refreshes the rest of the line on an interval
+// since the long-poll does not carry line-level fields.
 export const useLinePolling = ({ callId, joinProductionOptions }: TProps) => {
   const [line, setLine] = useState<TLine | null>(null);
   const [, dispatch] = useGlobalState();
@@ -33,13 +35,14 @@ export const useLinePolling = ({ callId, joinProductionOptions }: TProps) => {
     const controller = new AbortController();
     const productionId = parseInt(joinProductionOptions.productionId, 10);
     const lineId = parseInt(joinProductionOptions.lineId, 10);
+    const ERROR_AFTER_FAILURES = 5;
 
     const handleFailure = () => {
       consecutiveFailureCount += 1;
       logger.red(
         `Error fetching production line ${productionId}/${lineId}. For call-id: ${callId}`
       );
-      if (consecutiveFailureCount >= 5) {
+      if (consecutiveFailureCount === ERROR_AFTER_FAILURES) {
         dispatch({
           type: "ERROR",
           payload: {
@@ -50,19 +53,13 @@ export const useLinePolling = ({ callId, joinProductionOptions }: TProps) => {
           },
         });
       }
-      if (consecutiveFailureCount >= 10) {
-        dispatch({
-          type: "ERROR",
-          payload: {
-            callId,
-            error: new Error(
-              "Line polling stopped after 10 consecutive failures."
-            ),
-          },
-        });
-        return false;
+    };
+
+    // Clear a previously surfaced polling error once a request succeeds again.
+    const clearErrorOnRecovery = () => {
+      if (consecutiveFailureCount >= ERROR_AFTER_FAILURES) {
+        dispatch({ type: "ERROR", payload: { callId, error: null } });
       }
-      return true;
     };
 
     // Respect the global auth circuit breaker. Returns true when the caller may
@@ -92,18 +89,18 @@ export const useLinePolling = ({ callId, joinProductionOptions }: TProps) => {
       API.fetchLineParticipants(productionId, lineId, controller.signal)
         .then((participants) => {
           if (cancelled) return;
+          clearErrorOnRecovery();
           consecutiveFailureCount = 0;
           setLine((prev) => (prev ? { ...prev, participants } : prev));
           poll();
         })
         .catch((err) => {
           if (cancelled || isAbortError(err)) return;
-          if (handleFailure()) {
-            retryTimeout = setTimeout(
-              poll,
-              backoffDelayMs(consecutiveFailureCount)
-            );
-          }
+          handleFailure();
+          retryTimeout = setTimeout(
+            poll,
+            backoffDelayMs(consecutiveFailureCount)
+          );
         });
     };
 
@@ -116,25 +113,46 @@ export const useLinePolling = ({ callId, joinProductionOptions }: TProps) => {
       API.fetchProductionLine(productionId, lineId)
         .then((l) => {
           if (cancelled) return;
+          clearErrorOnRecovery();
           consecutiveFailureCount = 0;
           setLine(l);
           poll();
         })
         .catch((err) => {
           if (cancelled || isAbortError(err)) return;
-          if (handleFailure()) {
-            retryTimeout = setTimeout(
-              seed,
-              backoffDelayMs(consecutiveFailureCount)
-            );
-          }
+          handleFailure();
+          retryTimeout = setTimeout(
+            seed,
+            backoffDelayMs(consecutiveFailureCount)
+          );
+        });
+    };
+
+    const refreshLineMetadata = () => {
+      API.fetchProductionLine(productionId, lineId)
+        .then((l) => {
+          if (cancelled) return;
+          setLine((prev) =>
+            prev ? { ...l, participants: prev.participants } : l
+          );
+        })
+        .catch(() => {
+          if (cancelled) return;
+          logger.red(
+            `Error refreshing line metadata ${productionId}/${lineId}. For call-id: ${callId}`
+          );
         });
     };
 
     seed();
+    const metadataInterval = window.setInterval(
+      refreshLineMetadata,
+      LINE_METADATA_REFRESH_MS
+    );
 
     return () => {
       cancelled = true;
+      window.clearInterval(metadataInterval);
       if (retryTimeout !== null) clearTimeout(retryTimeout);
       resumeUnsub?.();
       controller.abort();

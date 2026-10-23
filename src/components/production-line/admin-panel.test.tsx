@@ -12,6 +12,7 @@ const other: TParticipant = {
   endpointId: "endpoint-other",
   isActive: true,
   isWhip: false,
+  hasVideo: false,
 };
 
 const me: TParticipant = {
@@ -20,6 +21,7 @@ const me: TParticipant = {
   endpointId: "endpoint-me",
   isActive: true,
   isWhip: false,
+  hasVideo: false,
 };
 
 const whip: TParticipant = {
@@ -28,6 +30,7 @@ const whip: TParticipant = {
   endpointId: "endpoint-whip",
   isActive: true,
   isWhip: true,
+  hasVideo: false,
 };
 
 const inactive: TParticipant = {
@@ -36,6 +39,7 @@ const inactive: TParticipant = {
   endpointId: "endpoint-inactive",
   isActive: false,
   isWhip: false,
+  hasVideo: false,
 };
 
 const renderPanel = (overrides?: { participants?: TParticipant[] }) => {

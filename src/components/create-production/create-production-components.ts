@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 import { darkText, errorColour } from "../../css-helpers/defaults";
-import { FlexContainer } from "../generic-components";
+import { FlexContainer, mediaQueries } from "../generic-components";
 
 export const HeaderWrapper = styled.div`
   display: flex;
@@ -77,12 +77,13 @@ export const LineNumber = styled.span`
 
 export const LineInputRow = styled.div`
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 1rem;
 
   > *:first-of-type {
-    flex: 1;
-    min-width: 0;
+    flex: 1 1 14rem;
+    min-width: 14rem;
   }
 
   label {
@@ -92,6 +93,17 @@ export const LineInputRow = styled.div`
   input,
   select {
     margin-bottom: 0;
+  }
+
+  ${mediaQueries.isSmallScreen} {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+
+    > *:first-of-type {
+      flex: 0 1 auto;
+      min-width: 0;
+    }
   }
 `;
 

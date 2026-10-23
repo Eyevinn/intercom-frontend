@@ -17,21 +17,21 @@ const CollapsibleHeaderTexts = styled(HeaderTexts)`
 type CollapsibleItemProps = {
   headerContent: ReactNode;
   expandedContent: ReactNode;
+  className?: string;
+  testId?: string;
   onHeaderClick?: (
     e: React.MouseEvent,
     open: boolean,
     setOpen: (open: boolean) => void
   ) => void;
-  className?: string;
-  testId?: string;
 };
 
 export const CollapsibleItem = ({
   headerContent,
   expandedContent,
-  onHeaderClick,
   className,
   testId,
+  onHeaderClick,
 }: CollapsibleItemProps) => {
   const [open, setOpen] = useState<boolean>(false);
 

@@ -49,8 +49,17 @@ export const ParticipantCount = styled.div`
 
 export const Lineblock = styled.div`
   margin-top: 1rem;
-  background-color: ${({ isProgramOutput }: { isProgramOutput?: boolean }) =>
-    isProgramOutput ? "rgb(73, 67, 124)" : "rgb(77, 77, 77)"};
+  background-color: ${({
+    isProgramOutput,
+    isVideoEnabled,
+  }: {
+    isProgramOutput?: boolean;
+    isVideoEnabled?: boolean;
+  }) => {
+    if (isVideoEnabled) return "rgb(45, 62, 124)";
+    if (isProgramOutput) return "rgb(73, 67, 124)";
+    return "rgb(77, 77, 77)";
+  }};
   border-radius: 1rem;
   padding: 1rem;
   display: flex;
@@ -71,7 +80,6 @@ export const LineBlockTexts = styled.div`
 export const LineBlockTitle = styled.div`
   font-weight: bold;
   font-size: 1.5rem;
-  margin-bottom: 0.2rem;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -83,6 +91,7 @@ export const LineBlockTitleWrapper = styled.div`
   gap: 0.5rem;
   min-width: 0;
   overflow: hidden;
+  margin-bottom: 0.2rem;
 
   &.management {
     margin-right: 1rem;
@@ -218,6 +227,7 @@ export const IconWrapper = styled.div`
   svg {
     height: 100%;
     width: 100%;
+    fill: #e8eaed;
   }
 `;
 

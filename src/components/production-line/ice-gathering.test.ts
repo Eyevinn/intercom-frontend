@@ -43,7 +43,7 @@ describe("waitForIceGathering", () => {
     await expect(promise).resolves.toBeUndefined();
   });
 
-  it("rejects on timeout", async () => {
+  it("resolves on timeout (proceeds with partial candidates)", async () => {
     const pc = new MockRTCPeerConnection();
     pc.iceGatheringState = "gathering";
 
@@ -54,7 +54,7 @@ describe("waitForIceGathering", () => {
 
     vi.advanceTimersByTime(3000);
 
-    await expect(promise).rejects.toThrow("ice gathering timeout");
+    await expect(promise).resolves.toBeUndefined();
   });
 
   it("cleans up event listener after completion", async () => {
@@ -74,18 +74,24 @@ describe("waitForIceGathering", () => {
     );
   });
 
-  it("uses default 5-second timeout", async () => {
+  it("uses default 8-second timeout", async () => {
     const pc = new MockRTCPeerConnection();
     pc.iceGatheringState = "gathering";
 
-    const promise = waitForIceGathering(pc as unknown as RTCPeerConnection);
+    let settled = false;
+    const promise = waitForIceGathering(
+      pc as unknown as RTCPeerConnection
+    ).then(() => {
+      settled = true;
+    });
 
-    // At 4.9s, should not have rejected yet
-    vi.advanceTimersByTime(4900);
+    vi.advanceTimersByTime(7900);
+    // micro-task to let any prematurely-resolved promise settle
+    await Promise.resolve();
+    expect(settled).toBe(false);
 
-    // At 5s, should reject
     vi.advanceTimersByTime(100);
-
-    await expect(promise).rejects.toThrow("waited 5 seconds");
+    await promise;
+    expect(settled).toBe(true);
   });
 });
