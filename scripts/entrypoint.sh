@@ -46,7 +46,8 @@ echo "entrypoint.sh: configuring runtime env.js (MANAGER_URL=$API_URL)"
 cat > /usr/share/nginx/html/env.js <<EOF
 window.__ENV__ = {
   MANAGER_URL: "$(escape_js "$API_URL")",
-  AUTH: "$(escape_js "${AUTH:-}")"
+  AUTH: "$(escape_js "${AUTH:-}")",
+  ICE_SERVERS: "$(escape_js "${ICE_SERVERS:-}")"
 };
 EOF
 

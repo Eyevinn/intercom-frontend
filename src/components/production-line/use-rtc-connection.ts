@@ -5,6 +5,7 @@ import { useGlobalState } from "../../global-state/context-provider.tsx";
 import { TGlobalStateAction } from "../../global-state/global-state-actions.ts";
 import { noop } from "../../helpers";
 import logger from "../../utils/logger.ts";
+import { getIceServers } from "../../utils/runtime-config.ts";
 import { createAudioElement } from "./audio-element-factory.ts";
 import {
   attachShowWhenReady,
@@ -312,10 +313,7 @@ export const useRtcConnection = ({
   const [rtcPeerConnection] = useState<RTCPeerConnection>(
     () =>
       new RTCPeerConnection({
-        iceServers: [
-          { urls: "stun:stun.l.google.com:19302" },
-          { urls: "stun:stun1.l.google.com:19302" },
-        ],
+        iceServers: getIceServers(),
       })
   );
   const [, dispatch] = useGlobalState();
