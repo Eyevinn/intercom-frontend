@@ -24,7 +24,20 @@
 export type TRuntimeEnv = {
   MANAGER_URL?: string;
   AUTH?: string;
+  ICE_SERVERS?: string;
 };
+
+/**
+ * Default STUN servers used when no ICE configuration is supplied. These are
+ * Google's public STUN servers; they are only a fallback so out-of-the-box
+ * behavior is unchanged. Operators concerned about leaking client IPs to a
+ * third party (or needing TURN) should override via ICE_SERVERS /
+ * VITE_ICE_SERVERS — see getIceServers.
+ */
+const DEFAULT_ICE_SERVERS: RTCIceServer[] = [
+  { urls: "stun:stun.l.google.com:19302" },
+  { urls: "stun:stun1.l.google.com:19302" },
+];
 
 declare global {
   interface Window {
@@ -60,3 +73,36 @@ export const getBackendUrl = (): string => {
  */
 export const getAuthUrl = (): string =>
   firstNonEmpty(getRuntimeEnv().AUTH, import.meta.env.AUTH) ?? "";
+
+/**
+ * ICE servers for the WebRTC peer connections, resolved (first non-empty wins)
+ * from the runtime window.__ENV__.ICE_SERVERS, then the build-time
+ * VITE_ICE_SERVERS, then the Google STUN defaults. The configured value must be
+ * a JSON array of RTCIceServer objects, e.g.
+ *   [{"urls":"stun:stun.example.com:3478"},
+ *    {"urls":"turn:turn.example.com:3478","username":"u","credential":"p"}]
+ * A missing, empty, malformed or non-array value falls back to the defaults so
+ * a misconfiguration can never leave the app without ICE servers.
+ */
+export const getIceServers = (): RTCIceServer[] => {
+  const raw = firstNonEmpty(
+    getRuntimeEnv().ICE_SERVERS,
+    import.meta.env.VITE_ICE_SERVERS
+  );
+  if (!raw) return DEFAULT_ICE_SERVERS;
+
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      return parsed as RTCIceServer[];
+    }
+    console.warn(
+      "Ignoring ICE_SERVERS config: expected a non-empty JSON array; using defaults."
+    );
+  } catch {
+    console.warn(
+      "Ignoring ICE_SERVERS config: value is not valid JSON; using defaults."
+    );
+  }
+  return DEFAULT_ICE_SERVERS;
+};

@@ -12,6 +12,7 @@ import { useEffect } from "react";
 import { noop } from "../../helpers.ts";
 import { API } from "../../api/api.ts";
 import logger from "../../utils/logger.ts";
+import { getIceServers } from "../../utils/runtime-config.ts";
 import { TJoinProductionOptions } from "./types.ts";
 import { useAudioElements } from "./use-audio-elements.ts";
 import { useVideoElements } from "./use-video-elements.ts";
@@ -88,10 +89,7 @@ export const useShadowRtcConnection = (
 
       // 2. Create the peer connection (receive-only — no local tracks added).
       rtcPeerConnection = new RTCPeerConnection({
-        iceServers: [
-          { urls: "stun:stun.l.google.com:19302" },
-          { urls: "stun:stun1.l.google.com:19302" },
-        ],
+        iceServers: getIceServers(),
       });
 
       // 3. Handle incoming tracks from the WHIP publisher.
