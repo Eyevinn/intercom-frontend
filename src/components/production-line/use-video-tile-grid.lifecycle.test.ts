@@ -246,3 +246,108 @@ describe("useVideoTileGrid — remote tile lifecycle", () => {
     expect(isVisible(elA)).toBe(false);
   });
 });
+
+describe("useVideoTileGrid — pin switch overlay", () => {
+  let grid: HTMLDivElement;
+  let clock: number;
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+    clock = 0;
+    vi.spyOn(performance, "now").mockImplementation(() => clock);
+    grid = document.createElement("div");
+    document.body.appendChild(grid);
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.useRealTimers();
+    grid.remove();
+  });
+
+  const withFrameCallbacks = (el: HTMLVideoElement) => {
+    let pending: ((now: number) => void) | null = null;
+    Object.assign(el, {
+      requestVideoFrameCallback: (cb: (now: number) => void) => {
+        pending = cb;
+        return 1;
+      },
+      cancelVideoFrameCallback: () => {
+        pending = null;
+      },
+    });
+    return (at: number) => {
+      clock = at;
+      const cb = pending;
+      pending = null;
+      cb?.(at);
+    };
+  };
+
+  const overlayShown = (el: HTMLVideoElement) =>
+    (el.parentElement as HTMLElement).querySelector<HTMLDivElement>(
+      "[data-pin-transition-overlay]"
+    )!.style.display === "flex";
+
+  const switchPin = () => {
+    const { el } = makeTile("ep-slot");
+    const presentFrame = withFrameCallbacks(el);
+    const a = participant({ sessionId: "a", endpointId: "ep-a" });
+    const b = participant({ sessionId: "b", endpointId: "ep-b" });
+    const tile = el.parentElement as HTMLElement;
+    let settle: () => void = () => {};
+    const pendingPinPromiseRef = {
+      current: new Promise<void>((resolve) => {
+        settle = resolve;
+      }) as Promise<void> | null,
+    };
+    const common = {
+      videoElements: [el],
+      participants: [a, b],
+      tileMatches: [match("a", a.name)],
+      pinnedContainer: tile,
+      pendingPinPromiseRef,
+    };
+    const view = renderGrid(grid, { ...common, pinnedSessionId: "a" });
+    view.update({ ...common, pinnedSessionId: "b" });
+    return {
+      el,
+      presentFrame,
+      settle: async () => {
+        await act(async () => {
+          settle();
+        });
+      },
+    };
+  };
+
+  it("clears the overlay shortly after the pin settles when frames keep flowing", async () => {
+    const { el, presentFrame, settle } = switchPin();
+    expect(overlayShown(el)).toBe(true);
+
+    presentFrame(33);
+    presentFrame(66);
+    expect(overlayShown(el)).toBe(true);
+
+    clock = 100;
+    await settle();
+    presentFrame(133);
+    expect(overlayShown(el)).toBe(true);
+
+    for (let t = 166; t <= 400; t += 33) presentFrame(t);
+    expect(overlayShown(el)).toBe(false);
+  });
+
+  it("keeps the overlay while the decoder waits for a keyframe, then clears on the first new frame", async () => {
+    const { el, presentFrame, settle } = switchPin();
+
+    presentFrame(33);
+    clock = 100;
+    await settle();
+    tick(1000);
+    expect(overlayShown(el)).toBe(true);
+
+    presentFrame(1100);
+    expect(overlayShown(el)).toBe(false);
+  });
+});
