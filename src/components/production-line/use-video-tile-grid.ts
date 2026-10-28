@@ -171,6 +171,7 @@ export const useVideoTileGrid = ({
     type CVFC = (h: number) => void;
 
     let aborted = false;
+    let settledAt: number | null = null;
     const perTarget = targets.map((tile) => {
       setTilePinTransitioning(tile, true);
 
@@ -182,7 +183,8 @@ export const useVideoTileGrid = ({
       };
 
       const frameCbHandleRef: { value: number | null } = { value: null };
-      const videoEl = tile.querySelector("video");
+      const videoEl =
+        (videoElements ?? []).find((el) => el.parentElement === tile) ?? null;
       return {
         tile,
         videoEl,
@@ -192,37 +194,46 @@ export const useVideoTileGrid = ({
       };
     });
 
+    const GAP_MS = 120;
+    const SETTLED_FRAME_MARGIN_MS = 250;
+    const withoutRvfc: (() => void)[] = [];
+
+    perTarget.forEach((entry) => {
+      const { videoEl, clearedRef, clear } = entry;
+      const handleRef = entry.frameCbHandleRef;
+      const rvfc = videoEl
+        ? (videoEl as unknown as { requestVideoFrameCallback?: RVFC })
+            .requestVideoFrameCallback
+        : undefined;
+
+      if (!videoEl || typeof rvfc !== "function") {
+        withoutRvfc.push(clear);
+        return;
+      }
+
+      let lastFrameAt = performance.now();
+      const onFrame = (now: number) => {
+        if (clearedRef.value || aborted) return;
+        const resumedAfterGap = now - lastFrameAt > GAP_MS;
+        lastFrameAt = now;
+        if (
+          settledAt !== null &&
+          (resumedAfterGap || now - settledAt >= SETTLED_FRAME_MARGIN_MS)
+        ) {
+          clear();
+          return;
+        }
+        handleRef.value = rvfc.call(videoEl, onFrame);
+      };
+      handleRef.value = rvfc.call(videoEl, onFrame);
+    });
+
     const pinSettled = pendingPinPromiseRef.current ?? Promise.resolve();
 
     pinSettled.finally(() => {
       if (aborted) return;
-      perTarget.forEach((entry) => {
-        const { videoEl, clearedRef, clear } = entry;
-        const handleRef = entry.frameCbHandleRef;
-        const rvfc = videoEl
-          ? (videoEl as unknown as { requestVideoFrameCallback?: RVFC })
-              .requestVideoFrameCallback
-          : undefined;
-
-        if (videoEl && typeof rvfc === "function") {
-          const GAP_MS = 120;
-          let lastFrameAt = performance.now();
-          let gapObserved = false;
-          const onFrame = (now: number) => {
-            if (clearedRef.value || aborted) return;
-            if (now - lastFrameAt > GAP_MS) gapObserved = true;
-            lastFrameAt = now;
-            if (gapObserved) {
-              clear();
-              return;
-            }
-            handleRef.value = rvfc.call(videoEl, onFrame);
-          };
-          handleRef.value = rvfc.call(videoEl, onFrame);
-        } else {
-          clear();
-        }
-      });
+      settledAt = performance.now();
+      withoutRvfc.forEach((clear) => clear());
     });
 
     const safetyTimer = setTimeout(() => {
