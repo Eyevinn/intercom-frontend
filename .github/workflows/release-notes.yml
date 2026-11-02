@@ -25,13 +25,14 @@ jobs:
           node-version: "20"
 
       - name: Install dependencies
-        run: |
-          npm install @anthropic-ai/sdk
+        working-directory: .github/scripts/release-notes
+        run: npm ci
 
       - name: Generate release notes
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_PATH: ${{ github.workspace }}/.github/scripts/release-notes/node_modules
         run: |
           cat > generate_release_notes.cjs << 'EOF'
           const { Anthropic } = require('@anthropic-ai/sdk');
@@ -110,4 +111,4 @@ jobs:
           generateReleaseNotes();
           EOF
 
-          node generate_release_notes.js
+          node generate_release_notes.cjs
