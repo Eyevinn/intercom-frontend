@@ -3,6 +3,7 @@ import { useGlobalState } from "../../../global-state/context-provider";
 import { DisplayContainerHeader } from "../../../pages/landing-page/display-container-header";
 import { UserSettingsForm } from "../user-settings-form/user-settings-form";
 import { ResponsiveFormContainer } from "../../layout/generic-components";
+import { RolePassword } from "./role-password";
 import { NavigateToRootButton } from "../navigate-to-root-button/navigate-to-root-button";
 import { HeaderWrapper } from "../../../pages/create-production/create-production-components";
 
@@ -16,6 +17,7 @@ interface UserSettingsProps {
   hideTitle?: boolean;
   hideUsername?: boolean;
   hideDevices?: boolean;
+  showRoleSection?: boolean;
 }
 
 export const UserSettings: FC<UserSettingsProps> = (props) => {
@@ -29,6 +31,7 @@ export const UserSettings: FC<UserSettingsProps> = (props) => {
     hideTitle,
     hideUsername,
     hideDevices,
+    showRoleSection,
   } = props;
   const [{ devices, userSettings }] = useGlobalState();
 
@@ -65,6 +68,7 @@ export const UserSettings: FC<UserSettingsProps> = (props) => {
           hideDevices={hideDevices}
         />
       )}
+      {showRoleSection && <RolePassword />}
     </ResponsiveFormContainer>
   );
 };

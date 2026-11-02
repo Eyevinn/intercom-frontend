@@ -36,6 +36,7 @@ export const LandingPage = ({ setApiError }: { setApiError: () => void }) => {
             onSave={() => setShowSettings(false)}
             showBackButton={showSettings}
             onBack={() => setShowSettings(false)}
+            showRoleSection
           />
         )) || (
           <>

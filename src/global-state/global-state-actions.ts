@@ -1,4 +1,5 @@
 import { TUserSettings } from "../components/ui/user-settings/types.ts";
+import { TRoleAuth } from "../api/role-auth-store.ts";
 import { CallState, DevicesState } from "./types.ts";
 
 export type TGlobalStateAction =
@@ -16,7 +17,8 @@ export type TGlobalStateAction =
   | TSetWebSocket
   | THeartbeatError
   | TPresetUpdated
-  | TPresetListFetched;
+  | TPresetListFetched
+  | TUpdateRoleAuth;
 
 export type TPublishError = {
   type: "ERROR";
@@ -86,4 +88,9 @@ export type TPresetUpdated = {
 
 export type TPresetListFetched = {
   type: "PRESET_LIST_FETCHED";
+};
+
+export type TUpdateRoleAuth = {
+  type: "UPDATE_ROLE_AUTH";
+  payload: TRoleAuth | null;
 };

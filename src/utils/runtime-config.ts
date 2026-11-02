@@ -25,6 +25,7 @@ export type TRuntimeEnv = {
   MANAGER_URL?: string;
   AUTH?: string;
   ICE_SERVERS?: string;
+  REQUIRE_AUTH?: string;
 };
 
 /**
@@ -73,6 +74,27 @@ export const getBackendUrl = (): string => {
  */
 export const getAuthUrl = (): string =>
   firstNonEmpty(getRuntimeEnv().AUTH, import.meta.env.AUTH) ?? "";
+
+/**
+ * Whether the manager deployment requires a role (REQUIRE_AUTH=true on the
+ * manager). This is the single global flag the route guards consult to decide
+ * what "no role held" means:
+ *
+ *   false (default) → no role held is allowed; guards and gates stay dormant,
+ *                     so existing no-auth deployments behave exactly as before.
+ *   true            → a role must be requested before restricted routes open.
+ *
+ * Resolved (first non-empty wins) from the runtime window.__ENV__.REQUIRE_AUTH
+ * then the build-time VITE_REQUIRE_AUTH, matching how the manager base URL and
+ * auth URL are configured. Any value other than "true"/"1" counts as off.
+ */
+export const getRequireAuth = (): boolean => {
+  const raw = firstNonEmpty(
+    getRuntimeEnv().REQUIRE_AUTH,
+    import.meta.env.VITE_REQUIRE_AUTH
+  );
+  return raw === "true" || raw === "1";
+};
 
 /**
  * ICE servers for the WebRTC peer connections, resolved (first non-empty wins)

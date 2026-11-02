@@ -4,6 +4,7 @@ import { TGlobalStateAction } from "../global-state/global-state-actions";
 import { isBrowserSafari, isIpad, isMobile } from "../bowser";
 import { useFetchDevices } from "./use-fetch-devices";
 import { useDevicePermissions } from "./use-device-permission";
+import { hasFeature } from "../api/role-auth-store";
 import logger from "../utils/logger";
 
 export const useInitiateProductionCall = ({
@@ -32,6 +33,30 @@ export const useInitiateProductionCall = ({
       customGlobalMute?: string;
     }): Promise<boolean> => {
       try {
+        // Roles feature (#635): joining a program-output line as the audio feed
+        // (speaker) is gated on `features.canJoinLine`. Listening is always
+        // allowed. This is the single choke point every join funnels through,
+        // so it enforces the gate regardless of which UI triggered the join.
+        // Dormant by default: `hasFeature` returns true when no role is held
+        // (unless REQUIRE_AUTH is on), so existing deployments are unaffected.
+        const { isProgramUser, lineUsedForProgramOutput } =
+          payload.joinProductionOptions;
+        if (
+          isProgramUser &&
+          lineUsedForProgramOutput &&
+          !hasFeature("canJoinLine")
+        ) {
+          dispatch({
+            type: "ERROR",
+            payload: {
+              error: new Error(
+                "You do not have permission to join this line as audio feed."
+              ),
+            },
+          });
+          return false;
+        }
+
         // Wait for devices to refresh and get the updated devices
         const updatedDevices = await getUpdatedDevices();
 

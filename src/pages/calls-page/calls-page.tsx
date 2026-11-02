@@ -484,6 +484,7 @@ export const CallsPage = () => {
           onSave={() => setShowSettings(false)}
           hideTitle
           hideDevices
+          showRoleSection
         />
       ),
     },

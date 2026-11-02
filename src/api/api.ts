@@ -1,4 +1,6 @@
 import { handleFetchRequest } from "./handle-fetch-request.ts";
+import { authorizedFetch } from "./authorized-fetch.ts";
+import { TRoleAuth } from "./role-auth-store.ts";
 import { getBackendUrl } from "../utils/runtime-config.ts";
 
 const API_VERSION = import.meta.env.VITE_BACKEND_API_VERSION ?? "api/v1/";
@@ -127,7 +129,7 @@ type TForceDisconnectParticipantOptions = {
 export const API = {
   createProduction: async ({ name, lines }: TCreateProductionOptions) =>
     handleFetchRequest<TBasicProductionResponse>(
-      fetch(`${API_URL}production/`, {
+      authorizedFetch(`${API_URL}production/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -143,7 +145,7 @@ export const API = {
     name,
   }: TUpdateProductionNameOptions) =>
     handleFetchRequest<TBasicProductionResponse>(
-      fetch(`${API_URL}production/${productionId}`, {
+      authorizedFetch(`${API_URL}production/${productionId}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -159,7 +161,7 @@ export const API = {
     name,
   }: TUpdateLineNameOptions) =>
     handleFetchRequest<TBasicProductionResponse>(
-      fetch(`${API_URL}production/${productionId}/line/${lineId}`, {
+      authorizedFetch(`${API_URL}production/${productionId}/line/${lineId}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -180,13 +182,16 @@ export const API = {
     sessionId: string | null;
   }): Promise<{ lineId: string; pinnedSessionId: string | null }> =>
     handleFetchRequest<{ lineId: string; pinnedSessionId: string | null }>(
-      fetch(`${API_URL}production/${productionId}/line/${lineId}/whep-source`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ pinnedSessionId: sessionId }),
-      })
+      authorizedFetch(
+        `${API_URL}production/${productionId}/line/${lineId}/whep-source`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ pinnedSessionId: sessionId }),
+        }
+      )
     ),
 
   setSessionVideoSource: async ({
@@ -200,7 +205,7 @@ export const API = {
       sessionId: string;
       pinnedSessionId: string | null;
     }>(
-      fetch(`${API_URL}session/${sessionId}/video-source`, {
+      authorizedFetch(`${API_URL}session/${sessionId}/video-source`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -214,31 +219,31 @@ export const API = {
     searchParams: string;
   }): Promise<TListProductionsResponse> =>
     handleFetchRequest<TListProductionsResponse>(
-      fetch(`${API_URL}productionlist?${searchParams}`, {
+      authorizedFetch(`${API_URL}productionlist?${searchParams}`, {
         method: "GET",
       })
     ),
   fetchProduction: (id: number): Promise<TBasicProductionResponse> =>
     handleFetchRequest<TBasicProductionResponse>(
-      fetch(`${API_URL}production/${id}`, {
+      authorizedFetch(`${API_URL}production/${id}`, {
         method: "GET",
       })
     ),
   deleteProduction: (id: string): Promise<string> =>
     handleFetchRequest<string>(
-      fetch(`${API_URL}production/${id}`, {
+      authorizedFetch(`${API_URL}production/${id}`, {
         method: "DELETE",
       })
     ),
   listProductionLines: (id: number) =>
     handleFetchRequest<TLine[]>(
-      fetch(`${API_URL}production/${id}/line`, {
+      authorizedFetch(`${API_URL}production/${id}/line`, {
         method: "GET",
       })
     ),
   fetchProductionLine: (productionId: number, lineId: number): Promise<TLine> =>
     handleFetchRequest<TLine>(
-      fetch(`${API_URL}production/${productionId}/line/${lineId}`, {
+      authorizedFetch(`${API_URL}production/${productionId}/line/${lineId}`, {
         method: "GET",
       })
     ),
@@ -251,7 +256,7 @@ export const API = {
     signal?: AbortSignal
   ): Promise<TParticipant[]> =>
     handleFetchRequest<TParticipant[]>(
-      fetch(
+      authorizedFetch(
         `${API_URL}production/${productionId}/line/${lineId}/participants`,
         {
           method: "POST",
@@ -266,7 +271,7 @@ export const API = {
     videoEnabled?: boolean
   ): Promise<TLine> =>
     handleFetchRequest<TLine>(
-      fetch(`${API_URL}production/${productionId}/line`, {
+      authorizedFetch(`${API_URL}production/${productionId}/line`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -283,7 +288,7 @@ export const API = {
     lineId: string
   ): Promise<string> =>
     handleFetchRequest<string>(
-      fetch(`${API_URL}production/${productionId}/line/${lineId}`, {
+      authorizedFetch(`${API_URL}production/${productionId}/line/${lineId}`, {
         method: "DELETE",
       })
     ),
@@ -298,7 +303,7 @@ export const API = {
     sessionId,
   }: TForceDisconnectParticipantOptions): Promise<string> =>
     handleFetchRequest<string>(
-      fetch(
+      authorizedFetch(
         `${API_URL}production/${productionId}/line/${lineId}/participants/${sessionId}/disconnect`,
         {
           method: "POST",
@@ -311,7 +316,7 @@ export const API = {
     username,
   }: TOfferAudioSessionOptions): Promise<TOfferAudioSessionResponse> =>
     handleFetchRequest<TOfferAudioSessionResponse>(
-      fetch(`${API_URL}session/`, {
+      authorizedFetch(`${API_URL}session/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -328,7 +333,7 @@ export const API = {
     sdpAnswer,
   }: TPatchAudioSessionOptions): Promise<TPatchAudioSessionResponse> =>
     handleFetchRequest<TPatchAudioSessionResponse>(
-      fetch(`${API_URL}session/${sessionId}`, {
+      authorizedFetch(`${API_URL}session/${sessionId}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -342,19 +347,19 @@ export const API = {
     sessionId,
   }: TDeleteAudioSessionOptions): Promise<string> =>
     handleFetchRequest<string>(
-      fetch(`${API_URL}session/${sessionId}`, {
+      authorizedFetch(`${API_URL}session/${sessionId}`, {
         method: "DELETE",
       })
     ),
   heartbeat: ({ sessionId }: THeartbeatOptions): Promise<string> =>
     handleFetchRequest<string>(
-      fetch(`${API_URL}heartbeat/${sessionId}`, {
+      authorizedFetch(`${API_URL}heartbeat/${sessionId}`, {
         method: "GET",
       })
     ),
   shareUrl: ({ path }: TShareUrlOptions): Promise<TShareUrlResponse> => {
     return handleFetchRequest<TShareUrlResponse>(
-      fetch(`${API_URL}share`, {
+      authorizedFetch(`${API_URL}share`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -367,7 +372,7 @@ export const API = {
   },
   reauth: async (): Promise<void> => {
     return handleFetchRequest<void>(
-      fetch(`${API_URL}reauth`, {
+      authorizedFetch(`${API_URL}reauth`, {
         method: "GET",
       })
     );
@@ -378,7 +383,7 @@ export const API = {
     companionUrl?: string;
   }): Promise<TPreset> =>
     handleFetchRequest<TPreset>(
-      fetch(`${API_URL}preset`, {
+      authorizedFetch(`${API_URL}preset`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -389,13 +394,13 @@ export const API = {
 
   listPresets: (): Promise<{ presets: TPreset[] }> =>
     handleFetchRequest<{ presets: TPreset[] }>(
-      fetch(`${API_URL}preset`, {
+      authorizedFetch(`${API_URL}preset`, {
         method: "GET",
       })
     ),
 
   deletePreset: async (id: string): Promise<void> => {
-    const response = await fetch(`${API_URL}preset/${id}`, {
+    const response = await authorizedFetch(`${API_URL}preset/${id}`, {
       method: "DELETE",
     });
     if (!response.ok || response.status !== 204) {
@@ -412,7 +417,7 @@ export const API = {
     }
   ): Promise<TPreset> =>
     handleFetchRequest<TPreset>(
-      fetch(`${API_URL}preset/${id}`, {
+      authorizedFetch(`${API_URL}preset/${id}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -420,4 +425,42 @@ export const API = {
         body: JSON.stringify(update),
       })
     ),
+
+  // Roles feature (#632): exchange a role password for the granted role and
+  // feature flags. Deliberately NOT routed through `handleFetchRequest`: a 401
+  // here means "wrong role password", not an expired session, so it must not
+  // trip the global auth circuit breaker (which would pause polling and kick
+  // off a reauth). Failures are surfaced to the caller with the HTTP status
+  // attached so the UI can distinguish bad password (401) from rate-limit
+  // (429) and server error.
+  requestPermissions: async ({
+    password,
+  }: {
+    password: string;
+  }): Promise<TRoleAuth> => {
+    const response = await authorizedFetch(`${API_URL}permissions`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ password }),
+    });
+
+    if (!response.ok) {
+      let message = response.statusText || "Permission request failed";
+      try {
+        const body = await response.json();
+        if (body && typeof body.message === "string") {
+          message = body.message;
+        }
+      } catch {
+        // No/invalid JSON body — keep the status-text fallback.
+      }
+      const error = new Error(message) as Error & { status?: number };
+      error.status = response.status;
+      throw error;
+    }
+
+    return response.json();
+  },
 };

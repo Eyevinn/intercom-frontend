@@ -33,6 +33,8 @@ import {
 } from "./hooks/use-reauth.tsx";
 import { TUserSettings } from "./components/ui/user-settings/types";
 import { RequireNonGuest } from "./components/layout/auth/require-non-guest.tsx";
+import { RequireFeature } from "./components/layout/auth/require-feature.tsx";
+import { getRoleAuth } from "./api/role-auth-store.ts";
 import { PresetProvider } from "./contexts/preset-context.tsx";
 
 const DisplayBoxPositioningContainer = styled(FlexContainer)`
@@ -171,7 +173,9 @@ const AppContent = ({
                     path="/create"
                     element={
                       <RequireNonGuest>
-                        <CreateProductionPage />
+                        <RequireFeature feature="canCreateProduction">
+                          <CreateProductionPage />
+                        </RequireFeature>
                       </RequireNonGuest>
                     }
                     errorElement={<ErrorPage />}
@@ -180,9 +184,11 @@ const AppContent = ({
                     path="/manage"
                     element={
                       <RequireNonGuest>
-                        <ManageProductionsPage
-                          setApiError={() => setApiError(true)}
-                        />
+                        <RequireFeature feature="canEditProduction">
+                          <ManageProductionsPage
+                            setApiError={() => setApiError(true)}
+                          />
+                        </RequireFeature>
                       </RequireNonGuest>
                     }
                     errorElement={<ErrorPage />}
@@ -230,6 +236,16 @@ const App = () => {
   });
 
   useLocalUserSettings({ devices, dispatch });
+
+  // Rehydrate a previously granted role (Roles feature, #632) from the
+  // persisted store into global state so route guards and UI gating survive a
+  // page reload. No-op when no role is held, keeping the default dormant.
+  useEffect(() => {
+    const stored = getRoleAuth();
+    if (stored) {
+      dispatch({ type: "UPDATE_ROLE_AUTH", payload: stored });
+    }
+  }, [dispatch]);
 
   return (
     <GlobalStateContext.Provider value={initializedGlobalState}>

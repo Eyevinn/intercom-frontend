@@ -4,6 +4,7 @@ import { useGlobalState } from "../../global-state/context-provider";
 import { useInitiateProductionCall } from "../../hooks/use-initiate-production-call";
 import { PrimaryButton } from "../../components/ui/form-elements/form-elements";
 import { Checkbox } from "../../components/ui/checkbox/checkbox";
+import { useHasFeature } from "../../hooks/use-has-feature";
 import { CheckboxWrapper } from "../landing-page/join-production-components";
 
 const CardContainer = styled.div<{ order?: number }>`
@@ -99,6 +100,9 @@ export const ProgramLineJoinCard = ({
   const [isProgramUser, setIsProgramUser] = useState(false);
   const [{ userSettings }, dispatch] = useGlobalState();
   const { initiateProductionCall } = useInitiateProductionCall({ dispatch });
+  // Roles feature (#635): the audio-feed (speaker) option is gated on
+  // `canJoinLine`. Allowed by default when no role is held.
+  const canJoinAsFeed = useHasFeature("canJoinLine");
 
   const displayName = lineName || lineId;
 
@@ -148,9 +152,13 @@ export const ProgramLineJoinCard = ({
         <Checkbox
           label="Audio feed"
           checked={isProgramUser}
-          onChange={() => setIsProgramUser(true)}
+          disabled={!canJoinAsFeed}
+          onChange={() => canJoinAsFeed && setIsProgramUser(true)}
         />
       </CheckboxWrapper>
+      {!canJoinAsFeed && (
+        <RoleLabel>You do not have permission to join as audio feed.</RoleLabel>
+      )}
       <ButtonRow>
         <JoinBtn
           type="button"

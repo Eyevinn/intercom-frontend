@@ -4,6 +4,7 @@ import {
   TProduction,
 } from "../components/ui/production-line/types.ts";
 import { TUserSettings } from "../components/ui/user-settings/types.ts";
+import { TRoleAuth } from "../api/role-auth-store.ts";
 
 export interface ErrorState {
   globalError?: Error | null;
@@ -48,4 +49,7 @@ export type TGlobalState = {
   selectedProductionId: string | null;
   apiError: Error | false;
   websocket: WebSocket | null;
+  // Granted role + feature flags when a role password has been requested, or
+  // null when no role is held (the default). Never carries the password.
+  roleAuth: TRoleAuth | null;
 };

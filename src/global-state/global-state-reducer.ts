@@ -17,6 +17,7 @@ export const initialGlobalState: TGlobalState = {
   calls: {},
   apiError: false,
   websocket: null,
+  roleAuth: null,
 };
 
 export const globalReducer: Reducer<TGlobalState, TGlobalStateAction> = (
@@ -139,6 +140,11 @@ export const globalReducer: Reducer<TGlobalState, TGlobalStateAction> = (
       return {
         ...state,
         websocket: action.payload,
+      };
+    case "UPDATE_ROLE_AUTH":
+      return {
+        ...state,
+        roleAuth: action.payload,
       };
     case "HEARTBEAT_ERROR":
       return {
