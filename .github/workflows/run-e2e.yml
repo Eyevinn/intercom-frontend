@@ -9,6 +9,9 @@ on:
       - "package.json"
       - "package-lock.json"
 
+permissions:
+  contents: read
+
 jobs:
   e2e:
     if: "!contains(github.event.pull_request.title, 'WIP!')"
