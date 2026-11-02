@@ -34,6 +34,7 @@ import {
   SectionDivider,
   SectionHeader,
   TwoColumnLayout,
+  MobileFormWrapper,
 } from "./create-production-components.ts";
 import { FormItem } from "../user-settings-form/form-item.tsx";
 import { InfoTooltip } from "../info-tooltip/info-tooltip.tsx";
@@ -825,11 +826,11 @@ export const CreateProductionPage = () => {
     return (
       <>
         <PageHeader title="Create" hasNavigateToRoot />
-        <div style={{ padding: "0 2rem" }}>
+        <MobileFormWrapper>
           {productionForm}
           <SectionDivider />
           {presetForm}
-        </div>
+        </MobileFormWrapper>
       </>
     );
   }

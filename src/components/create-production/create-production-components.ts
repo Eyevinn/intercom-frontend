@@ -1,6 +1,7 @@
 import styled from "@emotion/styled";
 import { darkText, errorColour } from "../../css-helpers/defaults";
 import { FlexContainer, mediaQueries } from "../generic-components";
+import { FormSelect } from "../form-elements/form-elements";
 
 export const HeaderWrapper = styled.div`
   display: flex;
@@ -186,16 +187,11 @@ export const AddLineCard = styled.button`
   }
 `;
 
-export const SelectInput = styled.select`
-  width: 100%;
-  font-size: 1.6rem;
-  padding: 0.75rem;
+// Built on the shared FormSelect primitive so create-production selects match
+// every other select in the app (chevron icon, padding, border). Only the
+// in-card bottom spacing and the disabled dimming are overridden here.
+export const SelectInput = styled(FormSelect)`
   margin: 0 0 1rem;
-  border: 0.1rem solid #6d6d6d;
-  border-radius: 0.5rem;
-  background: #32383b;
-  color: white;
-  cursor: pointer;
   &:disabled {
     opacity: 0.5;
     cursor: default;
@@ -218,6 +214,10 @@ export const SectionHeader = styled.h2`
 
 export const SectionDivider = styled.div`
   margin-top: 3rem;
+`;
+
+export const MobileFormWrapper = styled.div`
+  padding: 0 2rem;
 `;
 
 export const TwoColumnLayout = styled.div`
