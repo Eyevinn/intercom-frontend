@@ -1,0 +1,9 @@
+{
+  "name": "release-notes",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Dependencies for the Generate Release Notes GitHub Actions workflow",
+  "dependencies": {
+    "@anthropic-ai/sdk": "1.3.0"
+  }
+}
