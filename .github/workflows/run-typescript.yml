@@ -1,6 +1,9 @@
 name: Transpile and Build Check
 on: [pull_request]
 
+permissions:
+  contents: read
+
 jobs:
   builds:
     if: "!contains(github.event.pull_request.title, 'WIP!')"
