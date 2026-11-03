@@ -95,3 +95,91 @@ describe("API.forceDisconnectParticipant", () => {
     ).rejects.toThrow("Session with id session-1 not found on line 2");
   });
 });
+
+// ---------------------------------------------------------------------------
+// #632 — role permission request endpoint.
+// ---------------------------------------------------------------------------
+
+describe("API.requestPermissions", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.unstubAllEnvs();
+    vi.resetModules();
+  });
+
+  const features = {
+    canCreateProduction: true,
+    canEditProduction: true,
+    canDeleteProduction: true,
+    canManageLines: true,
+    canRemoveParticipants: true,
+    canManageIngests: true,
+    canJoinLine: true,
+  };
+
+  it("POSTs the password and returns the granted role + features on 200", async () => {
+    vi.stubEnv("VITE_BACKEND_URL", "https://example.com/");
+    vi.resetModules();
+
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({ role: "admin", features }),
+    } as unknown as Response);
+    vi.stubGlobal("fetch", fetchMock);
+
+    const { API } = await import("./api.ts");
+
+    const result = await API.requestPermissions({ password: "hunter2" });
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const [url, options] = fetchMock.mock.calls[0];
+    expect(url).toContain("permissions");
+    expect(options.method).toBe("POST");
+    expect(JSON.parse(options.body)).toEqual({ password: "hunter2" });
+    expect(result).toEqual({ role: "admin", features });
+  });
+
+  it("throws with the manager message and status 401 on a bad password", async () => {
+    vi.stubEnv("VITE_BACKEND_URL", "https://example.com/");
+    vi.resetModules();
+
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 401,
+      statusText: "Unauthorized",
+      json: async () => ({ message: "Invalid or unknown role password" }),
+    } as unknown as Response);
+    vi.stubGlobal("fetch", fetchMock);
+
+    const { API } = await import("./api.ts");
+
+    await expect(
+      API.requestPermissions({ password: "wrong" })
+    ).rejects.toMatchObject({
+      message: "Invalid or unknown role password",
+      status: 401,
+    });
+  });
+
+  it("throws with status 429 when rate-limited", async () => {
+    vi.stubEnv("VITE_BACKEND_URL", "https://example.com/");
+    vi.resetModules();
+
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 429,
+      statusText: "Too Many Requests",
+      json: async () => {
+        throw new Error("no body");
+      },
+    } as unknown as Response);
+    vi.stubGlobal("fetch", fetchMock);
+
+    const { API } = await import("./api.ts");
+
+    await expect(
+      API.requestPermissions({ password: "whatever" })
+    ).rejects.toMatchObject({ status: 429 });
+  });
+});

@@ -16,6 +16,14 @@ interface ImportMetaEnv {
    * src/utils/runtime-config.ts (getIceServers).
    */
   readonly VITE_ICE_SERVERS?: string;
+
+  /**
+   * Optional flag mirroring the manager's REQUIRE_AUTH setting. When `"true"`
+   * (or `"1"`) the role route guards require a role to be requested before
+   * restricted routes open. Unset/anything else keeps the Roles feature
+   * dormant. See src/utils/runtime-config.ts (getRequireAuth).
+   */
+  readonly VITE_REQUIRE_AUTH?: string;
 }
 
 interface ImportMeta {

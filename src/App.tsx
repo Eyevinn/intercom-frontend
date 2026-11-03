@@ -33,6 +33,8 @@ import {
 } from "./hooks/use-reauth.tsx";
 import { TUserSettings } from "./components/ui/user-settings/types";
 import { RequireNonGuest } from "./components/layout/auth/require-non-guest.tsx";
+import { RequireFeature } from "./components/layout/auth/require-feature.tsx";
+import { onRoleAuthCleared } from "./api/role-auth-store.ts";
 import { PresetProvider } from "./contexts/preset-context.tsx";
 
 const DisplayBoxPositioningContainer = styled(FlexContainer)`
@@ -171,7 +173,9 @@ const AppContent = ({
                     path="/create"
                     element={
                       <RequireNonGuest>
-                        <CreateProductionPage />
+                        <RequireFeature feature="canCreateProduction">
+                          <CreateProductionPage />
+                        </RequireFeature>
                       </RequireNonGuest>
                     }
                     errorElement={<ErrorPage />}
@@ -180,9 +184,11 @@ const AppContent = ({
                     path="/manage"
                     element={
                       <RequireNonGuest>
-                        <ManageProductionsPage
-                          setApiError={() => setApiError(true)}
-                        />
+                        <RequireFeature feature="canEditProduction">
+                          <ManageProductionsPage
+                            setApiError={() => setApiError(true)}
+                          />
+                        </RequireFeature>
                       </RequireNonGuest>
                     }
                     errorElement={<ErrorPage />}
@@ -230,6 +236,15 @@ const App = () => {
   });
 
   useLocalUserSettings({ devices, dispatch });
+
+  // Clear global-state role when the store drops a stale role password (401).
+  useEffect(
+    () =>
+      onRoleAuthCleared(() =>
+        dispatch({ type: "UPDATE_ROLE_AUTH", payload: null })
+      ),
+    [dispatch]
+  );
 
   return (
     <GlobalStateContext.Provider value={initializedGlobalState}>

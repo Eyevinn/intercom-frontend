@@ -66,6 +66,7 @@ describe("globalReducer", () => {
       calls: {},
       apiError: false,
       websocket: null,
+      roleAuth: null,
     });
   });
 

@@ -96,6 +96,7 @@ const mockState: TGlobalState = {
   userSettings: null,
   apiError: false,
   websocket: null,
+  roleAuth: null,
 };
 
 const wrapper = ({ children }: { children: ReactNode }) =>

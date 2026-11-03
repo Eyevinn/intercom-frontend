@@ -6,6 +6,11 @@ import { type TGlobalStateAction } from "../global-state/global-state-actions";
 import { useFetchDevices } from "./use-fetch-devices";
 import { useDevicePermissions } from "./use-device-permission";
 import * as bowser from "../bowser";
+import {
+  clearRoleAuth,
+  resetRoleAuthForTests,
+  setRoleAuth,
+} from "../api/role-auth-store";
 
 // ── Module mocks ─────────────────────────────────────────────────────────────
 
@@ -330,5 +335,131 @@ describe("useInitiateProductionCall", () => {
         expect.objectContaining({ type: "ADD_CALL" })
       );
     });
+  });
+});
+
+// ── Roles feature (#635): speaker-join gate ───────────────────────────────────
+
+describe("useInitiateProductionCall — program-line speaker gate", () => {
+  const allowAll = {
+    canCreateProduction: true,
+    canEditProduction: true,
+    canDeleteProduction: true,
+    canManageLines: true,
+    canRemoveParticipants: true,
+    canManageIngests: true,
+    canJoinLine: true,
+  };
+
+  let mockDispatch: Dispatch<TGlobalStateAction>;
+  let mockGetUpdatedDevices: ReturnType<typeof vi.fn>;
+
+  beforeEach(() => {
+    mockDispatch = vi.fn() as unknown as Dispatch<TGlobalStateAction>;
+    mockGetUpdatedDevices = vi
+      .fn()
+      .mockResolvedValue({ input: [], output: [] });
+
+    vi.stubGlobal("crypto", { randomUUID: vi.fn().mockReturnValue(FAKE_UUID) });
+    mockUseDevicePermissions.mockReturnValue({
+      permission: true,
+      denied: false,
+    });
+    mockUseFetchDevices.mockReturnValue([
+      mockGetUpdatedDevices,
+    ] as unknown as ReturnType<typeof mockUseFetchDevices>);
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.clearAllMocks();
+    clearRoleAuth();
+    resetRoleAuthForTests();
+    window.localStorage.clear();
+  });
+
+  const programFeedPayload = {
+    joinProductionOptions: {
+      ...defaultJoinOptions,
+      lineUsedForProgramOutput: true,
+      isProgramUser: true,
+    },
+    audiooutput: "spk1",
+  };
+
+  it("blocks joining a program line as audio feed when the role lacks canJoinLine", async () => {
+    setRoleAuth({
+      password: "pw",
+      role: "participant",
+      features: { ...allowAll, canJoinLine: false },
+    });
+
+    const { result } = renderHook(() =>
+      useInitiateProductionCall({ dispatch: mockDispatch })
+    );
+
+    let returnValue: boolean | undefined;
+    await act(async () => {
+      returnValue = await result.current.initiateProductionCall({
+        payload: programFeedPayload,
+      });
+    });
+
+    expect(returnValue).toBe(false);
+    expect(mockDispatch).toHaveBeenCalledWith(
+      expect.objectContaining({ type: "ERROR" })
+    );
+    expect(mockDispatch).not.toHaveBeenCalledWith(
+      expect.objectContaining({ type: "ADD_CALL" })
+    );
+  });
+
+  it("allows joining the same program line as listener even without canJoinLine", async () => {
+    setRoleAuth({
+      password: "pw",
+      role: "participant",
+      features: { ...allowAll, canJoinLine: false },
+    });
+
+    const { result } = renderHook(() =>
+      useInitiateProductionCall({ dispatch: mockDispatch })
+    );
+
+    let returnValue: boolean | undefined;
+    await act(async () => {
+      returnValue = await result.current.initiateProductionCall({
+        payload: {
+          joinProductionOptions: {
+            ...defaultJoinOptions,
+            lineUsedForProgramOutput: true,
+            isProgramUser: false,
+          },
+          audiooutput: "spk1",
+        },
+      });
+    });
+
+    expect(returnValue).toBe(true);
+    expect(mockDispatch).toHaveBeenCalledWith(
+      expect.objectContaining({ type: "ADD_CALL" })
+    );
+  });
+
+  it("allows audio-feed join when no role is held (dormant default)", async () => {
+    const { result } = renderHook(() =>
+      useInitiateProductionCall({ dispatch: mockDispatch })
+    );
+
+    let returnValue: boolean | undefined;
+    await act(async () => {
+      returnValue = await result.current.initiateProductionCall({
+        payload: programFeedPayload,
+      });
+    });
+
+    expect(returnValue).toBe(true);
+    expect(mockDispatch).toHaveBeenCalledWith(
+      expect.objectContaining({ type: "ADD_CALL" })
+    );
   });
 });
