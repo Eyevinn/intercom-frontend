@@ -1,6 +1,7 @@
 import { useCallback, useState } from "react";
 import { API } from "../api/api.ts";
 import { clearRoleAuth, setRoleAuth } from "../api/role-auth-store.ts";
+import { isHttpError } from "../api/http-error.ts";
 import { useGlobalState } from "../global-state/context-provider.tsx";
 
 // Roles feature (#632): drive the permission request flow.
@@ -19,7 +20,14 @@ const messageForStatus = (status?: number): string => {
   return "Could not verify the role password. Please try again.";
 };
 
-export const useRequestPermission = () => {
+type UseRequestPermissionResult = {
+  requestPermission: (password: string) => Promise<boolean>;
+  clearPermission: () => void;
+  loading: boolean;
+  error: string | null;
+};
+
+export const useRequestPermission = (): UseRequestPermissionResult => {
   const [, dispatch] = useGlobalState();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -34,8 +42,7 @@ export const useRequestPermission = () => {
         dispatch({ type: "UPDATE_ROLE_AUTH", payload: { role, features } });
         return true;
       } catch (e) {
-        const { status } = e as { status?: number };
-        setError(messageForStatus(status));
+        setError(messageForStatus(isHttpError(e) ? e.status : undefined));
         return false;
       } finally {
         setLoading(false);

@@ -1,4 +1,4 @@
-import { getAuthHeader } from "./role-auth-store.ts";
+import { clearRoleAuth, getAuthHeader } from "./role-auth-store.ts";
 
 /**
  * Thin `fetch` wrapper that attaches the role-based Authorization header to
@@ -26,5 +26,12 @@ export const authorizedFetch = (
       ...init?.headers,
       ...authHeader,
     },
+  }).then((response) => {
+    // The stored role password is no longer valid (rotated/removed): forget it
+    // so the user is not left "signed in" with every request failing.
+    if (response.status === 401) {
+      clearRoleAuth();
+    }
+    return response;
   });
 };

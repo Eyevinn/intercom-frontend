@@ -1,5 +1,6 @@
 import { handleFetchRequest } from "./handle-fetch-request.ts";
 import { authorizedFetch } from "./authorized-fetch.ts";
+import { createHttpError } from "./http-error.ts";
 import { TRoleAuth } from "./role-auth-store.ts";
 import { getBackendUrl } from "../utils/runtime-config.ts";
 
@@ -430,7 +431,8 @@ export const API = {
   // feature flags. Deliberately NOT routed through `handleFetchRequest`: a 401
   // here means "wrong role password", not an expired session, so it must not
   // trip the global auth circuit breaker (which would pause polling and kick
-  // off a reauth). Failures are surfaced to the caller with the HTTP status
+  // off a reauth). Do not "unify" this with handleFetchRequest without adding a
+  // breaker opt-out. Failures are surfaced to the caller with the HTTP status
   // attached so the UI can distinguish bad password (401) from rate-limit
   // (429) and server error.
   requestPermissions: async ({
@@ -456,9 +458,7 @@ export const API = {
       } catch {
         // No/invalid JSON body — keep the status-text fallback.
       }
-      const error = new Error(message) as Error & { status?: number };
-      error.status = response.status;
-      throw error;
+      throw createHttpError(message, response.status);
     }
 
     return response.json();

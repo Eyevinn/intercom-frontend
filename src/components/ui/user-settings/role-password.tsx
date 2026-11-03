@@ -1,3 +1,4 @@
+import type { ReactElement } from "react";
 import styled from "@emotion/styled";
 import { useForm } from "react-hook-form";
 import { useGlobalState } from "../../../global-state/context-provider";
@@ -45,7 +46,7 @@ type RolePasswordFormValues = {
  * held it shows the granted role and offers to clear it. Entirely optional —
  * users who never touch it keep the app's default (no-role) behaviour.
  */
-export const RolePassword = () => {
+export const RolePassword = (): ReactElement => {
   const [{ roleAuth }] = useGlobalState();
   const { requestPermission, clearPermission, loading, error } =
     useRequestPermission();

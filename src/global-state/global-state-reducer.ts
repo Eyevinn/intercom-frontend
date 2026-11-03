@@ -1,6 +1,7 @@
 import { Dispatch, Reducer, useReducer } from "react";
 import { TGlobalStateAction } from "./global-state-actions";
 import { TGlobalState } from "./types";
+import { getRoleAuth } from "../api/role-auth-store.ts";
 
 export const initialGlobalState: TGlobalState = {
   production: null,
@@ -165,4 +166,12 @@ export const globalReducer: Reducer<TGlobalState, TGlobalStateAction> = (
 export const useInitializeGlobalStateReducer = (): [
   TGlobalState,
   Dispatch<TGlobalStateAction>,
-] => useReducer(globalReducer, initialGlobalState);
+] =>
+  // Seed `roleAuth` synchronously from the persisted store (Roles feature,
+  // #632) so route guards see a previously granted role on the very first
+  // render. Rehydrating in an effect would leave it null for one render and
+  // make RequireFeature redirect deep links away when REQUIRE_AUTH=true.
+  useReducer(globalReducer, initialGlobalState, (initial) => ({
+    ...initial,
+    roleAuth: getRoleAuth(),
+  }));

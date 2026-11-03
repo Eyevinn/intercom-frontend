@@ -11,7 +11,15 @@ export const useInitiateProductionCall = ({
   dispatch,
 }: {
   dispatch: Dispatch<TGlobalStateAction>;
-}) => {
+}): {
+  initiateProductionCall: (args: {
+    payload: {
+      joinProductionOptions: TJoinProductionOptions;
+      audiooutput: string | undefined;
+    };
+    customGlobalMute?: string;
+  }) => Promise<boolean>;
+} => {
   const { permission } = useDevicePermissions({
     continueToApp: true,
   });

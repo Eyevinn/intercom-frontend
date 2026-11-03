@@ -40,7 +40,24 @@ type TStoredRoleAuth = TRoleAuth & {
   password: string;
 };
 
+// SECURITY TRADE-OFF: the raw role password is persisted in localStorage so the
+// Authorization header survives reloads and new tabs, and is sent as
+// `Bearer <password>`. Any script running on this origin (e.g. via XSS) can
+// read it. sessionStorage would narrow exposure to a single tab/session at the
+// cost of re-entering the password per tab; localStorage was chosen for
+// convenience of long-lived operator devices. Stored auth is cleared when the
+// manager rejects it with a 401 (see `authorizedFetch`).
 const STORAGE_KEY = "intercom_role_auth";
+
+const clearedListeners = new Set<() => void>();
+
+/** Subscribe to the store dropping its role (explicitly or after a 401). */
+export const onRoleAuthCleared = (listener: () => void): (() => void) => {
+  clearedListeners.add(listener);
+  return () => {
+    clearedListeners.delete(listener);
+  };
+};
 
 // In-memory cache, hydrated lazily from localStorage on first access. `false`
 // means "not yet read"; `null` means "read, nothing stored".
@@ -96,6 +113,7 @@ export const clearRoleAuth = (): void => {
   } catch {
     // Ignore — the cleared in-memory cache is authoritative.
   }
+  clearedListeners.forEach((listener) => listener());
 };
 
 /** The granted role + features, or null when no role is held. */

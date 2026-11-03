@@ -22,7 +22,10 @@ type RequireFeatureProps = {
  *   - Role held: access follows the granted flag; when denied the user is sent
  *     back to the landing page rather than seeing a broken restricted screen.
  */
-export const RequireFeature = ({ feature, children }: RequireFeatureProps) => {
+export const RequireFeature = ({
+  feature,
+  children,
+}: RequireFeatureProps): ReactNode => {
   const allowed = useHasFeature(feature);
 
   if (!allowed) {

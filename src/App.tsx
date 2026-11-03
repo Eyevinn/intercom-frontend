@@ -34,7 +34,7 @@ import {
 import { TUserSettings } from "./components/ui/user-settings/types";
 import { RequireNonGuest } from "./components/layout/auth/require-non-guest.tsx";
 import { RequireFeature } from "./components/layout/auth/require-feature.tsx";
-import { getRoleAuth } from "./api/role-auth-store.ts";
+import { onRoleAuthCleared } from "./api/role-auth-store.ts";
 import { PresetProvider } from "./contexts/preset-context.tsx";
 
 const DisplayBoxPositioningContainer = styled(FlexContainer)`
@@ -237,15 +237,14 @@ const App = () => {
 
   useLocalUserSettings({ devices, dispatch });
 
-  // Rehydrate a previously granted role (Roles feature, #632) from the
-  // persisted store into global state so route guards and UI gating survive a
-  // page reload. No-op when no role is held, keeping the default dormant.
-  useEffect(() => {
-    const stored = getRoleAuth();
-    if (stored) {
-      dispatch({ type: "UPDATE_ROLE_AUTH", payload: stored });
-    }
-  }, [dispatch]);
+  // Clear global-state role when the store drops a stale role password (401).
+  useEffect(
+    () =>
+      onRoleAuthCleared(() =>
+        dispatch({ type: "UPDATE_ROLE_AUTH", payload: null })
+      ),
+    [dispatch]
+  );
 
   return (
     <GlobalStateContext.Provider value={initializedGlobalState}>
