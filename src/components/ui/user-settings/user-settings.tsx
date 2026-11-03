@@ -1,0 +1,70 @@
+import { FC } from "react";
+import { useGlobalState } from "../../../global-state/context-provider";
+import { DisplayContainerHeader } from "../../../pages/landing-page/display-container-header";
+import { UserSettingsForm } from "../user-settings-form/user-settings-form";
+import { ResponsiveFormContainer } from "../../layout/generic-components";
+import { NavigateToRootButton } from "../navigate-to-root-button/navigate-to-root-button";
+import { HeaderWrapper } from "../../../pages/create-production/create-production-components";
+
+interface UserSettingsProps {
+  buttonText?: string;
+  className?: string;
+  needsConfirmation?: boolean;
+  onSave?: () => void;
+  showBackButton?: boolean;
+  onBack?: () => void;
+  hideTitle?: boolean;
+  hideUsername?: boolean;
+  hideDevices?: boolean;
+}
+
+export const UserSettings: FC<UserSettingsProps> = (props) => {
+  const {
+    buttonText,
+    className,
+    onSave,
+    needsConfirmation,
+    showBackButton,
+    onBack,
+    hideTitle,
+    hideUsername,
+    hideDevices,
+  } = props;
+  const [{ devices, userSettings }] = useGlobalState();
+
+  const hasBackButton = showBackButton ?? !onSave;
+
+  const defaultValues = {
+    username: userSettings?.username,
+    audioinput:
+      userSettings?.audioinput ??
+      devices.input?.find((d) => d.deviceId === "default")?.deviceId ??
+      devices.input?.[0]?.deviceId,
+    audiooutput: userSettings?.audiooutput,
+  };
+
+  return (
+    <ResponsiveFormContainer className={hideTitle ? "modal" : className}>
+      {!hideTitle &&
+        (hasBackButton ? (
+          <HeaderWrapper>
+            <NavigateToRootButton onNavigate={onBack} />
+            <DisplayContainerHeader>User Settings</DisplayContainerHeader>
+          </HeaderWrapper>
+        ) : (
+          <DisplayContainerHeader>User Settings</DisplayContainerHeader>
+        ))}
+      {devices && (
+        <UserSettingsForm
+          buttonText={buttonText || "Save"}
+          defaultValues={defaultValues}
+          onSave={onSave}
+          updateUserSettings
+          needsConfirmation={needsConfirmation}
+          hideUsername={hideUsername}
+          hideDevices={hideDevices}
+        />
+      )}
+    </ResponsiveFormContainer>
+  );
+};

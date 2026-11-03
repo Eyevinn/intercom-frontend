@@ -2,8 +2,8 @@ import {
   Hotkeys,
   TJoinProductionOptions,
   TProduction,
-} from "../components/production-line/types.ts";
-import { TUserSettings } from "../components/user-settings/types.ts";
+} from "../components/ui/production-line/types.ts";
+import { TUserSettings } from "../components/ui/user-settings/types.ts";
 
 export interface ErrorState {
   globalError?: Error | null;

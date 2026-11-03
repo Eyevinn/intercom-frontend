@@ -1,7 +1,7 @@
 import { Dispatch, useEffect } from "react";
 import { DevicesState } from "../global-state/types";
 import { TGlobalStateAction } from "../global-state/global-state-actions";
-import { useStorage } from "../components/accessing-local-storage/access-local-storage";
+import { useStorage } from "../components/ui/accessing-local-storage/access-local-storage";
 
 type TUseLocalUserSettings = {
   devices: DevicesState;

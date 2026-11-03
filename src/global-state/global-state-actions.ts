@@ -1,4 +1,4 @@
-import { TUserSettings } from "../components/user-settings/types.ts";
+import { TUserSettings } from "../components/ui/user-settings/types.ts";
 import { CallState, DevicesState } from "./types.ts";
 
 export type TGlobalStateAction =

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import logger from "../utils/logger";
-import { useShareLine } from "../components/production-line/use-share-line";
+import { useShareLine } from "../components/ui/production-line/use-share-line";
 import { buildCallsUrl } from "../utils/call-url";
 import { appendGuestParam } from "../utils/guest-session";
 

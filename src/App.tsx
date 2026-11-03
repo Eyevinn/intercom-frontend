@@ -7,32 +7,32 @@ import {
   Navigate,
   useLocation,
 } from "react-router";
-import { ErrorPage } from "./components/router-error.tsx";
+import { ErrorPage } from "./components/layout/router-error.tsx";
 import { useDevicePermissions } from "./hooks/use-device-permission.ts";
-import { LandingPage } from "./components/landing-page/landing-page.tsx";
+import { LandingPage } from "./pages/landing-page/landing-page.tsx";
 import { useInitializeGlobalStateReducer } from "./global-state/global-state-reducer.ts";
 import { GlobalStateContext } from "./global-state/context-provider.tsx";
-import { ErrorBanner } from "./components/error";
+import { ErrorBanner } from "./components/ui/error";
 import { useFetchDevices } from "./hooks/use-fetch-devices.ts";
 import {
   DisplayContainer,
   FlexContainer,
-} from "./components/generic-components.ts";
-import { DisplayWarning } from "./components/display-box.tsx";
+} from "./components/layout/generic-components.ts";
+import { DisplayWarning } from "./components/ui/display-box.tsx";
 import { isValidBrowser } from "./bowser.ts";
-import { DisplayContainerHeader } from "./components/landing-page/display-container-header.tsx";
-import { NavigateToRootButton } from "./components/navigate-to-root-button/navigate-to-root-button.tsx";
-import { CallsPage } from "./components/calls-page/calls-page.tsx";
-import { Header } from "./components/header.tsx";
+import { DisplayContainerHeader } from "./pages/landing-page/display-container-header.tsx";
+import { NavigateToRootButton } from "./components/ui/navigate-to-root-button/navigate-to-root-button.tsx";
+import { CallsPage } from "./pages/calls-page/calls-page.tsx";
+import { Header } from "./components/layout/header.tsx";
 import { useLocalUserSettings } from "./hooks/use-local-user-settings.ts";
-import { ManageProductionsPage } from "./components/manage-productions-page/manage-productions-page.tsx";
-import { CreateProductionPage } from "./components/create-production/create-production-page.tsx";
+import { ManageProductionsPage } from "./pages/manage-productions-page/manage-productions-page.tsx";
+import { CreateProductionPage } from "./pages/create-production/create-production-page.tsx";
 import {
   useAuthCircuitBreaker,
   useSetupTokenRefresh,
 } from "./hooks/use-reauth.tsx";
-import { TUserSettings } from "./components/user-settings/types";
-import { RequireNonGuest } from "./components/auth/require-non-guest.tsx";
+import { TUserSettings } from "./components/ui/user-settings/types";
+import { RequireNonGuest } from "./components/layout/auth/require-non-guest.tsx";
 import { PresetProvider } from "./contexts/preset-context.tsx";
 
 const DisplayBoxPositioningContainer = styled(FlexContainer)`
