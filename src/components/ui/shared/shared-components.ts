@@ -1,0 +1,160 @@
+import styled from "@emotion/styled";
+import { mediaQueries } from "../../layout/generic-components";
+
+export const HeaderWrapper = styled.div`
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2rem;
+  overflow: hidden;
+`;
+
+export const HeaderTexts = styled.div`
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+  overflow: hidden;
+`;
+
+export const HeaderIcon = styled.div`
+  display: flex;
+  align-items: center;
+  height: 2rem;
+  width: 2rem;
+  flex-shrink: 0;
+
+  svg {
+    transform: translateY(1.5px);
+  }
+`;
+
+export const CardGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 2rem;
+  align-items: start;
+  padding: 0 2rem 2rem 2rem;
+
+  ${mediaQueries.isLargeScreen} {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  ${mediaQueries.isMediumScreen} {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  ${mediaQueries.isSmallScreen} {
+    grid-template-columns: minmax(0, 1fr);
+  }
+`;
+
+export const CardGridCell = styled.div`
+  min-width: 0;
+`;
+
+export const CollapsibleItemWrapper = styled.div`
+  text-align: start;
+  color: #ffffff;
+  background-color: transparent;
+  width: 100%;
+  min-width: 0;
+  border: 1px solid #424242;
+  border-radius: 0.5rem;
+  cursor: pointer;
+
+  &.filled {
+    background-color: #32383b;
+    border-color: #4a5054;
+  }
+`;
+
+export const ExpandableSection = styled.div`
+  display: grid;
+  padding: 0 2rem;
+  grid-template-rows: 0fr;
+
+  &.expanded {
+    grid-template-rows: 1fr;
+    padding-bottom: 2rem;
+  }
+`;
+
+export const InnerDiv = styled.div`
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+`;
+
+export const EditNameIconWrapper = styled.div`
+  width: 1.8rem;
+  height: 1.8rem;
+`;
+
+export const NameEditButton = styled.button`
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+  display: flex;
+  justify-content: flex-start;
+  align-self: flex-start;
+  flex-shrink: 0;
+  height: 2rem;
+  width: 2rem;
+
+  &.edit {
+    margin-top: 0;
+  }
+
+  &.save {
+    justify-content: center;
+    align-self: center;
+  }
+
+  svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  &:hover svg {
+    transform: scale(1.2);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+
+  &:disabled:hover svg {
+    transform: none;
+  }
+`;
+
+export const EditNameWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: start;
+  max-width: 30rem;
+  min-height: 2rem;
+  pointer-events: none;
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+
+  &.ingests {
+    background-color: #484848;
+    padding: 1rem 1.5rem;
+    border-radius: 0.5rem;
+    margin: 0 1rem 2rem 1rem;
+  }
+
+  > * {
+    pointer-events: auto;
+  }
+`;

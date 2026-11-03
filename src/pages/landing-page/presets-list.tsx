@@ -1,0 +1,424 @@
+import { useCallback, useState } from "react";
+import styled from "@emotion/styled";
+import { useNavigate } from "react-router";
+import {
+  useSensors,
+  useSensor,
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  KeyboardSensor,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  rectSortingStrategy,
+  sortableKeyboardCoordinates,
+} from "@dnd-kit/sortable";
+import { usePresetContext } from "../../contexts/preset-context";
+import { buildCallsUrl } from "../../utils/call-url";
+import { TBasicProductionResponse, TPreset } from "../../api/api";
+import { CollapsibleItem } from "../../components/ui/shared/collapsible-item";
+import { InfoTooltip } from "../../components/ui/info-tooltip/info-tooltip";
+import { PageHeader } from "../../components/layout/page-header";
+import { ShareIcon, TVIcon, UsersIcon } from "../../assets/icons/icon";
+import { CopyIconWrapper } from "../../components/ui/copy-button/copy-components";
+import { SecondaryButton } from "../../components/ui/form-elements/form-elements";
+import { ShareUrlModal } from "../../components/ui/share-url-modal/share-url-modal";
+import {
+  IconWrapper,
+  Lineblock,
+  ParticipantCount,
+  ParticipantCountWrapper,
+} from "../../components/ui/production-list/production-list-components";
+import { useOrderedList } from "../../hooks/use-ordered-list";
+import { SortablePresetCard } from "./sortable-preset-card";
+import { CardGrid } from "../../components/ui/shared/shared-components";
+
+const CompanionRow = styled.div`
+  font-size: 1.2rem;
+  color: rgba(255, 255, 255, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding: 0;
+`;
+
+const CompanionLabel = styled.span`
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.55);
+`;
+
+const EmptyPresetText = styled.p`
+  font-size: 1.2rem;
+  color: rgba(255, 255, 255, 0.45);
+  font-style: italic;
+  margin: 0 0 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+
+  span {
+    font-style: normal;
+  }
+`;
+
+const PresetName = styled.span`
+  font-size: 1.4rem;
+  font-weight: bold;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  margin-right: 0.5rem;
+`;
+
+const Spacer = styled.span`
+  flex: 1;
+`;
+
+const JoinButton = styled(SecondaryButton)`
+  flex-shrink: 0;
+  margin-right: 0.5rem;
+`;
+
+const LocalBadge = styled.span`
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0.3rem;
+  padding: 0.1rem 0.4rem;
+  flex-shrink: 0;
+
+  @media (max-width: 768px) {
+    display: none;
+  }
+`;
+
+const CompanionBadge = styled(LocalBadge)``;
+
+const CallEntryList = styled.ul<{ hasCompanion?: boolean }>`
+  list-style: none;
+  margin: 0 0 ${({ hasCompanion }) => (hasCompanion ? "0.8rem" : "1.5rem")};
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+`;
+
+const LineName = styled.div`
+  font-weight: bold;
+  font-size: 1.5rem;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+`;
+
+const ProductionSubtext = styled.div`
+  position: absolute;
+  top: calc(100% - 0.4rem);
+  left: 0;
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.4);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+`;
+
+const LineNameRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 0;
+`;
+
+const LineNameWrapper = styled.div`
+  position: relative;
+  flex: 1;
+  min-width: 0;
+`;
+
+const RoleBadge = styled.span`
+  display: inline-block;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0.3rem;
+  padding: 0.1rem 0.4rem;
+`;
+
+type PresetCardProps = {
+  preset: TPreset;
+  productions: TBasicProductionResponse[];
+};
+
+const PresetCard = ({ preset, productions }: PresetCardProps) => {
+  const [shareModalOpen, setShareModalOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const resolveCall = (call: { productionId: string; lineId: string }) => {
+    const production = productions.find(
+      (p) => p.productionId === call.productionId
+    );
+    const line = production?.lines.find((l) => l.id === call.lineId);
+    return { production, line };
+  };
+
+  const totalParticipants = preset.calls.reduce((sum, call) => {
+    const { line } = resolveCall(call);
+    return sum + (line?.participants.filter((p) => !p.isWhip).length ?? 0);
+  }, 0);
+
+  const handleShare = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShareModalOpen(true);
+  };
+
+  const handleJoin = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigate(
+      buildCallsUrl(
+        preset.calls.map((call) => ({
+          productionId: call.productionId,
+          lineId: call.lineId,
+          ...(call.lineUsedForProgramOutput
+            ? { role: (call.isProgramUser ? "p" : "l") as "l" | "p" }
+            : {}),
+        })),
+        preset.companionUrl
+      )
+    );
+  };
+
+  const headerContent = (
+    <>
+      <PresetName title={preset.name}>{preset.name}</PresetName>
+      <ParticipantCountWrapper
+        className={totalParticipants > 0 ? "active" : ""}
+      >
+        <UsersIcon />
+        <ParticipantCount>{totalParticipants}</ParticipantCount>
+      </ParticipantCountWrapper>
+      {preset.calls.length > 0 && (
+        <CopyIconWrapper
+          title="Share saved configuration URL"
+          onClick={handleShare}
+          className="production-list-item"
+          isCopied={false}
+        >
+          <ShareIcon />
+        </CopyIconWrapper>
+      )}
+      {preset.isLocal && <LocalBadge>Local</LocalBadge>}
+      {preset.companionUrl && <CompanionBadge>Companion</CompanionBadge>}
+      <Spacer />
+      <JoinButton
+        type="button"
+        onClick={handleJoin}
+        style={{ visibility: preset.calls.length === 0 ? "hidden" : "visible" }}
+      >
+        Join
+      </JoinButton>
+    </>
+  );
+
+  const expandedContent = (
+    <CallEntryList hasCompanion={!!preset.companionUrl}>
+      {preset.calls.length === 0 && (
+        <li>
+          <EmptyPresetText>
+            No lines in this saved configuration
+            <InfoTooltip>
+              Lines may have been deleted. You can add new lines from the Manage
+              page or delete this saved configuration.
+            </InfoTooltip>
+          </EmptyPresetText>
+        </li>
+      )}
+      {preset.calls.map((call, idx) => {
+        const { production, line } = resolveCall(call);
+        const lineName = line
+          ? line.name
+          : `Production ${call.productionId} / Line ${call.lineId}`;
+        const productionName = production?.name ?? null;
+        const participantCount =
+          line?.participants.filter((p) => !p.isWhip).length ?? 0;
+
+        return (
+          // eslint-disable-next-line react/no-array-index-key
+          <li key={`${call.productionId}-${call.lineId}-${idx}`}>
+            <Lineblock isProgramOutput={!!line?.programOutputLine}>
+              {line?.programOutputLine && (
+                <IconWrapper>
+                  <TVIcon />
+                </IconWrapper>
+              )}
+              <LineNameWrapper>
+                <LineNameRow>
+                  <LineName>{lineName}</LineName>
+                  {call.lineUsedForProgramOutput && (
+                    <RoleBadge>
+                      {call.isProgramUser ? "Audio feed" : "Listener"}
+                    </RoleBadge>
+                  )}
+                </LineNameRow>
+                {productionName && (
+                  <ProductionSubtext>{productionName}</ProductionSubtext>
+                )}
+              </LineNameWrapper>
+              <ParticipantCountWrapper
+                className={participantCount > 0 ? "active" : ""}
+              >
+                <UsersIcon />
+                <ParticipantCount>{participantCount}</ParticipantCount>
+              </ParticipantCountWrapper>
+            </Lineblock>
+          </li>
+        );
+      })}
+      {preset.companionUrl && (
+        <CompanionRow>
+          <CompanionLabel>Companion</CompanionLabel>
+          {preset.companionUrl}
+        </CompanionRow>
+      )}
+    </CallEntryList>
+  );
+
+  return (
+    <>
+      <CollapsibleItem
+        headerContent={headerContent}
+        expandedContent={expandedContent}
+        className="filled"
+        // eslint-disable-next-line no-underscore-dangle
+        testId={`preset-${preset._id}`}
+      />
+      {shareModalOpen && (
+        <ShareUrlModal
+          path={buildCallsUrl(
+            preset.calls.map((call) => ({
+              productionId: call.productionId,
+              lineId: call.lineId,
+              ...(call.lineUsedForProgramOutput
+                ? { role: (call.isProgramUser ? "p" : "l") as "l" | "p" }
+                : {}),
+            }))
+          )}
+          companionUrl={preset.companionUrl}
+          title="Share Saved Configuration"
+          onClose={() => setShareModalOpen(false)}
+        />
+      )}
+    </>
+  );
+};
+
+const PRESET_SORT_ORDER_KEY = "preset-sort-order";
+
+const EMPTY_PRESETS: TPreset[] = [];
+
+// eslint-disable-next-line no-underscore-dangle
+const getPresetId = (p: TPreset) => p._id;
+
+type PresetsGridProps = {
+  presets: TPreset[];
+  productions: TBasicProductionResponse[];
+  onReorder: (activeId: string, overId: string) => void;
+};
+
+export const PresetsGrid = ({
+  presets,
+  productions,
+  onReorder,
+}: PresetsGridProps) => {
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      const { active, over } = event;
+      if (over && active.id !== over.id) {
+        onReorder(String(active.id), String(over.id));
+      }
+    },
+    [onReorder]
+  );
+
+  const presetIds = presets.map(getPresetId);
+
+  return (
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      onDragEnd={handleDragEnd}
+    >
+      <SortableContext items={presetIds} strategy={rectSortingStrategy}>
+        <CardGrid>
+          {presets.map((preset) => (
+            <SortablePresetCard
+              key={getPresetId(preset)}
+              id={getPresetId(preset)}
+            >
+              <PresetCard preset={preset} productions={productions} />
+            </SortablePresetCard>
+          ))}
+        </CardGrid>
+      </SortableContext>
+    </DndContext>
+  );
+};
+
+type PresetListProps = {
+  productions: TBasicProductionResponse[];
+};
+
+export const PresetList = ({ productions }: PresetListProps) => {
+  const { presets, loading } = usePresetContext();
+  const { ordered: orderedPresets, reorder: handleReorder } = useOrderedList(
+    presets ?? EMPTY_PRESETS,
+    getPresetId,
+    PRESET_SORT_ORDER_KEY
+  );
+
+  if (loading || orderedPresets.length === 0) return null;
+
+  return (
+    <>
+      <PageHeader
+        title="Saved Configurations"
+        titleAdornment={
+          <InfoTooltip>
+            A <strong>saved configuration</strong> is a saved combination of
+            lines you can join with one click. Attach a{" "}
+            <strong>companion URL</strong> to automatically open a companion
+            connection when the configuration is opened. Deleting a line removes
+            it from any saved configurations it belongs to.
+          </InfoTooltip>
+        }
+      />
+      <PresetsGrid
+        presets={orderedPresets}
+        productions={productions}
+        onReorder={handleReorder}
+      />
+    </>
+  );
+};

@@ -1,0 +1,46 @@
+import { FC, ReactNode } from "react";
+import { useSubmitOnEnter } from "../../../hooks/use-submit-form-enter-press";
+import { Modal } from "../modal/modal";
+import { ModalConfirmationText } from "../modal/modal-confirmation-text";
+import { VerifyDecision } from "./verify-decision";
+
+interface ConfirmationModalProps {
+  title: string;
+  description: ReactNode;
+  confirmationText?: ReactNode;
+  shouldSubmitOnEnter?: boolean;
+  onCancel: () => void;
+  onConfirm: () => void;
+}
+
+export const ConfirmationModal: FC<ConfirmationModalProps> = (props) => {
+  const {
+    title,
+    description,
+    confirmationText,
+    onCancel,
+    onConfirm,
+    shouldSubmitOnEnter,
+  } = props;
+
+  useSubmitOnEnter({
+    shouldSubmitOnEnter,
+    submitHandler: onConfirm,
+  });
+
+  return (
+    <Modal onClose={onCancel} title={title}>
+      <ModalConfirmationText>{description}</ModalConfirmationText>
+      {confirmationText && (
+        <ModalConfirmationText className="bold">
+          {confirmationText}
+        </ModalConfirmationText>
+      )}
+      <VerifyDecision
+        confirm={onConfirm}
+        abort={onCancel}
+        shouldSubmitOnEnter={shouldSubmitOnEnter}
+      />
+    </Modal>
+  );
+};

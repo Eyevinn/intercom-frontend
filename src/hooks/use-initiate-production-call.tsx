@@ -1,5 +1,5 @@
 import { useCallback, Dispatch } from "react";
-import { TJoinProductionOptions } from "../components/production-line/types";
+import { TJoinProductionOptions } from "../components/ui/production-line/types";
 import { TGlobalStateAction } from "../global-state/global-state-actions";
 import { isBrowserSafari, isIpad, isMobile } from "../bowser";
 import { useFetchDevices } from "./use-fetch-devices";

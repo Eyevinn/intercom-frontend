@@ -1,0 +1,77 @@
+import styled from "@emotion/styled";
+import { FC, PropsWithChildren, useState } from "react";
+import { ChevronDownIcon, ChevronUpIcon } from "../../../assets/icons/icon";
+import { FirefoxWarning } from "./firefox-warning";
+
+const SectionWrapper = styled.div`
+  border-top: 0.1rem solid rgba(109, 109, 109, 0.3);
+  padding: 0.5rem 0;
+  margin-top: 0.5rem;
+`;
+
+const SectionHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 3rem;
+  font-weight: 500;
+  position: relative;
+
+  &:hover {
+    cursor: pointer;
+  }
+`;
+
+const SectionTitle = styled.div`
+  font-size: 1.2rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05rem;
+  color: rgba(255, 255, 255, 0.6);
+`;
+
+const SectionCollapser = styled.div`
+  width: 3rem;
+  height: 3rem;
+`;
+
+const SectionBody = styled.div`
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.5s ease-out;
+
+  &.open {
+    grid-template-rows: 1fr;
+  }
+`;
+
+const SectionInner = styled.div`
+  overflow: hidden;
+`;
+
+interface CollapsableSectionProps extends PropsWithChildren {
+  title: string;
+  startOpen?: boolean;
+}
+
+export const CollapsableSection: FC<CollapsableSectionProps> = (props) => {
+  const { title, startOpen = false, children } = props;
+
+  const [open, setOpen] = useState<boolean>(startOpen);
+
+  return (
+    <SectionWrapper>
+      <SectionHeader onClick={() => setOpen(!open)}>
+        <SectionTitle>{title}</SectionTitle>
+        {title === "Devices" && open && (
+          <FirefoxWarning type="collapsable-header" />
+        )}
+        <SectionCollapser>
+          {open ? <ChevronUpIcon /> : <ChevronDownIcon />}
+        </SectionCollapser>
+      </SectionHeader>
+      <SectionBody className={open ? "open" : "closed"}>
+        <SectionInner>{children}</SectionInner>
+      </SectionBody>
+    </SectionWrapper>
+  );
+};

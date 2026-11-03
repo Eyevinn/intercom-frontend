@@ -3,7 +3,7 @@ import { act, renderHook } from "@testing-library/react";
 import { useShareUrl } from "./use-share-url";
 
 const mockShareLine = vi.fn();
-vi.mock("../components/production-line/use-share-line", () => ({
+vi.mock("../components/ui/production-line/use-share-line", () => ({
   useShareLine: () => mockShareLine,
 }));
 
