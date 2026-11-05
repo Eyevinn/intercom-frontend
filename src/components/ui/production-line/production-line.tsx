@@ -634,19 +634,27 @@ export const ProductionLine = ({
     dispatch,
   });
 
-  const muteParticipant = () => {
-    // Targeted advisory directive (already merged behaviour): asks the single
-    // target endpoint to mute its own input.
+  // Send a mute/unmute directive for a single participant over the conference
+  // data channel. Mirrors the already-merged mute behaviour but is parameterised
+  // on the desired state so the admin panel can offer a mute/unmute toggle
+  // (#676). Returns true when the directive was sent, false when the data
+  // channel was not open.
+  const setParticipantMute = (endpointId: string, muted: boolean): boolean => {
+    const muteValue = muted ? "mute" : "unmute";
+
+    // Targeted advisory directive: asks the single target endpoint to mute or
+    // unmute its own input. The 'unmute' payload is defined by the #677 mute
+    // state model.
     const msg = JSON.stringify({
       type: "EndpointMessage",
-      to: userId,
+      to: endpointId,
       payload: {
-        muteParticipant: "mute",
+        muteParticipant: muteValue,
       },
     });
 
-    // Global mute-state broadcast (#678): tell every endpoint that this
-    // participant is now muted so each client reflects it in its participant
+    // Global mute-state broadcast (#678): tell every endpoint about this
+    // participant's new mute state so each client reflects it in its participant
     // list. An empty `to` broadcasts to all other endpoints on the SMB
     // conference. Advisory only — not server-enforced (authoritative mute is
     // deferred follow-up option (b), which would persist state in the backend
@@ -655,8 +663,8 @@ export const ProductionLine = ({
       type: "EndpointMessage",
       to: "",
       payload: {
-        muteState: "mute",
-        participantId: userId,
+        muteState: muteValue,
+        participantId: endpointId,
       },
     });
 
@@ -667,13 +675,21 @@ export const ProductionLine = ({
       // own participant list locally so it reflects the change immediately.
       dispatch({
         type: "UPDATE_PARTICIPANT_MUTE_STATE",
-        payload: { callId: id, participantId: userId, muted: true },
+        payload: { callId: id, participantId: endpointId, muted },
       });
+      return true;
+    }
+
+    logger.red("Data channel is not open.");
+    return false;
+  };
+
+  const muteParticipant = () => {
+    if (setParticipantMute(userId, true)) {
       setMuteError(false);
       setConfirmModalOpen(false);
     } else {
       setMuteError(true);
-      logger.red("Data channel is not open.");
     }
   };
 
@@ -1188,6 +1204,8 @@ export const ProductionLine = ({
               participants={line.participants}
               sessionId={sessionId}
               programOutputLine={line.programOutputLine}
+              participantMuteState={participantMuteState}
+              onToggleMute={setParticipantMute}
               onClose={() => setAdminPanelOpen(false)}
             />
           )}

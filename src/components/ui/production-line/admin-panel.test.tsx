@@ -3,8 +3,8 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { AdminPanel, AdminPanelButton } from "./admin-panel";
 import { TParticipant } from "./types";
 
-// Covers #636 — the foundational admin panel UI. The mute and kick controls
-// are disabled placeholder slots; their behaviour lands in sibling issues.
+// Covers #636 — the admin panel UI — and #676: the functional per-participant
+// mute/unmute toggle. The kick control remains a disabled placeholder (#638).
 
 const other: TParticipant = {
   name: "Alice",
@@ -42,16 +42,22 @@ const inactive: TParticipant = {
   hasVideo: false,
 };
 
-const renderPanel = (overrides?: { participants?: TParticipant[] }) => {
+const renderPanel = (overrides?: {
+  participants?: TParticipant[];
+  participantMuteState?: Record<string, boolean>;
+}) => {
   const onClose = vi.fn();
+  const onToggleMute = vi.fn();
   render(
     <AdminPanel
       participants={overrides?.participants ?? [me, other]}
       sessionId="session-me"
+      participantMuteState={overrides?.participantMuteState}
+      onToggleMute={onToggleMute}
       onClose={onClose}
     />
   );
-  return { onClose };
+  return { onClose, onToggleMute };
 };
 
 describe("AdminPanel", () => {
@@ -70,48 +76,70 @@ describe("AdminPanel", () => {
     expect(screen.getByText(/Me/)).toBeInTheDocument();
   });
 
-  it("renders disabled placeholder mute and kick slots for other participants", () => {
+  it("renders a functional mute toggle and a disabled kick placeholder for other participants", () => {
     renderPanel();
 
     const muteButton = screen.getByRole("button", {
-      name: `Mute ${other.name} (coming soon)`,
+      name: `Mute ${other.name}`,
     });
     const kickButton = screen.getByRole("button", {
       name: `Kick ${other.name} (coming soon)`,
     });
 
-    expect(muteButton).toBeDisabled();
+    expect(muteButton).toBeEnabled();
+    expect(muteButton).toHaveAttribute("aria-pressed", "false");
     expect(kickButton).toBeDisabled();
   });
 
-  it("does not render placeholder slots for yourself", () => {
+  it("sends a mute directive for the target endpoint when an unmuted participant is clicked", () => {
+    const { onToggleMute } = renderPanel();
+
+    fireEvent.click(screen.getByRole("button", { name: `Mute ${other.name}` }));
+
+    expect(onToggleMute).toHaveBeenCalledWith(other.endpointId, true);
+  });
+
+  it("reflects an already-muted participant and sends an unmute directive when clicked", () => {
+    const { onToggleMute } = renderPanel({
+      participantMuteState: { [other.endpointId]: true },
+    });
+
+    const unmuteButton = screen.getByRole("button", {
+      name: `Unmute ${other.name}`,
+    });
+    expect(unmuteButton).toHaveAttribute("aria-pressed", "true");
+
+    fireEvent.click(unmuteButton);
+
+    expect(onToggleMute).toHaveBeenCalledWith(other.endpointId, false);
+  });
+
+  it("does not render action slots for yourself", () => {
     renderPanel();
 
     expect(
-      screen.queryByRole("button", { name: `Mute ${me.name} (coming soon)` })
+      screen.queryByRole("button", { name: `Mute ${me.name}` })
     ).toBeNull();
   });
 
-  it("does not render placeholder slots for WHIP participants", () => {
+  it("does not render action slots for WHIP participants", () => {
     renderPanel({ participants: [me, whip] });
 
     expect(screen.getByText(/Whip ingest/)).toBeInTheDocument();
     expect(
-      screen.queryByRole("button", { name: `Mute ${whip.name} (coming soon)` })
+      screen.queryByRole("button", { name: `Mute ${whip.name}` })
     ).toBeNull();
     expect(
       screen.queryByRole("button", { name: `Kick ${whip.name} (coming soon)` })
     ).toBeNull();
   });
 
-  it("does not render placeholder slots for inactive participants", () => {
+  it("does not render action slots for inactive participants", () => {
     renderPanel({ participants: [me, inactive] });
 
     expect(screen.getByText(/Bob/)).toBeInTheDocument();
     expect(
-      screen.queryByRole("button", {
-        name: `Mute ${inactive.name} (coming soon)`,
-      })
+      screen.queryByRole("button", { name: `Mute ${inactive.name}` })
     ).toBeNull();
     expect(
       screen.queryByRole("button", {
