@@ -2,6 +2,7 @@ import styled from "@emotion/styled";
 import {
   LogoutIcon,
   MicMuted,
+  MicUnmuted,
   SettingsIcon,
   UserIcon,
   WhipIcon,
@@ -23,11 +24,12 @@ import {
   truncateParticipantName,
 } from "./participant-list-primitives.ts";
 
-// Foundational admin-panel UI for issue #636 (sub-issue of #280). This panel
-// houses admin-only actions so they are not immediately visible to every
-// participant. The mute and kick controls are intentionally rendered as
-// disabled placeholder slots here — the actual behaviour is delivered by the
-// sibling issues (#676 / #637 / #638).
+// Admin-panel UI for issue #636 (sub-issue of #280). This panel houses
+// admin-only actions so they are not immediately visible to every participant.
+// The per-participant mute/unmute toggle (#676) is functional: it issues the
+// global-mute directive over the existing data channel and reflects each
+// participant's current advisory mute state (#678). The kick control remains a
+// disabled placeholder until its sibling issue (#638) lands.
 
 const EmptyState = styled.p`
   color: #ddd;
@@ -62,6 +64,37 @@ const PlaceholderButton = styled.button`
     fill: #f96c6c;
     display: block;
     width: 2rem;
+  }
+`;
+
+// Functional per-participant mute/unmute toggle (#676). When the participant is
+// muted it shows an "unmute" affordance (and highlights to make the active mute
+// state obvious); otherwise it offers to mute them.
+type TMuteToggleButtonProps = { isMuted: boolean };
+
+const MuteToggleButton = styled.button<TMuteToggleButtonProps>`
+  width: 3rem;
+  height: 3rem;
+  padding: 0.3rem;
+  margin: 0 0 0 0.5rem;
+  background: ${({ isMuted }) =>
+    isMuted ? "rgba(249, 108, 108, 0.25)" : "#302b2b"};
+  border: 0.1rem solid ${({ isMuted }) => (isMuted ? "#f96c6c" : "#707070")};
+  border-radius: 0.4rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  svg {
+    fill: #f96c6c;
+    display: block;
+    width: 2rem;
+  }
+
+  &:hover {
+    border-color: #f96c6c;
   }
 `;
 
@@ -124,6 +157,13 @@ type TAdminPanelProps = {
   participants: TParticipant[];
   sessionId: string | null;
   programOutputLine?: boolean;
+  // Advisory per-participant admin-mute state (#678/#749), keyed by endpointId.
+  // Drives the toggle's current state so the button reflects whether the
+  // participant is muted for every admin, not just the one who muted them.
+  participantMuteState?: Record<string, boolean>;
+  // Issues the mute/unmute directive for the target endpoint (#676). `muted`
+  // is the desired next state.
+  onToggleMute: (endpointId: string, muted: boolean) => void;
   onClose: () => void;
 };
 
@@ -131,6 +171,8 @@ export const AdminPanel = ({
   participants,
   sessionId,
   programOutputLine,
+  participantMuteState,
+  onToggleMute,
   onClose,
 }: TAdminPanelProps) => {
   return (
@@ -142,6 +184,7 @@ export const AdminPanel = ({
           {participants.map((p) => {
             const isYou = p.sessionId === sessionId;
             const truncatedName = truncateParticipantName(p.name);
+            const isMuted = participantMuteState?.[p.endpointId] ?? false;
             return (
               <ParticipantRow key={p.sessionId} isYou={isYou}>
                 <Participant title={p.name}>
@@ -159,22 +202,27 @@ export const AdminPanel = ({
                   two participant views stay consistent: skip yourself, inactive
                   participants, program-output lines and WHIP ingests.
 
-                  These mute/kick slots are intentionally disabled placeholders.
-                  The functional mute/kick controls currently live in UserList
-                  (#673), rendered directly above the admin-panel button. This
-                  panel is the intended eventual home for those controls, so the
-                  temporary coexistence is deliberate rather than an oversight.
+                  The mute slot is a functional mute/unmute toggle (#676). The
+                  kick slot remains a disabled placeholder until #638 lands. The
+                  functional mute/kick controls also currently live in UserList
+                  (#673), rendered above the admin-panel button; this panel is
+                  the intended eventual home, so the temporary coexistence is
+                  deliberate rather than an oversight.
                 */}
                 {!isYou && p.isActive && !programOutputLine && !p.isWhip && (
                   <ParticipantControls>
-                    <PlaceholderButton
+                    <MuteToggleButton
                       type="button"
-                      disabled
-                      aria-label={`Mute ${p.name} (coming soon)`}
-                      title="Mute — coming soon"
+                      isMuted={isMuted}
+                      aria-label={
+                        isMuted ? `Unmute ${p.name}` : `Mute ${p.name}`
+                      }
+                      aria-pressed={isMuted}
+                      title={isMuted ? "Unmute" : "Mute"}
+                      onClick={() => onToggleMute(p.endpointId, !isMuted)}
                     >
-                      <MicMuted />
-                    </PlaceholderButton>
+                      {isMuted ? <MicUnmuted /> : <MicMuted />}
+                    </MuteToggleButton>
                     <PlaceholderButton
                       type="button"
                       disabled
@@ -190,7 +238,7 @@ export const AdminPanel = ({
           })}
         </ListWrapper>
       )}
-      <PlaceholderNote>Mute and kick controls are coming soon.</PlaceholderNote>
+      <PlaceholderNote>Kick control is coming soon.</PlaceholderNote>
       <CloseButton type="button" onClick={onClose}>
         Close
       </CloseButton>
