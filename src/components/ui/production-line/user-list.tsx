@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { UserIcon, WhipIcon } from "../../../assets/icons/icon.tsx";
+import { MicMuted, UserIcon, WhipIcon } from "../../../assets/icons/icon.tsx";
 import { TParticipant } from "./types.ts";
 import {
   getStatusClass,
@@ -39,8 +39,26 @@ const IsTalkingIndicator = styled.div<TIsTalkingIndicator>`
       : ""}
 `;
 
+// Advisory global-mute indicator (#678): shown next to a participant whose
+// endpointId is flagged muted in the call's participantMuteState map. The mark
+// is fed by mute-state broadcasts on the data channel and therefore reflects
+// the same state on every client. Advisory only — it mirrors what an admin
+// asked for and is not server-enforced.
+const MutedIndicator = styled.div`
+  display: flex;
+  align-items: center;
+  margin-right: 1rem;
+  flex-shrink: 0;
+
+  svg {
+    width: 2rem;
+    fill: #f96c6c;
+  }
+`;
+
 type TUserListOptions = {
   participants: TParticipant[];
+  participantMuteState?: Record<string, boolean>;
   sessionId: string | null;
   dominantSpeaker: string | null;
   audioLevelAboveThreshold: boolean;
@@ -60,6 +78,7 @@ type TUserListOptions = {
 
 export const UserList = ({
   participants,
+  participantMuteState,
   sessionId,
   dominantSpeaker,
   audioLevelAboveThreshold,
@@ -91,6 +110,7 @@ export const UserList = ({
         {participants.map((p) => {
           const isYou = p.sessionId === sessionId;
           const truncatedUsername = truncateParticipantName(p.name);
+          const isMuted = participantMuteState?.[p.endpointId] ?? false;
           return (
             <UserWrapper key={p.sessionId} isYou={isYou}>
               <User title={p.name}>
@@ -111,6 +131,14 @@ export const UserList = ({
                   {truncatedUsername} {p.isActive ? "" : "(inactive)"}
                 </UserName>
               </User>
+              {isMuted && (
+                <MutedIndicator
+                  title={`${p.name} is muted`}
+                  aria-label={`${p.name} is muted`}
+                >
+                  <MicMuted />
+                </MutedIndicator>
+              )}
               <UserActionSlots
                 participant={p}
                 isYou={isYou}

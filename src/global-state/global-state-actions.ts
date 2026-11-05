@@ -13,6 +13,7 @@ export type TGlobalStateAction =
   | TSelectProductionId
   | TAddCallState
   | TUpdateCallState
+  | TUpdateParticipantMuteState
   | TRemoveCallState
   | TSetWebSocket
   | THeartbeatError
@@ -65,6 +66,14 @@ export type TUpdateCallState = {
 export type TRemoveCallState = {
   type: "REMOVE_CALL";
   payload: { id: string };
+};
+
+// Advisory global-mute state sync (#678): merge a single participant's
+// admin-mute state (keyed by endpointId) into a call's participantMuteState map
+// without clobbering the other participants' entries.
+export type TUpdateParticipantMuteState = {
+  type: "UPDATE_PARTICIPANT_MUTE_STATE";
+  payload: { callId: string; participantId: string; muted: boolean };
 };
 
 export type TUpdateUserSettings = {

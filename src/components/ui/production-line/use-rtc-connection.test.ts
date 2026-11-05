@@ -308,6 +308,38 @@ describe("useRtcConnection data channel message handling", () => {
     });
   });
 
+  it("dispatches UPDATE_PARTICIPANT_MUTE_STATE on a mute-state broadcast (#678)", () => {
+    renderHook(() => useRtcConnection(connectedOptions), { wrapper });
+
+    capturedMessageHandler?.({
+      data: JSON.stringify({
+        type: "EndpointMessage",
+        payload: { muteState: "mute", participantId: "ep-9" },
+        to: "",
+        from: "ep-admin",
+      }),
+    } as MessageEvent);
+
+    expect(mockDispatch).toHaveBeenCalledWith({
+      type: "UPDATE_PARTICIPANT_MUTE_STATE",
+      payload: {
+        callId: "test-call-id",
+        participantId: "ep-9",
+        muted: true,
+      },
+    });
+    // A broadcast must NOT flip the receiving client's own self-mute state.
+    expect(mockDispatch).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        payload: expect.objectContaining({
+          updates: expect.objectContaining({
+            isRemotelyMuted: expect.anything(),
+          }),
+        }),
+      })
+    );
+  });
+
   it("dispatches isRemotelyDisconnected on a forceDisconnect EndpointMessage", () => {
     renderHook(() => useRtcConnection(connectedOptions), { wrapper });
 

@@ -3,6 +3,7 @@ import {
   parseDataChannelMessage,
   isRemoteMute,
   isForceDisconnect,
+  getMuteStateBroadcast,
   type EndpointMessage,
 } from "./data-channel-parser.ts";
 
@@ -71,6 +72,36 @@ describe("parseDataChannelMessage", () => {
       expect(result.to).toBe("ep-1");
       expect(result.from).toBe("ep-2");
     }
+  });
+
+  it("parses a global mute-state broadcast (#678)", () => {
+    const data = JSON.stringify({
+      type: "EndpointMessage",
+      payload: { muteState: "mute", participantId: "ep-9" },
+      to: "",
+      from: "ep-admin",
+    });
+
+    const result = parseDataChannelMessage(data);
+
+    expect(result.type).toBe("EndpointMessage");
+    if (result.type === "EndpointMessage") {
+      expect(result.payload.muteState).toBe("mute");
+      expect(result.payload.participantId).toBe("ep-9");
+    }
+  });
+
+  it("returns unknown when muteState is present but participantId is missing", () => {
+    const data = JSON.stringify({
+      type: "EndpointMessage",
+      payload: { muteState: "mute" },
+      to: "",
+      from: "ep-admin",
+    });
+
+    const result = parseDataChannelMessage(data);
+
+    expect(result.type).toBe("unknown");
   });
 
   it("returns unknown for invalid JSON", () => {
@@ -146,6 +177,59 @@ describe("isRemoteMute", () => {
     };
 
     expect(isRemoteMute(msg)).toBe(false);
+  });
+});
+
+describe("getMuteStateBroadcast", () => {
+  it("returns participantId and muted=true for a mute broadcast", () => {
+    const msg: EndpointMessage = {
+      type: "EndpointMessage",
+      payload: { muteState: "mute", participantId: "ep-9" },
+      to: "",
+      from: "ep-admin",
+    };
+
+    expect(getMuteStateBroadcast(msg)).toEqual({
+      participantId: "ep-9",
+      muted: true,
+    });
+  });
+
+  it("returns muted=false for an unmute broadcast", () => {
+    const msg: EndpointMessage = {
+      type: "EndpointMessage",
+      payload: { muteState: "unmute", participantId: "ep-9" },
+      to: "",
+      from: "ep-admin",
+    };
+
+    expect(getMuteStateBroadcast(msg)).toEqual({
+      participantId: "ep-9",
+      muted: false,
+    });
+  });
+
+  it("returns null for a targeted self-mute directive (no broadcast fields)", () => {
+    const msg: EndpointMessage = {
+      type: "EndpointMessage",
+      payload: { muteParticipant: "mute" },
+      to: "ep-1",
+      from: "ep-2",
+    };
+
+    expect(getMuteStateBroadcast(msg)).toBeNull();
+  });
+
+  it("does not report a mute-state broadcast as a remote self-mute or kick", () => {
+    const msg: EndpointMessage = {
+      type: "EndpointMessage",
+      payload: { muteState: "mute", participantId: "ep-9" },
+      to: "",
+      from: "ep-admin",
+    };
+
+    expect(isRemoteMute(msg)).toBe(false);
+    expect(isForceDisconnect(msg)).toBe(false);
   });
 });
 

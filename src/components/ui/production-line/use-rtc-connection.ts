@@ -16,6 +16,7 @@ import {
   parseDataChannelMessage,
   isRemoteMute,
   isForceDisconnect,
+  getMuteStateBroadcast,
 } from "./data-channel-parser.ts";
 import { waitForIceGathering } from "./ice-gathering.ts";
 import { startRtcStatInterval } from "./rtc-stat-interval.ts";
@@ -223,7 +224,22 @@ const establishConnection = ({
         },
       });
     } else if (message.type === "EndpointMessage") {
-      if (isForceDisconnect(message)) {
+      const muteBroadcast = getMuteStateBroadcast(message);
+      if (muteBroadcast) {
+        // Advisory global-mute state broadcast (#678): an admin muted/unmuted
+        // this participant and broadcast the new state to all endpoints. Record
+        // it per-endpointId so this client's participant list reflects the mute
+        // state of every participant, not just itself. Advisory only — this is
+        // not server-enforced (authoritative mute is deferred option (b)).
+        dispatch({
+          type: "UPDATE_PARTICIPANT_MUTE_STATE",
+          payload: {
+            callId,
+            participantId: muteBroadcast.participantId,
+            muted: muteBroadcast.muted,
+          },
+        });
+      } else if (isForceDisconnect(message)) {
         // A client with admin rights kicked this participant. Flag the call so
         // production-line can tear down the RTCPeerConnection, leave the line
         // and surface a "You were removed from the call" notification.
