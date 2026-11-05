@@ -34,6 +34,12 @@ export interface CallState {
   dataChannel: RTCDataChannel | null;
   isRemotelyMuted: boolean;
   isRemotelyDisconnected: boolean;
+  // Advisory global-mute state (#678), keyed by participant endpointId. Updated
+  // from mute-state broadcasts on the conference data channel so the
+  // participant list can reflect each participant's current admin-mute state
+  // for every client, not just the mute target. Advisory only: it mirrors what
+  // an admin asked for and is not server-enforced.
+  participantMuteState: Record<string, boolean>;
 }
 
 export type TGlobalState = {

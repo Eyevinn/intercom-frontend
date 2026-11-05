@@ -31,6 +31,7 @@ function createMockCallState(overrides: Partial<CallState> = {}): CallState {
     dataChannel: null,
     isRemotelyMuted: false,
     isRemotelyDisconnected: false,
+    participantMuteState: {},
     ...overrides,
   };
 }
@@ -344,6 +345,63 @@ describe("globalReducer", () => {
 
       expect(next).not.toBe(state);
       expect(next.calls["call-1"].sessionId).toBe("new-session");
+    });
+  });
+
+  // ── UPDATE_PARTICIPANT_MUTE_STATE ───────────────────────────────────────
+
+  describe("UPDATE_PARTICIPANT_MUTE_STATE", () => {
+    it("should set a participant's advisory mute state keyed by endpointId", () => {
+      const state = stateWithCall("call-1");
+
+      const next = globalReducer(state, {
+        type: "UPDATE_PARTICIPANT_MUTE_STATE",
+        payload: { callId: "call-1", participantId: "ep-1", muted: true },
+      });
+
+      expect(next.calls["call-1"].participantMuteState).toEqual({
+        "ep-1": true,
+      });
+    });
+
+    it("should merge without clobbering other participants' mute state", () => {
+      const state = stateWithCall("call-1", {
+        participantMuteState: { "ep-1": true },
+      });
+
+      const next = globalReducer(state, {
+        type: "UPDATE_PARTICIPANT_MUTE_STATE",
+        payload: { callId: "call-1", participantId: "ep-2", muted: true },
+      });
+
+      expect(next.calls["call-1"].participantMuteState).toEqual({
+        "ep-1": true,
+        "ep-2": true,
+      });
+    });
+
+    it("should flip a participant from muted to unmuted (advisory unmute)", () => {
+      const state = stateWithCall("call-1", {
+        participantMuteState: { "ep-1": true },
+      });
+
+      const next = globalReducer(state, {
+        type: "UPDATE_PARTICIPANT_MUTE_STATE",
+        payload: { callId: "call-1", participantId: "ep-1", muted: false },
+      });
+
+      expect(next.calls["call-1"].participantMuteState["ep-1"]).toBe(false);
+    });
+
+    it("should return the same state when the call does not exist", () => {
+      const state = stateWithCall("call-1");
+
+      const next = globalReducer(state, {
+        type: "UPDATE_PARTICIPANT_MUTE_STATE",
+        payload: { callId: "missing", participantId: "ep-1", muted: true },
+      });
+
+      expect(next).toBe(state);
     });
   });
 

@@ -122,6 +122,24 @@ export const globalReducer: Reducer<TGlobalState, TGlobalStateAction> = (
           },
         },
       };
+    case "UPDATE_PARTICIPANT_MUTE_STATE": {
+      const { callId, participantId, muted } = action.payload;
+      const call = state.calls[callId];
+      if (!call) return state;
+      return {
+        ...state,
+        calls: {
+          ...state.calls,
+          [callId]: {
+            ...call,
+            participantMuteState: {
+              ...call.participantMuteState,
+              [participantId]: muted,
+            },
+          },
+        },
+      };
+    }
     case "REMOVE_CALL": {
       // eslint-disable-next-line @typescript-eslint/naming-convention
       const { [action.payload.id]: _, ...remainingCalls } = state.calls;

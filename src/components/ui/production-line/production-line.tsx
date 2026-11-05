@@ -145,6 +145,7 @@ export const ProductionLine = ({
     dataChannel,
     isRemotelyMuted,
     isRemotelyDisconnected,
+    participantMuteState,
   } = callState;
   const { isActiveParticipant } = useActiveParticipant(
     audioLevelAboveThreshold
@@ -634,6 +635,8 @@ export const ProductionLine = ({
   });
 
   const muteParticipant = () => {
+    // Targeted advisory directive (already merged behaviour): asks the single
+    // target endpoint to mute its own input.
     const msg = JSON.stringify({
       type: "EndpointMessage",
       to: userId,
@@ -642,8 +645,30 @@ export const ProductionLine = ({
       },
     });
 
+    // Global mute-state broadcast (#678): tell every endpoint that this
+    // participant is now muted so each client reflects it in its participant
+    // list. An empty `to` broadcasts to all other endpoints on the SMB
+    // conference. Advisory only — not server-enforced (authoritative mute is
+    // deferred follow-up option (b), which would persist state in the backend
+    // and prevent self-unmute).
+    const broadcast = JSON.stringify({
+      type: "EndpointMessage",
+      to: "",
+      payload: {
+        muteState: "mute",
+        participantId: userId,
+      },
+    });
+
     if (dataChannel && dataChannel.readyState === "open") {
       dataChannel.send(msg);
+      dataChannel.send(broadcast);
+      // The broadcast reaches every OTHER endpoint; update the acting admin's
+      // own participant list locally so it reflects the change immediately.
+      dispatch({
+        type: "UPDATE_PARTICIPANT_MUTE_STATE",
+        payload: { callId: id, participantId: userId, muted: true },
+      });
       setMuteError(false);
       setConfirmModalOpen(false);
     } else {
@@ -1066,6 +1091,7 @@ export const ProductionLine = ({
                           <UserList
                             sessionId={sessionId}
                             participants={line.participants}
+                            participantMuteState={participantMuteState}
                             dominantSpeaker={dominantSpeaker}
                             audioLevelAboveThreshold={audioLevelAboveThreshold}
                             programOutputLine={line.programOutputLine}

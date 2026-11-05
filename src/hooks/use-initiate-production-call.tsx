@@ -128,6 +128,7 @@ export const useInitiateProductionCall = ({
               dataChannel: null,
               isRemotelyMuted: false,
               isRemotelyDisconnected: false,
+              participantMuteState: {},
               hotkeys: {
                 muteHotkey: "m",
                 speakerHotkey: "n",
